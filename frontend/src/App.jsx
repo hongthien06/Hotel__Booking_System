@@ -1,9 +1,9 @@
-import Payments from "./features/payments/_id"
+import AppRoutes from './routes/AppRoutes'
 
 function App() {
   return (
     <>
-      <Payments />
+      <AppRoutes />
     </>
   )
 }

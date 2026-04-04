@@ -4,7 +4,7 @@ import InfomationCustomer from './Content/InfomationCustomer'
 import Checkout from './Content/checkout'
 import Policy from './Content/Policy'
 
-const PaymentContent = () => {
+const Review = () => {
   return (
     <Box sx={{ flexGrow: 1, p: { xs: 2, md: 4 }, maxWidth: '1440px', mx: 'auto' }}>
       <Grid container spacing={4} columns={10}>
@@ -33,4 +33,4 @@ const PaymentContent = () => {
   )
 }
 
-export default PaymentContent
+export default Review

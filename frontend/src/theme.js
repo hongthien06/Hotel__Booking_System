@@ -15,7 +15,7 @@ const theme = extendTheme({
     light: {
       palette: {
         primary: {
-          main: '#ffc2ec',
+          main: '#ffbfeb',
           light: '#fcd0ed',
           contrastText: '#ffffff'
         },

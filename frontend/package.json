@@ -20,6 +20,7 @@
     "axios": "^1.14.0",
     "cross-env": "^10.1.0",
     "file-loader": "^6.2.0",
+    "jspdf": "^4.2.1",
     "material-ui-confirm": "^4.0.0",
     "react": "^19.2.4",
     "react-complex-tree": "^2.6.1",

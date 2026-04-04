@@ -2,13 +2,8 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
-import {
-  Alert,
-  Box,
-  Button, Collapse,
-  Divider, Stack,
-  Typography
-} from '@mui/material'
+import { useNavigate } from 'react-router-dom'
+import { Alert, Box, Button, Collapse, Divider, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 
 
@@ -32,7 +27,10 @@ const InfoRow = ({ label, value, bold, valueColor, sub }) => (
 
 const InfomationRental = () => {
   const [openPrice, setOpenPrice] = useState(true)
-
+  const navigate = useNavigate()
+  const handleNext = () => {
+    navigate('/payment/?step=2')
+  }
   return (
     <Box sx={{
       display: 'flex',
@@ -76,8 +74,7 @@ const InfomationRental = () => {
             </Box>
             <Box sx={{
               mt: 1,
-              bgcolor: '#fefce8',
-              border: '1px solid #fef08a',
+              bgcolor: '#ff2fee11',
               borderRadius: '8px',
               px: 2, py: 1.5,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center'
@@ -99,6 +96,7 @@ const InfomationRental = () => {
             variant="contained"
             fullWidth
             size="large"
+            onClick={handleNext}
             sx={{
               borderRadius: '50px',
               py: 1.5,
