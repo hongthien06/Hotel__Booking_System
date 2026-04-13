@@ -16,7 +16,7 @@ public class RoomTypeResponse {
 
     public static RoomTypeResponse from(RoomType roomType) {
         if (roomType == null) return null;
-        
+
         RoomTypeResponse res = new RoomTypeResponse();
         res.typeId=roomType.getTypeId();
         res.typeName=roomType.getTypeName();
