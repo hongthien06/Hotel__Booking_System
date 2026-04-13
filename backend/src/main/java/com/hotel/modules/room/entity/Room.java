@@ -1,7 +1,9 @@
 package com.hotel.modules.room.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "Rooms", schema = "dbo")
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +25,7 @@ public class Room {
     @JoinColumn(name = "type_id", nullable = false)
     private RoomType roomType;
 
-    @Column(name = "room_number", nullable = false, length = 20)
+    @Column(name = "room_number", nullable = false, length = 20, unique = true)
     private String roomNumber;
 
     @Column(name = "floor")
@@ -61,4 +65,15 @@ public class Room {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
