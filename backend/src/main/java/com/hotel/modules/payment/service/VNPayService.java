@@ -133,9 +133,8 @@ public class VNPayService implements IVNPayService {
             String fieldName = (String) itr.next();
             String fieldValue = (String) params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                // Đồng bộ cách encode giống lúc tạo URL
-                String encodedKey = URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()).replace("+", "%20");
-                String encodedValue = URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()).replace("+", "%20");
+                String encodedKey = URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString());
+                String encodedValue = URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString());
 
                 hashPayload.append(encodedKey);
                 hashPayload.append('=');
