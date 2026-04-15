@@ -15,4 +15,5 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findByPricePerNightBetween(BigDecimal minPrice, BigDecimal maxPrice);
     List<Room> findByProvince(String province);
     boolean existsByRoomNumber(String roomNumber);
+    boolean existsByRoomType_TypeId(Integer typeId);
 }
