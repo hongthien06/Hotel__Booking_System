@@ -1,25 +1,41 @@
 import {
   Box, Button
 } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
-import Brand from './Info/Brand'
-import CardNumber from './Info/CardNumber'
-import CVV_EXP_OTP from './Info/CVV_EXP_OTP'
-
+import { createMomoPaytUrl, createVnpayPaymentUrl } from '~/shared/api'
 import Discount from './Discount/Discount'
+import Brand from './Info/Brand'
+import PaymentMethod from './Info/PaymentMethod'
+import { useState } from 'react'
 
-const Info = ({ card, setCard }) => {
-  const navigate = useNavigate()
-  const handleNext = () => {
-    navigate('/payment/?step=3')
+const Info = () => {
+  const [selectedMethod, setSelectedMethod] = useState('vnpay')
+  const handleNext = async () => {
+    const dataTestVnpay = {
+      amount: 10000,
+      txnRef: 'ORDER_12345678',
+      ipAddress: '127.0.0.1',
+      requestId: '1234567789'
+    }
+    const dataTestMomo = {
+      amount: 50000,
+      requestId: '123456e7789',
+      orderId: 'ORDER_123425678'
+    }
+    if (selectedMethod === 'vnpay') {
+      const { vnpUrl } = await createVnpayPaymentUrl(dataTestVnpay)
+      window.location.href = vnpUrl
+    }
+    if (selectedMethod === 'momo') {
+      const { payUrl } = await createMomoPaytUrl(dataTestMomo)
+      window.location.href = payUrl
+    }
   }
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
       <Brand />
-      <CardNumber card={card} setCard={setCard} />
-      <CVV_EXP_OTP />
+      <PaymentMethod selectedMethod={selectedMethod} setSelectedMethod={setSelectedMethod} />
       <Discount />
-      <Button fullWidth variant="contained" size="large" onClick={handleNext}
+      <Button fullWidth variant='contained' size='large' onClick={handleNext}
         sx={{ borderRadius: '12px', py: 1.5, fontWeight: 600, fontSize: 15, textTransform: 'none', background: 'linear-gradient(90deg,#f472b6,#ec4899)', boxShadow: 'none', '&:hover': { boxShadow: 'none', opacity: 0.9 } }}>
         Thanh toán ngay
       </Button>

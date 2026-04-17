@@ -4,7 +4,7 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import { Alert, Box, Button, Collapse, Divider, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
-import { createVnpayPaymentUrl } from '~/shared/api'
+import { useNavigate } from 'react-router-dom'
 
 const InfoRow = ({ label, value, bold, valueColor, sub }) => (
   <Box>
@@ -25,16 +25,10 @@ const InfoRow = ({ label, value, bold, valueColor, sub }) => (
 )
 
 const InfomationRental = () => {
+  const navigate = useNavigate()
   const [openPrice, setOpenPrice] = useState(true)
   const handleNext = async () => {
-    const data = {
-      amount: 10000,
-      txnRef: 'ORDER_12345678',
-      ipAddress: '127.0.0.1',
-      requestId: '1234567789'
-    }
-    const { vnpUrl } = await createVnpayPaymentUrl(data)
-    window.location.href = vnpUrl
+    navigate('/payment/?step=2')
   }
   return (
     <Box sx={{

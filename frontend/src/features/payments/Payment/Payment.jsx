@@ -1,10 +1,8 @@
 import { Box } from '@mui/material'
-import { useState } from 'react'
 import Info from './Content/Info'
 import Total from './Content/Total'
 
 const Payment = () => {
-  const [card, setCard] = useState(['2412', '7512', '3412', '3456'])
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', px: 2, mt: { xs: 2, md: 4 } }} >
@@ -23,10 +21,10 @@ const Payment = () => {
         }}
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Info card={card} setCard={setCard} />
+          <Info />
         </Box>
         <Box sx={{ width: { xs: '100%', md: 280 }, flexShrink: 0 }} >
-          <Total card={card} />
+          <Total />
         </Box>
       </Box>
     </Box>

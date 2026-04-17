@@ -1,11 +1,11 @@
 import Container from '@mui/material/Container'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import Header from '~/shared/components/layout/Header/Header'
+import Complete from './Complete/Complete'
 import Payment from './Payment/Payment'
 import PaymentBar from './PaymentBar/paymentBar'
 import Review from './Review/Review'
-import Complete from './Complete/Complete'
 
 
 function Payments() {
