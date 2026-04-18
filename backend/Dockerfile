@@ -33,4 +33,4 @@ ENV JAVA_OPTS="-Xms256m -Xmx512m \
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
 
 HEALTHCHECK --interval=20s --timeout=10s --retries=3 \
-  CMD wget -qO- http://localhost:8080/actuator/health || exit 1
+  CMD wget -qO- http://127.0.0.1:8080/api/v1/actuator/health || exit 1

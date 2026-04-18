@@ -40,12 +40,13 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // ── Public (ai cũng gọi được) ──
-                        .requestMatchers("/api/v1/auth/**").permitAll()
-                        .requestMatchers(GET, "/api/v1/rooms/**").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers(GET, "/rooms/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         // ── Cần đăng nhập ──
-                        .requestMatchers("/api/v1/bookings/**").hasAnyRole("CUSTOMER","ADMIN")
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/bookings/**").hasAnyRole("CUSTOMER","ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,

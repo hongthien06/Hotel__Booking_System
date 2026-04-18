@@ -149,12 +149,15 @@ app:
       hash-secret: ${APP_VNPAY_HASH_SECRET}
       pay-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
       return-url: http://localhost:5173/payment/?step=3
+      timeout: 15
     momo:
       partner-code: ${APP_MOMO_PARTNER_CODE}
       access-key: ${APP_MOMO_ACCESS_KEY}
       secret-key: ${APP_MOMO_SECRET_KEY}
-      endpoint: https://test-payment.momo.vn/v2/gateway/api/create
+      endpoint-url: https://test-payment.momo.vn/v2/gateway/api/create
       return-url: http://localhost:5173/payment/?step=3
+      request-type: captureWallet
+      ipn-url: ${APP_MOMO_IPN_URL:https://webhook.site/784642fe-feb2-4b1e-a31f-65e2e9349f6d}
   openai:
     api-key: ${APP_OPENAI_API_KEY}
     model: gpt-4o-mini
