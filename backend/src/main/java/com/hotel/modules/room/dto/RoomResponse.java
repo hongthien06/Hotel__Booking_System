@@ -43,8 +43,10 @@ public class RoomResponse {
         res.imageUrls    = room.getImageUrls();
         res.description  = room.getDescription();
         res.status       = room.getStatus();
-        res.typeId       = room.getRoomType().getTypeId();
-        res.typeName     = room.getRoomType().getTypeName();
+        if (room.getRoomType() != null) {
+            res.typeId = room.getRoomType().getTypeId();
+            res.typeName = room.getRoomType().getTypeName();
+        }
         return res;
     }
 }

@@ -71,6 +71,11 @@ spring:
       maximum-pool-size: 5
   jpa:
     show-sql: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
 
 app:
   jwt:
@@ -96,6 +101,7 @@ app:
       return-url: http://localhost:5173/payment/
       request-type: captureWallet
       ipn-url: https://webhook.site/784642fe-feb2-4b1e-a31f-65e2e9349f6d
+
   openai:
     api-key: "sk-your-local-test-key"
     model: gpt-4o-mini

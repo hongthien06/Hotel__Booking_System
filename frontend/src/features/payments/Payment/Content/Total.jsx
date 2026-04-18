@@ -2,10 +2,10 @@ import CardVisual from './Total/CardVisual'
 import OrderSummary from './Total/OrderSummary'
 import { Box, Typography } from '@mui/material'
 
-const Total = ({ card }) => {
+const Total = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <CardVisual number={card.join('')} />
+      <CardVisual />
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
         <OrderSummary />
         <Typography variant="caption" color="text.secondary" textAlign="center" lineHeight={1.6}>
