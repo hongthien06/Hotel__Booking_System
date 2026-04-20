@@ -5,7 +5,7 @@ import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.repository.bookingRepository;
 import com.hotel.modules.room.entity.Room;
-import com.hotel.modules.room.entity.RoomStatus;
+import com.hotel.modules.room.entity.enums.RoomStatus;
 import com.hotel.modules.room.repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

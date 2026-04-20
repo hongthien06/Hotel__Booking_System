@@ -1,7 +1,6 @@
 package com.hotel.modules.chatbot.dto.request;
 
-
-import com.hotel.modules.chatbot.entity.enums.MessageRole;
+import com.hotel.modules.chatbot.entity.enums.ConversationStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,23 +9,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatRequest {
-    @NotNull
-    private Long conversationId;
-
-    @NotNull
-    private MessageRole role;
+public class ConversationRequest {
+    private Long userId;
 
     @NotBlank
-    @Size(max=10000)
-    private String content;
+    @Size(max=100)
+    private String sessionId;
 
-    private Long roomId;
-    private Long bookingId;
+    @Size(max=255)
+    private String title;
+
+    @NotNull
+    private ConversationStatus status;
 
 
 }

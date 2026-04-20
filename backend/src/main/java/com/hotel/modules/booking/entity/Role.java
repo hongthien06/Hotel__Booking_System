@@ -8,7 +8,7 @@ import java.util.List;
 
 @Setter
 @Getter
-@Entity
+@Entity(name = "AuthRole")
 @Table(name = "Roles")
 public class Role {
 
