@@ -3,12 +3,13 @@ package com.hotel.modules.room.dto.response;
 import com.hotel.modules.room.entity.enums.BedType;
 import com.hotel.modules.room.entity.Room;
 import com.hotel.modules.room.entity.enums.RoomStatus;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class RoomResponse {
     private Long roomId;
     private String roomNumber;

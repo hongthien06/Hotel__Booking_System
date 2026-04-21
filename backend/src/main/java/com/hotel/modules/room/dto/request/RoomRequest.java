@@ -3,10 +3,7 @@ package com.hotel.modules.room.dto.request;
 import com.hotel.modules.room.entity.enums.BedType;
 import com.hotel.modules.room.entity.enums.RoomStatus;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 

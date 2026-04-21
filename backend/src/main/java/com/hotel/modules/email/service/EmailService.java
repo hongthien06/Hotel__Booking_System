@@ -55,7 +55,7 @@ public class EmailService {
                 return;
             }
             Long priceBooking = booking.getRoomPriceSnapshot().longValue() * booking.getTotalNights();
-            Long tax = (Long) (priceBooking * 0.08);//tax o involve;
+            Long tax = (long)(priceBooking * 0.08);//tax o involve;
             long totalPrice = priceBooking + tax;
 
             EmailRequest request = EmailRequest.builder()
