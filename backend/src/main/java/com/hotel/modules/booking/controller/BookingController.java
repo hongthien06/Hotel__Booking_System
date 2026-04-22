@@ -1,6 +1,5 @@
 package com.hotel.modules.booking.controller;
 
-
 import com.hotel.modules.booking.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,8 +20,12 @@ public class BookingController {
     }
 
     @PutMapping("/{id}/check-in")
-    public String checkIn(@PathVariable Long id) {
-        bookingService.checkIn(id);
-        return "Check-in thành công";
+    public ResponseEntity<?> checkIn(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.checkIn(id));
+    }
+
+    @PutMapping("/{id}/check-out")
+    public ResponseEntity<?> checkOut(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.checkOut(id));
     }
 }

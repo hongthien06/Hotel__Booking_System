@@ -16,7 +16,7 @@ import java.util.List;
 
 @Service
 public class BookingService {
-    @Autowired
+
     private final bookingRepository bookingRepository;
     private final RoomRepository roomRepository;
 
@@ -25,7 +25,8 @@ public class BookingService {
         this.roomRepository = roomRepository;
     }
 
-    public void checkIn(Long bookingId) {
+    @Transactional
+    public BookingDTO checkIn(Long bookingId) {
 
         // 1. Lấy booking
         Booking booking = bookingRepository.findById(bookingId)
@@ -36,7 +37,7 @@ public class BookingService {
             throw new RuntimeException("Booking không ở trạng thái check-in được");
         }
 
-        // 3. Check thời gian (optional nhưng nên có)
+        // 3. Check thời gian
         if (LocalDateTime.now().isBefore(booking.getCheckInDate().atStartOfDay())) {
             throw new RuntimeException("Chưa đến thời gian check-in");
         }
@@ -52,9 +53,12 @@ public class BookingService {
         // 6. Save
         bookingRepository.save(booking);
         roomRepository.save(room);
+
+        // 7. Trả về DTO
+        return toDTO(booking);
     }
 
-    @Transactional(readOnly = true)  // ← Thêm dòng này
+    @Transactional(readOnly = true)
     public List<BookingDTO> getAllBookings() {
         return bookingRepository.findAll()
                 .stream()
@@ -62,11 +66,9 @@ public class BookingService {
                 .toList();
     }
 
-    // Tách ra method riêng cho gọn
     private BookingDTO toDTO(Booking booking) {
         BookingDTO dto = new BookingDTO();
 
-        // Booking fields
         dto.setBookingId(booking.getBookingId());
         dto.setBookingCode(booking.getBookingCode());
         dto.setNumGuests(booking.getNumGuests());
@@ -82,19 +84,15 @@ public class BookingService {
         dto.setCreatedAt(booking.getCreatedAt());
         dto.setUpdatedAt(booking.getUpdatedAt());
 
-        // User fields
         if (booking.getUser() != null) {
             dto.setUserId(booking.getUser().getUserId());
             dto.setUserName(booking.getUser().getFullName());
             dto.setUserEmail(booking.getUser().getEmail());
         }
 
-        // Room fields
         if (booking.getRoom() != null) {
             dto.setRoomId(booking.getRoom().getRoomId());
             dto.setRoomNumber(booking.getRoom().getRoomNumber());
-
-            // Lấy RoomType an toàn (tránh null)
             if (booking.getRoom().getRoomType() != null) {
                 dto.setRoomTypeName(booking.getRoom().getRoomType().getTypeName());
             }
@@ -102,11 +100,39 @@ public class BookingService {
 
         return dto;
     }
-//    public void checkOut(Long bookingId);
-//    public void createBooking(...);
-//    public void cancelBooking(...);
-      public void checkAvailableRoom(){
-        
-      }
+
+    @Transactional
+    public BookingDTO checkOut(Long bookingId) {
+
+        // 1. Lấy booking
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        // 2. Check trạng thái
+        if (booking.getStatus() != BookingStatus.CHECKED_IN) {
+            throw new RuntimeException("Booking không ở trạng thái check-out được");
+        }
+
+        // 3. Update booking
+        booking.setStatus(BookingStatus.CHECKED_OUT);
+        booking.setActualCheckout(LocalDateTime.now());
+
+        // 4. Update room → trả về AVAILABLE
+        Room room = booking.getRoom();
+        room.setStatus(RoomStatus.AVAILABLE);
+
+        // 5. Save
+        bookingRepository.save(booking);
+        roomRepository.save(room);
+
+        // 6. Trả về DTO
+        return toDTO(booking);
+    }
+
+    public void checkAvailableRoom() {
+
+    }
+
+
 
 }

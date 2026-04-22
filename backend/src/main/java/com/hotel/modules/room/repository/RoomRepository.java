@@ -28,7 +28,4 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findByProvince(@Param("province") String province);
     boolean existsByRoomNumber(String roomNumber);
     boolean existsByRoomType_TypeId(Integer typeId);
-
-    @Query("SELECT r FROM Room r WHERE r.status = 'AVAILABLE' AND r.roomId NOT IN (...)")
-    List<Room> findAvailableRooms(@Param("checkIn") LocalDate checkIn, @Param("checkOut") LocalDate checkOut);
 }
