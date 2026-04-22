@@ -25,39 +25,6 @@ public class BookingService {
         this.roomRepository = roomRepository;
     }
 
-    @Transactional
-    public BookingDTO checkIn(Long bookingId) {
-
-        // 1. Lấy booking
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
-
-        // 2. Check trạng thái
-        if (booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new RuntimeException("Booking không ở trạng thái check-in được");
-        }
-
-        // 3. Check thời gian
-        if (LocalDateTime.now().isBefore(booking.getCheckInDate().atStartOfDay())) {
-            throw new RuntimeException("Chưa đến thời gian check-in");
-        }
-
-        // 4. Update booking
-        booking.setStatus(BookingStatus.CHECKED_IN);
-        booking.setActualCheckIn(LocalDateTime.now());
-
-        // 5. Update room
-        Room room = booking.getRoom();
-        room.setStatus(RoomStatus.OCCUPIED);
-
-        // 6. Save
-        bookingRepository.save(booking);
-        roomRepository.save(room);
-
-        // 7. Trả về DTO
-        return toDTO(booking);
-    }
-
     @Transactional(readOnly = true)
     public List<BookingDTO> getAllBookings() {
         return bookingRepository.findAll()
@@ -101,6 +68,51 @@ public class BookingService {
         return dto;
     }
 
+    // CHECK IN:
+    @Transactional
+    public BookingDTO checkIn(Long bookingId) {
+
+        // 1. Lấy booking
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        // 2. Check trạng thái
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new RuntimeException("Booking không ở trạng thái check-in được");
+        }
+
+        // 3. Check thời gian
+        if (LocalDateTime.now().isBefore(booking.getCheckInDate().atStartOfDay())) {
+            throw new RuntimeException("Chưa đến thời gian check-in");
+        }
+
+        // 4. Update booking
+        booking.setStatus(BookingStatus.CHECKED_IN);
+        booking.setActualCheckIn(LocalDateTime.now());
+
+        // 5. Update room
+        Room room = booking.getRoom();
+        room.setStatus(RoomStatus.OCCUPIED);
+
+        // 6. Save
+        bookingRepository.save(booking);
+        roomRepository.save(room);
+
+        // 7. Trả về DTO
+        return toDTO(booking);
+    }
+
+    // CHECK IN list ID
+    @Transactional(readOnly = true)
+    public List<Long> getCheckedInRoomIds() {
+        return bookingRepository.findAll()
+                .stream()
+                .filter(b -> b.getStatus() == BookingStatus.CHECKED_IN)
+                .map(b -> b.getRoom().getRoomId())
+                .toList();
+    }
+
+    // CHECK OUT:
     @Transactional
     public BookingDTO checkOut(Long bookingId) {
 
@@ -128,6 +140,19 @@ public class BookingService {
         // 6. Trả về DTO
         return toDTO(booking);
     }
+
+    // CHECK OUT list ID
+    @Transactional(readOnly = true)
+    public List<Long> getCheckedOutRoomIds() {
+        return bookingRepository.findAll()
+                .stream()
+                .filter(b -> b.getStatus() == BookingStatus.CHECKED_OUT)
+                .map(b -> b.getRoom().getRoomId())
+                .toList();
+    }
+
+
+
 
     public void checkAvailableRoom() {
 

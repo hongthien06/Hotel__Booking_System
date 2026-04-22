@@ -4,6 +4,8 @@ import com.hotel.modules.booking.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
@@ -27,5 +29,17 @@ public class BookingController {
     @PutMapping("/{id}/check-out")
     public ResponseEntity<?> checkOut(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.checkOut(id));
+    }
+
+    // Lấy danh sách roomId đã check-in
+    @GetMapping("/checked-in-rooms")
+    public List<Long> getCheckedInRoomIds() {
+        return bookingService.getCheckedInRoomIds();
+    }
+
+    // Lấy danh sách roomId đã check-out
+    @GetMapping("/checked-out-rooms")
+    public List<Long> getCheckedOutRoomIds() {
+        return bookingService.getCheckedOutRoomIds();
     }
 }
