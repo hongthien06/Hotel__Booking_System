@@ -44,6 +44,12 @@ public class User implements UserDetails {
     @Column(name = "avatar_url", length = 512)
     private String avatarUrl;
 
+    @Column(name = "reset_token", length = 100)
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;

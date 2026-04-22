@@ -6,6 +6,7 @@ import { useAuth } from '../../../../shared/hooks/useAuth'
 // Icon placeholders (Mock MUI icons text for now)
 const menuItems = [
   { id: 'dashboard', label: 'Dashboard', path: '/dashboard', roles: ['ROLE_ADMIN'] },
+  { id: 'profile', label: 'Trang cá nhân', path: '/profile', roles: ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_CUSTOMER'] },
   { id: 'rooms', label: 'Quản lý Phòng', path: '/rooms', roles: ['ROLE_ADMIN', 'ROLE_MANAGER'] },
   { id: 'bookings', label: 'Đặt phòng', path: '/bookings', roles: ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_CUSTOMER'] },
   { id: 'customers', label: 'Khách hàng', path: '/customers', roles: ['ROLE_ADMIN'] }

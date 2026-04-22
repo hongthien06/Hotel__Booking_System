@@ -31,23 +31,23 @@ const Header = () => {
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
         {isAuthenticated && user ? (
-          <>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+          <Box 
+            onClick={() => navigate('/profile')}
+            sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 1.5, 
+              cursor: 'pointer',
+              '&:hover': { opacity: 0.8 }
+            }}
+          >
+            <Avatar sx={{ width: 32, height: 32, bgcolor: 'secondary.main', fontWeight: 'bold' }}>
               {user.fullName?.charAt(0).toUpperCase() || 'U'}
             </Avatar>
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
               {user.fullName}
             </Typography>
-            <Button 
-              variant="outlined" 
-              color="inherit" 
-              size="small" 
-              onClick={handleLogout}
-              sx={{ borderColor: 'white', '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' } }}
-            >
-              Đăng xuất
-            </Button>
-          </>
+          </Box>
         ) : (
           <Button 
             variant="contained" 
@@ -55,6 +55,22 @@ const Header = () => {
             onClick={() => navigate('/login')}
           >
             Đăng nhập
+          </Button>
+        )}
+
+        {isAuthenticated && (
+          <Button 
+            variant="outlined" 
+            color="inherit" 
+            size="small" 
+            onClick={handleLogout}
+            sx={{ 
+              ml: 1,
+              borderColor: 'rgba(255,255,255,0.5)', 
+              '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' } 
+            }}
+          >
+            Đăng xuất
           </Button>
         )}
       </Box>

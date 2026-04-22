@@ -1,8 +1,6 @@
 package com.hotel.modules.auth.controller;
 
-import com.hotel.modules.auth.dto.AuthResponse;
-import com.hotel.modules.auth.dto.LoginRequest;
-import com.hotel.modules.auth.dto.RegisterRequest;
+import com.hotel.modules.auth.dto.*;
 import com.hotel.modules.auth.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,5 +31,19 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request) {
         AuthResponse result = authService.login(request);
         return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "Quên mật khẩu", description = "Gửi link khôi phục mật khẩu qua email")
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok("Link khôi phục mật khẩu đã được gửi vào email của bạn.");
+    }
+
+    @Operation(summary = "Đặt lại mật khẩu", description = "Sử dụng token từ email để thiết lập mật khẩu mới")
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok("Mật khẩu của bạn đã được thay đổi thành công.");
     }
 }

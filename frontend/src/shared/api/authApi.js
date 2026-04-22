@@ -19,4 +19,14 @@ export const registerApi = async (fullName, email, phone, password) => {
   return response.data
 }
 
+export const forgotPasswordApi = async (email) => {
+  const response = await axios.post(`${API_URL}/forgot-password`, { email })
+  return response.data
+}
+
+export const resetPasswordApi = async (token, newPassword) => {
+  const response = await axios.post(`${API_URL}/reset-password`, { token, newPassword })
+  return response.data
+}
+
 export { createVnpayPaymentUrl, createMomoPaytUrl }

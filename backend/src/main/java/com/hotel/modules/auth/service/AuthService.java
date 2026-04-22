@@ -1,13 +1,12 @@
 package com.hotel.modules.auth.service;
 
 import com.hotel.common.config.JwtService;
-import com.hotel.modules.auth.dto.AuthResponse;
-import com.hotel.modules.auth.dto.LoginRequest;
-import com.hotel.modules.auth.dto.RegisterRequest;
+import com.hotel.modules.auth.dto.*;
 import com.hotel.modules.auth.entity.Role;
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.auth.repository.RoleRepository;
 import com.hotel.modules.auth.repository.UserRepository;
+import com.hotel.modules.email.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +26,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
 
     // ── Đăng ký ───────────────────────────────────────────
     public AuthResponse register(RegisterRequest request) {
@@ -90,5 +90,42 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .message("Đăng nhập thành công!")
                 .build();
+    }
+
+    // ── Quên mật khẩu ──────────────────────────────────────
+    public void forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email này!"));
+
+        // Tạo token ngẫu nhiên (UUID)
+        String token = java.util.UUID.randomUUID().toString();
+        user.setResetToken(token);
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // Hết hạn sau 1 giờ
+        userRepository.save(user);
+
+        // Gửi email (link này sẽ trỏ về Frontend)
+        String resetLink = "http://localhost/reset-password?token=" + token;
+        String emailContent = "Chào " + user.getFullName() + ",\n\n" +
+                "Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau để thực hiện:\n" +
+                resetLink + "\n\n" +
+                "Link này sẽ hết hạn sau 1 giờ. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.";
+
+        emailService.sendMail(user.getEmail(), "Khôi phục mật khẩu - Hotel Booking", emailContent);
+    }
+
+    // ── Đặt lại mật khẩu ────────────────────────────────────
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByResetToken(request.getToken())
+                .orElseThrow(() -> new RuntimeException("Token không hợp lệ hoặc đã hết hạn!"));
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Token đã hết hạn!");
+        }
+
+        // Cập nhật mật khẩu mới
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        userRepository.save(user);
     }
 }

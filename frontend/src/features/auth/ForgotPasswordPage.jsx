@@ -1,33 +1,26 @@
 import React, { useState } from 'react'
-import { Box, Button, TextField, Typography, Paper, Alert, IconButton, InputAdornment } from '@mui/material'
-import { Visibility, VisibilityOff } from '@mui/icons-material'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../shared/hooks/useAuth'
-import { loginApi } from '../../shared/api/authApi'
+import { Box, Button, TextField, Typography, Paper, Alert } from '@mui/material'
+import { Link } from 'react-router-dom'
+import { forgotPasswordApi } from '../../shared/api/authApi'
 
-const LoginPage = () => {
+const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
+  const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const navigate = useNavigate()
-  const { login } = useAuth()
-
-  const handleClickShowPassword = () => setShowPassword((show) => !show)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setMessage('')
     setIsLoading(true)
 
     try {
-      const data = await loginApi(email, password)
-      login(data.token, { email: data.email, fullName: data.fullName, roles: data.roles || [] })
-      navigate('/dashboard')
+      const response = await forgotPasswordApi(email)
+      setMessage(typeof response === 'string' ? response : 'Link khôi phục mật khẩu đã được gửi vào email của bạn.')
     } catch (err) {
       const data = err.response?.data;
-      let errMsg = 'Đăng nhập thất bại. Xin vui lòng kiểm tra lại thông tin.';
+      let errMsg = 'Có lỗi xảy ra. Xin vui lòng thử lại sau.';
       if (data) {
         if (data.message) errMsg = data.message;
         else if (data.error) errMsg = data.error;
@@ -55,13 +48,14 @@ const LoginPage = () => {
         borderRadius: 4
       }}>
         <Typography variant="h4" align="center" color="secondary.main" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
-          Welcome Back
+          Quên mật khẩu?
         </Typography>
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>
-          Đăng nhập vào tài khoản Hotel Booking của bạn
+          Nhập email của bạn để nhận link khôi phục mật khẩu
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
+        {message && <Alert severity="success" sx={{ mb: 3, borderRadius: 2 }}>{message}</Alert>}
 
         <form onSubmit={handleSubmit}>
           <TextField
@@ -73,43 +67,8 @@ const LoginPage = () => {
             margin="normal"
             required
             autoFocus
+            sx={{ mb: 3 }}
           />
-          <TextField
-            fullWidth
-            label="Mật khẩu"
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            margin="normal"
-            required
-            sx={{ mb: 4, mt: 2 }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleClickShowPassword} edge="end">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: -3, mb: 3 }}>
-            <Typography 
-              component={Link} 
-              to="/forgot-password"
-              variant="body2" 
-              sx={{ 
-                color: 'secondary.main', 
-                textDecoration: 'none',
-                fontWeight: 600,
-                '&:hover': { textDecoration: 'underline' } 
-              }}
-            >
-              Quên mật khẩu?
-            </Typography>
-          </Box>
-
           <Button
             fullWidth
             variant="contained"
@@ -130,16 +89,16 @@ const LoginPage = () => {
               }
             }}
           >
-            {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {isLoading ? 'Đang gửi...' : 'Gửi yêu cầu'}
           </Button>
         </form>
 
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            Chưa có tài khoản?{'  '}
+            Quay lại{' '}
             <Box
               component={Link}
-              to="/register"
+              to="/login"
               sx={{
                 color: 'secondary.main',
                 textDecoration: 'none',
@@ -148,12 +107,11 @@ const LoginPage = () => {
                 transition: 'all 0.2s ease-in-out',
                 '&:hover': {
                   color: 'secondary.dark',
-                  textShadow: '0 2px 10px rgba(154, 28, 72, 0.2)',
                   textDecoration: 'underline'
                 }
               }}
             >
-              Đăng ký ngay
+              Đăng nhập
             </Box>
           </Typography>
         </Box>
@@ -162,4 +120,4 @@ const LoginPage = () => {
   )
 }
 
-export default LoginPage
+export default ForgotPasswordPage
