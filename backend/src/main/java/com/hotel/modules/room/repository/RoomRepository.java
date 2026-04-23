@@ -28,4 +28,11 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findByProvince(@Param("province") String province);
     boolean existsByRoomNumber(String roomNumber);
     boolean existsByRoomType_TypeId(Integer typeId);
+
+    @Query("""
+        SELECT r FROM Room r JOIN FETCH r.roomType 
+        WHERE r.status = com.hotel.modules.room.entity.enums.RoomStatus.AVAILABLE
+        AND r.roomId NOT IN :occupiedIds
+    """)
+    List<Room> findAvailableRooms(@Param("occupiedIds") List<Long> occupiedIds);
 }

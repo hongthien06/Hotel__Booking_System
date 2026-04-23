@@ -1,6 +1,7 @@
 package com.hotel.modules.room.service;
 
 
+import com.hotel.modules.booking.service.BookingService;
 import com.hotel.modules.room.dto.request.RoomRequest;
 import com.hotel.modules.room.dto.response.RoomResponse;
 import com.hotel.modules.room.entity.Room;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;import java.util.List;
 
 @Service
@@ -20,6 +22,7 @@ import java.time.LocalDateTime;import java.util.List;
 public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomTypeService roomTypeService;
+    private final BookingService bookingService;
 
     //Query Operations
     public List<RoomResponse> getAll() {
@@ -102,6 +105,20 @@ public class RoomService {
     }
     public Room findEntityById(Long id){
         return roomRepository.findById(id).orElseThrow(()->new RuntimeException("Room with id " + id + " does not exist"));
+    }
+    @Transactional
+    public List<RoomResponse> getAvailableRooms(LocalDate checkIn, LocalDate checkOut){
+        if (!checkOut.isAfter(checkIn)) throw new  RuntimeException("Check out date must be after check in");
+        List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
+        List<Room> availableRooms;
+        if(busyIds == null || busyIds.isEmpty()) {
+            availableRooms = roomRepository.findByStatus(RoomStatus.AVAILABLE);
+        }
+        else{
+            availableRooms = roomRepository.findAvailableRooms(busyIds);
+        }
+        return availableRooms.stream().map(RoomResponse::from).toList();
+
     }
 
 

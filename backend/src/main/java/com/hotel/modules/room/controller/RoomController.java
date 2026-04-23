@@ -5,11 +5,13 @@ import com.hotel.modules.room.dto.response.RoomResponse;
 import com.hotel.modules.room.entity.enums.RoomStatus;
 import com.hotel.modules.room.service.RoomService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -50,6 +52,13 @@ public class RoomController {
             @RequestParam(defaultValue = "999999999") BigDecimal max) {
         return ResponseEntity.ok(roomService.getByPriceRange(min, max));
     }
+    //Available room
+    @GetMapping("/available")
+    public ResponseEntity<List<RoomResponse>> getAvailableRooms(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut) {
+        return ResponseEntity.ok(roomService.getAvailableRooms(checkIn, checkOut));
+    }
 
     @PostMapping
     public ResponseEntity<RoomResponse> createRoom(@RequestBody RoomRequest req) {
@@ -70,4 +79,5 @@ public class RoomController {
     public ResponseEntity<RoomResponse> updateRoomStatus(@PathVariable Long id, @RequestBody RoomStatus status) {
         return ResponseEntity.ok(roomService.updateStatus(id, status));
     }
+
 }
