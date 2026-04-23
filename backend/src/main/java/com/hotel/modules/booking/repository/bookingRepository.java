@@ -37,5 +37,19 @@ public interface bookingRepository extends JpaRepository<Booking, Long> {
             @Param("checkIn") LocalDate checkIn,
             @Param("checkOut") LocalDate checkOut
     );
+
+    // Tìm id các phòng bị trùng trong khoảng thời gian khác chọn
+    @Query("""
+    SELECT b.room.roomId FROM Booking b
+    WHERE b.status NOT IN ('CANCELLED', 'REFUNDED')
+    AND b.checkInDate < :checkOut
+    AND b.checkOutDate > :checkIn
+""")
+    List<Long> findOccupiedRoomIds(
+            @Param("checkIn") LocalDate checkIn,
+            @Param("checkOut") LocalDate checkOut
+    );
+
+
 }
 

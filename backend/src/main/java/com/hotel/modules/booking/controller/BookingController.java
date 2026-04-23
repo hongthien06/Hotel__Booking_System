@@ -4,6 +4,7 @@ import com.hotel.modules.booking.service.BookingService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -41,5 +42,12 @@ public class BookingController {
     @GetMapping("/checked-out-rooms")
     public List<Long> getCheckedOutRoomIds() {
         return bookingService.getCheckedOutRoomIds();
+    }
+
+    @GetMapping("/occupied-rooms")
+    public ResponseEntity<?> getOccupiedRooms(
+            @RequestParam LocalDate checkIn,
+            @RequestParam LocalDate checkOut) {
+        return ResponseEntity.ok(bookingService.getOccupiedRoomIds(checkIn, checkOut));
     }
 }
