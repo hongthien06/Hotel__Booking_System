@@ -1,5 +1,6 @@
 package com.hotel.modules.chatbot.service.openai;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
@@ -31,20 +32,25 @@ public class OpenAIService {
     }
 
     public String chat(List<Message> history, String userText) {
-        List<Message> messages = new ArrayList<>();
+        try{
+            List<Message> messages = new ArrayList<>();
 
-        messages.add(new SystemMessage(SYSTEM_PROMPT));
+            messages.add(new SystemMessage(SYSTEM_PROMPT));
 
-        if (history != null && !history.isEmpty()) {
-            messages.addAll(history);
+            if (history != null && !history.isEmpty()) {
+                messages.addAll(history);
+            }
+
+            messages.add(new UserMessage(userText));
+
+            Prompt prompt = new Prompt(messages);
+
+            return chatClient.prompt(prompt)
+                    .call()
+                    .content();
+        }catch(Exception e){
+            return "error";
         }
 
-        messages.add(new UserMessage(userText));
-
-        Prompt prompt = new Prompt(messages);
-
-        return chatClient.prompt(prompt)
-                .call()
-                .content();
     }
 }

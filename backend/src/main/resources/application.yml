@@ -6,6 +6,10 @@ spring:
   ai:
     openai:
       api-key: "sk-placeholder"
+      chat:
+        options:
+          model: gpt-4o-mini
+          max-tokens: 500
   jpa:
     hibernate:
       ddl-auto: update
@@ -61,6 +65,9 @@ spring:
       on-profile: local
   flyway:
     enabled: false
+  ai:
+    openai:
+      api-key: "sk-xxxx-key-thật"
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=HotelBookingDB;encrypt=false;trustServerCertificate=true
     username: sa
@@ -100,10 +107,10 @@ app:
       request-type: captureWallet
       ipn-url: https://webhook.site/784642fe-feb2-4b1e-a31f-65e2e9349f6d
 
-  openai:
-    api-key: "sk-your-local-test-key"
-    model: gpt-4o-mini
-    max-tokens: 500
+#  openai:
+#    api-key: "sk-your-local-test-key"
+#    model: gpt-4o-mini
+#    max-tokens: 500
 
 ---
 spring:
