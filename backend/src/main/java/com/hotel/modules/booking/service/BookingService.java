@@ -1,18 +1,25 @@
 package com.hotel.modules.booking.service;
 
+import com.hotel.modules.auth.entity.User;
+import com.hotel.modules.auth.repository.UserRepository;
 import com.hotel.modules.booking.dto.BookingDTO;
+import com.hotel.modules.booking.dto.BookingRequest;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.room.dto.response.RoomResponse;
 import com.hotel.modules.room.entity.Room;
 import com.hotel.modules.room.entity.enums.RoomStatus;
 import com.hotel.modules.room.repository.RoomRepository;
+import com.hotel.modules.room.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -20,10 +27,12 @@ public class BookingService {
 
     private final bookingRepository bookingRepository;
     private final RoomRepository roomRepository;
+    private final UserRepository userRepository;
 
-    public BookingService(bookingRepository bookingRepository, RoomRepository roomRepository) {
+    public BookingService(bookingRepository bookingRepository, RoomRepository roomRepository, UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -162,6 +171,59 @@ public class BookingService {
 
     }
 
+    public BookingDTO createBooking(BookingRequest request, Long userId) {
 
+        // 1. Kiểm tra thời gian checkIn < checkOut
+        if (!request.getCheckOut().isAfter(request.getCheckIn())) {
+            throw new RuntimeException("Ngày checkout phải sau ngày checkin");
+        }
 
+        // 2. Kiểm tra phòng AVAILABLE
+        Room room = roomRepository.findById(request.getRoomId())
+                .orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
+
+        if (room.getStatus() != RoomStatus.AVAILABLE) {
+            throw new RuntimeException("Phòng không khả dụng");
+        }
+
+        // 3. Kiểm tra trùng lịch (tránh race condition)
+        List<Long> occupiedRoomIds = getOccupiedRoomIds(request.getCheckIn(), request.getCheckOut());
+        if (occupiedRoomIds.contains(request.getRoomId())) {
+            throw new RuntimeException("Phòng đã được đặt trong khoảng thời gian này");
+        }
+
+        // 4. Lấy user
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User không tồn tại"));
+
+        // 5. Tính toán
+        short totalNights = (short) ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
+
+        // 6. Tạo booking
+        Booking booking = new Booking();
+        booking.setBookingCode(generateBookingCode(request.getCheckIn()));
+        booking.setUser(user);
+        booking.setRoom(room);
+        booking.setCheckInDate(request.getCheckIn());
+        booking.setCheckOutDate(request.getCheckOut());
+        booking.setNumGuests(request.getNumGuests());
+        booking.setSpecialRequest(request.getSpecialRequest());
+        booking.setRoomPriceSnapshot(room.getPricePerNight());
+        booking.setTotalNights(totalNights);
+        booking.setStatus(BookingStatus.PENDING);
+        booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
+        booking.setCreatedAt(LocalDateTime.now());
+        booking.setUpdatedAt(LocalDateTime.now());
+
+        bookingRepository.save(booking);
+
+        return toDTO(booking);
+    }
+
+    // Generate booking code: HB20260425-0001
+    private String generateBookingCode(LocalDate checkIn) {
+        String datePart = checkIn.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        long count = bookingRepository.count() + 1;
+        return String.format("HB%s-%04d", datePart, count);
+    }
 }

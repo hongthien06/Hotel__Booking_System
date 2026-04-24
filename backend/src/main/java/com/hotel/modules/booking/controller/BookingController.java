@@ -1,7 +1,12 @@
 package com.hotel.modules.booking.controller;
 
+import com.hotel.modules.auth.entity.User;
+import com.hotel.modules.booking.dto.BookingRequest;
 import com.hotel.modules.booking.service.BookingService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -49,5 +54,14 @@ public class BookingController {
             @RequestParam LocalDate checkIn,
             @RequestParam LocalDate checkOut) {
         return ResponseEntity.ok(bookingService.getOccupiedRoomIds(checkIn, checkOut));
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createBooking(
+            @RequestBody BookingRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = ((User) userDetails).getUserId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(bookingService.createBooking(request, userId));
     }
 }

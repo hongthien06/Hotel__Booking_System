@@ -37,3 +37,6 @@ docker/db_data/
 .DS_Store
 Thumbs.db
 out/
+
+.postman/
+postman/
