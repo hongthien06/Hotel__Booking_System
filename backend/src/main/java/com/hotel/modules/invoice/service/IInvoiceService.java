@@ -16,4 +16,9 @@ public interface IInvoiceService {
     Page<InvoiceResponse> getInvoices(LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     InvoiceResponse updateInvoice(Long id, String notes, String pdfUrl);
     void deleteInvoice(Long id);
+
+    /**
+     * Kiểm tra hóa đơn đã tồn tại cho booking chưa.
+     */
+    boolean existsByBookingId(Long bookingId);
 }

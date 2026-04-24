@@ -1,8 +1,10 @@
 package com.hotel.modules.invoice.controller;
 
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
+import com.hotel.modules.invoice.dto.request.InvoiceUpdateRequest;
 import com.hotel.modules.invoice.dto.response.InvoiceResponse;
 import com.hotel.modules.invoice.service.IInvoiceService;
+import com.hotel.modules.invoice.service.PdfService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -10,7 +12,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +29,7 @@ import java.time.LocalTime;
 public class InvoiceController {
 
     private final IInvoiceService invoiceService;
+    private final PdfService pdfService;
 
     @PostMapping
     public ResponseEntity<InvoiceResponse> createInvoice(
@@ -72,9 +77,24 @@ public class InvoiceController {
     @PatchMapping("/{id}")
     public ResponseEntity<InvoiceResponse> updateInvoice(
             @PathVariable Long id,
-            @RequestParam(required = false) String notes,
-            @RequestParam(required = false) String pdfUrl) {
-        return ResponseEntity.ok(invoiceService.updateInvoice(id, notes, pdfUrl));
+            @RequestBody InvoiceUpdateRequest request) {
+        return ResponseEntity.ok(invoiceService.updateInvoice(id, request.getNotes(), request.getPdfUrl()));
+    }
+
+    // ── GET /invoices/{id}/pdf ──────────────────────────────────────
+    @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+    public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable Long id) {
+        byte[] pdf = pdfService.generateInvoicePdf(id);
+
+        InvoiceResponse invoice = invoiceService.getInvoiceById(id);
+        String filename = "invoice-" + invoice.getInvoiceNumber() + ".pdf";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("attachment", filename);
+        headers.setContentLength(pdf.length);
+
+        return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

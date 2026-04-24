@@ -26,7 +26,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final IInvoiceService invoiceService;
 
-    // ── Tạo payment ban đầu (PENDING) khi khách bắt đầu thanh toán ──
+    // khởi tạo payment khi khách nhấn thanh toán
     @Transactional
     public Payment createInitialPayment(Booking booking, BigDecimal amount, PaymentGateway gateway) {
         Payment payment = Payment.builder()
@@ -39,34 +39,33 @@ public class PaymentService {
         return paymentRepository.save(payment);
     }
 
-    // ── Tìm payment theo transactionId ──────────────────────────────
+    // Tìm payment theo transactionId
     public Payment findByTransactionId(String transactionId) {
         return paymentRepository.findByTransactionId(transactionId).orElse(null);
     }
 
-    // ── Cập nhật kết quả thanh toán từ IPN callback ─────────────────
+    // Cập nhật kết quả thanh toán sau khi IPN
     @Transactional
     public void updatePaymentResult(Payment payment,
-                                    String gatewayTransactionNo,
-                                    String rawResponse,
-                                    boolean isSuccess) {
+            String gatewayTransactionNo,
+            String rawResponse,
+            boolean isSuccess) {
         if (isSuccess) {
+            // nếu thành công thì set status
             payment.setStatus(PaymentStatus.SUCCESS);
             payment.setPaidAt(LocalDateTime.now());
 
-            // Cập nhật trạng thái booking → CONFIRMED
+            // Cập nhật trạng thái booking là đã confirm
             Booking booking = payment.getBooking();
             if (booking != null) {
                 booking.setStatus(BookingStatus.CONFIRMED);
-
-                // Tự động tạo hóa đơn sau khi thanh toán thành công
+                // tạo hóa đơn khi thanh toán thành công
                 autoCreateInvoice(payment, booking);
             }
 
         } else {
             payment.setStatus(PaymentStatus.FAILED);
-
-            // Huỷ booking khi thanh toán thất bại
+            // nếu thanh toán thất bại thì set statust của booking là cancel
             Booking booking = payment.getBooking();
             if (booking != null && booking.getStatus() == BookingStatus.PENDING) {
                 booking.setStatus(BookingStatus.CANCELLED);
@@ -77,16 +76,16 @@ public class PaymentService {
         paymentRepository.save(payment);
     }
 
-    // ── Private: tự động tạo invoice từ thông tin booking/payment ───
+    // tạo hóa đơn
     private void autoCreateInvoice(Payment payment, Booking booking) {
         try {
-            // Kiểm tra invoice chưa tồn tại để tránh duplicate
+            // check invoice exists
             if (invoiceService.existsByBookingId(booking.getBookingId())) {
                 log.warn("Invoice đã tồn tại cho bookingId={}, bỏ qua tạo mới", booking.getBookingId());
                 return;
             }
 
-            // Tạo invoice item từ thông tin phòng trong booking
+            // lấy thông tin cần thiết cho req
             InvoiceItemRequest roomItem = new InvoiceItemRequest();
             roomItem.setItemType("ROOM");
             roomItem.setDescription("Phòng " + booking.getRoom().getRoomNumber()
@@ -94,18 +93,18 @@ public class PaymentService {
             roomItem.setQuantity(booking.getTotalNights());
             roomItem.setUnitPrice(booking.getRoomPriceSnapshot());
 
+            // thông tin cần thiết cho req để tạo invoice
             InvoiceCreateRequest invoiceRequest = new InvoiceCreateRequest();
             invoiceRequest.setBookingId(booking.getBookingId());
             invoiceRequest.setPaymentId(payment.getPaymentId());
             invoiceRequest.setDiscountAmount(BigDecimal.ZERO);
             invoiceRequest.setNotes("Tự động tạo sau khi thanh toán qua " + payment.getGateway());
             invoiceRequest.setItems(List.of(roomItem));
-
+            // tạo invoice
             invoiceService.createInvoice(invoiceRequest);
             log.info("Đã tự động tạo invoice cho bookingId={}", booking.getBookingId());
 
         } catch (Exception e) {
-            // Không để lỗi invoice làm rollback transaction payment
             log.error("Lỗi khi tự động tạo invoice cho bookingId={}: {}",
                     booking.getBookingId(), e.getMessage());
         }
