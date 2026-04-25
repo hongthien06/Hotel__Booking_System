@@ -50,6 +50,12 @@ public interface bookingRepository extends JpaRepository<Booking, Long> {
             @Param("checkOut") LocalDate checkOut
     );
 
+    @Query("""
+    SELECT b FROM Booking b
+    WHERE b.status = 'PENDING'
+    AND b.expiresAt < :now
+""")
+    List<Booking> findExpiredPendingBookings(@Param("now") LocalDateTime now);
 
 }
 

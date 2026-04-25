@@ -6,6 +6,7 @@ import com.hotel.modules.booking.dto.BookingDTO;
 import com.hotel.modules.booking.dto.BookingRequest;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
+import com.hotel.modules.booking.entity.CancelActor;
 import com.hotel.modules.booking.repository.bookingRepository;
 import com.hotel.modules.room.dto.response.RoomResponse;
 import com.hotel.modules.room.entity.Room;
@@ -21,6 +22,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+
+import static com.hotel.modules.booking.entity.CancelActor.SYSTEM;
 
 @Service
 public class BookingService {
@@ -171,6 +174,15 @@ public class BookingService {
 
     }
 
+    // Generate booking code: HB20260425-0001
+    private String generateBookingCode(LocalDate checkIn) {
+        String datePart = checkIn.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        long count = bookingRepository.count() + 1;
+        return String.format("HB%s-%04d", datePart, count);
+    }
+
+    // Tao Booking tu userId va Request
+    @Transactional
     public BookingDTO createBooking(BookingRequest request, Long userId) {
 
         // 1. Kiểm tra thời gian checkIn < checkOut
@@ -220,10 +232,78 @@ public class BookingService {
         return toDTO(booking);
     }
 
-    // Generate booking code: HB20260425-0001
-    private String generateBookingCode(LocalDate checkIn) {
-        String datePart = checkIn.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        long count = bookingRepository.count() + 1;
-        return String.format("HB%s-%04d", datePart, count);
+    // Thao tac Cancel booking
+    @Transactional
+    public BookingDTO cancelBooking(Long bookingId, Long userId, CancelActor Actor) {
+
+        // 1. Lấy booking
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking"));
+
+        switch (Actor) {
+
+            case USER -> {
+                // Chỉ được hủy booking của chính mình
+                if (!booking.getUser().getUserId().equals(userId)) {
+                    throw new RuntimeException("Bạn không có quyền hủy booking này");
+                }
+
+                // Chỉ hủy được PENDING hoặc CONFIRMED
+                if (booking.getStatus() != BookingStatus.PENDING
+                        && booking.getStatus() != BookingStatus.CONFIRMED) {
+                    throw new RuntimeException("Booking không thể hủy ở trạng thái hiện tại");
+                }
+
+                // Nếu CONFIRMED → kiểm tra có trước 24h không
+                if (booking.getStatus() == BookingStatus.CONFIRMED) {
+                    LocalDateTime deadline = booking.getCheckInDate()
+                            .atStartOfDay()
+                            .minusHours(24);
+
+                    if (LocalDateTime.now().isBefore(deadline)) {
+                        // Hủy trước 24h → hoàn tiền
+                        booking.setStatus(BookingStatus.REFUNDED);
+                    } else {
+                        // Hủy sau 24h → không hoàn tiền
+                        booking.setStatus(BookingStatus.CANCELLED);
+                    }
+                } else {
+                    // PENDING → hủy bình thường
+                    booking.setStatus(BookingStatus.CANCELLED);
+                }
+            }
+
+            case ADMIN -> {
+                // Admin hủy bất kì booking nào
+                if (booking.getStatus() == BookingStatus.CHECKED_OUT) {
+                    throw new RuntimeException("Không thể hủy booking đã check-out");
+                }
+                booking.setStatus(BookingStatus.CANCELLED);
+            }
+
+            case SYSTEM -> {
+                // System chỉ hủy PENDING hết hạn hoặc thanh toán thất bại
+                if (booking.getStatus() != BookingStatus.PENDING) {
+                    throw new RuntimeException("System chỉ hủy được booking PENDING");
+                }
+                booking.setStatus(BookingStatus.CANCELLED);
+            }
+
+            default -> throw new RuntimeException("cancelledBy không hợp lệ");
+        }
+
+        // 2. Trả phòng về AVAILABLE nếu phòng đang bị giữ
+        Room room = booking.getRoom();
+        if (room.getStatus() == RoomStatus.OCCUPIED) {
+            room.setStatus(RoomStatus.AVAILABLE);
+            roomRepository.save(room);
+        }
+
+        // 3. Update thời gian
+        booking.setUpdatedAt(LocalDateTime.now());
+        bookingRepository.save(booking);
+
+        return toDTO(booking);
     }
+
 }

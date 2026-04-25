@@ -2,7 +2,9 @@ package com.hotel.modules.booking.controller;
 
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.booking.dto.BookingRequest;
+import com.hotel.modules.booking.entity.CancelActor;
 import com.hotel.modules.booking.service.BookingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,10 +14,15 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.hotel.modules.booking.entity.CancelActor.ADMIN;
+import static com.hotel.modules.booking.entity.CancelActor.USER;
+import static com.hotel.modules.booking.entity.CancelActor.SYSTEM;
+
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
 
+    @Autowired
     private final BookingService bookingService;
 
     public BookingController(BookingService bookingService) {
@@ -64,4 +71,19 @@ public class BookingController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bookingService.createBooking(request, userId));
     }
+
+    // User hủy
+    @PutMapping("/{id}/cancel")
+    public ResponseEntity<?> cancelBooking(
+            @PathVariable Long id,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(bookingService.cancelBooking(id, user.getUserId(), USER));
+    }
+
+    // Admin hủy
+    @PutMapping("/{id}/cancel/admin")
+    public ResponseEntity<?> cancelBookingByAdmin(@PathVariable Long id) {
+        return ResponseEntity.ok(bookingService.cancelBooking(id, null, ADMIN));
+    }
+
 }
