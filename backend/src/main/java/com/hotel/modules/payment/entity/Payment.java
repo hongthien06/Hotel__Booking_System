@@ -9,9 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Payments", uniqueConstraints = {
-        @UniqueConstraint(name = "UQ_Payments_TxnId", columnNames = "transaction_id")
-})
+@Table(name = "Payments")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,7 +23,7 @@ public class Payment {
     private Long paymentId;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", nullable = false, unique = true)
+    @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
     @Enumerated(EnumType.STRING)

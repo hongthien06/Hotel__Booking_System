@@ -23,4 +23,5 @@ public interface IInvoiceService {
     void deleteInvoice(Long id);
 
     boolean existsByBookingId(Long bookingId);
+
 }

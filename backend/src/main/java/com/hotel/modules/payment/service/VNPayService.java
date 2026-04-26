@@ -8,14 +8,19 @@ import com.hotel.modules.payment.entity.Currency;
 import com.hotel.modules.payment.entity.Locale;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VNPayService implements IVNPayService {
@@ -39,9 +44,13 @@ public class VNPayService implements IVNPayService {
     private String paymentPrefixUrl;
 
     @Override
-    public VNPayResponse init(VNPayRequest request){
-        String amount = String.valueOf(Integer.parseInt(request.getAmount()) * 100);
-        String txnRef = request.getTxnRef(); //booking id
+    public VNPayResponse init(VNPayRequest request) {
+        log.info("TMN_CODE={}, SECRET_KEY={}", tmnCode, secretKey);
+        String amount = new BigDecimal(request.getAmount())
+                .setScale(0, RoundingMode.HALF_UP)
+                .multiply(new BigDecimal(100))
+                .toPlainString();
+        String txnRef = request.getTxnRef(); // booking id
         String returnUrl = buildReturnUrl(txnRef);
         Calendar vnCalendar = Calendar.getInstance(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
@@ -57,8 +66,8 @@ public class VNPayService implements IVNPayService {
         params.put(VNPayParams.VERSION, VERSION);
         params.put(VNPayParams.COMMAND, COMMAND);
 
-        params.put(VNPayParams.TMN_CODE,tmnCode);
-        params.put(VNPayParams.AMOUNT,amount);
+        params.put(VNPayParams.TMN_CODE, tmnCode);
+        params.put(VNPayParams.AMOUNT, amount);
         params.put(VNPayParams.CURRENCY, Currency.VND.getValue());
 
         params.put(VNPayParams.TXN_REF, txnRef);
@@ -82,6 +91,7 @@ public class VNPayService implements IVNPayService {
     private String buildReturnUrl(String txnRef) {
         return returnUrlFormat;
     }
+
     private String buildPaymentDetail(VNPayRequest request) {
         return String.format("Thanh toan don hang: %s | Ma giao dich: %s",
                 request.getTxnRef(),
@@ -89,24 +99,27 @@ public class VNPayService implements IVNPayService {
     }
 
     @SneakyThrows
-    private String buildInitPaymentUrl(Map<String, String> params){
+    private String buildInitPaymentUrl(Map<String, String> params) {
         StringBuilder hashPayload = new StringBuilder();
         StringBuilder query = new StringBuilder();
-        List fieldNames = new ArrayList<>(params.keySet());
+        List<String> fieldNames = new ArrayList<>(params.keySet());
         Collections.sort(fieldNames);
-        Iterator itr = fieldNames.iterator();
+        Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
-            String fieldName = (String) itr.next();
-            String fieldValue = (String) params.get(fieldName);
+            String fieldName = itr.next();
+            String fieldValue = params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                // Giống VNPay demo: encode bằng US_ASCII
+                // Build hash data
                 hashPayload.append(fieldName);
                 hashPayload.append('=');
-                hashPayload.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                hashPayload
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()).replace("+", "%20"));
 
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
+                // Build query
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()).replace("+", "%20"));
                 query.append('=');
-                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
+                query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()).replace("+", "%20"));
+
                 if (itr.hasNext()) {
                     query.append('&');
                     hashPayload.append('&');
@@ -121,20 +134,21 @@ public class VNPayService implements IVNPayService {
 
     @Override
     @SneakyThrows
-    public boolean verifyIpn(Map<String, String > params){
+    public boolean verifyIpn(Map<String, String> params) {
         String reqSecureHash = params.get(VNPayParams.SECURE_HASH);
         params.remove(VNPayParams.SECURE_HASH);
         params.remove(VNPayParams.SECURE_HASH_TYPE);
         StringBuilder hashPayload = new StringBuilder();
-        List fieldNames = new ArrayList<>(params.keySet());
+        List<String> fieldNames = new ArrayList<>(params.keySet());
         Collections.sort(fieldNames);
-        Iterator itr = fieldNames.iterator();
+        Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
-            String fieldName = (String) itr.next();
-            String fieldValue = (String) params.get(fieldName);
+            String fieldName = itr.next();
+            String fieldValue = params.get(fieldName);
             if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                String encodedKey = URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString());
-                String encodedValue = URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString());
+                String encodedKey = URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()).replace("+", "%20");
+                String encodedValue = URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()).replace("+",
+                        "%20");
 
                 hashPayload.append(encodedKey);
                 hashPayload.append('=');

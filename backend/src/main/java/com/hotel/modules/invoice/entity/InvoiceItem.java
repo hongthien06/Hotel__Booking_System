@@ -17,9 +17,6 @@ public class InvoiceItem {
     @Column(name = "item_id")
     private Long id;
 
-    @Column(name = "invoice_id", nullable = false)
-    private Long invoiceId;
-
     @Column(name = "item_type", nullable = false)
     private String itemType;
 

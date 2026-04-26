@@ -16,7 +16,7 @@ import com.hotel.modules.payment.dto.response.PaymentCreateResponse;
 import com.hotel.modules.payment.service.IPaymentService;
 import com.hotel.modules.payment.service.IpnHandler;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 

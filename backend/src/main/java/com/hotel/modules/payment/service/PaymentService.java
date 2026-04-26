@@ -1,6 +1,5 @@
 package com.hotel.modules.payment.service;
 
-import com.hotel.common.utils.RequestUtil;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.service.BookingService;
@@ -52,6 +51,7 @@ public class PaymentService implements IPaymentService {
                 .transactionId(generateTransactionId())
                 .gateway(request.getGateway())
                 .status(PaymentStatus.PENDING)
+                .ipAddress(ipAddress)
                 .currency("VND")
                 .build();
         payment = paymentRepository.save(payment);

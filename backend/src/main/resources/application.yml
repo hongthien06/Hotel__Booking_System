@@ -93,17 +93,17 @@ app:
     allowed-origins: "http://localhost:3000"
   payment:
     vnpay:
-      tmn-code: BJ1R655A
-      hash-secret: MEBTJSYPU2ISDEAG32UYTLHRB70DU37J
+      tmn-code: ${VNPAY_TMN_CODE}
+      hash-secret: ${VNPAY_HASH_SECRET}
       pay-url:  https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
       return-url: http://localhost:3000/payment/?step=3
       timeout: 15
     momo:
-      partner-code: MOMOLRJZ20181206
-      access-key: mTCKt9W3eU1m39TW
-      secret-key: SetA5RDnLHvt51AULf51DyauxUo3kDU6
+      partner-code: ${MOMO_PARTNER_CODE}
+      access-key: ${MOMO_ACCESS_KEY}
+      secret-key: ${MOMO_SECRET_KEY}
       endpoint-url: https://test-payment.momo.vn/v2/gateway/api/create
-      return-url: http://localhost:3000/payment/
+      return-url: http://localhost:3000/payment/?step=3
       request-type: captureWallet
       ipn-url: https://webhook.site/784642fe-feb2-4b1e-a31f-65e2e9349f6d
 

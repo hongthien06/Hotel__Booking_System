@@ -2,7 +2,6 @@ package com.hotel.modules.payment.dto.request;
 
 import java.math.BigDecimal;
 
-import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.payment.entity.PaymentGateway;
 
 import lombok.AllArgsConstructor;
