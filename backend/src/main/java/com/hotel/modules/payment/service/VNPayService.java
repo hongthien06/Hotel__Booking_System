@@ -45,7 +45,6 @@ public class VNPayService implements IVNPayService {
 
     @Override
     public VNPayResponse init(VNPayRequest request) {
-        log.info("TMN_CODE={}, SECRET_KEY={}", tmnCode, secretKey);
         String amount = new BigDecimal(request.getAmount())
                 .setScale(0, RoundingMode.HALF_UP)
                 .multiply(new BigDecimal(100))
@@ -60,7 +59,6 @@ public class VNPayService implements IVNPayService {
         String exprireDate = formatter.format(vnCalendar.getTime());
         String ipAddress = request.getIpAddress();
         var orderInfo = buildPaymentDetail(request);
-        String requestId = request.getRequestId();
 
         Map<String, String> params = new HashMap<>();
         params.put(VNPayParams.VERSION, VERSION);
@@ -81,6 +79,7 @@ public class VNPayService implements IVNPayService {
 
         params.put(VNPayParams.ORDER_INFO, orderInfo);
         params.put(VNPayParams.ORDER_TYPE, ORDER_TYPE);
+        log.info("PARAM+{}", params);
 
         String initPaymentUrl = buildInitPaymentUrl(params);
         return VNPayResponse.builder()
@@ -100,35 +99,35 @@ public class VNPayService implements IVNPayService {
 
     @SneakyThrows
     private String buildInitPaymentUrl(Map<String, String> params) {
-        StringBuilder hashPayload = new StringBuilder();
-        StringBuilder query = new StringBuilder();
         List<String> fieldNames = new ArrayList<>(params.keySet());
         Collections.sort(fieldNames);
+
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
+
         Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = params.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                // Build hash data
-                hashPayload.append(fieldName);
-                hashPayload.append('=');
-                hashPayload
-                        .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()).replace("+", "%20"));
 
-                // Build query
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()).replace("+", "%20"));
-                query.append('=');
-                query.append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()).replace("+", "%20"));
+            if (fieldValue != null && !fieldValue.isEmpty()) {
+                hashData.append(fieldName)
+                        .append('=')
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()))
+                        .append('=')
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
 
                 if (itr.hasNext()) {
+                    hashData.append('&');
                     query.append('&');
-                    hashPayload.append('&');
                 }
             }
         }
-        String secureHash = CryptoUtil.hmacSHA512(secretKey, hashPayload.toString());
-        query.append("&vnp_SecureHash=");
-        query.append(secureHash);
+
+        String secureHash = CryptoUtil.hmacSHA512(secretKey, hashData.toString());
+        query.append("&vnp_SecureHash=").append(secureHash);
         return paymentPrefixUrl + "?" + query;
     }
 
@@ -138,28 +137,30 @@ public class VNPayService implements IVNPayService {
         String reqSecureHash = params.get(VNPayParams.SECURE_HASH);
         params.remove(VNPayParams.SECURE_HASH);
         params.remove(VNPayParams.SECURE_HASH_TYPE);
-        StringBuilder hashPayload = new StringBuilder();
+
         List<String> fieldNames = new ArrayList<>(params.keySet());
         Collections.sort(fieldNames);
+
+        StringBuilder hashData = new StringBuilder();
         Iterator<String> itr = fieldNames.iterator();
         while (itr.hasNext()) {
             String fieldName = itr.next();
             String fieldValue = params.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                String encodedKey = URLEncoder.encode(fieldName, StandardCharsets.UTF_8.toString()).replace("+", "%20");
-                String encodedValue = URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()).replace("+",
-                        "%20");
+            if (fieldValue != null && !fieldValue.isEmpty()) {
 
-                hashPayload.append(encodedKey);
-                hashPayload.append('=');
-                hashPayload.append(encodedValue);
-
+                hashData.append(fieldName)
+                        .append('=')
+                        .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
                 if (itr.hasNext()) {
-                    hashPayload.append('&');
+                    hashData.append('&');
                 }
             }
         }
-        String secureHash = CryptoUtil.hmacSHA512(secretKey, hashPayload.toString());
+
+        String secureHash = CryptoUtil.hmacSHA512(secretKey, hashData.toString());
+        log.info("Hash payload : {}", hashData);
+        log.info("Expected hash: {}", secureHash);
+        log.info("Received hash: {}", reqSecureHash);
         return secureHash.equals(reqSecureHash);
     }
 }

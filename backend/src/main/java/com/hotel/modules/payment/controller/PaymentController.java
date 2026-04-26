@@ -40,7 +40,7 @@ public class PaymentController {
 
     @PostMapping("/create")
     public PaymentCreateResponse createPayment(HttpServletRequest request, @RequestBody PaymentRequest paymentRequest) {
-        String ipAdress = RequestUtil.getIpAddress(request);
+        String ipAdress = "127.0.0.1";
         return paymentService.createInitialPayment(paymentRequest, ipAdress);
     }
 

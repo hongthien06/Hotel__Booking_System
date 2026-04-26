@@ -94,7 +94,6 @@ public class BookingServiceService {
         response.setUnitPriceSnap(entity.getUnitPriceSnap());
         response.setSubtotal(entity.getSubtotal());
 
-        // Manual calculation if subtotal is null (before flush)
         if (response.getSubtotal() == null && entity.getUnitPriceSnap() != null && entity.getQuantity() != null) {
             response.setSubtotal(entity.getUnitPriceSnap().multiply(new java.math.BigDecimal(entity.getQuantity())));
         }

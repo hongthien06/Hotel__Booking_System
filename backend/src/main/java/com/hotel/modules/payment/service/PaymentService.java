@@ -11,6 +11,7 @@ import com.hotel.modules.payment.dto.request.PaymentRequest;
 import com.hotel.modules.payment.dto.request.VNPayRequest;
 import com.hotel.modules.payment.dto.response.MomoResponse;
 import com.hotel.modules.payment.dto.response.PaymentCreateResponse;
+import com.hotel.modules.payment.dto.response.PaymentResponse;
 import com.hotel.modules.payment.dto.response.VNPayResponse;
 import com.hotel.modules.payment.entity.Payment;
 import com.hotel.modules.payment.entity.PaymentGateway;
@@ -44,6 +45,7 @@ public class PaymentService implements IPaymentService {
     @Override
     @Transactional
     public PaymentCreateResponse createInitialPayment(PaymentRequest request, String ipAddress) {
+        log.info(ipAddress);
         Booking booking = bookingService.findById(request.getBookingId());
         Payment payment = Payment.builder()
                 .booking(booking)
@@ -81,7 +83,20 @@ public class PaymentService implements IPaymentService {
         return PaymentCreateResponse.builder()
                 .bookingCode(payment.getBooking().getBookingCode())
                 .paymnent_url(paymentUrl)
-                .payment(payment)
+                .payment(mapToResponse(payment))
+                .build();
+    }
+
+    private PaymentResponse mapToResponse(Payment payment) {
+        return PaymentResponse.builder()
+                .paymentId(payment.getPaymentId())
+                .transactionId(payment.getTransactionId())
+                .amount(payment.getAmount())
+                .currency(payment.getCurrency())
+                .gateway(payment.getGateway())
+                .status(payment.getStatus())
+                .paidAt(payment.getPaidAt())
+                .createdAt(payment.getCreatedAt())
                 .build();
     }
 
@@ -93,6 +108,7 @@ public class PaymentService implements IPaymentService {
     }
 
     @Override
+    @Transactional
     public Payment findByBookingCode(String bookingCode) {
         return paymentRepository.findByBookingCode(bookingCode).orElse(null);
     }

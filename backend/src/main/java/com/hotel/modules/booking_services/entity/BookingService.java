@@ -1,5 +1,6 @@
 package com.hotel.modules.booking_services.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hotel.modules.booking.entity.Booking;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class BookingService {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("bookingId")
     @JoinColumn(name = "booking_id")
+    @JsonIgnore
     private Booking booking;
 
     @ManyToOne(fetch = FetchType.LAZY)

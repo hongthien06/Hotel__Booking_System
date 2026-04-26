@@ -162,7 +162,7 @@ app:
       endpoint-url: https://test-payment.momo.vn/v2/gateway/api/create
       return-url: http://localhost:3000/payment/?step=3
       request-type: captureWallet
-      ipn-url: ${APP_MOMO_IPN_URL:https://webhook.site/784642fe-feb2-4b1e-a31f-65e2e9349f6d}
+      ipn-url: https://webhook.site/784642fe-feb2-4b1e-a31f-65e2e9349f6d
   openai:
     api-key: ${APP_OPENAI_API_KEY}
     model: gpt-4o-mini

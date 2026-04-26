@@ -1,6 +1,5 @@
 package com.hotel.modules.payment.dto.response;
 
-import com.hotel.modules.payment.entity.Payment;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,5 +13,5 @@ import lombok.NoArgsConstructor;
 public class PaymentCreateResponse {
   private String paymnent_url;
   private String bookingCode;
-  private Payment payment;
+  private PaymentResponse payment;
 }

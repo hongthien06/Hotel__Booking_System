@@ -1,6 +1,6 @@
 import axios from 'axios'
 import axiosInstance from './axiosInstance'
-import { createVnpayPaymentUrl, createMomoPaytUrl } from './index'
+import { createPaymentUrl } from './index'
 
 // API base URL configuration
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
@@ -36,4 +36,4 @@ export const changePasswordApi = async (oldPassword, newPassword) => {
   return response.data
 }
 
-export { createVnpayPaymentUrl, createMomoPaytUrl }
+export { createPaymentUrl }

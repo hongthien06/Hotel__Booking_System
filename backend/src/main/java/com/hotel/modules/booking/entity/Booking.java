@@ -3,6 +3,7 @@ package com.hotel.modules.booking.entity;
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.invoice.entity.Invoice;
 import com.hotel.modules.room.entity.Room;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -83,6 +84,7 @@ public class Booking {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BookingService> bookingServices = new ArrayList<>();
 

@@ -1,20 +1,20 @@
 package com.hotel.modules.payment.service;
 
-import com.hotel.modules.email.dto.EmailRequest;
+import java.math.BigDecimal;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
 import com.hotel.modules.email.service.EmailService;
 import com.hotel.modules.payment.constant.VNPayParams;
 import com.hotel.modules.payment.constant.VnpIpnResponseConst;
 import com.hotel.modules.payment.dto.response.IpnResponse;
 import com.hotel.modules.payment.entity.Payment;
 import com.hotel.modules.payment.entity.PaymentStatus;
-import com.hotel.modules.payment.repository.PaymentRepository;
+
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service("vnpayIpnHandler")
@@ -25,6 +25,7 @@ public class VNPayIpnHandler implements IpnHandler {
     private final PaymentService paymentService;
 
     @Override
+    @Transactional
     public IpnResponse process(Map<String, String> params) {
         if (!vnPayService.verifyIpn(params)) {
             return VnpIpnResponseConst.SIGNATURE_FAILED;
@@ -39,8 +40,15 @@ public class VNPayIpnHandler implements IpnHandler {
             if (payment == null) {
                 return VnpIpnResponseConst.ORDER_NOT_FOUND;
             }
-            long amountFromVNPay = Long.parseLong(vnpAmount) / 100;
-            if (payment.getAmount().longValue() != amountFromVNPay) {
+            BigDecimal amountFromVNPay = new BigDecimal(vnpAmount)
+                    .divide(new BigDecimal(100))
+                    .stripTrailingZeros();
+
+            BigDecimal dbAmount = payment.getAmount().stripTrailingZeros();
+            log.info("vnpAmount raw: " + vnpAmount);
+            log.info("after /100: " + amountFromVNPay);
+            log.info("DB amount: " + dbAmount);
+            if (dbAmount.compareTo(amountFromVNPay) != 0) {
                 return VnpIpnResponseConst.INVALID_AMOUNT;
             }
             if (!payment.getStatus().equals(PaymentStatus.PENDING)) {
@@ -54,6 +62,7 @@ public class VNPayIpnHandler implements IpnHandler {
             }
             return VnpIpnResponseConst.SUCCESS;
         } catch (Exception e) {
+            log.error("IPN processing error", e);
             ipnResponse = VnpIpnResponseConst.UNKNOWN_ERROR;
         }
         return ipnResponse;
