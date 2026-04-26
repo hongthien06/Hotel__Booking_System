@@ -7,16 +7,23 @@ import React from 'react'
 import App from '~/App.jsx'
 import theme from './theme'
 import { AuthProvider } from './shared/context/AuthContext'
+import { ToastContainer } from 'react-toastify'
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter basename='/'>
     <React.StrictMode>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </ThemeProvider >
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AuthProvider>
+            <App />
+            <ToastContainer autoClose={2000} theme="colored" />
+          </AuthProvider>
+        </ThemeProvider >
+      </QueryClientProvider>
     </React.StrictMode>
   </BrowserRouter>
 )
