@@ -82,7 +82,7 @@ public class InvoiceService implements IInvoiceService {
         List<InvoiceItem> items = request.getItems().stream()
                 .map(itemReq -> buildInvoiceItem(itemReq, invoiceId))// build từng cái item invoice
                 .collect(Collectors.toList());
-        // save tất cả item
+        // save tất cả items
         invoiceItemRepository.saveAll(items);
 
         log.info("Invoice created: id={}, number={}", invoice.getId(), invoiceNumber);

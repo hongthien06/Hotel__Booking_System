@@ -274,13 +274,14 @@ public class PdfService {
                 .setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.RIGHT)
                 .setMarginRight(30).setMarginTop(16).setMarginBottom(16);
 
+        // Tạm tính
         addTotalRow(t, "Tạm tính", fmtVnd(invoice.getSubtotal()),
                 regular, DARK_NAVY, ColorConstants.WHITE);
         // VAT
         addTotalRow(t, "Thuế VAT (" + invoice.getTaxRate().stripTrailingZeros().toPlainString() + "%)",
                 "+ " + fmtVnd(invoice.getTaxAmount()),
                 regular, TEXT_MUTED, ColorConstants.WHITE);
-        // Discount (conditional)
+        // Discount
         if (invoice.getDiscountAmount() != null
                 && invoice.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
             addTotalRow(t, "Giảm giá",
@@ -345,7 +346,6 @@ public class PdfService {
         doc.add(t);
     }
 
-    /** Footer */
     private void addFooter(Document doc, PdfFont bold, PdfFont regular) {
         doc.add(new Paragraph("\u0110\u00C3 THANH TO\u00C1N")
                 .setFont(bold).setFontSize(13)
@@ -368,8 +368,6 @@ public class PdfService {
                 .setFont(regular).setFontSize(9).setFontColor(TEXT_MUTED)
                 .setTextAlignment(TextAlignment.CENTER));
     }
-
-    // ── Helpers ───────────────────────────────────────────────
 
     private String fmtVnd(BigDecimal amount) {
         if (amount == null)

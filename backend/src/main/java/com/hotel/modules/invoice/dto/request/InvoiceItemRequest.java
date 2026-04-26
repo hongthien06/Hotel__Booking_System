@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Data
 public class InvoiceItemRequest {
     @NotBlank(message = "Loại item không được để trống")
-    private String itemType; // ROOM, SERVICE, v.v.
+    private String itemType;
 
     @NotBlank(message = "Mô tả không được để trống")
     private String description;
