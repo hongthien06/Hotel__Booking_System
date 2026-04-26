@@ -17,7 +17,7 @@ public class InvoiceItem {
     @Column(name = "item_id")
     private Long id;
 
-    @Column(name = "invoice_id", nullable = false)
+    @Column(name = "invoice_id", insertable = false, updatable = false)
     private Long invoiceId;
 
     @Column(name = "item_type", nullable = false)
