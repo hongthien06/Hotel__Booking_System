@@ -2,7 +2,9 @@ package com.hotel.modules.auth.service;
 
 import com.hotel.modules.auth.dto.UpdateProfileRequest;
 import com.hotel.modules.auth.dto.UserResponse;
+import com.hotel.modules.auth.entity.Role;
 import com.hotel.modules.auth.entity.User;
+import com.hotel.modules.auth.repository.RoleRepository;
 import com.hotel.modules.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,6 +21,7 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
     public User getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -35,9 +40,31 @@ public class UserService {
         
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
+        user.setUpdatedAt(java.time.LocalDateTime.now());
         
         User updatedUser = userRepository.save(user);
         return mapToResponse(updatedUser);
+    }
+
+    public List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public UserResponse updateRoles(Long userId, Set<String> roleNames) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Set<Role> roles = roleNames.stream()
+                .map(name -> roleRepository.findByRoleName(name)
+                        .orElseThrow(() -> new RuntimeException("Role " + name + " not found")))
+                .collect(Collectors.toSet());
+
+        user.setRoles(roles);
+        user.setUpdatedAt(java.time.LocalDateTime.now());
+        return mapToResponse(userRepository.save(user));
     }
 
     private UserResponse mapToResponse(User user) {

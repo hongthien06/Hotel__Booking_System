@@ -61,7 +61,7 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqlserver:1433;databaseName=HotelBookingDB;encrypt=false;trustServerCertificate=true"
       SPRING_DATASOURCE_USERNAME: "sa"
       SPRING_DATASOURCE_PASSWORD: "${SQL_SA_PASSWORD}"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
       SPRING_JPA_SHOW_SQL: "false"
       APP_JWT_SECRET: "${JWT_SECRET_KEY}"
       APP_JWT_EXPIRATION: "900000"

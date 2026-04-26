@@ -1,20 +1,42 @@
-import React, { useState } from 'react'
-import { Box, Button, TextField, Typography, Paper, Alert, IconButton, InputAdornment } from '@mui/material'
-import { Visibility, VisibilityOff } from '@mui/icons-material'
+import React, { useState, useEffect } from 'react'
+import { Box, Button, TextField, Typography, Paper, Alert, IconButton, Tabs, Tab, InputAdornment } from '@mui/material'
+import { Visibility, VisibilityOff, PersonOutline, AdminPanelSettings } from '@mui/icons-material'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { loginApi } from '../../shared/api/authApi'
 
 const LoginPage = () => {
+  const [userType, setUserType] = useState('customer') // 'customer' or 'manager'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { login } = useAuth()
+  const { login, isAuthenticated, user } = useAuth()
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      const roles = user.roles || []
+      const isAdminOrManager = roles.some(r => {
+        const roleStr = typeof r === 'string' ? r : (r.roleName || r.authority || '')
+        return ['ADMIN', 'MANAGER', 'ROLE_ADMIN', 'ROLE_MANAGER'].includes(roleStr)
+      })
+      
+      if (isAdminOrManager && userType === 'manager') {
+        navigate('/dashboard')
+      } else {
+        navigate('/home')
+      }
+    }
+  }, [isAuthenticated, user, navigate, userType])
 
   const handleClickShowPassword = () => setShowPassword((show) => !show)
+
+  const handleUserTypeChange = (event, newValue) => {
+    setUserType(newValue)
+    setError('')
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -23,19 +45,25 @@ const LoginPage = () => {
 
     try {
       const data = await loginApi(email, password)
-      login(data.token, { email: data.email, fullName: data.fullName, roles: data.roles || [] })
-      navigate('/dashboard')
-    } catch (err) {
-      const data = err.response?.data;
-      let errMsg = 'Đăng nhập thất bại. Xin vui lòng kiểm tra lại thông tin.';
-      if (data) {
-        if (data.message) errMsg = data.message;
-        else if (data.error) errMsg = data.error;
-        else if (typeof data === 'object' && Object.keys(data).length > 0) errMsg = Object.values(data)[0];
+      
+      // Check if roles match selection
+      const roles = data.roles || []
+      const isAdminOrManager = roles.some(r => r === 'ADMIN' || r === 'MANAGER' || r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER')
+      
+      if (userType === 'manager' && !isAdminOrManager) {
+        throw new Error('Tài khoản này không có quyền quản lý!')
       }
+
+      if (userType === 'customer' && isAdminOrManager) {
+        throw new Error('Tài khoản quản lý vui lòng đăng nhập ở mục "Quản lý"!')
+      }
+
+      login(data.token, { email: data.email, fullName: data.fullName, roles: roles })
+      // Redirection is now handled by useEffect
+    } catch (err) {
+      const errMsg = err.message || 'Đăng nhập thất bại. Xin vui lòng kiểm tra lại thông tin.';
       setError(errMsg);
-    } finally {
-      setIsLoading(false)
+      setIsLoading(false) // Only set loading false on error, on success useEffect handles transition
     }
   }
 
@@ -60,6 +88,21 @@ const LoginPage = () => {
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>
           Đăng nhập vào tài khoản Hotel Booking của bạn
         </Typography>
+
+        <Tabs 
+          value={userType} 
+          onChange={handleUserTypeChange} 
+          variant="fullWidth" 
+          sx={{ 
+            mb: 4, 
+            bgcolor: 'action.hover', 
+            borderRadius: 2,
+            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' }
+          }}
+        >
+          <Tab icon={<PersonOutline />} label="Khách hàng" value="customer" iconPosition="start" sx={{ minHeight: 64 }} />
+          <Tab icon={<AdminPanelSettings />} label="Quản lý" value="manager" iconPosition="start" sx={{ minHeight: 64 }} />
+        </Tabs>
 
         {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
 

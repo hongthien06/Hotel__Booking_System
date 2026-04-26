@@ -4,7 +4,7 @@ import { useAuth } from '../shared/hooks/useAuth'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 
-const PrivateRoute = ({ requiredRole }) => {
+const PrivateRoute = ({ requiredRoles }) => {
   const { isAuthenticated, user, loading } = useAuth()
 
   if (loading) {
@@ -21,11 +21,25 @@ const PrivateRoute = ({ requiredRole }) => {
   }
 
   // If a specific role is required, check roles
-  if (requiredRole && user && user.roles) {
-    const hasRole = user.roles.some(role => role.roleName === requiredRole || role.authority === `ROLE_${requiredRole}`)
-    if (!hasRole) {
-      // Forbidden -> Could redirect to a 'Not Authorized' page or home
-      return <Navigate to="/" replace />
+  if (requiredRoles && user && user.roles) {
+    const rolesToMatch = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles]
+    
+    // Normalize user roles
+    const userRoleStrings = user.roles.map(r => {
+      if (typeof r === 'string') return r
+      return r.roleName || r.authority || ''
+    }).filter(Boolean)
+
+    const hasPermission = rolesToMatch.some(reqRole => {
+      const normReq = reqRole.startsWith('ROLE_') ? reqRole : `ROLE_${reqRole}`
+      return userRoleStrings.some(uRole => {
+        const normUser = uRole.startsWith('ROLE_') ? uRole : `ROLE_${uRole}`
+        return normReq === normUser
+      })
+    })
+
+    if (!hasPermission) {
+      return <Navigate to="/home" replace />
     }
   }
 

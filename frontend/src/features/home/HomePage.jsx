@@ -1,0 +1,294 @@
+import React from 'react';
+import {
+  Box,
+  Typography,
+  Container,
+  Grid,
+  Card,
+  CardContent,
+  Avatar,
+  Rating,
+  Button,
+  Paper,
+  Divider
+} from '@mui/material';
+import {
+  KingBed,
+  Security,
+  SupportAgent,
+  Star,
+  Wifi,
+  Pool,
+  Restaurant,
+  Spa,
+  EventNote
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
+import heroBg from '../../assets/hotel_hero.png';
+
+// Dữ liệu giới thiệu dịch vụ
+const features = [
+  { icon: <KingBed sx={{ fontSize: 40 }} />, title: 'Phòng cao cấp', desc: 'Hơn 200 phòng được thiết kế sang trọng với đầy đủ tiện nghi hiện đại.' },
+  { icon: <Security sx={{ fontSize: 40 }} />, title: 'An toàn & Bảo mật', desc: 'Hệ thống bảo mật 24/7, camera giám sát và két sắt trong phòng.' },
+  { icon: <SupportAgent sx={{ fontSize: 40 }} />, title: 'Hỗ trợ tận tâm', desc: 'Đội ngũ nhân viên chuyên nghiệp, hỗ trợ khách hàng mọi lúc mọi nơi.' },
+  { icon: <Star sx={{ fontSize: 40 }} />, title: 'Trải nghiệm 5 sao', desc: 'Dịch vụ đẳng cấp quốc tế, mang đến trải nghiệm nghỉ dưỡng tuyệt vời.' },
+];
+
+// Dữ liệu tiện ích
+const amenities = [
+  { icon: <Wifi />, label: 'Wifi miễn phí' },
+  { icon: <Pool />, label: 'Hồ bơi' },
+  { icon: <Restaurant />, label: 'Nhà hàng' },
+  { icon: <Spa />, label: 'Spa & Gym' },
+];
+
+// Dữ liệu đánh giá
+const reviews = [
+  { name: 'Nguyễn Văn Anh', avatar: 'A', rating: 5, comment: 'Dịch vụ tuyệt vời! Phòng sạch sẽ, nhân viên thân thiện. Chắc chắn sẽ quay lại lần nữa.', date: '15/04/2026' },
+  { name: 'Trần Thị Minh', avatar: 'M', rating: 5, comment: 'View đẹp, đồ ăn ngon, giá cả hợp lý. Rất hài lòng với trải nghiệm tại đây!', date: '10/04/2026' },
+  { name: 'Lê Hoàng Phúc', avatar: 'P', rating: 4, comment: 'Vị trí thuận tiện, gần trung tâm. Phòng rộng rãi và thoáng mát. Recommend cho mọi người!', date: '05/04/2026' },
+  { name: 'Phạm Quỳnh Như', avatar: 'N', rating: 5, comment: 'Đã đặt phòng cho gia đình qua hệ thống này, rất tiện lợi và nhanh chóng. 10 điểm!', date: '01/04/2026' },
+];
+
+const HomePage = () => {
+  const navigate = useNavigate();
+
+  return (
+    <Box>
+      {/* Hero Section */}
+      <Box
+        sx={{
+          height: '70vh',
+          position: 'relative',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: 'white',
+          backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 100%), url(${heroBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
+        <Container maxWidth="md" sx={{ textAlign: 'center', zIndex: 1 }}>
+          <Typography variant="overline" sx={{ letterSpacing: 4, fontSize: '0.9rem', opacity: 0.9, mb: 2, display: 'block' }}>
+            CHÀO MỪNG ĐẾN VỚI
+          </Typography>
+          <Typography variant="h2" sx={{ fontWeight: 900, mb: 2, textShadow: '2px 4px 20px rgba(0,0,0,0.4)' }}>
+            Hotel Booking System
+          </Typography>
+          <Typography variant="h6" sx={{ mb: 5, fontWeight: 300, opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
+            Hệ thống đặt phòng khách sạn trực tuyến hàng đầu — nhanh chóng, tiện lợi và đáng tin cậy
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<EventNote />}
+            onClick={() => navigate('/bookings')}
+            sx={{
+              py: 1.8, px: 5, borderRadius: 3, fontWeight: 800, fontSize: '1.1rem',
+              bgcolor: 'white', color: '#9a1c48',
+              boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+              '&:hover': {
+                bgcolor: '#9a1c48',
+                color: 'white',
+                transform: 'translateY(-3px)',
+                boxShadow: '0 12px 35px rgba(154, 28, 72, 0.4)'
+              },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            Đặt phòng ngay
+          </Button>
+        </Container>
+      </Box>
+
+      {/* Stats Bar */}
+      <Paper 
+        elevation={8} 
+        sx={{ 
+          mx: 'auto', 
+          maxWidth: 1200, 
+          width: '95%',
+          mt: -6, 
+          borderRadius: 4, 
+          position: 'relative', 
+          zIndex: 2, 
+          overflow: 'hidden', 
+          background: 'linear-gradient(135deg, #9a1c48 0%, #c02860 100%)',
+          boxShadow: '0 10px 40px rgba(154, 28, 72, 0.3)',
+          display: 'flex', // Dùng Flexbox để ép giãn đều
+          width: '100%',
+          boxSizing: 'border-box'
+        }}
+      >
+        {[
+          { number: '200+', label: 'Phòng cao cấp' },
+          { number: '50K+', label: 'Khách hàng' },
+          { number: '4.8★', label: 'Đánh giá' },
+          { number: '24/7', label: 'Hỗ trợ' },
+        ].map((stat, i) => (
+          <Box 
+            key={i}
+            sx={{ 
+              flex: 1, // Mỗi ô chiếm 1 phần bằng nhau (1/4)
+              textAlign: 'center', 
+              py: { xs: 3, md: 5 }, 
+              borderRight: i < 3 ? '1px solid rgba(255,255,255,0.15)' : 'none',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
+            }}
+          >
+            <Typography variant="h3" sx={{ fontWeight: 900, color: '#fff', mb: 0.5, fontSize: { xs: '1.2rem', sm: '1.8rem', md: '2.5rem' } }}>
+              {stat.number}
+            </Typography>
+            <Typography variant="body1" sx={{ fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: 1, textTransform: 'uppercase', fontSize: { xs: '0.6rem', sm: '0.75rem', md: '0.9rem' } }}>
+              {stat.label}
+            </Typography>
+          </Box>
+        ))}
+      </Paper>
+
+      {/* Features Section */}
+      <Container maxWidth="lg" sx={{ py: 10 }}>
+        <Box sx={{ textAlign: 'center', mb: 7 }}>
+          <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
+            TẠI SAO CHỌN CHÚNG TÔI?
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
+            Dịch vụ vượt trội
+          </Typography>
+        </Box>
+
+        <Grid container spacing={4}>
+          {features.map((f, i) => (
+            <Grid item xs={12} sm={6} md={3} key={i}>
+              <Card sx={{
+                p: 3, textAlign: 'center', borderRadius: 4, height: '100%',
+                transition: 'all 0.3s ease',
+                '&:hover': { transform: 'translateY(-8px)', boxShadow: '0 12px 30px rgba(0,0,0,0.1)' }
+              }}>
+                <Box sx={{
+                  width: 80, height: 80, borderRadius: 3, mx: 'auto', mb: 2,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  bgcolor: '#9a1c48', color: '#fff'
+                }}>
+                  {f.icon}
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>{f.title}</Typography>
+                <Typography variant="body2" color="text.secondary">{f.desc}</Typography>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* Amenities Section */}
+      <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
+        <Container maxWidth="lg">
+          <Box sx={{ textAlign: 'center', mb: 5 }}>
+            <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
+              TIỆN ÍCH
+            </Typography>
+            <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
+              Đầy đủ tiện nghi
+            </Typography>
+          </Box>
+          <Grid container spacing={3} justifyContent="center">
+            {amenities.map((a, i) => (
+              <Grid item xs={6} sm={3} key={i}>
+                <Paper elevation={0} sx={{
+                  p: 3, textAlign: 'center', borderRadius: 3, border: '2px solid', borderColor: 'divider',
+                  transition: 'all 0.3s', '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.light', color: 'primary.contrastText' }
+                }}>
+                  <Box sx={{ mb: 1 }}>{a.icon}</Box>
+                  <Typography variant="body1" sx={{ fontWeight: 700 }}>{a.label}</Typography>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* Reviews Section */}
+      <Container maxWidth="lg" sx={{ py: 10 }}>
+        <Box sx={{ textAlign: 'center', mb: 7 }}>
+          <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
+            ĐÁNH GIÁ
+          </Typography>
+          <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
+            Khách hàng nói gì về chúng tôi?
+          </Typography>
+        </Box>
+
+        <Grid container spacing={4}>
+          {reviews.map((r, i) => (
+            <Grid item xs={12} sm={6} md={3} key={i}>
+              <Card sx={{
+                p: 3, borderRadius: 4, height: '100%', position: 'relative',
+                transition: 'all 0.3s ease',
+                '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }
+              }}>
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'secondary.main', fontWeight: 700 }}>{r.avatar}</Avatar>
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{r.name}</Typography>
+                      <Typography variant="caption" color="text.secondary">{r.date}</Typography>
+                    </Box>
+                  </Box>
+                  <Rating value={r.rating} readOnly size="small" sx={{ mb: 1.5 }} />
+                  <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.7 }}>
+                    "{r.comment}"
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+
+      {/* CTA Section */}
+      <Box sx={{
+        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+        py: 8, textAlign: 'center', color: 'white'
+      }}>
+        <Container maxWidth="md">
+          <Typography variant="h4" sx={{ fontWeight: 900, mb: 2 }}>
+            Sẵn sàng cho chuyến nghỉ dưỡng tiếp theo?
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 4, opacity: 0.9 }}>
+            Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt!
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            onClick={() => navigate('/bookings')}
+            sx={{
+              bgcolor: 'white', color: '#9a1c48', fontWeight: 800, px: 6, py: 2, borderRadius: 3,
+              boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
+              '&:hover': {
+                bgcolor: '#9a1c48',
+                color: 'white',
+                transform: 'translateY(-3px)',
+                boxShadow: '0 15px 40px rgba(154, 28, 72, 0.4)'
+              },
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+            }}
+          >
+            Đặt phòng ngay
+          </Button>
+        </Container>
+      </Box>
+
+      {/* Footer */}
+      <Box sx={{ bgcolor: 'background.paper', py: 4, textAlign: 'center' }}>
+        <Typography variant="body2" color="text.secondary">
+          © 2026 Hotel Booking Management System — Đồ án môn học
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
+
+export default HomePage;

@@ -107,7 +107,7 @@ const DashboardPage = () => {
     <Box sx={{ p: { xs: 2, md: 4 } }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.main', mb: 0.5 }}>
+          <Typography variant="h4" sx={{ fontWeight: 900, color: '#9a1c48', mb: 0.5 }}>
             Dashboard Overview
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -160,7 +160,7 @@ const DashboardPage = () => {
         </Grid>
       </Grid>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 3 }}>
+      <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, color: '#9a1c48' }}>
         Đơn đặt phòng gần đây
       </Typography>
       
