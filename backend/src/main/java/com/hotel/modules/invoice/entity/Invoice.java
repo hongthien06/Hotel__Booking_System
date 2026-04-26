@@ -1,13 +1,17 @@
 package com.hotel.modules.invoice.entity;
 
-import com.hotel.modules.booking.entity.Booking;
-import com.hotel.modules.payment.entity.Payment;
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.payment.entity.Payment;
 
 @Entity
 @Table(name = "Invoices")
@@ -29,7 +33,6 @@ public class Invoice {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id", nullable = false)
     private Payment payment;
-
 
     @Column(name = "invoice_number", length = 30, nullable = false, unique = true)
     private String invoiceNumber;
@@ -65,6 +68,5 @@ public class Invoice {
     private String notes;
 
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private java.util.List<InvoiceItem> items = new java.util.ArrayList<>();
+    private List<InvoiceItem> invoiceItems;
 }

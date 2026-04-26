@@ -14,6 +14,5 @@ import lombok.NoArgsConstructor;
 public class PaymentCreateResponse {
   private String paymnent_url;
   private String bookingCode;
-  private String transactionId;
   private Payment payment;
 }

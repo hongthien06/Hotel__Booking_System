@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentRequest {
-  private Booking booking;
+  private Long bookingId;
   private BigDecimal amount;
   private PaymentGateway gateway;
 }

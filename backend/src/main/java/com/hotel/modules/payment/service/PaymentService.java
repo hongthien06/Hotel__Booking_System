@@ -45,8 +45,9 @@ public class PaymentService implements IPaymentService {
     @Override
     @Transactional
     public PaymentCreateResponse createInitialPayment(PaymentRequest request, String ipAddress) {
+        Booking booking = bookingService.findById(request.getBookingId());
         Payment payment = Payment.builder()
-                .booking(request.getBooking())
+                .booking(booking)
                 .amount(request.getAmount())
                 .transactionId(generateTransactionId())
                 .gateway(request.getGateway())
@@ -163,21 +164,4 @@ public class PaymentService implements IPaymentService {
         }
     }
 
-    /**
-     * Cập nhật trạng thái thanh toán thủ công (Yêu cầu xác thực userId)
-     */
-    @Transactional
-    public void updatePaymentStatusWithUser(Long paymentId, PaymentStatus status, Long userId) {
-        Payment payment = paymentRepository.findById(paymentId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy thanh toán"));
-
-        // Kiểm tra quyền sở hữu
-        if (!payment.getBooking().getUser().getUserId().equals(userId)) {
-            throw new RuntimeException("Bạn không có quyền cập nhật thanh toán này");
-        }
-
-        payment.setStatus(status);
-        paymentRepository.save(payment);
-        log.info("User {} updated payment {} status to {}", userId, paymentId, status);
-    }
 }

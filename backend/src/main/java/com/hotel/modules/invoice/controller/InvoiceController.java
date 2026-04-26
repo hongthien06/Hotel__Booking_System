@@ -1,10 +1,12 @@
 package com.hotel.modules.invoice.controller;
 
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
+import com.hotel.modules.invoice.dto.request.InvoiceQueryRequest;
 import com.hotel.modules.invoice.dto.request.InvoiceUpdateRequest;
 import com.hotel.modules.invoice.dto.response.InvoiceResponse;
 import com.hotel.modules.invoice.entity.Invoice;
 import com.hotel.modules.invoice.service.IInvoiceService;
+import com.hotel.modules.invoice.service.IPdfService;
 import com.hotel.modules.invoice.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +29,8 @@ import java.time.LocalTime;
 @RequiredArgsConstructor
 public class InvoiceController {
     private final IInvoiceService invoiceService;
+
+    private final IPdfService pdfService;
 
     @PostMapping
     public ResponseEntity<InvoiceResponse> createInvoice(@Validated @RequestBody InvoiceCreateRequest request) {
@@ -60,18 +64,23 @@ public class InvoiceController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<InvoiceResponse>> getAllInvoices(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size,
-            @RequestParam(value = "startDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(value = "endDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+    public ResponseEntity<Page<InvoiceResponse>> getAllInvoices(InvoiceQueryRequest request) {
+        Pageable pageable = PageRequest.of(request.getPage(), request.getSize(), Sort.by("issuedAt").descending());
 
-        LocalDateTime startDateTime = (startDate != null) ? startDate.atStartOfDay() : null;
-        LocalDateTime endDateTime = (endDate != null) ? endDate.atTime(LocalTime.MAX) : null;
-
-        Pageable pageable = PageRequest.of(page, size, Sort.by("issuedAt").descending());
-        Page<InvoiceResponse> invoices = invoiceService.getInvoices(startDateTime, endDateTime, pageable);
+        Page<InvoiceResponse> invoices = invoiceService.getInvoices(
+                request.getStartDateTime(),
+                request.getEndDateTime(),
+                pageable);
 
         return ResponseEntity.ok(invoices);
+    }
+
+    @GetMapping("/invoice/{id}/pdf")
+    public ResponseEntity<byte[]> download(@PathVariable Long id) {
+        byte[] pdf = pdfService.generateInvoicePdf(id);
+        return ResponseEntity.ok()
+                .header("Content-Type", "application/pdf")
+                .header("Content-Disposition", "attachment; filename=invoice.pdf")
+                .body(pdf);
     }
 }

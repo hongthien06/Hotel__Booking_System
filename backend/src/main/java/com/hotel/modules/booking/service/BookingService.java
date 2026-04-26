@@ -24,8 +24,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import static com.hotel.modules.booking.entity.CancelActor.SYSTEM;
-
 @Service
 public class BookingService {
 
@@ -33,7 +31,8 @@ public class BookingService {
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
 
-    public BookingService(bookingRepository bookingRepository, RoomRepository roomRepository, UserRepository userRepository) {
+    public BookingService(bookingRepository bookingRepository, RoomRepository roomRepository,
+            UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;
@@ -83,8 +82,7 @@ public class BookingService {
         if (booking.getRoomPriceSnapshot() != null && booking.getTotalNights() != null) {
             dto.setTotalAmount(
                     booking.getRoomPriceSnapshot()
-                            .multiply(BigDecimal.valueOf(booking.getTotalNights()))
-            );
+                            .multiply(BigDecimal.valueOf(booking.getTotalNights())));
         }
 
         return dto;
@@ -173,11 +171,10 @@ public class BookingService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)   // Nó đây nha ĐA
+    @Transactional(readOnly = true) // Nó đây nha ĐA
     public List<Long> getOccupiedRoomIds(LocalDate checkIn, LocalDate checkOut) {
         return bookingRepository.findOccupiedRoomIds(checkIn, checkOut);
     }
-
 
     public void checkAvailableRoom() {
 
@@ -313,6 +310,11 @@ public class BookingService {
         bookingRepository.save(booking);
 
         return toDTO(booking);
+    }
+
+    public Booking findById(Long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking #" + bookingId));
     }
 
 }

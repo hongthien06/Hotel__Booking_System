@@ -1,6 +1,5 @@
 package com.hotel.modules.room.entity;
 
-import com.hotel.modules.invoice.entity.Review;
 import com.hotel.modules.room.entity.enums.BedType;
 import com.hotel.modules.room.entity.enums.RoomStatus;
 import jakarta.persistence.*;
@@ -11,6 +10,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Rooms", schema = "dbo")
@@ -68,9 +68,6 @@ public class Room {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Review> reviews;
 
     @PrePersist
     protected void onCreate() {

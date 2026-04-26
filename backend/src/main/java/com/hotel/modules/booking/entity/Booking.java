@@ -2,7 +2,6 @@ package com.hotel.modules.booking.entity;
 
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.invoice.entity.Invoice;
-import com.hotel.modules.invoice.entity.Review;
 import com.hotel.modules.room.entity.Room;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -81,9 +80,4 @@ public class Booking {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Review review;
-
-    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Invoice invoice;
 }
