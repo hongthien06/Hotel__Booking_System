@@ -1,4 +1,4 @@
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, Navigate } from 'react-router-dom'
 import Payments from '~/features/payments/_id'
 import LoginPage from '~/features/auth/LoginPage'
 import RegisterPage from '~/features/auth/RegisterPage'
@@ -8,27 +8,47 @@ import PrivateRoute from './PrivateRoute'
 import MainLayout from '../shared/components/layout/MainLayout'
 import DashboardPage from '~/features/dashboard/DashboardPage'
 import ProfilePage from '~/features/auth/ProfilePage'
+import UserManagementPage from '~/features/admin/UserManagementPage'
+import HomePage from '~/features/home/HomePage'
+import BookingPage from '~/features/bookings/BookingPage'
 
 const AppRoutes = () => {
+  const isAuthenticated = !!localStorage.getItem('token');
+
   return (
     <Routes>
-      {/* Public route không có Header/Sidebar (Full màn hình) */}
+      {/* Điều hướng mặc định khi truy cập vào "/" */}
+      <Route path="/" element={
+        isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
+      } />
+
+      {/* Các trang công khai - không có Header */}
       <Route path='/login' element={<LoginPage />} />
       <Route path='/register' element={<RegisterPage />} />
       <Route path='/forgot-password' element={<ForgotPasswordPage />} />
       <Route path='/reset-password' element={<ResetPasswordPage />} />
-      
-      {/* Các route nằm trong Layout chung */}
+
+      {/* Các trang sử dụng MainLayout (Có Header + Navbar) */}
       <Route element={<MainLayout />}>
-        {/* Route public nhưng vẫn có Header (nhưng Sidebar ẩn vì chưa đăng nhập) */}
-        <Route path='/payment' element={<Payments />} />
+        {/* Trang chủ công khai */}
+        <Route path='/home' element={<HomePage />} />
         
-        {/* Example protected blocks (cần đăng nhập, sẽ hiện sidebar) */}
+        {/* Các trang yêu cầu đăng nhập */}
         <Route element={<PrivateRoute />}>
-           <Route path="/dashboard" element={<DashboardPage />} />
-           <Route path="/profile" element={<ProfilePage />} />
+          <Route path='/bookings' element={<BookingPage />} />
+          <Route path='/payment' element={<Payments />} />
+          <Route path='/profile' element={<ProfilePage />} />
+        </Route>
+
+        {/* Các trang chỉ dành cho Admin/Manager */}
+        <Route element={<PrivateRoute requiredRoles={['ADMIN', 'MANAGER']} />}>
+          <Route path='/dashboard' element={<DashboardPage />} />
+          <Route path='/admin/users' element={<UserManagementPage />} />
         </Route>
       </Route>
+
+      {/* Bẫy các route không tồn tại về "/" */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

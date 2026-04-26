@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -67,6 +68,9 @@ public class AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .message("Đăng ký thành công!")
+                .roles(user.getRoles().stream()
+                        .map(r -> r.getRoleName())
+                        .collect(Collectors.toSet()))
                 .build();
     }
 
@@ -89,6 +93,9 @@ public class AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .message("Đăng nhập thành công!")
+                .roles(user.getRoles().stream()
+                        .map(r -> r.getRoleName())
+                        .collect(Collectors.toSet()))
                 .build();
     }
 

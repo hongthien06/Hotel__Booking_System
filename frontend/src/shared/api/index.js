@@ -1,4 +1,4 @@
-import axios from 'axios'
+import axiosInstance from './axiosInstance'
 
 export const createVnpayPaymentUrl = async (data) => {
   const response = await axiosInstance.post('/api/v1/payments/vnpay_url', data)

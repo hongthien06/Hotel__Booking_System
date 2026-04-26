@@ -4,12 +4,21 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../shared/hooks/useAuth'
 
 // Icon placeholders (Mock MUI icons text for now)
+// Icon placeholders (using character initials as before or importing MUI icons)
+import {
+  Home,
+  EventNote,
+  AccountBalanceWallet,
+  Person,
+  Dashboard
+} from '@mui/icons-material'
+
 const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', path: '/dashboard', roles: ['ROLE_ADMIN'] },
-  { id: 'profile', label: 'Trang cá nhân', path: '/profile', roles: ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_CUSTOMER'] },
-  { id: 'rooms', label: 'Quản lý Phòng', path: '/rooms', roles: ['ROLE_ADMIN', 'ROLE_MANAGER'] },
-  { id: 'bookings', label: 'Đặt phòng', path: '/bookings', roles: ['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_CUSTOMER'] },
-  { id: 'customers', label: 'Khách hàng', path: '/customers', roles: ['ROLE_ADMIN'] }
+  { id: 'home', label: 'Trang chủ', path: '/', roles: [], icon: <Home /> },
+  { id: 'bookings', label: 'Đặt phòng', path: '/bookings', roles: [], icon: <EventNote /> },
+  { id: 'payment', label: 'Thanh toán', path: '/payment', roles: [], icon: <AccountBalanceWallet /> },
+  { id: 'profile', label: 'Tài khoản', path: '/profile', roles: [], icon: <Person /> },
+  { id: 'dashboard', label: 'Dashboard', path: '/dashboard', roles: ['ADMIN', 'MANAGER'], icon: <Dashboard /> }
 ]
 
 const Sidebar = () => {
@@ -21,14 +30,22 @@ const Sidebar = () => {
   const hasAccess = (itemRoles) => {
     if (!itemRoles || itemRoles.length === 0) return true
     if (!user || (!user.roles && !user.role)) return false
-    
-    // Normalize user roles to array of strings
-    const userRoleStrings = user.roles ? user.roles.map(r => r.roleName || r.authority) : []
-    if (user.role) userRoleStrings.push(user.role) // Handle single role format if any
 
-    return itemRoles.some(role => 
-      userRoleStrings.includes(role) || userRoleStrings.includes(role.replace('ROLE_', ''))
-    )
+    // Normalize user roles to array of strings
+    const userRoleStrings = (user.roles || []).map(r => {
+      if (typeof r === 'string') return r
+      return r.roleName || r.authority || ''
+    }).filter(Boolean)
+
+    if (user.role) userRoleStrings.push(user.role)
+
+    return itemRoles.some(role => {
+      const normalizedRole = role.startsWith('ROLE_') ? role : `ROLE_${role}`
+      return userRoleStrings.some(uRole => {
+        const normalizedURole = uRole.startsWith('ROLE_') ? uRole : `ROLE_${uRole}`
+        return normalizedRole === normalizedURole
+      })
+    })
   }
 
   return (
@@ -58,10 +75,7 @@ const Sidebar = () => {
               }}
             >
               <ListItemIcon sx={{ color: location.pathname.startsWith(item.path) ? 'inherit' : 'primary.main' }}>
-                {/* Generic Icon placeholder */}
-                <Box sx={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid currentColor', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>
-                  {item.label.charAt(0)}
-                </Box>
+                {item.icon}
               </ListItemIcon>
               <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: location.pathname.startsWith(item.path) ? 'bold' : 'normal' }} />
             </ListItemButton>

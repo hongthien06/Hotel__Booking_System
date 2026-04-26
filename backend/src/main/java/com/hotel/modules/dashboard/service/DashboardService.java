@@ -27,32 +27,46 @@ public class DashboardService {
     private final PaymentRepository paymentRepository;
 
     public DashboardStatsDTO getStats() {
-        long totalRooms = roomRepository.count();
-        long availableRooms = roomRepository.findByStatus(RoomStatus.AVAILABLE).size();
-        long totalBookings = bookingRepository.count();
-        long totalCustomers = userRepository.count();
+        try {
+            long totalRooms = roomRepository.count();
+            long availableRooms = roomRepository.findByStatus(RoomStatus.AVAILABLE).size();
+            long totalBookings = bookingRepository.count();
+            long totalCustomers = userRepository.count();
 
-        // Calculate revenue from successful payments
-        double totalRevenue = paymentRepository.findAll().stream()
-                .filter(p -> p.getStatus() == PaymentStatus.SUCCESS)
-                .mapToDouble(p -> p.getAmount() != null ? p.getAmount().doubleValue() : 0.0)
-                .sum();
+            // Calculate revenue from successful payments
+            double totalRevenue = 0.0;
+            try {
+                totalRevenue = paymentRepository.findAll().stream()
+                        .filter(p -> p.getStatus() == PaymentStatus.SUCCESS)
+                        .mapToDouble(p -> p.getAmount() != null ? p.getAmount().doubleValue() : 0.0)
+                        .sum();
+            } catch (Exception e) {
+                System.err.println("Error calculating revenue: " + e.getMessage());
+            }
 
-        // Get 5 recent bookings
-        var recentBookings = bookingRepository.findAll(
-                PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"))
-        ).getContent().stream()
-                .map(this::mapToRecentBookingDTO)
-                .collect(Collectors.toList());
+            // Get 5 recent bookings
+            var recentBookings = new java.util.ArrayList<RecentBookingDTO>();
+            try {
+                recentBookings.addAll(bookingRepository.findAll(
+                        PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"))
+                ).getContent().stream()
+                        .map(this::mapToRecentBookingDTO)
+                        .collect(Collectors.toList()));
+            } catch (Exception e) {
+                System.err.println("Error fetching recent bookings: " + e.getMessage());
+            }
 
-        return DashboardStatsDTO.builder()
-                .totalRooms(totalRooms)
-                .availableRooms(availableRooms)
-                .totalBookings(totalBookings)
-                .totalCustomers(totalCustomers)
-                .totalRevenue(totalRevenue)
-                .recentBookings(recentBookings)
-                .build();
+            return DashboardStatsDTO.builder()
+                    .totalRooms(totalRooms)
+                    .availableRooms(availableRooms)
+                    .totalBookings(totalBookings)
+                    .totalCustomers(totalCustomers)
+                    .totalRevenue(totalRevenue)
+                    .recentBookings(recentBookings)
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi lấy thống kê dashboard: " + e.getMessage());
+        }
     }
 
     private RecentBookingDTO mapToRecentBookingDTO(Booking booking) {
