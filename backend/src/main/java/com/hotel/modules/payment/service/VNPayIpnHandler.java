@@ -42,7 +42,7 @@ public class VNPayIpnHandler implements  IpnHandler {
                 return VnpIpnResponseConst.INVALID_AMOUNT;
             }
             if (!payment.getStatus().equals(PaymentStatus.PENDING)) {
-                return VnpIpnResponseConst.ORDER_ALREADY_CONFIRMED;
+                return VnpIpnResponseConst.SUCCESS; // Trả về thành công để VNPay dừng gọi lại (Idempotency)
             }
             boolean isSuccess = "00".equals(responseCode);
 

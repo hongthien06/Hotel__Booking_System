@@ -8,10 +8,13 @@ import com.hotel.modules.invoice.entity.Invoice;
 import com.hotel.modules.invoice.entity.InvoiceItem;
 import com.hotel.modules.invoice.repository.InvoiceItemRepository;
 import com.hotel.modules.invoice.repository.InvoiceRepository;
+import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.payment.repository.PaymentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,9 @@ public class InvoiceService implements IInvoiceService {
 
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
+    private final bookingRepository bookingRepository;
+    private final PaymentRepository paymentRepository;
+
 
     // CREATE INVOICE
     @Override
@@ -37,37 +43,41 @@ public class InvoiceService implements IInvoiceService {
     public InvoiceResponse createInvoice(InvoiceCreateRequest request) {
         log.info("Creating invoice for bookingId={}, paymentId={}",
                 request.getBookingId(), request.getPaymentId());
-        // check xem có tồn tại cái đơn booking không
-        if (invoiceRepository.existsByBookingId(request.getBookingId())) {
+
+        if (invoiceRepository.existsByBooking_BookingId(request.getBookingId())) {
             throw new IllegalStateException(
                     "Hóa đơn cho booking #" + request.getBookingId() + " đã tồn tại");
         }
-        // tính tổng tiền của các hóa đơn items
+
+
+        var booking = bookingRepository.findById(request.getBookingId())
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy booking #" + request.getBookingId()));
+        var payment = paymentRepository.findById(request.getPaymentId())
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy payment #" + request.getPaymentId()));
+
         BigDecimal subtotal = request.getItems().stream()
                 .map(item -> item.getUnitPrice()
                         .multiply(BigDecimal.valueOf(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // thuế 10%
         BigDecimal taxRate = new BigDecimal("10.00");
-        // check xem có discount k ? lấy amount : 0
         BigDecimal discountAmount = request.getDiscountAmount() != null
                 ? request.getDiscountAmount()
                 : BigDecimal.ZERO;
-        // Tính thuế
+
         BigDecimal taxAmount = subtotal.multiply(taxRate)
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        // total = subtotal + tax - discount
         BigDecimal totalAmount = subtotal.add(taxAmount).subtract(discountAmount);
-        // generate code for invoice
+
         String invoiceNumber = "INV-"
                 + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
                 + "-" + request.getBookingId();
-        // build invoice entity
+
         Invoice invoice = Invoice.builder()
-                .bookingId(request.getBookingId())
-                .paymentId(request.getPaymentId())
+                .booking(booking)
+                .payment(payment)
                 .invoiceNumber(invoiceNumber)
+                .transactionId(java.util.UUID.randomUUID().toString().replace("-", "").toUpperCase())
                 .subtotal(subtotal)
                 .taxRate(taxRate)
                 .taxAmount(taxAmount)
@@ -75,44 +85,50 @@ public class InvoiceService implements IInvoiceService {
                 .totalAmount(totalAmount)
                 .notes(request.getNotes())
                 .build();
-        // save invoice
+
         invoice = invoiceRepository.save(invoice);
-        // save items
-        final Long invoiceId = invoice.getId();
+
+        final Invoice savedInvoice = invoice;
         List<InvoiceItem> items = request.getItems().stream()
-                .map(itemReq -> buildInvoiceItem(itemReq, invoiceId))// build từng cái item invoice
+                .map(itemReq -> buildInvoiceItem(itemReq, savedInvoice))
                 .collect(Collectors.toList());
-        // save tất cả items
+
         invoiceItemRepository.saveAll(items);
 
-        log.info("Invoice created: id={}, number={}", invoice.getId(), invoiceNumber);
-        return toResponse(invoice, items);
+        log.info("Invoice created: id={}, number={}", savedInvoice.getId(), invoiceNumber);
+        return toResponse(savedInvoice, items);
     }
+
 
     @Override
     public InvoiceResponse getInvoiceById(Long id) {
         Invoice invoice = findInvoiceOrThrow(id);
-        List<InvoiceItem> items = invoiceItemRepository.findByInvoiceId(id);
+        List<InvoiceItem> items = invoiceItemRepository.findByInvoice_Id(id);
+
         return toResponse(invoice, items);
     }
 
     @Override
     public InvoiceResponse getInvoiceByBookingId(Long bookingId) {
-        Invoice invoice = invoiceRepository.findByBookingId(bookingId)
+        Invoice invoice = invoiceRepository.findByBooking_BookingId(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Không tìm thấy hóa đơn cho booking #" + bookingId));
-        List<InvoiceItem> items = invoiceItemRepository.findByInvoiceId(invoice.getId());
+        List<InvoiceItem> items = invoiceItemRepository.findByInvoice_Id(invoice.getId());
+
         return toResponse(invoice, items);
     }
 
+
     @Override
     public InvoiceResponse getInvoiceByPaymentId(Long paymentId) {
-        Invoice invoice = invoiceRepository.findByPaymentId(paymentId)
+        Invoice invoice = invoiceRepository.findByPayment_PaymentId(paymentId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Không tìm thấy hóa đơn cho payment #" + paymentId));
-        List<InvoiceItem> items = invoiceItemRepository.findByInvoiceId(invoice.getId());
+        List<InvoiceItem> items = invoiceItemRepository.findByInvoice_Id(invoice.getId());
+
         return toResponse(invoice, items);
     }
+
 
     @Override
     public Page<InvoiceResponse> getInvoices(LocalDateTime startDate,
@@ -121,7 +137,8 @@ public class InvoiceService implements IInvoiceService {
         return invoiceRepository
                 .findAllWithFilters(startDate, endDate, pageable)
                 .map(invoice -> {
-                    List<InvoiceItem> items = invoiceItemRepository.findByInvoiceId(invoice.getId());
+                    List<InvoiceItem> items = invoiceItemRepository.findByInvoice_Id(invoice.getId());
+
                     return toResponse(invoice, items);
                 });
     }
@@ -138,7 +155,8 @@ public class InvoiceService implements IInvoiceService {
             invoice.setPdfUrl(pdfUrl);
 
         invoice = invoiceRepository.save(invoice);
-        List<InvoiceItem> items = invoiceItemRepository.findByInvoiceId(id);
+        List<InvoiceItem> items = invoiceItemRepository.findByInvoice_Id(id);
+
 
         log.info("Invoice updated: id={}", id);
         return toResponse(invoice, items);
@@ -149,15 +167,17 @@ public class InvoiceService implements IInvoiceService {
     @Transactional
     public void deleteInvoice(Long id) {
         findInvoiceOrThrow(id);
-        invoiceItemRepository.deleteByInvoiceId(id);
+        invoiceItemRepository.deleteByInvoice_Id(id);
+
         invoiceRepository.deleteById(id);
         log.info("Invoice deleted: id={}", id);
     }
 
     @Override
     public boolean existsByBookingId(Long bookingId) {
-        return invoiceRepository.existsByBookingId(bookingId);
+        return invoiceRepository.existsByBooking_BookingId(bookingId);
     }
+
 
     private Invoice findInvoiceOrThrow(Long id) {
         return invoiceRepository.findById(id)
@@ -165,12 +185,11 @@ public class InvoiceService implements IInvoiceService {
                         "Không tìm thấy hóa đơn với id=" + id));
     }
 
-    // build item invoice
-    private InvoiceItem buildInvoiceItem(InvoiceItemRequest req, Long invoiceId) {
+    private InvoiceItem buildInvoiceItem(InvoiceItemRequest req, Invoice invoice) {
         BigDecimal lineTotal = req.getUnitPrice()
                 .multiply(BigDecimal.valueOf(req.getQuantity()));
         return InvoiceItem.builder()
-                .invoiceId(invoiceId)
+                .invoice(invoice)
                 .itemType(req.getItemType())
                 .description(req.getDescription())
                 .quantity(req.getQuantity())
@@ -179,10 +198,11 @@ public class InvoiceService implements IInvoiceService {
                 .build();
     }
 
+
     private InvoiceItemResponse toItemResponse(InvoiceItem item) {
         return InvoiceItemResponse.builder()
                 .id(item.getId())
-                .invoiceId(item.getInvoiceId())
+                .invoiceId(item.getInvoice().getId())
                 .itemType(item.getItemType())
                 .description(item.getDescription())
                 .quantity(item.getQuantity())
@@ -191,12 +211,14 @@ public class InvoiceService implements IInvoiceService {
                 .build();
     }
 
+
     private InvoiceResponse toResponse(Invoice invoice, List<InvoiceItem> items) {
         return InvoiceResponse.builder()
                 .id(invoice.getId())
-                .bookingId(invoice.getBookingId())
-                .paymentId(invoice.getPaymentId())
+                .bookingId(invoice.getBooking().getBookingId())
+                .paymentId(invoice.getPayment().getPaymentId())
                 .invoiceNumber(invoice.getInvoiceNumber())
+                .transactionId(invoice.getTransactionId())
                 .subtotal(invoice.getSubtotal())
                 .taxRate(invoice.getTaxRate())
                 .taxAmount(invoice.getTaxAmount())
@@ -208,4 +230,5 @@ public class InvoiceService implements IInvoiceService {
                 .items(items.stream().map(this::toItemResponse).collect(Collectors.toList()))
                 .build();
     }
+
 }

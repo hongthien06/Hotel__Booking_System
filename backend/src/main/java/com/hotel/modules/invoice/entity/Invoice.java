@@ -1,10 +1,10 @@
 package com.hotel.modules.invoice.entity;
 
+import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.payment.entity.Payment;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,14 +22,20 @@ public class Invoice {
     @Column(name = "invoice_id")
     private Long id;
 
-    @Column(name = "booking_id", nullable = false)
-    private Long bookingId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false, unique = true)
+    private Booking booking;
 
-    @Column(name = "payment_id", nullable = false)
-    private Long paymentId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_id", nullable = false)
+    private Payment payment;
 
-    @Column(name = "invoice_number", length = 30, nullable = false)
+
+    @Column(name = "invoice_number", length = 30, nullable = false, unique = true)
     private String invoiceNumber;
+
+    @Column(name = "transaction_id", length = 50, nullable = false, unique = true)
+    private String transactionId;
 
     @Column(name = "subtotal", precision = 18, scale = 2, nullable = false)
     private BigDecimal subtotal;
@@ -57,4 +63,8 @@ public class Invoice {
 
     @Column(name = "notes", length = 500)
     private String notes;
+
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<InvoiceItem> items = new java.util.ArrayList<>();
 }

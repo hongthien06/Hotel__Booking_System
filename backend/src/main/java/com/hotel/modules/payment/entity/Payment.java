@@ -29,21 +29,21 @@ public class Payment {
     private Booking booking;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "gateway", length = 20, nullable = false)
+    @Column(name = "gateway", nullable = false)
     private PaymentGateway gateway;
 
-    @Column(name = "transaction_id", length = 255)
+    @Column(name = "transaction_id")
     private String transactionId;
 
-    @Column(name = "amount", precision = 18, scale = 2, nullable = false)
+    @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
-    @Column(name = "currency", length = 10, nullable = false)
+    @Column(name = "currency", nullable = false)
     @Builder.Default
     private String currency = "VND";
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(name = "status", nullable = false)
     @Builder.Default
     private PaymentStatus status = PaymentStatus.PENDING;
 

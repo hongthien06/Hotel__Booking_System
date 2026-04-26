@@ -14,13 +14,13 @@ import java.util.Optional;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
-    Optional<Invoice> findByBookingId(Long bookingId);
+    Optional<Invoice> findByBooking_BookingId(Long bookingId);
 
-    Optional<Invoice> findByPaymentId(Long paymentId);
+    Optional<Invoice> findByPayment_PaymentId(Long paymentId);
 
     Optional<Invoice> findByInvoiceNumber(String invoiceNumber);
 
-    boolean existsByBookingId(Long bookingId);
+    boolean existsByBooking_BookingId(Long bookingId);
 
     @Query("""
         SELECT i FROM Invoice i

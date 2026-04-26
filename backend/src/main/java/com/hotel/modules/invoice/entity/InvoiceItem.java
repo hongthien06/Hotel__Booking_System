@@ -17,8 +17,10 @@ public class InvoiceItem {
     @Column(name = "item_id")
     private Long id;
 
-    @Column(name = "invoice_id", nullable = false)
-    private Long invoiceId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id", nullable = false)
+    @ToString.Exclude
+    private Invoice invoice;
 
     @Column(name = "item_type", length = 20, nullable = false)
     private String itemType;

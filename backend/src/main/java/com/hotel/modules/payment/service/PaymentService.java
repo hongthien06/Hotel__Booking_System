@@ -2,6 +2,7 @@ package com.hotel.modules.payment.service;
 
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
+import com.hotel.modules.booking.service.BookingService;
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
 import com.hotel.modules.invoice.dto.request.InvoiceItemRequest;
 import com.hotel.modules.invoice.service.IInvoiceService;
@@ -13,10 +14,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import static com.hotel.modules.booking.entity.CancelActor.SYSTEM;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -25,6 +27,7 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final IInvoiceService invoiceService;
+    private final BookingService bookingService;
 
     // khởi tạo payment khi khách nhấn thanh toán
     @Transactional
@@ -34,9 +37,11 @@ public class PaymentService {
                 .amount(amount)
                 .gateway(gateway)
                 .status(PaymentStatus.PENDING)
+                .transactionId(UUID.randomUUID().toString().replace("-", "").toUpperCase())
                 .currency("VND")
                 .build();
         return paymentRepository.save(payment);
+
     }
 
     // Tìm payment theo transactionId
@@ -65,10 +70,10 @@ public class PaymentService {
 
         } else {
             payment.setStatus(PaymentStatus.FAILED);
-            // nếu thanh toán thất bại thì set statust của booking là cancel
+            // nếu thanh toán thất bại thì set status của booking là cancel
             Booking booking = payment.getBooking();
-            if (booking != null && booking.getStatus() == BookingStatus.PENDING) {
-                booking.setStatus(BookingStatus.CANCELLED);
+            if (booking != null) {
+                bookingService.cancelBooking(booking.getBookingId(), null, SYSTEM);
             }
         }
 
@@ -108,5 +113,23 @@ public class PaymentService {
             log.error("Lỗi khi tự động tạo invoice cho bookingId={}: {}",
                     booking.getBookingId(), e.getMessage());
         }
+    }
+
+    /**
+     * Cập nhật trạng thái thanh toán thủ công (Yêu cầu xác thực userId)
+     */
+    @Transactional
+    public void updatePaymentStatusWithUser(Long paymentId, PaymentStatus status, Long userId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy thanh toán"));
+
+        // Kiểm tra quyền sở hữu
+        if (!payment.getBooking().getUser().getUserId().equals(userId)) {
+            throw new RuntimeException("Bạn không có quyền cập nhật thanh toán này");
+        }
+
+        payment.setStatus(status);
+        paymentRepository.save(payment);
+        log.info("User {} updated payment {} status to {}", userId, paymentId, status);
     }
 }
