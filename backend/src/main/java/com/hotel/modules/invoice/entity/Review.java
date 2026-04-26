@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.room.entity.Room;
 
@@ -24,12 +25,10 @@ public class Review {
     @JoinColumn(name = "booking_id", nullable = false)
     private Booking booking;
 
-    // Quan hệ với User: Một user có thể viết nhiều review
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Quan hệ với Room: Một phòng có thể nhận nhiều review
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;

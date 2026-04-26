@@ -13,7 +13,7 @@ import java.util.Map;
 
 @Service("momoIpnHandler")
 @RequiredArgsConstructor
-public class MomoIpnHandler implements IpnHandler{
+public class MomoIpnHandler implements IpnHandler {
     private final IMomoService momoService;
     private final PaymentService paymentService;
     private final EmailService emailService;
@@ -25,13 +25,12 @@ public class MomoIpnHandler implements IpnHandler{
             return MomoIpnResponseConst.SIGNATURE_MISMATCH;
         }
 
-        String orderId = params.get("orderId");
+        String orderId = params.get("orderId"); // bookingCode
         String resultCode = params.get("resultCode");
         String transId = params.get("transId");
-        String message = params.get("message");
 
         try {
-            Payment payment = paymentService.findByTransactionId(orderId);
+            Payment payment = paymentService.findByBookingCode(orderId);
             if (payment == null) {
                 return MomoIpnResponseConst.ORDER_NOT_FOUND;
             }
@@ -43,11 +42,11 @@ public class MomoIpnHandler implements IpnHandler{
                 return MomoIpnResponseConst.SUCCESS; // Trả về thành công để MoMo dừng gọi lại
             }
             boolean isSuccess = "00".equals(resultCode);
-                paymentService.updatePaymentResult(payment, transId, params.toString(), isSuccess);
+            paymentService.updatePaymentResult(payment, transId, params.toString(), isSuccess);
             if (isSuccess) {
                 emailService.sendConfirmationEmail(payment.getBooking());
             }
-                return MomoIpnResponseConst.SUCCESS;
+            return MomoIpnResponseConst.SUCCESS;
 
         } catch (Exception e) {
             return MomoIpnResponseConst.UNKNOWN_ERROR;

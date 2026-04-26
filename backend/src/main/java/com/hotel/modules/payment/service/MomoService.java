@@ -1,13 +1,8 @@
 package com.hotel.modules.payment.service;
 
-import com.hotel.common.utils.CryptoUtil;
-import com.hotel.modules.payment.constant.MomoParams;
-import com.hotel.modules.payment.constant.VNPayParams;
-import com.hotel.modules.payment.dto.request.MoMoRequest;
-import com.hotel.modules.payment.dto.request.VNPayRequest;
-import com.hotel.modules.payment.dto.response.MomoResponse;
-import com.hotel.modules.payment.entity.Locale;
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,13 +11,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URLEncoder;import java.nio.charset.StandardCharsets;import java.util.HashMap;
-import java.util.Map;
+import com.hotel.common.utils.CryptoUtil;
+import com.hotel.modules.payment.constant.MomoParams;
+import com.hotel.modules.payment.dto.request.MoMoRequest;
+import com.hotel.modules.payment.dto.response.MomoResponse;
+import com.hotel.modules.payment.entity.Locale;
 
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class MomoService  implements  IMomoService{
+public class MomoService implements IMomoService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -40,7 +39,6 @@ public class MomoService  implements  IMomoService{
     private String REQUEST_TYPE;
     @Value("${app.payment.momo.endpoint-url}")
     private String ENDPOINT_URL;
-
 
     @Override
     public MomoResponse createQR(MoMoRequest request) {
@@ -61,13 +59,12 @@ public class MomoService  implements  IMomoService{
                 "&requestId=" + requestId +
                 "&requestType=" + REQUEST_TYPE;
 
-
         String signature = CryptoUtil.hmacSHA256(SECRET_KEY, rawHash);
         System.out.println("=== RAW HASH: " + rawHash);
         System.out.println("=== SIGNATURE: " + signature);
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put(MomoParams.REQUEST_ID,requestId );
+        requestBody.put(MomoParams.REQUEST_ID, requestId);
         requestBody.put(MomoParams.AMOUNT, amount);
         requestBody.put(MomoParams.ORDER_ID, orderId);
         requestBody.put(MomoParams.ORDER_INFO, orderInfo);
@@ -75,15 +72,16 @@ public class MomoService  implements  IMomoService{
         requestBody.put(MomoParams.SIGNATURE, signature);
         requestBody.put(MomoParams.LANG, Locale.VIETNAMVI.getCode());
         requestBody.put(MomoParams.IPN_URL, IPN_URL);
-        requestBody.put(MomoParams.PARTNER_CODE,PARTNER_CODE );
-        requestBody.put(MomoParams.REQUEST_TYPE,REQUEST_TYPE );
-        requestBody.put(MomoParams.REDIRECT_URL,REDIRECT_URL );
+        requestBody.put(MomoParams.PARTNER_CODE, PARTNER_CODE);
+        requestBody.put(MomoParams.REQUEST_TYPE, REQUEST_TYPE);
+        requestBody.put(MomoParams.REDIRECT_URL, REDIRECT_URL);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
         try {
-            ResponseEntity<MomoResponse> response = restTemplate.postForEntity(ENDPOINT_URL, entity, MomoResponse.class);
+            ResponseEntity<MomoResponse> response = restTemplate.postForEntity(ENDPOINT_URL, entity,
+                    MomoResponse.class);
             return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();

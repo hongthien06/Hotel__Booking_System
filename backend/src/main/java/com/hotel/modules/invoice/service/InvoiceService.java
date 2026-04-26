@@ -8,7 +8,9 @@ import com.hotel.modules.invoice.entity.Invoice;
 import com.hotel.modules.invoice.entity.InvoiceItem;
 import com.hotel.modules.invoice.repository.InvoiceItemRepository;
 import com.hotel.modules.invoice.repository.InvoiceRepository;
+import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.payment.entity.Payment;
 import com.hotel.modules.payment.repository.PaymentRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -48,10 +50,10 @@ public class InvoiceService implements IInvoiceService {
                                         "Hóa đơn cho booking #" + request.getBookingId() + " đã tồn tại");
                 }
 
-                var booking = bookingRepository.findById(request.getBookingId())
+                Booking booking = bookingRepository.findById(request.getBookingId())
                                 .orElseThrow(() -> new EntityNotFoundException(
                                                 "Không tìm thấy booking #" + request.getBookingId()));
-                var payment = paymentRepository.findById(request.getPaymentId())
+                Payment payment = paymentRepository.findById(request.getPaymentId())
                                 .orElseThrow(() -> new EntityNotFoundException(
                                                 "Không tìm thấy payment #" + request.getPaymentId()));
 

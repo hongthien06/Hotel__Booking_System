@@ -1,15 +1,24 @@
 package com.hotel.modules.payment.service;
 
+import com.hotel.common.utils.RequestUtil;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.service.BookingService;
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
 import com.hotel.modules.invoice.dto.request.InvoiceItemRequest;
 import com.hotel.modules.invoice.service.IInvoiceService;
+import com.hotel.modules.payment.dto.request.MoMoRequest;
+import com.hotel.modules.payment.dto.request.PaymentRequest;
+import com.hotel.modules.payment.dto.request.VNPayRequest;
+import com.hotel.modules.payment.dto.response.MomoResponse;
+import com.hotel.modules.payment.dto.response.PaymentCreateResponse;
+import com.hotel.modules.payment.dto.response.VNPayResponse;
 import com.hotel.modules.payment.entity.Payment;
 import com.hotel.modules.payment.entity.PaymentGateway;
 import com.hotel.modules.payment.entity.PaymentStatus;
 import com.hotel.modules.payment.repository.PaymentRepository;
+import com.hotel.modules.room.entity.Room;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,39 +26,77 @@ import org.springframework.transaction.annotation.Transactional;
 import static com.hotel.modules.booking.entity.CancelActor.SYSTEM;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class PaymentService {
+public class PaymentService implements IPaymentService {
 
     private final PaymentRepository paymentRepository;
     private final IInvoiceService invoiceService;
     private final BookingService bookingService;
 
-    // khởi tạo payment khi khách nhấn thanh toán
+    private final IVNPayService vnPayService;
+    private final IMomoService momoService;
+
+    @Override
     @Transactional
-    public Payment createInitialPayment(Booking booking, BigDecimal amount, PaymentGateway gateway) {
+    public PaymentCreateResponse createInitialPayment(PaymentRequest request, String ipAddress) {
         Payment payment = Payment.builder()
-                .booking(booking)
-                .amount(amount)
-                .gateway(gateway)
+                .booking(request.getBooking())
+                .amount(request.getAmount())
+                .transactionId(generateTransactionId())
+                .gateway(request.getGateway())
                 .status(PaymentStatus.PENDING)
-                .transactionId(UUID.randomUUID().toString().replace("-", "").toUpperCase())
                 .currency("VND")
                 .build();
-        return paymentRepository.save(payment);
+        payment = paymentRepository.save(payment);
 
+        PaymentGateway gateway = request.getGateway();
+        String paymentUrl = "";
+        if (gateway == PaymentGateway.VNPAY) {
+            VNPayRequest vnpRequest = VNPayRequest.builder()
+                    .amount(payment.getAmount().toPlainString())
+                    .txnRef(payment.getBooking().getBookingCode())
+                    .requestId(payment.getTransactionId())
+                    .ipAddress(ipAddress)
+                    .build();
+            VNPayResponse vnPayResponse = vnPayService.init(vnpRequest);
+            paymentUrl = vnPayResponse.getVnpUrl();
+        } else if (gateway == PaymentGateway.MOMO) {
+            MoMoRequest moMoRequest = MoMoRequest.builder()
+                    .amount(payment.getAmount().longValue())
+                    .orderId(payment.getBooking().getBookingCode())
+                    .requestId(payment.getTransactionId())
+                    .build();
+            MomoResponse momoResponse = momoService.createQR(moMoRequest);
+            paymentUrl = momoResponse.getPayUrl();
+        } else {
+            throw new IllegalArgumentException("Unsupported payment gateway");
+        }
+        return PaymentCreateResponse.builder()
+                .bookingCode(payment.getBooking().getBookingCode())
+                .paymnent_url(paymentUrl)
+                .build();
     }
 
-    // Tìm payment theo transactionId
-    public Payment findByTransactionId(String transactionId) {
-        return paymentRepository.findByTransactionId(transactionId).orElse(null);
+    private static String generateTransactionId() {
+        String time = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String uuid = UUID.randomUUID().toString().substring(0, 8);
+        return "TXN_" + time + "_" + uuid;
+    }
+
+    @Override
+    public Payment findByBookingCode(String bookingCode) {
+        return paymentRepository.findByBookingCode(bookingCode).orElse(null);
     }
 
     // Cập nhật kết quả thanh toán sau khi IPN
+    @Override
     @Transactional
     public void updatePaymentResult(Payment payment,
             String gatewayTransactionNo,
@@ -73,7 +120,7 @@ public class PaymentService {
             // nếu thanh toán thất bại thì set status của booking là cancel
             Booking booking = payment.getBooking();
             if (booking != null) {
-                bookingService.cancelBooking(booking.getBookingId(), null, SYSTEM);
+                bookingService.cancelBooking(booking.getBookingId(), booking.getUser().getUserId(), SYSTEM);
             }
         }
 
@@ -92,8 +139,9 @@ public class PaymentService {
 
             // lấy thông tin cần thiết cho req
             InvoiceItemRequest roomItem = new InvoiceItemRequest();
-            roomItem.setItemType("ROOM");
-            roomItem.setDescription("Phòng " + booking.getRoom().getRoomNumber()
+            Room room = booking.getRoom();
+            roomItem.setItemType(room.getRoomType().getTypeName());
+            roomItem.setDescription("Phòng " + room.getRoomNumber()
                     + " x " + booking.getTotalNights() + " đêm");
             roomItem.setQuantity(booking.getTotalNights());
             roomItem.setUnitPrice(booking.getRoomPriceSnapshot());
