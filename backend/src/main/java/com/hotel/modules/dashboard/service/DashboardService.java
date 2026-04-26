@@ -15,6 +15,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,7 +47,7 @@ public class DashboardService {
             }
 
             // Get 5 recent bookings
-            var recentBookings = new java.util.ArrayList<RecentBookingDTO>();
+            List<RecentBookingDTO> recentBookings = new ArrayList<>();
             try {
                 recentBookings.addAll(bookingRepository.findAll(
                         PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"))
