@@ -9,7 +9,7 @@ const PaymentMethod = ({ selectedMethod, setSelectedMethod }) => {
 
   const PAYMENT_METHODS = [
     {
-      id: 'vnpay',
+      id: 'VNPAY',
       name: 'VNPay',
       description: 'Thanh toán qua cổng VNPay (ATM, QR, Visa/Master)',
       logo: (
@@ -25,7 +25,7 @@ const PaymentMethod = ({ selectedMethod, setSelectedMethod }) => {
       bg: '#e8f4fd'
     },
     {
-      id: 'momo',
+      id: 'MOMO',
       name: 'MoMo',
       description: 'Ví điện tử MoMo – nhanh chóng & bảo mật',
       logo: (

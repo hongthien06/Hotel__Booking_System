@@ -1,0 +1,35 @@
+package com.hotel.modules.booking_services.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import lombok.*;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+@Embeddable
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class BookingServiceId implements Serializable {
+
+    @Column(name = "booking_id")
+    private Long bookingId;
+
+    @Column(name = "service_id")
+    private Integer serviceId;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BookingServiceId that = (BookingServiceId) o;
+        return Objects.equals(bookingId, that.bookingId) && Objects.equals(serviceId, that.serviceId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bookingId, serviceId);
+    }
+}

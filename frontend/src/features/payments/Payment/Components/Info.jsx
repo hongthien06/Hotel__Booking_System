@@ -1,7 +1,7 @@
 import {
   Box, Button
 } from '@mui/material'
-import { createMomoPaytUrl, createVnpayPaymentUrl } from '~/shared/api'
+import { createPaymentUrl } from '~/shared/api'
 import Discount from './Discount/Discount'
 import Brand from './Info/Brand'
 import PaymentMethod from './Info/PaymentMethod'
@@ -10,25 +10,15 @@ import { useState } from 'react'
 const Info = () => {
   const [selectedMethod, setSelectedMethod] = useState('vnpay')
   const handleNext = async () => {
-    const dataTestVnpay = {
-      amount: 10000,
-      txnRef: 'ORDER_12345678',
-      ipAddress: '127.0.0.1',
-      requestId: '1234567789'
+
+    const payloadTest = {
+      'bookingId': 7,
+      'amount': 850000,
+      'gateway': selectedMethod
     }
-    const dataTestMomo = {
-      amount: 50000,
-      requestId: '123456e7789',
-      orderId: 'ORDER_123425678'
-    }
-    if (selectedMethod === 'vnpay') {
-      const { vnpUrl } = await createVnpayPaymentUrl(dataTestVnpay)
-      window.location.href = vnpUrl
-    }
-    if (selectedMethod === 'momo') {
-      const { payUrl } = await createMomoPaytUrl(dataTestMomo)
-      window.location.href = payUrl
-    }
+    const { paymnent_url } = await createPaymentUrl(payloadTest)
+    window.location.href = paymnent_url
+
   }
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>

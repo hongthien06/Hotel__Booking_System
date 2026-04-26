@@ -10,6 +10,9 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import com.hotel.modules.booking_services.entity.BookingService;
 
 @Getter
 @Setter
@@ -79,5 +82,8 @@ public class Booking {
     // updated_at DATETIME2 NOT NULL DEFAULT SYSDATETIME()
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BookingService> bookingServices = new ArrayList<>();
 
 }

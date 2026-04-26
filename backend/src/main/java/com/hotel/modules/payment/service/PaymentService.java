@@ -81,6 +81,7 @@ public class PaymentService implements IPaymentService {
         return PaymentCreateResponse.builder()
                 .bookingCode(payment.getBooking().getBookingCode())
                 .paymnent_url(paymentUrl)
+                .payment(payment)
                 .build();
     }
 

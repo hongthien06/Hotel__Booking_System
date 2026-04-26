@@ -8,6 +8,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import com.hotel.modules.booking_services.dto.BookingServiceResponse;
 
 @Getter
 @Setter
@@ -29,6 +31,9 @@ public class BookingDTO {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private BigDecimal totalAmount;    // Tính tổng tiền booking (chưa tính ExtraService)
+    private BigDecimal serviceTotal;   // Tổng tiền dịch vụ
+    private BigDecimal grandTotal;     // Tổng cộng (Room + Service)
+    private List<BookingServiceResponse> bookingServices;
 
     // ── Thông tin User (lấy từ booking.getUser()) ─────
     private Long userId;

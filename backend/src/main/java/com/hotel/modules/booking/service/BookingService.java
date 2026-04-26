@@ -8,6 +8,7 @@ import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.entity.CancelActor;
 import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking_services.dto.BookingServiceResponse;
 import com.hotel.modules.room.dto.response.RoomResponse;
 import com.hotel.modules.room.entity.Room;
 import com.hotel.modules.room.entity.enums.RoomStatus;
@@ -83,6 +84,35 @@ public class BookingService {
             dto.setTotalAmount(
                     booking.getRoomPriceSnapshot()
                             .multiply(BigDecimal.valueOf(booking.getTotalNights())));
+        }
+
+        // Tính toán dịch vụ Booking
+        if (booking.getBookingServices() != null) {
+            List<BookingServiceResponse> serviceResponses = booking.getBookingServices().stream()
+                    // lấy từng dịch vụ ra xét
+                    .map(bs -> {
+                        BookingServiceResponse res = new BookingServiceResponse();
+                        res.setServiceId(bs.getId().getServiceId());
+                        res.setServiceName(bs.getExtraService().getServiceName());
+                        res.setQuantity(bs.getQuantity());
+                        res.setUnitPriceSnap(bs.getUnitPriceSnap());
+                        BigDecimal subtotal = bs.getSubtotal() != null ? bs.getSubtotal()
+                                : bs.getUnitPriceSnap().multiply(BigDecimal.valueOf(bs.getQuantity()));
+                        res.setSubtotal(subtotal);
+                        return res;
+                    }).toList();
+
+            dto.setBookingServices(serviceResponses);
+            // tính giá tiền dịch vụ
+            BigDecimal serviceTotal = serviceResponses.stream()
+                    .map(BookingServiceResponse::getSubtotal)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            dto.setServiceTotal(serviceTotal);
+            dto.setGrandTotal(dto.getTotalAmount().add(serviceTotal));
+        } else {
+            dto.setServiceTotal(BigDecimal.ZERO);
+            dto.setGrandTotal(dto.getTotalAmount());
         }
 
         return dto;
