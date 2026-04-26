@@ -24,8 +24,8 @@ public class Payment {
     @Column(name = "payment_id")
     private Long paymentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "booking_id", nullable = false, foreignKey = @ForeignKey(name = "FK_Payments_Booking"))
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false, unique = true)
     private Booking booking;
 
     @Enumerated(EnumType.STRING)

@@ -17,24 +17,26 @@ public class InvoiceItem {
     @Column(name = "item_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "invoice_id", nullable = false)
-    @ToString.Exclude
-    private Invoice invoice;
+    @Column(name = "invoice_id", nullable = false)
+    private Long invoiceId;
 
-    @Column(name = "item_type", length = 20, nullable = false)
+    @Column(name = "item_type", nullable = false)
     private String itemType;
 
-    @Column(name = "description", length = 255, nullable = false)
+    @Column(name = "description", nullable = false)
     private String description;
 
     @Column(name = "quantity", nullable = false)
     @Builder.Default
     private Short quantity = 1;
 
-    @Column(name = "unit_price", precision = 18, scale = 2, nullable = false)
+    @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
-    @Column(name = "line_total", precision = 18, scale = 2, insertable = false, updatable = false)
+    @Column(name = "line_total", insertable = false, updatable = false)
     private BigDecimal lineTotal;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "invoice_id", nullable = false)
+    private Invoice invoice;
 }

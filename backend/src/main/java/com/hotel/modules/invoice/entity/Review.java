@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.room.entity.Room;
+
 @Entity
 @Table(name = "Reviews")
 @Data
@@ -17,14 +20,19 @@ public class Review {
     @Column(name = "review_id")
     private Long id;
 
-    @Column(name = "booking_id", nullable = false)
-    private Long bookingId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id", nullable = false)
+    private Booking booking;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    // Quan hệ với User: Một user có thể viết nhiều review
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    @Column(name = "room_id", nullable = false)
-    private Long roomId;
+    // Quan hệ với Room: Một phòng có thể nhận nhiều review
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id", nullable = false)
+    private Room room;
 
     @Column(name = "rating_overall", nullable = false)
     private Integer ratingOverall;

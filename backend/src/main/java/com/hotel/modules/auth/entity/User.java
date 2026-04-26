@@ -6,6 +6,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.hotel.modules.invoice.entity.Review;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -61,36 +63,48 @@ public class User implements UserDetails {
     private LocalDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "UserRoles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
+    @JoinTable(name = "UserRoles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Review> reviews;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        if (roles == null) return List.of();
+        if (roles == null)
+            return List.of();
         return roles.stream()
                 .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getRoleName()))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public String getPassword() { return passwordHash; }
+    public String getPassword() {
+        return passwordHash;
+    }
 
     @Override
-    public String getUsername() { return email; }
+    public String getUsername() {
+        return email;
+    }
 
     @Override
-    public boolean isAccountNonExpired()  { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked()   { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return Boolean.TRUE.equals(isActive); }
+    public boolean isEnabled() {
+        return Boolean.TRUE.equals(isActive);
+    }
 }

@@ -15,6 +15,7 @@ public class InvoiceResponse {
     private Long bookingId;
     private Long paymentId;
     private String invoiceNumber;
+    private String transactionId;
 
     private BigDecimal subtotal;
     private BigDecimal taxRate;
