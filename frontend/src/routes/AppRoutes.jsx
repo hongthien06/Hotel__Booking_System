@@ -11,6 +11,7 @@ import ProfilePage from '~/features/auth/ProfilePage'
 import UserManagementPage from '~/features/admin/UserManagementPage'
 import HomePage from '~/features/home/HomePage'
 import BookingPage from '~/features/bookings/BookingPage'
+import RoomList from '~/features/rooms/List/RoomList'
 
 const AppRoutes = () => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -32,6 +33,7 @@ const AppRoutes = () => {
       <Route element={<MainLayout />}>
         {/* Trang chủ công khai */}
         <Route path='/home' element={<HomePage />} />
+        <Route path='/rooms' element={<RoomList />} />
         
         {/* Các trang yêu cầu đăng nhập */}
         <Route element={<PrivateRoute />}>
