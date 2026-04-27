@@ -149,9 +149,9 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         </Box>
       ))}
 
-      <Button fullWidth variant="contained" onClick={onSearch} disabled={loading}
+      <Button fullWidth variant="contained" color="primary" onClick={onSearch} disabled={loading}
         startIcon={<Search />}
-        sx={{ bgcolor: PC, '&:hover': { bgcolor: '#a0365a' }, borderRadius: 2, py: 1.2, fontWeight: 700 }}
+        sx={{ borderRadius: 2, py: 1.2, fontWeight: 700 }}
       >
         {loading ? 'Đang tìm...' : 'Tìm phòng'}
       </Button>
@@ -288,8 +288,8 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={onClose} sx={{ borderRadius: 2 }}>Huỷ</Button>
-        <Button variant="contained" onClick={handleBook} disabled={submitting}
-          sx={{ bgcolor: PC, '&:hover': { bgcolor: '#a0365a' }, borderRadius: 2, fontWeight: 700, px: 3 }}
+        <Button variant="contained" color="primary" onClick={handleBook} disabled={submitting}
+          sx={{ borderRadius: 2, fontWeight: 700, px: 3 }}
           startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : null}
         >
           {submitting ? 'Đang xử lý...' : 'Xác nhận đặt phòng'}
@@ -343,7 +343,7 @@ const BookingPage = () => {
     setLoading(true); setSearched(true);
     try {
       const typeName = roomTypes.length === 1 ? roomTypes[0] : undefined;
-      const bedType  = bedTypes.length  === 1 ? bedTypes[0]  : undefined;
+      const bedType = bedTypes.length === 1 ? bedTypes[0] : undefined;
       const d = await getAvailableRoomsApi(
         params.checkIn,
         params.checkOut,
@@ -408,8 +408,8 @@ const BookingPage = () => {
           <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
             {fmtVND(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0))}
           </Typography>
-          <Button size="small" variant="contained" onClick={() => openBooking(room, isMock)}
-            sx={{ bgcolor: PC, '&:hover': { bgcolor: '#a0365a' }, borderRadius: 2, fontSize: 11, px: 1.5 }}>
+          <Button size="small" variant="contained" color="primary" onClick={() => openBooking(room, isMock)}
+            sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}>
             Đặt ngay
           </Button>
         </Box>
@@ -420,16 +420,19 @@ const BookingPage = () => {
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f7f8fa' }}>
 
-      {/* Sidebar */}
+      {/* Sidebar — fixed, độc lập với scroll trang chính */}
       <Box sx={{
+        position: 'fixed',
+        top: 0, left: 0,
         width: sidebarOpen ? SIDEBAR_W : 0,
-        minWidth: sidebarOpen ? SIDEBAR_W : 0,
-        overflow: 'hidden',
-        transition: 'all 0.3s ease',
-        flexShrink: 0,
+        height: '100vh',
+        overflowY: sidebarOpen ? 'auto' : 'hidden',
+        overflowX: 'hidden',
+        transition: 'width 0.3s ease',
         bgcolor: 'white',
         borderRight: '1px solid #eee',
-        position: 'sticky', top: 0, maxHeight: '100vh',
+        zIndex: 100,
+        boxShadow: sidebarOpen ? '2px 0 12px rgba(0,0,0,0.07)' : 'none',
       }}>
         <Sidebar params={params} onParam={onParam}
           roomTypes={roomTypes} setRoomTypes={setRoomTypes}
@@ -441,24 +444,29 @@ const BookingPage = () => {
         />
       </Box>
 
-      {/* Main */}
-      <Box sx={{ flex: 1, overflow: 'auto', minWidth: 0 }}>
-        {/* Filter toggle */}
-        <Box sx={{ px: 2, pt: 2, pb: 0 }}>
+      {/* Main — đẩy sang phải theo chiều rộng sidebar */}
+      <Box sx={{
+        flex: 1, minWidth: 0,
+        marginLeft: sidebarOpen ? `${SIDEBAR_W}px` : 0,
+        transition: 'margin-left 0.3s ease',
+      }}>
+        {/* Filter toggle - Sticky */}
+        <Box sx={{ position: 'sticky', top: 0, zIndex: 90, pl: 0.5, pt: 0.5, pb: 0, width: 'fit-content' }}>
           <IconButton onClick={() => setSidebarOpen(o => !o)}
-            sx={{ bgcolor: PC, color: 'white', borderRadius: 2, '&:hover': { bgcolor: '#a0365a' } }}>
+            sx={{ bgcolor: PC, color: 'white', borderRadius: 2, boxShadow: 3, '&:hover': { bgcolor: '#a0365a' } }}>
             <FilterList />
           </IconButton>
         </Box>
 
         <Box sx={{ px: 3, py: 2, pb: 8 }}>
+          <Box sx={{ maxWidth: 1080, mx: 'auto' }}>
 
-          {/* Điểm đến phổ biến */}
-          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🗺️ Điểm đến phổ biến</Typography>
+            {/* Điểm đến phổ biến */}
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🗺️ Điểm đến phổ biến</Typography>
           <Box sx={{ position: 'relative', mb: 4 }}>
             {/* Nút cuộn trái */}
             <IconButton onClick={() => scrollDest(-1)} sx={{
-              position: 'absolute', left: -20, top: '50%', transform: 'translateY(-50%)',
+              position: 'absolute', left: -16, top: '50%', transform: 'translateY(-50%)',
               zIndex: 2, bgcolor: 'white', boxShadow: 3,
               '&:hover': { bgcolor: PC_LIGHT },
             }}>
@@ -467,37 +475,44 @@ const BookingPage = () => {
 
             {/* Scroll container */}
             <Box ref={destScrollRef} sx={{
-              display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1, px: 3,
+              display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1, px: 1,
               justifyContent: 'center',
               scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
             }}>
               {DESTINATIONS.map((d, i) => (
                 <Card key={d.name} onClick={() => selectDest(i)} sx={{
-                  cursor: 'pointer', borderRadius: 3, textAlign: 'center',
-                  p: 1.5, bgcolor: d.bg, flexShrink: 0, width: 190,
-                  border: destIdx === i ? `2px solid ${PC}` : '2px solid transparent',
+                  cursor: 'pointer', borderRadius: 3, flexShrink: 0, width: 190, height: 160,
+                  position: 'relative', overflow: 'hidden',
+                  border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
                   transition: 'all 0.2s',
-                  '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
-                  boxShadow: destIdx === i ? `0 0 0 3px ${PC}22` : 1,
+                  '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
+                  boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1,
                 }}>
-                  <Box sx={{ width: '100%', height: 120, overflow: 'hidden', borderRadius: 2, mb: 1 }}>
-                    <img
-                      src={d.img}
-                      alt={d.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
+                  {/* Ảnh tràn kín */}
+                  <img
+                    src={d.img}
+                    alt={d.name}
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  {/* Gradient overlay */}
+                  <Box sx={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)',
+                  }} />
+                  {/* Text */}
+                  <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 1.2, textAlign: 'center' }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
+                      {d.name}
+                    </Typography>
+                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.82)' }}>{d.desc}</Typography>
                   </Box>
-                  <Typography variant="body2" sx={{ fontWeight: 700, color: destIdx === i ? PC : 'text.primary', mt: 0.5 }}>
-                    {d.name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">{d.desc}</Typography>
                 </Card>
               ))}
             </Box>
 
             {/* Nút cuộn phải */}
             <IconButton onClick={() => scrollDest(1)} sx={{
-              position: 'absolute', right: -20, top: '50%', transform: 'translateY(-50%)',
+              position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)',
               zIndex: 2, bgcolor: 'white', boxShadow: 3,
               '&:hover': { bgcolor: PC_LIGHT },
             }}>
@@ -507,8 +522,10 @@ const BookingPage = () => {
 
           {/* Loại chỗ nghỉ */}
           <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🏠 Loại chỗ nghỉ</Typography>
-          <Box sx={{ display: 'flex', gap: 2, mb: 4, overflowX: 'auto', pb: 1, justifyContent: 'center',
-            scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
+          <Box sx={{
+            display: 'flex', gap: 2, mb: 4, overflowX: 'auto', pb: 1, px: 1, justifyContent: 'center',
+            scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }
+          }}>
             {ACCOM_TYPES.map((t, i) => (
               <Card key={t.name} onClick={() => setAccomIdx(i)} sx={{
                 cursor: 'pointer', borderRadius: 3, textAlign: 'center', p: 2, minWidth: 110, flexShrink: 0,
@@ -567,6 +584,7 @@ const BookingPage = () => {
             )}
           </Grid>
 
+          </Box>
         </Box>
       </Box>
 
