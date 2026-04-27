@@ -11,7 +11,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Snackbar, CircularProgress
 } from '@mui/material';
-import { Menu as MenuIcon, Search, LocationOn, ChevronLeft, ChevronRight, Close } from '@mui/icons-material';
+import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList } from '@mui/icons-material';
 import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi';
 import { createBookingApi } from '../../shared/api/bookingApi';
 
@@ -443,15 +443,12 @@ const BookingPage = () => {
 
       {/* Main */}
       <Box sx={{ flex: 1, overflow: 'auto', minWidth: 0 }}>
-        {/* Hamburger */}
-        <Box sx={{ px: 2, pt: 2, pb: 0, display: 'flex', alignItems: 'center', gap: 1 }}>
+        {/* Filter toggle */}
+        <Box sx={{ px: 2, pt: 2, pb: 0 }}>
           <IconButton onClick={() => setSidebarOpen(o => !o)}
             sx={{ bgcolor: PC, color: 'white', borderRadius: 2, '&:hover': { bgcolor: '#a0365a' } }}>
-            {sidebarOpen ? <ChevronLeft /> : <MenuIcon />}
+            <FilterList />
           </IconButton>
-          <Typography variant="body2" color="text.secondary">
-            {sidebarOpen ? 'Ẩn bộ lọc' : 'Hiện bộ lọc'}
-          </Typography>
         </Box>
 
         <Box sx={{ px: 3, py: 2, pb: 8 }}>
