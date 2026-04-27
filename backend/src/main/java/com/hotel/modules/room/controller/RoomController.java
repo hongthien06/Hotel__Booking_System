@@ -52,7 +52,8 @@ public class RoomController {
             @RequestParam(defaultValue = "999999999") BigDecimal max) {
         return ResponseEntity.ok(roomService.getByPriceRange(min, max));
     }
-    //Available room
+
+    // Available room
     @GetMapping("/available")
     public ResponseEntity<List<RoomResponse>> getAvailableRooms(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
@@ -75,6 +76,7 @@ public class RoomController {
         roomService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
     @PatchMapping("/{id}/status")
     public ResponseEntity<RoomResponse> updateRoomStatus(@PathVariable Long id, @RequestBody RoomStatus status) {
         return ResponseEntity.ok(roomService.updateStatus(id, status));

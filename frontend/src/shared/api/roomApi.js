@@ -8,10 +8,10 @@ export const getRoomsApi = async () => {
   return response.data;
 };
 
-export const getAvailableRoomsApi = async (checkIn, checkOut) => {
-  const response = await axiosInstance.get(`${API_URL}/available`, {
-    params: { checkIn, checkOut }
-  });
+export const getAvailableRoomsApi = async (checkIn, checkOut, province) => {
+  const params = { checkIn, checkOut };
+  if (province && province.trim()) params.province = province.trim();
+  const response = await axiosInstance.get(`${API_URL}/available`, { params });
   return response.data;
 };
 
