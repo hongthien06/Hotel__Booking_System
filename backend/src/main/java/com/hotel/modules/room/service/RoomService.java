@@ -107,18 +107,37 @@ public class RoomService {
         return roomRepository.findById(id).orElseThrow(()->new RuntimeException("Room with id " + id + " does not exist"));
     }
     @Transactional
-    public List<RoomResponse> getAvailableRooms(LocalDate checkIn, LocalDate checkOut){
-        if (!checkOut.isAfter(checkIn)) throw new  RuntimeException("Check out date must be after check in");
-        List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
-        List<Room> availableRooms;
-        if(busyIds == null || busyIds.isEmpty()) {
-            availableRooms = roomRepository.findByStatus(RoomStatus.AVAILABLE);
+    public List<RoomResponse> getAvailableRooms(
+            LocalDate checkIn,
+            LocalDate checkOut,
+            String province,
+            Double minPrice,
+            Double maxPrice,
+            String typeName,
+            String bedType
+    ) {
+        if (!checkOut.isAfter(checkIn)) {
+            throw new RuntimeException("Check out date must be after check in");
         }
-        else{
-            availableRooms = roomRepository.findAvailableRooms(busyIds);
-        }
-        return availableRooms.stream().map(RoomResponse::from).toList();
 
+        List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
+
+        if (busyIds != null && busyIds.isEmpty()) {
+            busyIds = null;
+        }
+
+        List<Room> availableRooms = roomRepository.findAvailableRooms(
+                busyIds,
+                province,
+                minPrice,
+                maxPrice,
+                typeName,
+                bedType
+        );
+
+        return availableRooms.stream()
+                .map(RoomResponse::from)
+                .toList();
     }
 
 

@@ -56,8 +56,15 @@ public class RoomController {
     @GetMapping("/available")
     public ResponseEntity<List<RoomResponse>> getAvailableRooms(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut) {
-        return ResponseEntity.ok(roomService.getAvailableRooms(checkIn, checkOut));
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut,
+            @RequestParam(required = false) String province,
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice,
+            @RequestParam(required = false) String typeName,
+            @RequestParam(required = false) String bedType) {
+        return ResponseEntity.ok(roomService.getAvailableRooms(
+                checkIn, checkOut, province, minPrice, maxPrice, typeName, bedType
+        ));
     }
 
     @PostMapping
