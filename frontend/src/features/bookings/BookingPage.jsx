@@ -271,7 +271,7 @@ const BookingPage = () => {
   const [searched, setSearched] = useState(false);
   const [destIdx, setDestIdx] = useState(1);
   const [accomIdx, setAccomIdx] = useState(2);
-  const [roomTypes, setRoomTypes] = useState(['Standard']);
+  const [roomTypes, setRoomTypes] = useState([]);
   const [bedTypes, setBedTypes] = useState([]);
   const [services, setServices] = useState([]);
   const [params, setParams] = useState({
@@ -300,7 +300,17 @@ const BookingPage = () => {
     if (!params.checkIn || !params.checkOut) return;
     setLoading(true); setSearched(true);
     try {
-      const d = await getAvailableRoomsApi(params.checkIn, params.checkOut);
+      const typeName = roomTypes.length === 1 ? roomTypes[0] : undefined;
+      const bedType  = bedTypes.length  === 1 ? bedTypes[0]  : undefined;
+      const d = await getAvailableRoomsApi(
+        params.checkIn,
+        params.checkOut,
+        params.destination || undefined,
+        undefined,
+        undefined,
+        typeName,
+        bedType
+      );
       setRooms(Array.isArray(d) ? d : []);
     } catch { setRooms([]); }
     finally { setLoading(false); }
