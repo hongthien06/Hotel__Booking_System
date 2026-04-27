@@ -1,4 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import imgHCM from '../../assets/TP_HCM.png';
+import imgHaNoi from '../../assets/HA NOI.jpg';
+import imgVungTau from '../../assets/VUNG TAU.jpg';
+import imgDaLat from '../../assets/DA_LAT.webp';
+import imgDaNang from '../../assets/DA_NANG.jpg';
 import {
   Box, Typography, Grid, TextField, Button, Card, CardContent, CardMedia,
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
@@ -6,7 +11,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Snackbar, CircularProgress
 } from '@mui/material';
-import { Menu as MenuIcon, Search, LocationOn, ChevronLeft, Close } from '@mui/icons-material';
+import { Menu as MenuIcon, Search, LocationOn, ChevronLeft, ChevronRight, Close } from '@mui/icons-material';
 import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi';
 import { createBookingApi } from '../../shared/api/bookingApi';
 
@@ -15,11 +20,11 @@ const PC_LIGHT = '#fce4ec';
 const SIDEBAR_W = 300;
 
 const DESTINATIONS = [
-  { name: 'TP. Hồ Chí Minh', desc: 'Thành phố sôi động', emoji: '🏙️', bg: '#fff0f3' },
-  { name: 'Hà Nội', desc: 'Thủ đô ngàn năm', emoji: '🏛️', bg: '#f0f4ff' },
-  { name: 'Vũng Tàu', desc: 'Biển xanh cát trắng', emoji: '🏖️', bg: '#f0fff4' },
-  { name: 'Đà Lạt', desc: 'Thành phố ngàn hoa', emoji: '🌸', bg: '#fff8f0' },
-  { name: 'Đà Nẵng', desc: 'Thành phố đáng sống', emoji: '🌉', bg: '#f5f0ff' },
+  { name: 'TP. Hồ Chí Minh', desc: 'Thành phố sôi động', img: imgHCM, bg: '#fff0f3' },
+  { name: 'Hà Nội', desc: 'Thủ đô ngàn năm', img: imgHaNoi, bg: '#f0f4ff' },
+  { name: 'Vũng Tàu', desc: 'Biển xanh cát trắng', img: imgVungTau, bg: '#f0fff4' },
+  { name: 'Đà Lạt', desc: 'Thành phố ngàn hoa', img: imgDaLat, bg: '#fff8f0' },
+  { name: 'Đà Nẵng', desc: 'Thành phố đáng sống', img: imgDaNang, bg: '#f5f0ff' },
 ];
 
 const ACCOM_TYPES = [
@@ -319,6 +324,10 @@ const BookingPage = () => {
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedIsMock, setSelectedIsMock] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' });
+  const destScrollRef = useRef(null);
+  const scrollDest = (dir) => {
+    if (destScrollRef.current) destScrollRef.current.scrollBy({ left: dir * 220, behavior: 'smooth' });
+  };
 
   useEffect(() => {
     getRoomsApi()
@@ -448,33 +457,64 @@ const BookingPage = () => {
         <Box sx={{ px: 3, py: 2, pb: 8 }}>
 
           {/* Điểm đến phổ biến */}
-          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>🗺️ Điểm đến phổ biến</Typography>
-          <Grid container spacing={2} sx={{ mb: 4 }}>
-            {DESTINATIONS.map((d, i) => (
-              <Grid item xs={6} sm={4} md={2.4} key={d.name}>
-                <Card onClick={() => selectDest(i)} sx={{
-                  cursor: 'pointer', borderRadius: 3, textAlign: 'center', p: 1.5, bgcolor: d.bg,
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🗺️ Điểm đến phổ biến</Typography>
+          <Box sx={{ position: 'relative', mb: 4 }}>
+            {/* Nút cuộn trái */}
+            <IconButton onClick={() => scrollDest(-1)} sx={{
+              position: 'absolute', left: -20, top: '50%', transform: 'translateY(-50%)',
+              zIndex: 2, bgcolor: 'white', boxShadow: 3,
+              '&:hover': { bgcolor: PC_LIGHT },
+            }}>
+              <ChevronLeft sx={{ color: PC }} />
+            </IconButton>
+
+            {/* Scroll container */}
+            <Box ref={destScrollRef} sx={{
+              display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1, px: 3,
+              justifyContent: 'center',
+              scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+            }}>
+              {DESTINATIONS.map((d, i) => (
+                <Card key={d.name} onClick={() => selectDest(i)} sx={{
+                  cursor: 'pointer', borderRadius: 3, textAlign: 'center',
+                  p: 1.5, bgcolor: d.bg, flexShrink: 0, width: 190,
                   border: destIdx === i ? `2px solid ${PC}` : '2px solid transparent',
                   transition: 'all 0.2s',
                   '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
                   boxShadow: destIdx === i ? `0 0 0 3px ${PC}22` : 1,
                 }}>
-                  <Typography sx={{ fontSize: 36 }}>{d.emoji}</Typography>
+                  <Box sx={{ width: '100%', height: 120, overflow: 'hidden', borderRadius: 2, mb: 1 }}>
+                    <img
+                      src={d.img}
+                      alt={d.name}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  </Box>
                   <Typography variant="body2" sx={{ fontWeight: 700, color: destIdx === i ? PC : 'text.primary', mt: 0.5 }}>
                     {d.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">{d.desc}</Typography>
                 </Card>
-              </Grid>
-            ))}
-          </Grid>
+              ))}
+            </Box>
+
+            {/* Nút cuộn phải */}
+            <IconButton onClick={() => scrollDest(1)} sx={{
+              position: 'absolute', right: -20, top: '50%', transform: 'translateY(-50%)',
+              zIndex: 2, bgcolor: 'white', boxShadow: 3,
+              '&:hover': { bgcolor: PC_LIGHT },
+            }}>
+              <ChevronRight sx={{ color: PC }} />
+            </IconButton>
+          </Box>
 
           {/* Loại chỗ nghỉ */}
-          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>🏠 Loại chỗ nghỉ</Typography>
-          <Box sx={{ display: 'flex', gap: 2, mb: 4, overflowX: 'auto', pb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🏠 Loại chỗ nghỉ</Typography>
+          <Box sx={{ display: 'flex', gap: 2, mb: 4, overflowX: 'auto', pb: 1, justifyContent: 'center',
+            scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' } }}>
             {ACCOM_TYPES.map((t, i) => (
               <Card key={t.name} onClick={() => setAccomIdx(i)} sx={{
-                cursor: 'pointer', borderRadius: 3, textAlign: 'center', p: 2, minWidth: 100, flexShrink: 0,
+                cursor: 'pointer', borderRadius: 3, textAlign: 'center', p: 2, minWidth: 110, flexShrink: 0,
                 border: accomIdx === i ? `2px solid ${PC}` : '2px solid #eee',
                 bgcolor: accomIdx === i ? PC_LIGHT : 'white',
                 transition: 'all 0.2s',
