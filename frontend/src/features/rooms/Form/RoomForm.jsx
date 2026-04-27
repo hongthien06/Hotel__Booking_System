@@ -109,7 +109,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
 
           {/* Hàng 1: Số phòng (6) + Loại phòng (6) */}
           <Grid item xs={6}>
-            <TextField label="Số phòng *" fullWidth
+            <TextField label="Mã phòng *" fullWidth
               value={form.roomNumber} onChange={set('roomNumber')}
               error={!!errors.roomNumber} helperText={errors.roomNumber}
               placeholder="VD: 101, A201..." sx={inputSx}

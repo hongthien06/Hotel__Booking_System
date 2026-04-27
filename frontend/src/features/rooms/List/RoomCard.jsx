@@ -29,13 +29,16 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
       onClick={() => onClick(room)}
       elevation={0}
       sx={{
-        borderRadius: 4,
-        border: '1px solid',
-        borderColor: 'divider',
-        cursor: 'pointer',
-        overflow: 'hidden',
-        transition: 'all 0.2s ease',
-        '&:hover': {
+      height: '100%',        
+      display: 'flex',      
+      flexDirection: 'column', 
+      borderRadius: 4,
+      border: '1px solid',
+      borderColor: 'divider',
+      cursor: 'pointer',
+      overflow: 'hidden',
+      transition: 'all 0.2s ease',
+      '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: '0 12px 40px rgba(154,28,72,0.12)',
           borderColor: 'primary.main',

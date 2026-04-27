@@ -96,7 +96,7 @@ const RoomList = () => {
 
   // Derived
   const roomTypes = useMemo(() =>
-    [...new Set(rooms.map(r => r.roomType || r.type).filter(Boolean))],
+    [...new Set(rooms.map(r => r.roomType || (typeof r.type === 'string' ? r.type : (r.type?.typeName || r.type?.name || ''))).filter(Boolean))],
     [rooms]
   )
 
@@ -110,14 +110,16 @@ const RoomList = () => {
   const filtered = useMemo(() => {
     let list = [...rooms]
     if (search.trim()) {
+      const getType = r => r.roomType || (typeof r.type === 'string' ? r.type : (r.type?.typeName || r.type?.name || ''))
       const q = search.toLowerCase()
       list = list.filter(r =>
         String(r.roomNumber).toLowerCase().includes(q) ||
-        (r.roomType || r.type || '').toLowerCase().includes(q)
+        getType(r).toLowerCase().includes(q)
       )
     }
+    const getType = r => r.roomType || (typeof r.type === 'string' ? r.type : (r.type?.typeName || r.type?.name || ''))
     if (filterStatus !== 'ALL') list = list.filter(r => r.status === filterStatus)
-    if (filterType  !== 'ALL') list = list.filter(r => (r.roomType || r.type) === filterType)
+    if (filterType  !== 'ALL') list = list.filter(r => getType(r) === filterType)
     list.sort((a, b) => {
       if (sortBy === 'price')     return (a.pricePerNight || 0) - (b.pricePerNight || 0)
       if (sortBy === 'priceDesc') return (b.pricePerNight || 0) - (a.pricePerNight || 0)
@@ -285,14 +287,14 @@ const RoomList = () => {
       <Grid container spacing={2.5}>
         {loading
           ? Array.from({ length: 8 }).map((_, i) => (
-              <Grid item xs={12} sm={6} md={4} lg={3} key={i}>
+              <Grid item xs={12} sm={6} md={4} lg={2} key={i} sx={{ display: 'flex' }}>
                 <SkeletonCard />
               </Grid>
             ))
           : filtered.length === 0
             ? <EmptyState onAdd={handleAddClick} canEdit={canEdit} />
             : filtered.map(room => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={room.roomId || room.id || room.roomNumber}>
+                <Grid item xs={12} sm={6} md={4} lg={2} key={room.roomId || room.id || room.roomNumber}>
                   <RoomCard
                     room={room}
                     onClick={handleCardClick}
