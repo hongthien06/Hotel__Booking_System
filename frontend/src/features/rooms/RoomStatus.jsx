@@ -6,8 +6,7 @@ export const STATUS_CONFIG = {
   AVAILABLE:   { label: 'Còn trống', color: '#16a34a', bg: '#dcfce7', border: '#bbf7d0' },
   OCCUPIED:    { label: 'Đang thuê', color: '#dc2626', bg: '#fee2e2', border: '#fecaca' },
   MAINTENANCE: { label: 'Bảo trì',   color: '#d97706', bg: '#fef3c7', border: '#fde68a' },
-  CLEANING:    { label: 'Đang dọn',  color: '#0284c7', bg: '#e0f2fe', border: '#bae6fd' },
-  RESERVED:    { label: 'Đã đặt',    color: '#7c3aed', bg: '#ede9fe', border: '#ddd6fe' },
+  INACTIVE:    { label: 'Ngừng HĐ',  color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb' },
 }
 
 const sizeMap = {
