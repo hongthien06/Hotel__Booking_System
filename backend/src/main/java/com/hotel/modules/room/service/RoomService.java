@@ -1,5 +1,6 @@
 package com.hotel.modules.room.service;
 
+
 import com.hotel.modules.booking.service.BookingService;
 import com.hotel.modules.room.dto.request.RoomRequest;
 import com.hotel.modules.room.dto.response.RoomResponse;
@@ -13,8 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
+import java.time.LocalDateTime;import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -24,113 +24,102 @@ public class RoomService {
     private final RoomTypeService roomTypeService;
     private final BookingService bookingService;
 
-    // Query Operations
+    //Query Operations
     public List<RoomResponse> getAll() {
         return roomRepository.findAll().stream().map(RoomResponse::from).toList();
     }
-
     public RoomResponse getById(Long id) {
-        Room room = findEntityById(id);
+        Room room=findEntityById(id);
         return RoomResponse.from(room);
     }
-
     public List<RoomResponse> getByStatus(RoomStatus status) {
         return roomRepository.findByStatus(status).stream().map(RoomResponse::from).toList();
     }
-
     public List<RoomResponse> getByTypeName(String typeName) {
         return roomRepository.findByRoomType_TypeName(typeName).stream().map(RoomResponse::from).toList();
     }
-
     public List<RoomResponse> getByPriceRange(BigDecimal min, BigDecimal max) {
-        return roomRepository.findByPricePerNightBetween(min, max).stream().map(RoomResponse::from).toList();
+        return  roomRepository.findByPricePerNightBetween(min,max).stream().map(RoomResponse::from).toList();
     }
-
     public List<RoomResponse> getByProvince(String province) {
-        return roomRepository.findByProvince(province).stream().map(RoomResponse::from).toList();
+        return  roomRepository.findByProvince(province).stream().map(RoomResponse::from).toList();
     }
 
-    // Command Operations
+    //Command Operations
     @Transactional
     public RoomResponse create(RoomRequest req) {
-        if (roomRepository.existsByRoomNumber(req.getRoomNumber())) {
+        if(roomRepository.existsByRoomNumber(req.getRoomNumber())) {
             throw new RuntimeException("Room number " + req.getRoomNumber() + " already exists");
         }
-        Room room = new Room();
-        RoomType type = roomTypeService.findEntityById(req.getTypeId());
-        mapRequestToEntity(req, room, type);
+        Room room=new Room();
+        RoomType type=roomTypeService.findEntityById(req.getTypeId());
+        mapRequestToEntity(req,room,type);
         room.setCreatedAt(LocalDateTime.now());
         room.setUpdatedAt(LocalDateTime.now());
-        Room save = roomRepository.save(room);
+        Room save=roomRepository.save(room);
         return RoomResponse.from(save);
 
     }
-
     @Transactional
-    public RoomResponse update(Long id, RoomRequest req) {
-        Room room = findEntityById(id);
-        if (!room.getRoomNumber().equals(req.getRoomNumber())
-                && roomRepository.existsByRoomNumber(req.getRoomNumber())) {
+    public RoomResponse update(Long id,RoomRequest req) {
+        Room room=findEntityById(id);
+        if(!room.getRoomNumber().equals(req.getRoomNumber()) && roomRepository.existsByRoomNumber(req.getRoomNumber())) {
             throw new RuntimeException("Room number " + req.getRoomNumber() + " already exists");
         }
-        RoomType type = roomTypeService.findEntityById(req.getTypeId());
-        mapRequestToEntity(req, room, type);
+        RoomType type=roomTypeService.findEntityById(req.getTypeId());
+        mapRequestToEntity(req,room,type);
         room.setUpdatedAt(LocalDateTime.now());
         roomRepository.save(room);
         return RoomResponse.from(room);
     }
-
     @Transactional
     public void delete(Long id) {
-        // soft delete
-        Room room = findEntityById(id);
+        //soft delete
+        Room room=findEntityById(id);
         room.setStatus(RoomStatus.INACTIVE);
         roomRepository.save(room);
     }
-
     @Transactional
     public RoomResponse updateStatus(Long id, RoomStatus status) {
-        Room room = findEntityById(id);
+        Room room=findEntityById(id);
         room.setStatus(status);
         room.setUpdatedAt(LocalDateTime.now());
         roomRepository.save(room);
         return RoomResponse.from(room);
     }
 
-    // Internal Helper Methods
+    //Internal Helper Methods
     private void mapRequestToEntity(RoomRequest req, Room room, RoomType type) {
-        room.setRoomType(type);
-        room.setRoomNumber(req.getRoomNumber());
-        room.setFloor(req.getFloor());
-        room.setBedType(req.getBedType());
-        room.setProvince(req.getProvince());
-        room.setDistrict(req.getDistrict());
-        room.setAddress(req.getAddress());
-        room.setPricePerNight(req.getPricePerNight());
-        room.setThumbnailUrl(req.getThumbnailUrl());
-        room.setImageUrls(req.getImageUrls());
-        room.setDescription(req.getDescription());
-        room.setStatus(req.getStatus());
+       room.setRoomType(type);
+       room.setRoomNumber(req.getRoomNumber());
+       room.setFloor(req.getFloor());
+       room.setBedType(req.getBedType());
+       room.setProvince(req.getProvince());
+       room.setDistrict(req.getDistrict());
+       room.setAddress(req.getAddress());
+       room.setPricePerNight(req.getPricePerNight());
+       room.setThumbnailUrl(req.getThumbnailUrl());
+       room.setImageUrls(req.getImageUrls());
+       room.setDescription(req.getDescription());
+       room.setStatus(req.getStatus());
     }
-
-    public Room findEntityById(Long id) {
-        return roomRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Room with id " + id + " does not exist"));
+    public Room findEntityById(Long id){
+        return roomRepository.findById(id).orElseThrow(()->new RuntimeException("Room with id " + id + " does not exist"));
     }
-
     @Transactional
-    public List<RoomResponse> getAvailableRooms(LocalDate checkIn, LocalDate checkOut) {
-        if (!checkOut.isAfter(checkIn))
-            throw new RuntimeException("Check out date must be after check in");
+    public List<RoomResponse> getAvailableRooms(LocalDate checkIn, LocalDate checkOut){
+        if (!checkOut.isAfter(checkIn)) throw new  RuntimeException("Check out date must be after check in");
         List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
         List<Room> availableRooms;
-        if (busyIds == null || busyIds.isEmpty()) {
+        if(busyIds == null || busyIds.isEmpty()) {
             availableRooms = roomRepository.findByStatus(RoomStatus.AVAILABLE);
-        } else {
+        }
+        else{
             availableRooms = roomRepository.findAvailableRooms(busyIds);
         }
         return availableRooms.stream().map(RoomResponse::from).toList();
 
     }
+
 
 }

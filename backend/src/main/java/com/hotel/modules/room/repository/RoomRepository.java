@@ -30,9 +30,22 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     boolean existsByRoomType_TypeId(Integer typeId);
 
     @Query("""
-        SELECT r FROM Room r JOIN FETCH r.roomType 
-        WHERE r.status = com.hotel.modules.room.entity.enums.RoomStatus.AVAILABLE
-        AND r.roomId NOT IN :occupiedIds
-    """)
-    List<Room> findAvailableRooms(@Param("occupiedIds") List<Long> occupiedIds);
+    SELECT r FROM Room r 
+    JOIN FETCH r.roomType rt
+    WHERE r.status = com.hotel.modules.room.entity.enums.RoomStatus.AVAILABLE
+    AND (:province IS NULL OR r.province = :province)
+    AND (:minPrice IS NULL OR r.pricePerNight >= :minPrice)
+    AND (:maxPrice IS NULL OR r.pricePerNight <= :maxPrice)
+    AND (:typeName IS NULL OR rt.typeName = :typeName)
+    AND (:bedType IS NULL OR r.bedType = :bedType)
+    AND (:occupiedIds IS NULL OR r.roomId NOT IN :occupiedIds)
+""")
+    List<Room> findAvailableRooms(
+            @Param("occupiedIds") List<Long> occupiedIds,
+            @Param("province") String province,
+            @Param("minPrice") Double minPrice,
+            @Param("maxPrice") Double maxPrice,
+            @Param("typeName") String typeName,
+            @Param("bedType") String bedType
+    );
 }
