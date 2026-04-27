@@ -1,7 +1,7 @@
 import {
   Box, Button
 } from '@mui/material'
-import { createPaymentUrl } from '~/shared/api'
+import { createPaymentUrl } from '~/shared/api/paymentApi'
 import Discount from './Discount/Discount'
 import Brand from './Info/Brand'
 import PaymentMethod from './Info/PaymentMethod'

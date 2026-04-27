@@ -10,7 +10,7 @@ const Invoice = ({ invoiceData }) => {
     <Box sx={{ flex: 1, p: 4, display: 'flex', flexDirection: 'column' }}>
       <InvoiceHeader invoiceData={invoiceData} />
       <InvoiceMain invoiceData={invoiceData} />
-      <InvoiceFooter invoiceData={invoiceData} />
+      <InvoiceFooter />
     </Box>
   )
 }

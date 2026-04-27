@@ -1,6 +1,6 @@
 import axios from 'axios'
 import axiosInstance from './axiosInstance'
-import { createPaymentUrl } from './index'
+import { createPaymentUrl } from './paymentApi'
 
 // API base URL configuration
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
