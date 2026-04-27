@@ -1,9 +1,21 @@
 import React from 'react'
+import {
+  Card, CardContent, CardMedia, Box, Typography,
+  IconButton, Tooltip, Skeleton
+} from '@mui/material'
+import { Edit, People, SquareFoot, KingBed } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
+
+const MetaItem = ({ icon, text }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+    {React.cloneElement(icon, { sx: { fontSize: 13, color: 'text.secondary' } })}
+    <Typography variant="caption" color="text.secondary" fontWeight={500}>{text}</Typography>
+  </Box>
+)
 
 const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
   const price = room.pricePerNight
-    ? new Intl.NumberFormat('vi-VN').format(room.pricePerNight)
+    ? new Intl.NumberFormat('vi-VN').format(room.pricePerNight) + '₫'
     : '—'
 
   const amenities = room.amenities
@@ -13,100 +25,136 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
     : []
 
   return (
-    <div
+    <Card
       onClick={() => onClick(room)}
-      className="group relative bg-white rounded-2xl border border-gray-100 shadow-sm
-        hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer overflow-hidden"
+      elevation={0}
+      sx={{
+        borderRadius: 4,
+        border: '1px solid',
+        borderColor: 'divider',
+        cursor: 'pointer',
+        overflow: 'hidden',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: '0 12px 40px rgba(154,28,72,0.12)',
+          borderColor: 'primary.main',
+        }
+      }}
     >
       {/* Image */}
-      <div className="h-36 bg-gradient-to-br from-[#ffc7db]/40 to-[#c02860]/20 relative overflow-hidden">
+      <Box sx={{ position: 'relative', height: 140, overflow: 'hidden' }}>
         {room.imageUrl ? (
-          <img
-            src={room.imageUrl}
+          <CardMedia
+            component="img"
+            image={room.imageUrl}
             alt={`Phòng ${room.roomNumber}`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            sx={{ height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease',
+              '&:hover': { transform: 'scale(1.05)' } }}
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <span className="text-5xl opacity-20 select-none">🏨</span>
-          </div>
+          <Box sx={{
+            height: '100%',
+            background: 'linear-gradient(135deg, #ffc7db55 0%, #c0286033 100%)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <Typography sx={{ fontSize: 48, opacity: 0.25 }}>🏨</Typography>
+          </Box>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+
+        {/* Gradient overlay */}
+        <Box sx={{
+          position: 'absolute', inset: 0,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.35) 0%, transparent 60%)'
+        }} />
 
         {/* Status badge */}
-        <div className="absolute top-3 left-3">
+        <Box sx={{ position: 'absolute', top: 10, left: 10 }}>
           <RoomStatus status={room.status} size="sm" />
-        </div>
+        </Box>
 
         {/* Edit button */}
         {canEdit && (
-          <button
-            onClick={e => { e.stopPropagation(); onEdit(room) }}
-            className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm
-              hover:bg-white text-gray-600 hover:text-[#9a1c48] transition-all
-              flex items-center justify-center text-sm opacity-0 group-hover:opacity-100"
-          >
-            ✏️
-          </button>
+          <Tooltip title="Chỉnh sửa">
+            <IconButton
+              size="small"
+              onClick={e => { e.stopPropagation(); onEdit(room) }}
+              sx={{
+                position: 'absolute', top: 6, right: 6,
+                bgcolor: 'rgba(255,255,255,0.85)',
+                backdropFilter: 'blur(4px)',
+                opacity: 0,
+                transition: 'opacity 0.2s',
+                '.MuiCard-root:hover &': { opacity: 1 },
+                '&:hover': { bgcolor: 'white', color: 'secondary.main' },
+                width: 30, height: 30,
+              }}
+            >
+              <Edit sx={{ fontSize: 14 }} />
+            </IconButton>
+          </Tooltip>
         )}
 
-        {/* Floor tag */}
+        {/* Floor */}
         {room.floor && (
-          <div className="absolute bottom-2 right-3 text-white/80 text-xs font-medium">
+          <Typography variant="caption" sx={{
+            position: 'absolute', bottom: 8, right: 10,
+            color: 'rgba(255,255,255,0.85)', fontWeight: 600
+          }}>
             Tầng {room.floor}
-          </div>
+          </Typography>
         )}
-      </div>
+      </Box>
 
       {/* Content */}
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h3 className="font-black text-gray-900 text-base">#{room.roomNumber}</h3>
-            <p className="text-xs text-gray-400 font-medium mt-0.5">
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="h6" fontWeight={900} lineHeight={1.2} display="block">
+              #{room.roomNumber}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
               {room.roomType || room.type || 'Standard'}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="font-black text-[#9a1c48] text-sm">{price}₫</p>
-            <p className="text-gray-300 text-xs">/đêm</p>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+          <Box sx={{ textAlign: 'right', flexShrink: 0, ml: 1 }}>
+            <Typography variant="subtitle2" fontWeight={900} color="secondary.main" lineHeight={1.2} display="block">
+              {price}
+            </Typography>
+            <Typography variant="caption" color="text.disabled" display="block">/đêm</Typography>
+          </Box>
+        </Box>
 
-        {/* Meta row */}
-        <div className="flex items-center gap-3 text-xs text-gray-400 mb-3">
-          {room.capacity && (
-            <span className="flex items-center gap-1">
-              <span>👥</span> {room.capacity} khách
-            </span>
-          )}
-          {room.area && (
-            <span className="flex items-center gap-1">
-              <span>📐</span> {room.area}m²
-            </span>
-          )}
-          {room.bedType && (
-            <span className="flex items-center gap-1">
-              <span>🛏️</span> {room.bedType}
-            </span>
-          )}
-        </div>
+        {/* Meta */}
+        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: amenities.length ? 1.5 : 0 }}>
+          {room.capacity && <MetaItem icon={<People />} text={`${room.capacity} khách`} />}
+          {room.area && <MetaItem icon={<SquareFoot />} text={`${room.area}m²`} />}
+          {room.bedType && <MetaItem icon={<KingBed />} text={room.bedType} />}
+        </Box>
 
         {/* Amenities */}
         {amenities.length > 0 && (
-          <div className="flex flex-wrap gap-1">
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
             {amenities.slice(0, 3).map((a, i) => (
-              <span key={i} className="text-xs bg-gray-50 text-gray-500 px-2 py-0.5 rounded-lg border border-gray-100">
+              <Box key={i} sx={{
+                px: 1, py: 0.25,
+                bgcolor: 'background.default',
+                border: '1px solid', borderColor: 'divider',
+                borderRadius: 2,
+                fontSize: '0.65rem', fontWeight: 600, color: 'text.secondary'
+              }}>
                 {a}
-              </span>
+              </Box>
             ))}
             {amenities.length > 3 && (
-              <span className="text-xs text-gray-400 px-1">+{amenities.length - 3}</span>
+              <Typography variant="caption" color="text.disabled" sx={{ alignSelf: 'center' }}>
+                +{amenities.length - 3}
+              </Typography>
             )}
-          </div>
+          </Box>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 

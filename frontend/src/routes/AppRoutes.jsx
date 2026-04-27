@@ -33,13 +33,15 @@ const AppRoutes = () => {
       <Route element={<MainLayout />}>
         {/* Trang chủ công khai */}
         <Route path='/home' element={<HomePage />} />
-        <Route path='/rooms' element={<RoomList />} />
+        
+        
         
         {/* Các trang yêu cầu đăng nhập */}
         <Route element={<PrivateRoute />}>
           <Route path='/bookings' element={<BookingPage />} />
           <Route path='/payment' element={<Payments />} />
           <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/rooms' element={<RoomList />} />
         </Route>
 
         {/* Các trang chỉ dành cho Admin/Manager */}
