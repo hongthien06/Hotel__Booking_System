@@ -43,8 +43,8 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     List<Room> findAvailableRooms(
             @Param("occupiedIds") List<Long> occupiedIds,
             @Param("province") String province,
-            @Param("minPrice") Double minPrice,
-            @Param("maxPrice") Double maxPrice,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
             @Param("typeName") String typeName,
             @Param("bedType") String bedType
     );

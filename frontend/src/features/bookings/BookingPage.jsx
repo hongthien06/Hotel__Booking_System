@@ -47,7 +47,7 @@ const nightsBetween = (a, b) => {
 };
 
 /* ─── Sidebar ─────────────────────────────────────────── */
-const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes, services, setServices, onSearch, loading }) => {
+const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes, services, setServices, minPrice, setMinPrice, maxPrice, setMaxPrice, onSearch, loading }) => {
   const toggle = (list, setList, v) =>
     setList(list.includes(v) ? list.filter(x => x !== v) : [...list, v]);
   const labelSx = { fontWeight: 700, color: '#888', letterSpacing: 1, fontSize: 11, display: 'block', mb: 0.5 };
@@ -89,6 +89,37 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
           </Grid>
         ))}
       </Grid>
+
+      {/* Price range */}
+      <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>GIÁ / ĐÊM (VNĐ)</Typography>
+      <Grid container spacing={1.5} sx={{ mb: 1 }}>
+        <Grid item xs={6}>
+          <TextField
+            fullWidth size="small" type="number" placeholder="Tối thiểu"
+            value={minPrice ?? ''}
+            onChange={e => setMinPrice(e.target.value === '' ? undefined : Number(e.target.value))}
+            inputProps={{ min: 0, step: 50000 }}
+            InputProps={{ sx: { fontSize: 12 } }}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <TextField
+            fullWidth size="small" type="number" placeholder="Tối đa"
+            value={maxPrice ?? ''}
+            onChange={e => setMaxPrice(e.target.value === '' ? undefined : Number(e.target.value))}
+            inputProps={{ min: 0, step: 50000 }}
+            InputProps={{ sx: { fontSize: 12 } }}
+          />
+        </Grid>
+      </Grid>
+      {(minPrice != null || maxPrice != null) && (
+        <Typography variant="caption" sx={{ color: '#aaa', display: 'block', mb: 1 }}>
+          {minPrice != null ? new Intl.NumberFormat('vi-VN').format(minPrice) + '₫' : '0₫'}
+          {' — '}
+          {maxPrice != null ? new Intl.NumberFormat('vi-VN').format(maxPrice) + '₫' : 'không giới hạn'}
+        </Typography>
+      )}
+      <Divider sx={{ mb: 2 }} />
 
       {[
         ['LOẠI PHÒNG', ROOM_TYPES, roomTypes, setRoomTypes],
@@ -274,6 +305,8 @@ const BookingPage = () => {
   const [roomTypes, setRoomTypes] = useState([]);
   const [bedTypes, setBedTypes] = useState([]);
   const [services, setServices] = useState([]);
+  const [minPrice, setMinPrice] = useState(undefined);
+  const [maxPrice, setMaxPrice] = useState(undefined);
   const [params, setParams] = useState({
     destination: 'Hà Nội',
     checkIn: new Date().toISOString().split('T')[0],
@@ -306,8 +339,8 @@ const BookingPage = () => {
         params.checkIn,
         params.checkOut,
         params.destination || undefined,
-        undefined,
-        undefined,
+        minPrice,
+        maxPrice,
         typeName,
         bedType
       );
@@ -393,6 +426,8 @@ const BookingPage = () => {
           roomTypes={roomTypes} setRoomTypes={setRoomTypes}
           bedTypes={bedTypes} setBedTypes={setBedTypes}
           services={services} setServices={setServices}
+          minPrice={minPrice} setMinPrice={setMinPrice}
+          maxPrice={maxPrice} setMaxPrice={setMaxPrice}
           onSearch={handleSearch} loading={loading}
         />
       </Box>

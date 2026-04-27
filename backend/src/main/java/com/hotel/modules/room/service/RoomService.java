@@ -110,7 +110,7 @@ public class RoomService {
     @Transactional
     public List<RoomResponse> getAvailableRooms(
             LocalDate checkIn, LocalDate checkOut,
-            String province, Double minPrice, Double maxPrice,
+            String province, BigDecimal minPrice, BigDecimal maxPrice,
             String typeName, String bedType) {
         if (!checkOut.isAfter(checkIn)) throw new RuntimeException("Check out date must be after check in");
         List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
