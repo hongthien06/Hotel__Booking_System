@@ -19,6 +19,7 @@ DROP TABLE IF EXISTS Payments;
 DROP TABLE IF EXISTS BookingServices;
 DROP TABLE IF EXISTS Bookings;
 DROP TABLE IF EXISTS ChatMessages;
+DROP TABLE IF EXISTS Conversations;
 DROP TABLE IF EXISTS HotelAmenityMap;
 DROP TABLE IF EXISTS HotelServices;
 DROP TABLE IF EXISTS Rooms;
@@ -147,9 +148,39 @@ CREATE TABLE Bookings (
     CONSTRAINT UQ_Bookings_Code UNIQUE (booking_code)
 );
 
+CREATE TABLE Conversations (
+    conversation_id BIGINT NOT NULL IDENTITY(1,1),
+    user_id BIGINT NULL,
+    session_id VARCHAR(100) NOT NULL,
+    title NVARCHAR(255) NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    updated_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_Conversations PRIMARY KEY (conversation_id),
+    CONSTRAINT FK_Conv_User FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE SET NULL
+);
+
+CREATE TABLE ChatMessages (
+    message_id BIGINT NOT NULL IDENTITY(1,1),
+    conversation_id BIGINT NOT NULL,
+    role VARCHAR(20) NOT NULL,
+    content NVARCHAR(MAX) NOT NULL,
+    tokens_used INT NULL,
+    ref_hotel_id BIGINT NULL,
+    ref_room_id BIGINT NULL,
+    ref_booking_id BIGINT NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_ChatMessages PRIMARY KEY (message_id),
+    CONSTRAINT FK_Msg_Conv FOREIGN KEY (conversation_id) REFERENCES Conversations(conversation_id) ON DELETE CASCADE,
+    CONSTRAINT FK_Msg_Hotel FOREIGN KEY (ref_hotel_id) REFERENCES Hotels(hotel_id) ON DELETE SET NULL,
+    CONSTRAINT FK_Msg_Room FOREIGN KEY (ref_room_id) REFERENCES Rooms(room_id) ON DELETE SET NULL,
+    CONSTRAINT FK_Msg_Booking FOREIGN KEY (ref_booking_id) REFERENCES Bookings(booking_id) ON DELETE SET NULL
+);
+
 -- Dữ liệu mẫu tối giản
 GO
 INSERT INTO Roles (role_name) VALUES ('ROLE_ADMIN'), ('ROLE_MANAGER'), ('ROLE_USER');
+
 INSERT INTO Hotels (hotel_code, hotel_name, province, province_code, district, address, star_rating) VALUES
 ('HNK-001', N'Mường Thanh Grand Hanoi', N'Hà Nội', 'HN', N'Hoàn Kiếm', N'1 Lý Thái Tổ', 5),
 ('DNS-001', N'InterContinental Danang', N'Đà Nẵng', 'DN', N'Sơn Trà', N'Bãi Bắc, Sơn Trà', 5);

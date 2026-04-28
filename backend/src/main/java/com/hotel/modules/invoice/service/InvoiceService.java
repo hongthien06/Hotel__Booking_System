@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.hotel.modules.booking.entity.Booking;
-import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
 import com.hotel.modules.invoice.dto.request.InvoiceItemRequest;
 import com.hotel.modules.invoice.dto.response.InvoiceItemResponse;
@@ -36,7 +36,7 @@ public class InvoiceService implements IInvoiceService {
 
         private final InvoiceRepository invoiceRepository;
         private final InvoiceItemRepository invoiceItemRepository;
-        private final bookingRepository bookingRepository;
+        private final BookingRepository bookingRepository;
         private final PaymentRepository paymentRepository;
 
         // CREATE INVOICE

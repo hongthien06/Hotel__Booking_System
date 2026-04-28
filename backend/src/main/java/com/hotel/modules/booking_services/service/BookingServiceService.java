@@ -1,7 +1,7 @@
 package com.hotel.modules.booking_services.service;
 
 import com.hotel.modules.booking.entity.Booking;
-import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.booking_services.dto.BookingServiceRequest;
 import com.hotel.modules.booking_services.dto.BookingServiceResponse;
 import com.hotel.modules.booking_services.entity.BookingService;
@@ -22,7 +22,7 @@ public class BookingServiceService {
 
     private final BookingServiceRepository bookingServiceRepository;
     private final ExtraServiceRepository extraServiceRepository;
-    private final bookingRepository bookingRepo;
+    private final BookingRepository bookingRepo;
 
     // láy list service từ booking
     public List<BookingServiceResponse> getServicesByBooking(Long bookingId) {

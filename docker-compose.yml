@@ -79,7 +79,7 @@ services:
       APP_MOMO_PARTNER_CODE: "${MOMO_PARTNER_CODE}"
       APP_MOMO_ACCESS_KEY: "${MOMO_ACCESS_KEY}"
       APP_MOMO_SECRET_KEY: "${MOMO_SECRET_KEY}"
-      APP_OPENAI_API_KEY: "${OPENAI_API_KEY}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
       SPRING_PROFILES_ACTIVE: "docker"
       JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseContainerSupport"
     volumes:

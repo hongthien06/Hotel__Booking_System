@@ -1,6 +1,6 @@
 package com.hotel.modules.booking.entity;
 
-import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.booking.service.BookingService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,10 +14,10 @@ import static com.hotel.modules.booking.entity.CancelActor.SYSTEM;
 public class BookingScheduler {
 
     private final BookingService bookingService;
-    private final bookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
 
     public BookingScheduler(BookingService bookingService,
-                            bookingRepository bookingRepository) {
+                            BookingRepository bookingRepository) {
         this.bookingService = bookingService;
         this.bookingRepository = bookingRepository;
     }

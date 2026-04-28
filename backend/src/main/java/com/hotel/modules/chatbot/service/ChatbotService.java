@@ -1,10 +1,9 @@
 package com.hotel.modules.chatbot.service;
 
-
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.auth.repository.UserRepository;
 import com.hotel.modules.booking.entity.Booking;
-import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.chatbot.dto.request.ChatRequest;
 import com.hotel.modules.chatbot.dto.request.ConversationRequest;
 import com.hotel.modules.chatbot.dto.response.ChatResponse;
@@ -15,7 +14,9 @@ import com.hotel.modules.chatbot.entity.enums.ConversationStatus;
 import com.hotel.modules.chatbot.entity.enums.MessageRole;
 import com.hotel.modules.chatbot.repository.ChatMessageRepository;
 import com.hotel.modules.chatbot.repository.ConversationRepository;
-import com.hotel.modules.chatbot.service.openai.OpenAIService;
+import com.hotel.modules.chatbot.service.gemini.GeminiService;
+import com.hotel.modules.hotel.entity.Hotel;
+import com.hotel.modules.hotel.repository.HotelRepository;
 import com.hotel.modules.room.entity.Room;
 import com.hotel.modules.room.repository.RoomRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -26,21 +27,21 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ChatbotService {
+
     private final ConversationRepository conversationRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final OpenAIService openAIService;
+    private final GeminiService geminiService;
     private final UserRepository userRepository;
     private final RoomRepository roomRepository;
-    private final bookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
+    private final HotelRepository hotelRepository;
 
-    //Conversation
     @Transactional
     public ConversationResponse createConversation(ConversationRequest request) {
         Conversation conv = new Conversation();
@@ -55,7 +56,7 @@ public class ChatbotService {
         conv.setTitle(request.getTitle() != null ? request.getTitle() : "Cuộc trò chuyện mới");
         conv.setStatus(ConversationStatus.ACTIVE);
 
-        Conversation save=conversationRepository.save(conv);
+        Conversation save = conversationRepository.save(conv);
         return ConversationResponse.from(save);
     }
 
@@ -74,28 +75,28 @@ public class ChatbotService {
         return ConversationResponse.from(conversationRepository.save(conv));
     }
 
-    //Chat
     @Transactional
     public ChatResponse sendMessage(ChatRequest request) {
         Conversation conv = conversationRepository.findById(request.getConversationId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Conversation not found: " + request.getConversationId()));
+                .orElseThrow(() -> new EntityNotFoundException("Conversation not found: " + request.getConversationId()));
 
         if (conv.getStatus() == ConversationStatus.CLOSED) {
             throw new IllegalStateException("Conversation closed");
         }
+
         List<Message> history = buildHistory(conv.getConversationId());
 
         ChatMessage userMsg = buildMessage(conv, MessageRole.USER, request);
         chatMessageRepository.save(userMsg);
 
-        String aiReply = openAIService.chat(history, request.getContent());
+        String hotelContext = buildHotelContext();
+        String aiReply = geminiService.chat(history, request.getContent(), hotelContext);
 
-        ChatMessage assistantMsg = ChatMessage.builder()
-                .conversation(conv)
-                .role(MessageRole.ASSISTANT)
-                .content(aiReply)
-                .build();
+        ChatMessage assistantMsg = new ChatMessage();
+        assistantMsg.setConversation(conv);
+        assistantMsg.setRole(MessageRole.ASSISTANT);
+        assistantMsg.setContent(aiReply);
+
         chatMessageRepository.save(assistantMsg);
 
         return ChatResponse.from(assistantMsg);
@@ -111,14 +112,16 @@ public class ChatbotService {
                 .collect(Collectors.toList());
     }
 
-    //Helper
     private ChatMessage buildMessage(Conversation conv, MessageRole role, ChatRequest request) {
-        ChatMessage msg = ChatMessage.builder()
-                .conversation(conv)
-                .role(role)
-                .content(request.getContent())
-                .build();
+        ChatMessage msg = new ChatMessage();
+        msg.setConversation(conv);
+        msg.setRole(role);
+        msg.setContent(request.getContent());
 
+        if (request.getHotelId() != null) {
+            Hotel hotel = hotelRepository.findById(request.getHotelId()).orElse(null);
+            msg.setHotel(hotel);
+        }
         if (request.getRoomId() != null) {
             Room room = roomRepository.findById(request.getRoomId()).orElse(null);
             msg.setRoom(room);
@@ -139,7 +142,22 @@ public class ChatbotService {
                         : new AssistantMessage(m.getContent()))
                 .collect(Collectors.toList());
     }
+
+    private String buildHotelContext() {
+        List<Hotel> hotels = hotelRepository.findAll();
+        if (hotels.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder context = new StringBuilder();
+        for (Hotel h : hotels) {
+            context.append("- Khách sạn: ").append(h.getHotelName())
+                    .append(" | Mã: ").append(h.getHotelCode())
+                    .append(" | Địa chỉ: ").append(h.getAddress())
+                    .append(", ").append(h.getDistrict())
+                    .append(", ").append(h.getProvince())
+                    .append(" | Hạng sao: ").append(h.getStarRating()).append(" sao\n");
+        }
+        return context.toString();
+    }
 }
-
-
-

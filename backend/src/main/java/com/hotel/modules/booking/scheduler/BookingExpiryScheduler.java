@@ -2,7 +2,7 @@ package com.hotel.modules.booking.scheduler;
 
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
-import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking.repository.BookingRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingExpiryScheduler {
 
-    private final bookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
 
     /**
      * Chạy mỗi 2 phút: tự động hủy các booking PENDING đã hết hạn (expiresAt < now).

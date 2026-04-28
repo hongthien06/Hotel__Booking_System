@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin("*")
 @RestController
 @RequestMapping("/chatbot")
 @RequiredArgsConstructor
 public class ChatbotController {
+
     private final ChatbotService chatbotService;
+
     @PostMapping("/conversations")
     public ResponseEntity<ConversationResponse> createConversation(@RequestBody ConversationRequest request) {
         return ResponseEntity.ok(chatbotService.createConversation(request));

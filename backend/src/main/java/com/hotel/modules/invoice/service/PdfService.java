@@ -1,7 +1,7 @@
 package com.hotel.modules.invoice.service;
 
 import com.hotel.modules.booking.dto.BookingDTO;
-import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.invoice.dto.response.InvoiceItemResponse;
 import com.hotel.modules.invoice.dto.response.InvoiceResponse;
 import com.itextpdf.io.font.constants.StandardFonts;
@@ -54,7 +54,7 @@ public class PdfService implements IPdfService {
         private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
         private final IInvoiceService invoiceService;
-        private final bookingRepository bookingRepo;
+        private final BookingRepository bookingRepo;
 
         @Transactional
         public byte[] generateInvoicePdf(Long invoiceId) {

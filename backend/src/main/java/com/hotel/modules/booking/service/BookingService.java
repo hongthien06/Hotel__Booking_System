@@ -7,14 +7,11 @@ import com.hotel.modules.booking.dto.BookingRequest;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.entity.CancelActor;
-import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.booking_services.dto.BookingServiceResponse;
-import com.hotel.modules.room.dto.response.RoomResponse;
 import com.hotel.modules.room.entity.Room;
 import com.hotel.modules.room.entity.enums.RoomStatus;
 import com.hotel.modules.room.repository.RoomRepository;
-import com.hotel.modules.room.service.RoomService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +25,12 @@ import java.util.List;
 @Service
 public class BookingService {
 
-    private final bookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
     private final RoomRepository roomRepository;
     private final UserRepository userRepository;
 
-    public BookingService(bookingRepository bookingRepository, RoomRepository roomRepository,
-            UserRepository userRepository) {
+    public BookingService(BookingRepository bookingRepository, RoomRepository roomRepository,
+                          UserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.roomRepository = roomRepository;
         this.userRepository = userRepository;

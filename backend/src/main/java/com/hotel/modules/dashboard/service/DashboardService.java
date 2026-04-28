@@ -2,7 +2,7 @@ package com.hotel.modules.dashboard.service;
 
 import com.hotel.modules.auth.repository.UserRepository;
 import com.hotel.modules.booking.entity.Booking;
-import com.hotel.modules.booking.repository.bookingRepository;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.dashboard.dto.DashboardStatsDTO;
 import com.hotel.modules.dashboard.dto.RecentBookingDTO;
 import com.hotel.modules.payment.entity.PaymentStatus;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class DashboardService {
 
     private final RoomRepository roomRepository;
-    private final bookingRepository bookingRepository;
+    private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
 

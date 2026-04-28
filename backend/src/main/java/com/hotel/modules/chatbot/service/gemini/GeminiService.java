@@ -1,6 +1,5 @@
-package com.hotel.modules.chatbot.service.openai;
+package com.hotel.modules.chatbot.service.gemini;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
@@ -12,30 +11,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class OpenAIService {
+public class GeminiService {
 
     private final ChatClient chatClient;
 
     private static final String SYSTEM_PROMPT = """
-            Bạn là trợ lý AI của khách sạn, tên là "HotelBot".
+            Bạn là trợ lý AI của hệ thống đặt phòng khách sạn, tên là "HotelBot".
             Nhiệm vụ của bạn là hỗ trợ khách hàng với các thông tin về:
             - Đặt phòng, check-in, check-out
             - Thông tin phòng (loại phòng, giá, tiện nghi)
             - Chính sách hủy đặt phòng và hoàn tiền
             - Các dịch vụ của khách sạn
             Hãy trả lời ngắn gọn, thân thiện và chuyên nghiệp bằng tiếng Việt.
-            Nếu không biết câu trả lời, hãy đề nghị khách liên hệ lễ tân.
+            Tuyệt đối không bịa đặt thông tin. Nếu không có dữ liệu, hãy đề nghị khách liên hệ lễ tân.
             """;
 
-    public OpenAIService(ChatClient.Builder chatClientBuilder) {
+    public GeminiService(ChatClient.Builder chatClientBuilder) {
         this.chatClient = chatClientBuilder.build();
     }
 
-    public String chat(List<Message> history, String userText) {
-        try{
+    public String chat(List<Message> history, String userText, String hotelContext) {
+        try {
             List<Message> messages = new ArrayList<>();
 
-            messages.add(new SystemMessage(SYSTEM_PROMPT));
+            String dynamicSystemPrompt = SYSTEM_PROMPT;
+            if (hotelContext != null && !hotelContext.isBlank()) {
+                dynamicSystemPrompt += "\n\nDỮ LIỆU KHÁCH SẠN HIỆN TẠI ĐỂ BẠN TƯ VẤN:\n" + hotelContext;
+            }
+            messages.add(new SystemMessage(dynamicSystemPrompt));
 
             if (history != null && !history.isEmpty()) {
                 messages.addAll(history);
@@ -48,9 +51,10 @@ public class OpenAIService {
             return chatClient.prompt(prompt)
                     .call()
                     .content();
-        }catch(Exception e){
-            return "error";
-        }
 
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "Xin lỗi, hệ thống HotelBot đang quá tải hoặc mất kết nối. Vui lòng thử lại sau vài giây.";
+        }
     }
 }

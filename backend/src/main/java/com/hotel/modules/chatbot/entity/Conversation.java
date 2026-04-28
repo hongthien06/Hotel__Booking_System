@@ -1,6 +1,5 @@
 package com.hotel.modules.chatbot.entity;
 
-
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.chatbot.entity.enums.ConversationStatus;
 import jakarta.persistence.*;
@@ -14,7 +13,8 @@ import java.util.List;
 
 @Entity
 @Table(name="Conversations", schema="dbo")
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Conversation {

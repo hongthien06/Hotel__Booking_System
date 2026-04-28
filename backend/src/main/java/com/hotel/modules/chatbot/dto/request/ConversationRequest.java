@@ -2,17 +2,18 @@ package com.hotel.modules.chatbot.dto.request;
 
 import com.hotel.modules.chatbot.entity.enums.ConversationStatus;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConversationRequest {
+
     private Long userId;
 
     @NotBlank
@@ -22,8 +23,5 @@ public class ConversationRequest {
     @Size(max=255)
     private String title;
 
-    @NotNull
     private ConversationStatus status;
-
-
 }
