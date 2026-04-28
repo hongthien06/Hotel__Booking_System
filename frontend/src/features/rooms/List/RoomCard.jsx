@@ -116,8 +116,11 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
             <Typography variant="h6" fontWeight={900} lineHeight={1.2} display="block">
               #{room.roomNumber}
             </Typography>
+            <Typography variant="caption" color="secondary.main" fontWeight={700} display="block">
+              {room.hotelName || ''}
+            </Typography>
             <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-              {room.roomType || room.type || 'Standard'}
+              {room.typeName || room.roomType || room.type || 'Standard'}
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'right', flexShrink: 0, ml: 1 }}>

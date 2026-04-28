@@ -5,9 +5,8 @@ networks:
     driver: bridge
 
 volumes:
-  sqlserver-data:
+  sqlserver-data-final:
   backend-logs:
-
 
 services:
 
@@ -25,11 +24,30 @@ services:
       MSSQL_PID: "Developer"
       MSSQL_COLLATION: "Vietnamese_CI_AS"
     volumes:
-      - sqlserver-data:/var/opt/mssql
-      - ./database/HotelBookingDB.sql:/docker-entrypoint-initdb.d/HotelBookingDB.sql:ro
-      - ./database/init-db.sh:/usr/local/bin/init-db.sh:ro
-    entrypoint: /bin/bash -c "/usr/local/bin/init-db.sh & /opt/mssql/bin/sqlservr"
+      - sqlserver-data-final:/var/opt/mssql
     restart: unless-stopped
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hbms-db-init
+    networks:
+      - hbms-network
+    volumes:
+      - ./database/HotelBookingDB.sql:/HotelBookingDB.sql:ro
+    env_file:
+      - .env
+    entrypoint: /bin/bash -c "
+      echo 'Đợi SQL Server...';
+      for i in {1..60}; do
+        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P \"$SQL_SA_PASSWORD\" -Q 'SELECT 1' -No -C && break;
+        echo 'Thử lại sau 2s...';
+        sleep 2;
+      done;
+      echo 'Đang nạp SQL...';
+      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P \"$SQL_SA_PASSWORD\" -i /HotelBookingDB.sql -No -C;
+      echo 'Xong!';"
+    depends_on:
+      - sqlserver
 
   backend:
     build:
@@ -47,7 +65,7 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqlserver:1433;databaseName=HotelBookingDB;encrypt=false;trustServerCertificate=true"
       SPRING_DATASOURCE_USERNAME: "sa"
       SPRING_DATASOURCE_PASSWORD: "${SQL_SA_PASSWORD}"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SPRING_JPA_SHOW_SQL: "false"
       APP_JWT_SECRET: "${JWT_SECRET_KEY}"
       APP_JWT_EXPIRATION: "900000"
@@ -67,7 +85,8 @@ services:
     volumes:
       - backend-logs:/app/logs
     depends_on:
-      - sqlserver
+      db-init:
+        condition: service_completed_successfully
     restart: unless-stopped
 
   frontend:

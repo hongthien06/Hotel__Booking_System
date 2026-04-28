@@ -138,7 +138,7 @@ spring:
     password: ${SPRING_MAIL_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
 
 app:

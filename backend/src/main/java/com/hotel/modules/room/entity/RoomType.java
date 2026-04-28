@@ -23,5 +23,9 @@ public class RoomType {
 
     @Column(name="description", length=500)
     private String description;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id", nullable = false)
+    private com.hotel.modules.hotel.entity.Hotel hotel;
 }
 

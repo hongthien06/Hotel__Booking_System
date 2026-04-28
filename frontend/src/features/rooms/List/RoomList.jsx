@@ -16,7 +16,7 @@ import RoomForm from '../Form/RoomForm'
 import RoomStatus, { STATUS_CONFIG } from '../RoomStatus'
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
-const createRoomApi = (data)     => axiosInstance.post(`${BASE_URL}/rooms`, data).then(r => r.data)
+const createRoomApi = (data) => axiosInstance.post(`${BASE_URL}/rooms`, data).then(r => r.data)
 const updateRoomApi = (id, data) => axiosInstance.put(`${BASE_URL}/rooms/${id}`, data).then(r => r.data)
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
@@ -62,20 +62,20 @@ const RoomList = () => {
     )
   )
 
-  const [rooms,       setRooms]       = useState([])
-  const [loading,     setLoading]     = useState(true)
-  const [error,       setError]       = useState('')
-  const [search,      setSearch]      = useState('')
+  const [rooms, setRooms] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState('ALL')
-  const [filterType,  setFilterType]  = useState('ALL')
-  const [sortBy,      setSortBy]      = useState('roomNumber')
+  const [filterType, setFilterType] = useState('ALL')
+  const [sortBy, setSortBy] = useState('roomNumber')
 
   const [selectedRoom, setSelectedRoom] = useState(null)
-  const [detailOpen,   setDetailOpen]   = useState(false)
-  const [formOpen,     setFormOpen]     = useState(false)
-  const [editRoom,     setEditRoom]     = useState(null)
-  const [formLoading,  setFormLoading]  = useState(false)
-  const [toast,        setToast]        = useState({ open: false, msg: '', severity: 'success' })
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [formOpen, setFormOpen] = useState(false)
+  const [editRoom, setEditRoom] = useState(null)
+  const [formLoading, setFormLoading] = useState(false)
+  const [toast, setToast] = useState({ open: false, msg: '', severity: 'success' })
 
   const showToast = (msg, severity = 'success') =>
     setToast({ open: true, msg, severity })
@@ -119,9 +119,9 @@ const RoomList = () => {
     }
     const getType = r => r.roomType || (typeof r.type === 'string' ? r.type : (r.type?.typeName || r.type?.name || ''))
     if (filterStatus !== 'ALL') list = list.filter(r => r.status === filterStatus)
-    if (filterType  !== 'ALL') list = list.filter(r => getType(r) === filterType)
+    if (filterType !== 'ALL') list = list.filter(r => getType(r) === filterType)
     list.sort((a, b) => {
-      if (sortBy === 'price')     return (a.pricePerNight || 0) - (b.pricePerNight || 0)
+      if (sortBy === 'price') return (a.pricePerNight || 0) - (b.pricePerNight || 0)
       if (sortBy === 'priceDesc') return (b.pricePerNight || 0) - (a.pricePerNight || 0)
       return String(a.roomNumber).localeCompare(String(b.roomNumber), undefined, { numeric: true })
     })
@@ -129,9 +129,9 @@ const RoomList = () => {
   }, [rooms, search, filterStatus, filterType, sortBy])
 
   // Handlers
-  const handleCardClick  = (room) => { setSelectedRoom(room); setDetailOpen(true) }
-  const handleEditClick  = (room) => { setEditRoom(room); setFormOpen(true); setDetailOpen(false) }
-  const handleAddClick   = ()     => { setEditRoom(null); setFormOpen(true) }
+  const handleCardClick = (room) => { setSelectedRoom(room); setDetailOpen(true) }
+  const handleEditClick = (room) => { setEditRoom(room); setFormOpen(true); setDetailOpen(false) }
+  const handleAddClick = () => { setEditRoom(null); setFormOpen(true) }
 
   const handleFormSubmit = async (payload) => {
     setFormLoading(true)
@@ -193,8 +193,10 @@ const RoomList = () => {
             transition: 'all 0.15s',
             ...(filterStatus === 'ALL'
               ? { bgcolor: 'secondary.main', color: 'white', borderColor: 'secondary.main' }
-              : { bgcolor: 'background.paper', color: 'text.secondary', borderColor: 'divider',
-                  '&:hover': { borderColor: 'secondary.main' } }
+              : {
+                bgcolor: 'background.paper', color: 'text.secondary', borderColor: 'divider',
+                '&:hover': { borderColor: 'secondary.main' }
+              }
             )
           }}
         >
@@ -214,8 +216,10 @@ const RoomList = () => {
                 transition: 'all 0.15s',
                 ...(filterStatus === key
                   ? { bgcolor: cfg.bg, color: cfg.color, borderColor: cfg.border, transform: 'scale(1.05)' }
-                  : { bgcolor: 'background.paper', color: 'text.secondary', borderColor: 'divider',
-                      '&:hover': { borderColor: cfg.border } }
+                  : {
+                    bgcolor: 'background.paper', color: 'text.secondary', borderColor: 'divider',
+                    '&:hover': { borderColor: cfg.border }
+                  }
                 )
               }}
             >
@@ -267,8 +271,10 @@ const RoomList = () => {
         <Tooltip title="Tải lại">
           <IconButton
             onClick={fetchRooms}
-            sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 3,
-              '&:hover': { borderColor: 'secondary.main', color: 'secondary.main' } }}
+            sx={{
+              border: '1px solid', borderColor: 'divider', borderRadius: 3,
+              '&:hover': { borderColor: 'secondary.main', color: 'secondary.main' }
+            }}
           >
             <Refresh fontSize="small" />
           </IconButton>
@@ -287,22 +293,22 @@ const RoomList = () => {
       <Grid container spacing={2.5}>
         {loading
           ? Array.from({ length: 8 }).map((_, i) => (
-              <Grid item xs={12} sm={6} md={4} lg={2} key={i} sx={{ display: 'flex' }}>
-                <SkeletonCard />
-              </Grid>
-            ))
+            <Grid item xs={12} sm={6} md={4} lg={2} key={i} sx={{ display: 'flex' }}>
+              <SkeletonCard />
+            </Grid>
+          ))
           : filtered.length === 0
             ? <EmptyState onAdd={handleAddClick} canEdit={canEdit} />
             : filtered.map(room => (
-                <Grid item xs={12} sm={6} md={4} lg={2} key={room.roomId || room.id || room.roomNumber} sx={{ display: 'flex' }}>
-                  <RoomCard
-                    room={room}
-                    onClick={handleCardClick}
-                    onEdit={handleEditClick}
-                    canEdit={canEdit}
-                  />
-                </Grid>
-              ))
+              <Grid item xs={12} sm={6} md={4} lg={2} key={room.roomId || room.id || room.roomNumber} sx={{ display: 'flex' }}>
+                <RoomCard
+                  room={room}
+                  onClick={handleCardClick}
+                  onEdit={handleEditClick}
+                  canEdit={canEdit}
+                />
+              </Grid>
+            ))
         }
       </Grid>
 

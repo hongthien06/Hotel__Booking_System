@@ -23,14 +23,14 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        Role adminRole = createRoleIfNotFound("ADMIN", "Quản trị viên hệ thống");
-        Role managerRole = createRoleIfNotFound("MANAGER", "Quản lý khách sạn");
-        createRoleIfNotFound("CUSTOMER", "Khách hàng");
+        Role adminRole = createRoleIfNotFound("ROLE_ADMIN", "Quản trị viên hệ thống");
+        Role managerRole = createRoleIfNotFound("ROLE_MANAGER", "Quản lý khách sạn");
+        createRoleIfNotFound("ROLE_CUSTOMER", "Khách hàng");
 
         // Tạo Admin mặc định
-        createDefaultUser("admin@hotel.com", "admin123", "System Admin", adminRole);
+        createDefaultUser("admin@hotel.com", "123456", "System Admin", adminRole);
         // Tạo một Manager mặc định
-        createDefaultUser("manager@hotel.com", "manager123", "Hotel Manager", managerRole);
+        createDefaultUser("manager@hotel.com", "123456", "Hotel Manager", managerRole);
     }
 
     private void createDefaultUser(String email, String password, String name, Role role) {
