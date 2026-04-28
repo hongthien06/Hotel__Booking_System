@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
-    Optional<Invoice> findByBooking_BookingId(Long bookingId);
+    Optional<Invoice> findByBooking_BookingCode(String bookingCode);
 
     Optional<Invoice> findByPayment_PaymentId(Long paymentId);
 
@@ -23,13 +23,12 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     boolean existsByBooking_BookingId(Long bookingId);
 
     @Query("""
-        SELECT i FROM Invoice i
-        WHERE (:startDate IS NULL OR i.issuedAt >= :startDate)
-          AND (:endDate   IS NULL OR i.issuedAt <= :endDate)
-    """)
+                SELECT i FROM Invoice i
+                WHERE (:startDate IS NULL OR i.issuedAt >= :startDate)
+                  AND (:endDate   IS NULL OR i.issuedAt <= :endDate)
+            """)
     Page<Invoice> findAllWithFilters(
             @Param("startDate") LocalDateTime startDate,
-            @Param("endDate")   LocalDateTime endDate,
-            Pageable pageable
-    );
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
 }

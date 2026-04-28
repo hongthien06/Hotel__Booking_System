@@ -38,7 +38,8 @@ public class ExtraServiceController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ExtraServiceDTO> updateService(@PathVariable Integer id, @Valid @RequestBody ExtraServiceDTO dto) {
+    public ResponseEntity<ExtraServiceDTO> updateService(@PathVariable Integer id,
+            @Valid @RequestBody ExtraServiceDTO dto) {
         return ResponseEntity.ok(extraServiceService.updateService(id, dto));
     }
 

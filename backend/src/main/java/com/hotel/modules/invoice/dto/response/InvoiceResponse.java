@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,6 +17,13 @@ public class InvoiceResponse {
     private Long paymentId;
     private String invoiceNumber;
     private String transactionId;
+    private String bookingCode;
+
+    private LocalDate checkInDate;
+    private LocalDate checkOutDate;
+    private Short totalNight;
+    private Byte numGuests;
+    private String address;
 
     private BigDecimal subtotal;
     private BigDecimal taxRate;

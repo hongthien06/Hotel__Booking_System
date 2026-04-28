@@ -6,7 +6,8 @@ import com.hotel.modules.email.dto.EmailRequest;
 import com.hotel.modules.room.entity.Room;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;import org.springframework.mail.SimpleMailMessage;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -22,7 +23,7 @@ public class EmailService {
 
     private final TemplateEngine templateEngine;
 
-    public void sendMail(String toEmail, String subject, String content){
+    public void sendMail(String toEmail, String subject, String content) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject(subject);
@@ -30,13 +31,13 @@ public class EmailService {
         mailSender.send(message);
     }
 
-    public void sendMailWithThymeleaf(String toEmail, String subject, EmailRequest request){
+    public void sendMailWithThymeleaf(String toEmail, String subject, EmailRequest request) {
         Context context = new Context();
         context.setVariable("booking", request);
         String htmlContent = templateEngine.process("success-email", context);
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, "utf-8");
-        try{
+        try {
             messageHelper.setTo(toEmail);
             messageHelper.setSubject(subject);
             messageHelper.setText(htmlContent, true);
@@ -50,17 +51,17 @@ public class EmailService {
         try {
             User user = booking.getUser();
             Room room = booking.getRoom();
-            if(user == null || user.getEmail() == null) {
+            if (user == null || user.getEmail() == null) {
                 log.error("Không tìm thấy thông tin User hoặc Email cho Booking ID: {}", booking.getBookingId());
                 return;
             }
             Long priceBooking = booking.getRoomPriceSnapshot().longValue() * booking.getTotalNights();
-            Long tax = (long)(priceBooking * 0.08);//tax o involve;
+            Long tax = (long) (priceBooking * 0.08);// tax o involve;
             long totalPrice = priceBooking + tax;
 
             EmailRequest request = EmailRequest.builder()
                     .toEmail(user.getEmail())
-                    .buildingName("Toa nha ABC") // Có thể dùng @Value để lấy từ file properties
+                    .buildingName(room.getRoomNumber()) // Có thể dùng @Value để lấy từ file properties
                     .buildingAdress(room.getAddress())
                     .customerName(user.getFullName())
                     .customerPhone(user.getPhone())

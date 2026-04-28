@@ -23,6 +23,7 @@ import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.layout.properties.VerticalAlignment;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -55,6 +56,7 @@ public class PdfService implements IPdfService {
         private final IInvoiceService invoiceService;
         private final bookingRepository bookingRepo;
 
+        @Transactional
         public byte[] generateInvoicePdf(Long invoiceId) {
                 // found invoice
                 InvoiceResponse invoice = invoiceService.getInvoiceById(invoiceId);
@@ -84,7 +86,7 @@ public class PdfService implements IPdfService {
         }
 
         // PDF Builder
-
+        @Transactional
         private byte[] buildPdf(InvoiceResponse invoice, BookingDTO booking) {
                 try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
                         PdfWriter writer = new PdfWriter(baos);

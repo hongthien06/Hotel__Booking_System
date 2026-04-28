@@ -1,5 +1,18 @@
 package com.hotel.modules.invoice.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.booking.repository.bookingRepository;
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
 import com.hotel.modules.invoice.dto.request.InvoiceItemRequest;
 import com.hotel.modules.invoice.dto.response.InvoiceItemResponse;
@@ -8,25 +21,13 @@ import com.hotel.modules.invoice.entity.Invoice;
 import com.hotel.modules.invoice.entity.InvoiceItem;
 import com.hotel.modules.invoice.repository.InvoiceItemRepository;
 import com.hotel.modules.invoice.repository.InvoiceRepository;
-import com.hotel.modules.booking.entity.Booking;
-import com.hotel.modules.booking.repository.bookingRepository;
 import com.hotel.modules.payment.entity.Payment;
 import com.hotel.modules.payment.repository.PaymentRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -102,6 +103,7 @@ public class InvoiceService implements IInvoiceService {
         }
 
         @Override
+        @Transactional
         public InvoiceResponse getInvoiceById(Long id) {
                 Invoice invoice = findInvoiceOrThrow(id);
                 List<InvoiceItem> items = invoiceItemRepository.findByInvoice_Id(id);
@@ -110,16 +112,18 @@ public class InvoiceService implements IInvoiceService {
         }
 
         @Override
-        public InvoiceResponse getInvoiceByBookingId(Long bookingId) {
-                Invoice invoice = invoiceRepository.findByBooking_BookingId(bookingId)
+        @Transactional
+        public InvoiceResponse getInvoiceByBookingCode(String BookingCode) {
+                Invoice invoice = invoiceRepository.findByBooking_BookingCode(BookingCode)
                                 .orElseThrow(() -> new EntityNotFoundException(
-                                                "Không tìm thấy hóa đơn cho booking #" + bookingId));
+                                                "Không tìm thấy hóa đơn cho booking #" + BookingCode));
                 List<InvoiceItem> items = invoiceItemRepository.findByInvoice_Id(invoice.getId());
 
                 return toResponse(invoice, items);
         }
 
         @Override
+        @Transactional
         public InvoiceResponse getInvoiceByPaymentId(Long paymentId) {
                 Invoice invoice = invoiceRepository.findByPayment_PaymentId(paymentId)
                                 .orElseThrow(() -> new EntityNotFoundException(
@@ -130,6 +134,7 @@ public class InvoiceService implements IInvoiceService {
         }
 
         @Override
+        @Transactional
         public Page<InvoiceResponse> getInvoices(LocalDateTime startDate,
                         LocalDateTime endDate,
                         Pageable pageable) {
@@ -215,6 +220,12 @@ public class InvoiceService implements IInvoiceService {
                                 .paymentId(invoice.getPayment().getPaymentId())
                                 .invoiceNumber(invoice.getInvoiceNumber())
                                 .transactionId(invoice.getTransactionId())
+                                .bookingCode(invoice.getBooking().getBookingCode())
+                                .checkInDate(invoice.getBooking().getCheckInDate())
+                                .checkOutDate(invoice.getBooking().getCheckOutDate())
+                                .totalNight(invoice.getBooking().getTotalNights())
+                                .numGuests(invoice.getBooking().getNumGuests())
+                                .address(invoice.getBooking().getRoom().getAddress())
                                 .subtotal(invoice.getSubtotal())
                                 .taxRate(invoice.getTaxRate())
                                 .taxAmount(invoice.getTaxAmount())
