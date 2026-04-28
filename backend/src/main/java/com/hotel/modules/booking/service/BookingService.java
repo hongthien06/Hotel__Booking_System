@@ -52,7 +52,8 @@ public class BookingService {
 
         dto.setBookingId(booking.getBookingId());
         dto.setBookingCode(booking.getBookingCode());
-        dto.setNumGuests(booking.getNumGuests());
+        dto.setNumAdults(booking.getNumAdults());
+        dto.setNumChildren(booking.getNumChildren());
         dto.setSpecialRequest(booking.getSpecialRequest());
         dto.setRoomPriceSnapshot(booking.getRoomPriceSnapshot());
         dto.setTotalNights(booking.getTotalNights());
@@ -247,14 +248,23 @@ public class BookingService {
         // 5. Tính toán
         short totalNights = (short) ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
 
-        // 6. Tạo booking
+        // 6. Kiểm tra sức chứa (Capacity Check)
+        if (request.getNumAdults() > room.getBedType().getMaxAdults()) {
+            throw new RuntimeException("Số lượng người lớn vượt quá sức chứa của phòng (" + room.getBedType().getMaxAdults() + ")");
+        }
+        if (request.getNumChildren() > room.getBedType().getMaxChildren()) {
+            throw new RuntimeException("Số lượng trẻ em vượt quá sức chứa của phòng (" + room.getBedType().getMaxChildren() + ")");
+        }
+
+        // 7. Tạo booking
         Booking booking = new Booking();
         booking.setBookingCode(generateBookingCode(request.getCheckIn()));
         booking.setUser(user);
         booking.setRoom(room);
         booking.setCheckInDate(request.getCheckIn());
         booking.setCheckOutDate(request.getCheckOut());
-        booking.setNumGuests(request.getNumGuests());
+        booking.setNumAdults(request.getNumAdults());
+        booking.setNumChildren(request.getNumChildren());
         booking.setSpecialRequest(request.getSpecialRequest());
         booking.setRoomPriceSnapshot(room.getPricePerNight());
         booking.setTotalNights(totalNights);

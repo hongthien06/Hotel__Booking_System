@@ -71,8 +71,6 @@ public class RoomTypeService {
     private void mapRequestToEntity(RoomTypeRequest req, RoomType roomType) {
         roomType.setTypeName(req.getTypeName());
         roomType.setDescription(req.getDescription());
-        roomType.setBasePrice(req.getBasePrice());
-        roomType.setMaxOccupancy(req.getMaxOccupancy());
     }
 
 

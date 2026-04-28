@@ -2,7 +2,6 @@ package com.hotel.modules.room.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
-import java.math.BigDecimal;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -14,14 +13,4 @@ public class RoomTypeRequest {
 
     @Size(max = 500)
     private String description;
-
-    @NotNull
-    @DecimalMin(value="0.0",inclusive=false)
-    private BigDecimal basePrice;
-
-    @NotNull
-    @Min(value = 1)
-    @Max(value = 10)
-    private Byte maxOccupancy;
-
 }

@@ -51,9 +51,11 @@ public class Booking {
     @Column(name = "actual_checkout")
     private LocalDateTime actualCheckout; // actual_checkout — Giờ thực tế staff bấm check-out
 
-    // num_guests TINYINT NOT NULL DEFAULT 1
-    @Column(name = "num_guests", nullable = false)
-    private Byte numGuests = 1; // num_guests — Số khách
+    @Column(name = "num_adults", nullable = false)
+    private Byte numAdults = 1;
+
+    @Column(name = "num_children", nullable = false)
+    private Byte numChildren = 0;
 
     // special_request NVARCHAR(500) NULL
     @Column(name = "special_request", length = 500)

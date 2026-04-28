@@ -12,10 +12,13 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class RoomRequest {
     @NotNull
+    private Long hotelId;
+
+    @NotNull
     private Integer typeId;
 
     @NotBlank
-    @Size(max=20)
+    @Size(max=30)
     private String roomNumber;
 
     private Short floor;
@@ -23,21 +26,10 @@ public class RoomRequest {
     @NotNull
     private BedType bedType;
 
-    @NotBlank
-    @Size(max=100)
-    private String province;
-
-    @NotBlank
-    @Size(max=100)
-    private String district;
-    @Size(max=500)
-    private String address;
-
     @NotNull
     @DecimalMin(value = "0.0",inclusive = false)
     private BigDecimal pricePerNight;
 
-    private String thumbnailUrl;
     private String imageUrls;
     private String description;
 

@@ -11,6 +11,7 @@ public class BookingRequest {
     private Long roomId;
     private LocalDate checkIn;
     private LocalDate checkOut;
-    private Byte numGuests;
+    private Byte numAdults;
+    private Byte numChildren;
     private String specialRequest;
 }

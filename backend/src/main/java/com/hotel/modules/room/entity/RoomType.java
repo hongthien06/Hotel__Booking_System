@@ -6,8 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 @Entity
 @Table(name="RoomTypes", schema = "dbo")
 @Getter
@@ -25,11 +23,5 @@ public class RoomType {
 
     @Column(name="description", length=500)
     private String description;
-
-    @Column(name = "base_price", nullable = false, precision = 18, scale = 2)
-    private BigDecimal basePrice;
-
-    @Column(name = "max_occupancy", nullable = false)
-    private Byte maxOccupancy;
 }
 

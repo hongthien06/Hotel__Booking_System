@@ -2,6 +2,8 @@ package com.hotel.modules.room.service;
 
 
 import com.hotel.modules.booking.service.BookingService;
+import com.hotel.modules.hotel.entity.Hotel;
+import com.hotel.modules.hotel.service.HotelService;
 import com.hotel.modules.room.dto.request.RoomRequest;
 import com.hotel.modules.room.dto.response.RoomResponse;
 import com.hotel.modules.room.entity.Room;
@@ -24,6 +26,7 @@ public class RoomService {
     private final RoomRepository roomRepository;
     private final RoomTypeService roomTypeService;
     private final BookingService bookingService;
+    private final HotelService hotelService;
 
     //Query Operations
     public List<RoomResponse> getAll() {
@@ -43,7 +46,10 @@ public class RoomService {
         return  roomRepository.findByPricePerNightBetween(min,max).stream().map(RoomResponse::from).toList();
     }
     public List<RoomResponse> getByProvince(String province) {
-        return  roomRepository.findByProvince(province).stream().map(RoomResponse::from).toList();
+        return  roomRepository.findByHotel_Province(province).stream().map(RoomResponse::from).toList();
+    }
+    public List<RoomResponse> getByHotel(Long hotelId) {
+        return roomRepository.findByHotel_HotelId(hotelId).stream().map(RoomResponse::from).toList();
     }
 
     //Command Operations
@@ -54,7 +60,8 @@ public class RoomService {
         }
         Room room=new Room();
         RoomType type=roomTypeService.findEntityById(req.getTypeId());
-        mapRequestToEntity(req,room,type);
+        Hotel hotel=hotelService.findEntityById(req.getHotelId());
+        mapRequestToEntity(req,room,type,hotel);
         room.setCreatedAt(LocalDateTime.now());
         room.setUpdatedAt(LocalDateTime.now());
         Room save=roomRepository.save(room);
@@ -68,7 +75,8 @@ public class RoomService {
             throw new RuntimeException("Room number " + req.getRoomNumber() + " already exists");
         }
         RoomType type=roomTypeService.findEntityById(req.getTypeId());
-        mapRequestToEntity(req,room,type);
+        Hotel hotel=hotelService.findEntityById(req.getHotelId());
+        mapRequestToEntity(req,room,type,hotel);
         room.setUpdatedAt(LocalDateTime.now());
         roomRepository.save(room);
         return RoomResponse.from(room);
@@ -90,16 +98,13 @@ public class RoomService {
     }
 
     //Internal Helper Methods
-    private void mapRequestToEntity(RoomRequest req, Room room, RoomType type) {
+    private void mapRequestToEntity(RoomRequest req, Room room, RoomType type, Hotel hotel) {
+       room.setHotel(hotel);
        room.setRoomType(type);
        room.setRoomNumber(req.getRoomNumber());
        room.setFloor(req.getFloor());
        room.setBedType(req.getBedType());
-       room.setProvince(req.getProvince());
-       room.setDistrict(req.getDistrict());
-       room.setAddress(req.getAddress());
        room.setPricePerNight(req.getPricePerNight());
-       room.setThumbnailUrl(req.getThumbnailUrl());
        room.setImageUrls(req.getImageUrls());
        room.setDescription(req.getDescription());
        room.setStatus(req.getStatus());
@@ -110,13 +115,14 @@ public class RoomService {
     @Transactional
     public List<RoomResponse> getAvailableRooms(
             LocalDate checkIn, LocalDate checkOut,
-            String province, BigDecimal minPrice, BigDecimal maxPrice,
+            Long hotelId, String province, BigDecimal minPrice, BigDecimal maxPrice,
             String typeName, String bedType) {
         if (!checkOut.isAfter(checkIn)) throw new RuntimeException("Check out date must be after check in");
         List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
         // Pass all filters directly to the repository @Query
         List<Room> availableRooms = roomRepository.findAvailableRooms(
                 (busyIds == null || busyIds.isEmpty()) ? null : busyIds,
+                hotelId,
                 (province != null && !province.isBlank()) ? province : null,
                 minPrice,
                 maxPrice,

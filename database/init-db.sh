@@ -27,23 +27,14 @@ while [ $i -lt $MAX_ATTEMPTS ]; do
     sleep $INTERVAL
 done
 
-EXISTS=$(/opt/mssql-tools18/bin/sqlcmd \
+log "Đang nạp script SQL '$SQL_FILE'..."
+if /opt/mssql-tools18/bin/sqlcmd \
     -S localhost -U sa -P "$SA_PASS" \
-    -Q "SET NOCOUNT ON; SELECT COUNT(*) FROM sys.databases WHERE name='$DB_NAME'" \
-    -h -1 -No -C 2>/dev/null | tr -d ' \r\n')
-
-if [ "$EXISTS" = "0" ]; then
-    log "Khởi tạo '$DB_NAME'..."
-    if /opt/mssql-tools18/bin/sqlcmd \
-        -S localhost -U sa -P "$SA_PASS" \
-        -i "$SQL_FILE" -b -No -C; then
-        log "Tạo thành công!"
-    else
-        log "LỖI khi chạy SQL!"
-        exit 1
-    fi
+    -i "$SQL_FILE" -b -No -C; then
+    log "Nạp script thành công!"
 else
-    log "'$DB_NAME' đã tồn tại - Bỏ qua."
+    log "LỖI khi chạy SQL!"
+    exit 1
 fi
 
 log "Init hoàn thành."

@@ -46,6 +46,11 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getByProvince(province));
     }
 
+    @GetMapping("/hotel/{hotelId}")
+    public ResponseEntity<List<RoomResponse>> getRoomsByHotel(@PathVariable Long hotelId) {
+        return ResponseEntity.ok(roomService.getByHotel(hotelId));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<RoomResponse>> getRoomsByPriceRange(
             @RequestParam(defaultValue = "0") BigDecimal min,
@@ -58,13 +63,14 @@ public class RoomController {
     public ResponseEntity<List<RoomResponse>> getAvailableRooms(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkOut,
+            @RequestParam(required = false) Long hotelId,
             @RequestParam(required = false) String province,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String typeName,
             @RequestParam(required = false) String bedType) {
         return ResponseEntity.ok(roomService.getAvailableRooms(
-                checkIn, checkOut, province, minPrice, maxPrice, typeName, bedType
+                checkIn, checkOut, hotelId, province, minPrice, maxPrice, typeName, bedType
         ));
     }
 

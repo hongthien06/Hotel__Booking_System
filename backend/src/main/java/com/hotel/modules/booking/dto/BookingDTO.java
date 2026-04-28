@@ -18,7 +18,8 @@ public class BookingDTO {
     // ── Thông tin Booking ──────────────────────────────
     private Long bookingId;
     private String bookingCode;
-    private Byte numGuests;
+    private Byte numAdults;
+    private Byte numChildren;
     private String specialRequest;
     private BigDecimal roomPriceSnapshot;
     private Short totalNights;

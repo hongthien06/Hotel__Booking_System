@@ -15,11 +15,7 @@ public class RoomResponse {
     private String roomNumber;
     private Short floor;
     private BedType bedType;
-    private String province;
-    private String district;
-    private String address;
     private BigDecimal pricePerNight;
-    private String thumbnailUrl;
     private String imageUrls;
     private String description;
     private RoomStatus status;
@@ -27,6 +23,12 @@ public class RoomResponse {
     //Thong tin phong
     private Integer typeId;
     private String typeName;
+
+    //Thong tin khach san
+    private Long hotelId;
+    private String hotelName;
+    private String province;
+    private String district;
 
     public static RoomResponse from(Room room) {
         if(room == null) return null;
@@ -36,18 +38,23 @@ public class RoomResponse {
         res.roomNumber   = room.getRoomNumber();
         res.floor        = room.getFloor();
         res.bedType      = room.getBedType();
-        res.province     = room.getProvince();
-        res.district     = room.getDistrict();
-        res.address      = room.getAddress();
         res.pricePerNight = room.getPricePerNight();
-        res.thumbnailUrl = room.getThumbnailUrl();
         res.imageUrls    = room.getImageUrls();
         res.description  = room.getDescription();
         res.status       = room.getStatus();
+
         if (room.getRoomType() != null) {
             res.typeId = room.getRoomType().getTypeId();
             res.typeName = room.getRoomType().getTypeName();
         }
+
+        if (room.getHotel() != null) {
+            res.hotelId = room.getHotel().getHotelId();
+            res.hotelName = room.getHotel().getHotelName();
+            res.province = room.getHotel().getProvince();
+            res.district = room.getHotel().getDistrict();
+        }
+
         return res;
     }
 }

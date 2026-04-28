@@ -61,8 +61,8 @@ public class EmailService {
 
             EmailRequest request = EmailRequest.builder()
                     .toEmail(user.getEmail())
-                    .buildingName(room.getRoomNumber()) // Có thể dùng @Value để lấy từ file properties
-                    .buildingAdress(room.getAddress())
+                    .buildingName(room.getHotel().getHotelName()) 
+                    .buildingAdress(room.getHotel().getAddress())
                     .customerName(user.getFullName())
                     .customerPhone(user.getPhone())
                     .codeBooking(booking.getBookingCode())
@@ -72,7 +72,7 @@ public class EmailService {
                     .dateCheckout(booking.getCheckOutDate().toString())
                     .timeCheckout("12:00")
                     .night(Integer.valueOf(booking.getTotalNights()))
-                    .people(Integer.valueOf(booking.getNumGuests()))
+                    .people(booking.getNumAdults() + booking.getNumChildren())
                     .priceBooking(priceBooking)
                     .priceBreakfast(0L)
                     .feeService(0L)

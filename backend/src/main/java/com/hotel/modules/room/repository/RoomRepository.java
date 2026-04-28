@@ -8,32 +8,42 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType")
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel")
     List<Room> findAll();
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType WHERE r.roomId = :id")
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.roomId = :id")
     Optional<Room> findById(@Param("id") Long id);
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType WHERE r.status = :status")
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.status = :status")
     List<Room> findByStatus(@Param("status") RoomStatus status);
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType WHERE r.roomType.typeName = :typeName")
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.hotel.hotelId = :hotelId")
+    List<Room> findByHotel_HotelId(@Param("hotelId") Long hotelId);
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.roomType.typeName = :typeName")
     List<Room> findByRoomType_TypeName(@Param("typeName") String typeName);
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType WHERE r.pricePerNight BETWEEN :min AND :max")
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.pricePerNight BETWEEN :min AND :max")
     List<Room> findByPricePerNightBetween(@Param("min") BigDecimal min, @Param("max") BigDecimal max);
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType WHERE r.province = :province")
-    List<Room> findByProvince(@Param("province") String province);
+
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.hotel.province = :province")
+    List<Room> findByHotel_Province(@Param("province") String province);
+
     boolean existsByRoomNumber(String roomNumber);
     boolean existsByRoomType_TypeId(Integer typeId);
 
     @Query("""
     SELECT r FROM Room r 
     JOIN FETCH r.roomType rt
+    JOIN FETCH r.hotel h
     WHERE r.status = com.hotel.modules.room.entity.enums.RoomStatus.AVAILABLE
-    AND (:province IS NULL OR r.province = :province)
+    AND (:hotelId IS NULL OR h.hotelId = :hotelId)
+    AND (:province IS NULL OR h.province = :province)
     AND (:minPrice IS NULL OR r.pricePerNight >= :minPrice)
     AND (:maxPrice IS NULL OR r.pricePerNight <= :maxPrice)
     AND (:typeName IS NULL OR rt.typeName = :typeName)
@@ -42,6 +52,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
 """)
     List<Room> findAvailableRooms(
             @Param("occupiedIds") List<Long> occupiedIds,
+            @Param("hotelId") Long hotelId,
             @Param("province") String province,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
