@@ -3,7 +3,7 @@ import {
   Drawer, Box, Typography, Divider, Button,
   IconButton, Stack, Chip
 } from '@mui/material'
-import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub } from '@mui/icons-material'
+import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub, Business, LocationOn } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
 
 const InfoRow = ({ label, value, icon }) => (
@@ -92,7 +92,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
           <Box>
             <Typography variant="h6" fontWeight={800} color="text.primary">
-              {room.roomType || room.type || 'Standard'}
+              {room.typeName || room.roomType || room.type || 'Standard'}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               Tầng {room.floor || '—'}
@@ -108,11 +108,13 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
 
         {/* Details */}
         <Box sx={{ bgcolor: 'background.default', borderRadius: 3, px: 2, py: 0.5, mb: 2.5 }}>
-          <InfoRow label="Sức chứa" value={`${room.capacity || '—'} khách`} icon={<People />} />
-          <InfoRow label="Diện tích" value={room.area ? `${room.area} m²` : '—'} icon={<SquareFoot />} />
-          <InfoRow label="Loại giường" value={room.bedType || '—'} icon={<KingBed />} />
-          <InfoRow label="Số phòng ngủ" value={room.bedrooms || '1'} icon={<Layers />} />
-          <InfoRow label="Số phòng tắm" value={room.bathrooms || '1'} icon={<Bathtub />} />
+          <InfoRow label="Khach san" value={room.hotelName || '—'} icon={<Business />} />
+          <InfoRow label="Dia chi" value={room.address || '—'} icon={<LocationOn />} />
+          <InfoRow label="Suc chua" value={`${room.capacity || '—'} khach`} icon={<People />} />
+          <InfoRow label="Dien tich" value={room.area ? `${room.area} m²` : '—'} icon={<SquareFoot />} />
+          <InfoRow label="Loai giuong" value={room.bedType || '—'} icon={<KingBed />} />
+          <InfoRow label="So phong ngu" value={room.bedrooms || '1'} icon={<Layers />} />
+          <InfoRow label="So phong tam" value={room.bathrooms || '1'} icon={<Bathtub />} />
         </Box>
 
         {/* Description */}
