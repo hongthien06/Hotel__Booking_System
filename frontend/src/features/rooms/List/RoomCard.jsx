@@ -29,16 +29,16 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
       onClick={() => onClick(room)}
       elevation={0}
       sx={{
-      height: '100%',        
-      display: 'flex',      
-      flexDirection: 'column', 
-      borderRadius: 4,
-      border: '1px solid',
-      borderColor: 'divider',
-      cursor: 'pointer',
-      overflow: 'hidden',
-      transition: 'all 0.2s ease',
-      '&:hover': {
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: 4,
+        border: '1px solid',
+        borderColor: 'divider',
+        cursor: 'pointer',
+        overflow: 'hidden',
+        transition: 'all 0.2s ease',
+        '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: '0 12px 40px rgba(154,28,72,0.12)',
           borderColor: 'primary.main',
@@ -110,7 +110,7 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
       </Box>
 
       {/* Content */}
-      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+      <CardContent sx={{ p: 2, '&:last-child': { pb: 2 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography variant="h6" fontWeight={900} lineHeight={1.2} display="block">

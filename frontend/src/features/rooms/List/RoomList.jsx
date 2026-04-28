@@ -294,7 +294,7 @@ const RoomList = () => {
           : filtered.length === 0
             ? <EmptyState onAdd={handleAddClick} canEdit={canEdit} />
             : filtered.map(room => (
-                <Grid item xs={12} sm={6} md={4} lg={2} key={room.roomId || room.id || room.roomNumber}>
+                <Grid item xs={12} sm={6} md={4} lg={2} key={room.roomId || room.id || room.roomNumber} sx={{ display: 'flex' }}>
                   <RoomCard
                     room={room}
                     onClick={handleCardClick}

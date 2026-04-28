@@ -2,10 +2,11 @@ import React from 'react'
 import { Box, Typography, Button, Avatar, Tooltip, IconButton } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../shared/hooks/useAuth'
-import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout } from '@mui/icons-material'
+import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed } from '@mui/icons-material'
 
 const navItems = [
   { label: 'Trang chủ', path: '/home', icon: <Home fontSize="small" /> },
+  { label: 'Phòng', path: '/rooms', icon: <KingBed fontSize="small" /> },
   { label: 'Đặt phòng', path: '/bookings', icon: <EventNote fontSize="small" /> },
   { label: 'Thanh toán', path: '/payment', icon: <AccountBalanceWallet fontSize="small" /> },
 ]
@@ -81,6 +82,7 @@ const Header = () => {
                 borderRadius: 2,
                 px: 2,
                 py: 0.8,
+                minWidth: 120,
                 backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
                 '&:hover': { 
                   color: '#fff',
