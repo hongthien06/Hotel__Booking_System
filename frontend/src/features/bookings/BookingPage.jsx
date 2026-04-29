@@ -38,8 +38,22 @@ const DESTINATIONS = [
 ];
 
 
-const ROOM_TYPES = ['Standard', 'Deluxe', 'VIP Suite', 'Family', 'Penthouse'];
+const ROOM_TYPES = ['Standard', 'Deluxe', 'Superior', 'Family Room', 'Presidential Suite'];
 const BED_TYPES = ['Đơn', 'Đôi', 'Ba', 'King', 'Queen'];
+const BED_TYPE_MAP = {
+  'Đơn': 'SINGLE',
+  'Đôi': 'DOUBLE',
+  'Ba': 'TRIPLE',
+  'King': 'KING',
+  'Queen': 'QUEEN'
+};
+const BED_TYPE_LABELS = {
+  'SINGLE': 'Giường Đơn',
+  'DOUBLE': 'Giường Đôi',
+  'TRIPLE': 'Giường Ba',
+  'KING': 'Giường King',
+  'QUEEN': 'Giường Queen'
+};
 const SERVICES = ['Bữa sáng', 'Đưa đón sân bay', 'Thuê xe máy', 'Spa & Massage', 'Hồ bơi'];
 
 const MOCK_ROOMS = [
@@ -333,7 +347,7 @@ const BookingPage = () => {
       // Distance between cards = (Total Width - Total Gaps) / 5 + Gap
       // Which simplifies to (clientWidth + gap) / 5
       const scrollAmount = (clientWidth + 20) / 5;
-      
+
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
       if (dir < 0 && scrollLeft <= 10) return;
 
@@ -355,7 +369,7 @@ const BookingPage = () => {
     setLoading(true); setSearched(true);
     try {
       const typeName = roomTypes.length === 1 ? roomTypes[0] : undefined;
-      const bedType = bedTypes.length === 1 ? bedTypes[0] : undefined;
+      const bedType = bedTypes.length === 1 ? BED_TYPE_MAP[bedTypes[0]] : undefined;
       const d = await getAvailableRoomsApi(
         params.checkIn,
         params.checkOut,
@@ -407,7 +421,9 @@ const BookingPage = () => {
         <Typography variant="caption" color="text.secondary"
           sx={{ display: 'flex', alignItems: 'center', gap: 0.3, mb: 1 }}>
           <LocationOn fontSize="inherit" />
-          {isMock ? `${room.location} · ${room.bed}` : (room.province || 'Hà Nội')}
+          {isMock 
+            ? `${room.location} · ${room.bed}` 
+            : `${room.province || 'Hà Nội'} · ${BED_TYPE_LABELS[room.bedType] || room.bedType}`}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
           <Rating value={isMock ? room.rating : 5} precision={0.1} readOnly size="small"
@@ -476,108 +492,108 @@ const BookingPage = () => {
             {/* Điểm đến phổ biến */}
             <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🗺️ Điểm đến phổ biến</Typography>
             <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
-            {/* Nút cuộn trái */}
-            <IconButton onClick={() => scrollDest(-1)} sx={{
-              position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-              zIndex: 2, bgcolor: 'white', boxShadow: 3,
-              '&:hover': { bgcolor: PC_LIGHT },
-            }}>
-              <ChevronLeft sx={{ color: PC }} />
-            </IconButton>
+              {/* Nút cuộn trái */}
+              <IconButton onClick={() => scrollDest(-1)} sx={{
+                position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                '&:hover': { bgcolor: PC_LIGHT },
+              }}>
+                <ChevronLeft sx={{ color: PC }} />
+              </IconButton>
 
-            {/* Scroll container */}
-            <Box ref={destScrollRef} sx={{
-              display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1,
-              justifyContent: 'flex-start',
-              scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-              scrollSnapType: 'x mandatory',
-            }}>
-              {DESTINATIONS.map((d, i) => (
-                <Card key={d.name} onClick={() => selectDest(i)} sx={{
-                  cursor: 'pointer', borderRadius: 3, flexShrink: 0, 
-                  width: 'calc((100% - 80px) / 5)', height: 160,
-                  position: 'relative', overflow: 'hidden',
-                  scrollSnapAlign: 'start',
-                  scrollSnapStop: 'always',
-                  border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
-                  transition: 'all 0.2s',
-                  '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
-                  boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1,
-                }}>
-                  {/* Ảnh tràn kín */}
-                  <img
-                    src={d.img}
-                    alt={d.name}
-                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
-                  {/* Gradient overlay */}
-                  <Box sx={{
-                    position: 'absolute', inset: 0,
-                    background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)',
-                  }} />
-                  {/* Text */}
-                  <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 1.2, textAlign: 'center' }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
-                      {d.name}
-                    </Typography>
-                    <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.82)' }}>{d.desc}</Typography>
-                  </Box>
-                </Card>
-              ))}
+              {/* Scroll container */}
+              <Box ref={destScrollRef} sx={{
+                display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1,
+                justifyContent: 'flex-start',
+                scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                scrollSnapType: 'x mandatory',
+              }}>
+                {DESTINATIONS.map((d, i) => (
+                  <Card key={d.name} onClick={() => selectDest(i)} sx={{
+                    cursor: 'pointer', borderRadius: 3, flexShrink: 0,
+                    width: 'calc((100% - 80px) / 5)', height: 160,
+                    position: 'relative', overflow: 'hidden',
+                    scrollSnapAlign: 'start',
+                    scrollSnapStop: 'always',
+                    border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
+                    transition: 'all 0.2s',
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
+                    boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1,
+                  }}>
+                    {/* Ảnh tràn kín */}
+                    <img
+                      src={d.img}
+                      alt={d.name}
+                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    {/* Gradient overlay */}
+                    <Box sx={{
+                      position: 'absolute', inset: 0,
+                      background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)',
+                    }} />
+                    {/* Text */}
+                    <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 1.2, textAlign: 'center' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
+                        {d.name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.82)' }}>{d.desc}</Typography>
+                    </Box>
+                  </Card>
+                ))}
+              </Box>
+
+              {/* Nút cuộn phải */}
+              <IconButton onClick={() => scrollDest(1)} sx={{
+                position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                '&:hover': { bgcolor: PC_LIGHT },
+              }}>
+                <ChevronRight sx={{ color: PC }} />
+              </IconButton>
             </Box>
 
-            {/* Nút cuộn phải */}
-            <IconButton onClick={() => scrollDest(1)} sx={{
-              position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-              zIndex: 2, bgcolor: 'white', boxShadow: 3,
-              '&:hover': { bgcolor: PC_LIGHT },
-            }}>
-              <ChevronRight sx={{ color: PC }} />
-            </IconButton>
-          </Box>
 
-
-          {/* Phòng nổi bật */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 800 }}>
-              ⭐ {searched ? 'Phòng còn trống' : 'Phòng nổi bật'}
-            </Typography>
-            {!loading && (
-              <Typography variant="body2" color="text.secondary">
-                {rooms.length > 0 ? `${rooms.length} phòng` : `${MOCK_ROOMS.length} phòng mẫu`}
+            {/* Phòng nổi bật */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                ⭐ {searched ? 'Phòng còn trống' : 'Phòng nổi bật'}
               </Typography>
-            )}
-          </Box>
+              {!loading && (
+                <Typography variant="body2" color="text.secondary">
+                  {rooms.length > 0 ? `${rooms.length} phòng` : `${MOCK_ROOMS.length} phòng mẫu`}
+                </Typography>
+              )}
+            </Box>
 
-          <Grid container spacing={3}>
-            {loading ? (
-              [...Array(3)].map((_, i) => (
-                <Grid item xs={12} sm={6} md={4} key={i}>
-                  <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
-                  <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
-                  <Skeleton width="50%" height={18} />
+            <Grid container spacing={3}>
+              {loading ? (
+                [...Array(3)].map((_, i) => (
+                  <Grid item xs={12} sm={6} md={4} key={i}>
+                    <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
+                    <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
+                    <Skeleton width="50%" height={18} />
+                  </Grid>
+                ))
+              ) : rooms.length > 0 ? (
+                rooms.map(r => (
+                  <Grid item xs={12} sm={6} md={4} key={r.id}>
+                    <RoomCard room={r} isMock={false} />
+                  </Grid>
+                ))
+              ) : searched ? (
+                <Grid item xs={12}>
+                  <Alert severity="info" sx={{ borderRadius: 3 }}>
+                    Không tìm thấy phòng trống trong thời gian này. Vui lòng thử ngày khác!
+                  </Alert>
                 </Grid>
-              ))
-            ) : rooms.length > 0 ? (
-              rooms.map(r => (
-                <Grid item xs={12} sm={6} md={4} key={r.id}>
-                  <RoomCard room={r} isMock={false} />
-                </Grid>
-              ))
-            ) : searched ? (
-              <Grid item xs={12}>
-                <Alert severity="info" sx={{ borderRadius: 3 }}>
-                  Không tìm thấy phòng trống trong thời gian này. Vui lòng thử ngày khác!
-                </Alert>
-              </Grid>
-            ) : (
-              MOCK_ROOMS.map(r => (
-                <Grid item xs={12} sm={6} md={4} key={r.id}>
-                  <RoomCard room={r} isMock={true} />
-                </Grid>
-              ))
-            )}
-          </Grid>
+              ) : (
+                MOCK_ROOMS.map(r => (
+                  <Grid item xs={12} sm={6} md={4} key={r.id}>
+                    <RoomCard room={r} isMock={true} />
+                  </Grid>
+                ))
+              )}
+            </Grid>
 
           </Box>
         </Box>

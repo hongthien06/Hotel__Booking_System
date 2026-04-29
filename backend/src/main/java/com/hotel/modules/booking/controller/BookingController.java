@@ -2,7 +2,6 @@ package com.hotel.modules.booking.controller;
 
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.booking.dto.BookingRequest;
-import com.hotel.modules.booking.entity.CancelActor;
 import com.hotel.modules.booking.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +15,6 @@ import java.util.List;
 
 import static com.hotel.modules.booking.entity.CancelActor.ADMIN;
 import static com.hotel.modules.booking.entity.CancelActor.USER;
-import static com.hotel.modules.booking.entity.CancelActor.SYSTEM;
 
 @RestController
 @RequestMapping("/bookings")
