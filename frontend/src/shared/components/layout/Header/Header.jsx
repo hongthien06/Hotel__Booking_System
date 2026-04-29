@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Typography, Button, Avatar, Tooltip, IconButton } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../shared/hooks/useAuth'
-import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed } from '@mui/icons-material'
+import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed, History } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../LanguageSwitcher'
 
@@ -61,9 +61,9 @@ const Header = () => {
       boxSizing: 'border-box'
     }}>
       {/* Logo */}
-      <Typography 
-        variant="h6" 
-        sx={{ fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: '#9a1c48' }} 
+      <Typography
+        variant="h6"
+        sx={{ fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: '#9a1c48' }}
         onClick={() => navigate(isAuthenticated ? '/home' : '/login')}
       >
         🏨 Hotel Booking
@@ -87,7 +87,7 @@ const Header = () => {
                 py: 0.8,
                 minWidth: 120,
                 backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
-                '&:hover': { 
+                '&:hover': {
                   color: '#fff',
                   backgroundColor: '#c02860',
                 }
@@ -114,7 +114,7 @@ const Header = () => {
                 backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
                 borderLeft: '1px solid rgba(154,28,72,0.2)',
                 ml: 1,
-                '&:hover': { 
+                '&:hover': {
                   color: '#fff',
                   backgroundColor: '#c02860',
                 }
@@ -131,10 +131,31 @@ const Header = () => {
         <LanguageSwitcher />
         {isAuthenticated && user ? (
           <>
+            <Button
+              onClick={() => navigate('/booking-history')}
+              startIcon={<History fontSize="small" />}
+              sx={{
+                color: isActive('/booking-history') ? '#fff' : '#9a1c48',
+                fontWeight: isActive('/booking-history') ? 800 : 600,
+                fontSize: '0.85rem',
+                textTransform: 'none',
+                borderRadius: 2,
+                px: 2,
+                py: 0.6,
+                mr: 1,
+                backgroundColor: isActive('/booking-history') ? '#9a1c48' : 'transparent',
+                '&:hover': {
+                  color: '#fff',
+                  backgroundColor: '#c02860',
+                }
+              }}
+            >
+              Lịch sử đặt phòng
+            </Button>
             <Tooltip title="Trang cá nhân">
               <IconButton
                 onClick={() => navigate('/profile')}
-                sx={{ 
+                sx={{
                   p: 0.5,
                   '&:hover': { opacity: 0.8 }
                 }}
@@ -150,9 +171,9 @@ const Header = () => {
             <Tooltip title={t("header.logout")}>
               <IconButton
                 onClick={handleLogout}
-                sx={{ 
+                sx={{
                   color: '#9a1c48',
-                  '&:hover': { backgroundColor: 'rgba(154,28,72,0.1)' } 
+                  '&:hover': { backgroundColor: 'rgba(154,28,72,0.1)' }
                 }}
               >
                 <Logout fontSize="small" />
@@ -160,11 +181,11 @@ const Header = () => {
             </Tooltip>
           </>
         ) : (
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             size="small"
             onClick={() => navigate('/login')}
-            sx={{ 
+            sx={{
               fontWeight: 700, textTransform: 'none',
               bgcolor: '#9a1c48', color: '#fff',
               '&:hover': { bgcolor: '#c02860' }

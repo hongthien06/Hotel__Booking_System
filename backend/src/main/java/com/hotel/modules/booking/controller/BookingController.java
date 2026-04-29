@@ -34,6 +34,14 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
+    @GetMapping("/my-bookings")
+    public ResponseEntity<?> getMyBookings(
+            @AuthenticationPrincipal User user,
+            @RequestParam(required = false) LocalDate checkIn,
+            @RequestParam(required = false) LocalDate checkOut) {
+        return ResponseEntity.ok(bookingService.getMyBookings(user.getUserId(), checkIn, checkOut));
+    }
+
     @PutMapping("/{id}/check-in")
     public ResponseEntity<?> checkIn(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.checkIn(id));

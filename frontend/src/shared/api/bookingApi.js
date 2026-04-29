@@ -9,8 +9,11 @@ export const createBookingApi = async (bookingData) => {
   return response.data;
 };
 
-export const getMyBookingsApi = async () => {
-  const response = await axiosInstance.get(`${API_URL}/my`);
+export const getMyBookingsApi = async (checkIn, checkOut) => {
+  const params = {};
+  if (checkIn) params.checkIn = checkIn;
+  if (checkOut) params.checkOut = checkOut;
+  const response = await axiosInstance.get(`${API_URL}/my-bookings`, { params });
   return response.data;
 };
 

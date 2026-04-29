@@ -44,6 +44,14 @@ public class BookingService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<BookingDTO> getMyBookings(Long userId, LocalDate checkIn, LocalDate checkOut) {
+        return bookingRepository.findMyBookings(userId, checkIn, checkOut)
+                .stream()
+                .map(this::toDTO)
+                .toList();
+    }
+
     private BookingDTO toDTO(Booking booking) {
         BookingDTO dto = new BookingDTO();
 
