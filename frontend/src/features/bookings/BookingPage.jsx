@@ -4,6 +4,11 @@ import imgHaNoi from '../../assets/HA NOI.jpg';
 import imgVungTau from '../../assets/VUNG TAU.jpg';
 import imgDaLat from '../../assets/DA_LAT.webp';
 import imgDaNang from '../../assets/DA_NANG.jpg';
+import imgNhaTrang from '../../assets/NHA_TRANG.png';
+import imgPhuQuoc from '../../assets/PHU_QUOC.png';
+import imgSapa from '../../assets/SAPA.png';
+import imgHue from '../../assets/HUE.png';
+import imgCatBa from '../../assets/CAT_BA.png';
 import {
   Box, Typography, Grid, TextField, Button, Card, CardContent, CardMedia,
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
@@ -20,11 +25,16 @@ const PC_LIGHT = '#fce4ec';
 const SIDEBAR_W = 300;
 
 const DESTINATIONS = [
-  { name: 'TP. Hồ Chí Minh', desc: 'Thành phố sôi động', img: imgHCM, bg: '#fff0f3' },
-  { name: 'Hà Nội', desc: 'Thủ đô ngàn năm', img: imgHaNoi, bg: '#f0f4ff' },
-  { name: 'Vũng Tàu', desc: 'Biển xanh cát trắng', img: imgVungTau, bg: '#f0fff4' },
-  { name: 'Đà Lạt', desc: 'Thành phố ngàn hoa', img: imgDaLat, bg: '#fff8f0' },
-  { name: 'Đà Nẵng', desc: 'Thành phố đáng sống', img: imgDaNang, bg: '#f5f0ff' },
+  { name: 'TP. Hồ Chí Minh', province: 'TP. Hồ Chí Minh', desc: 'Thành phố sôi động', img: imgHCM, bg: '#fff0f3' },
+  { name: 'Hà Nội', province: 'Hà Nội', desc: 'Thủ đô ngàn năm', img: imgHaNoi, bg: '#f0f4ff' },
+  { name: 'Vũng Tàu', province: 'Bà Rịa - Vũng Tàu', desc: 'Biển xanh cát trắng', img: imgVungTau, bg: '#f0fff4' },
+  { name: 'Đà Lạt', province: 'Lâm Đồng', desc: 'Thành phố ngàn hoa', img: imgDaLat, bg: '#fff8f0' },
+  { name: 'Đà Nẵng', province: 'Đà Nẵng', desc: 'Thành phố đáng sống', img: imgDaNang, bg: '#f5f0ff' },
+  { name: 'Nha Trang', province: 'Khánh Hòa', desc: 'Hòn ngọc Biển Đông', img: imgNhaTrang, bg: '#f0f9ff' },
+  { name: 'Phú Quốc', province: 'Kiên Giang', desc: 'Đảo Ngọc thiên đường', img: imgPhuQuoc, bg: '#f0fff4' },
+  { name: 'Sapa', province: 'Lào Cai', desc: 'Thành phố trong sương', img: imgSapa, bg: '#f5f5f5' },
+  { name: 'Huế', province: 'Thừa Thiên Huế', desc: 'Cố đô cổ kính', img: imgHue, bg: '#fff5f0' },
+  { name: 'Cát Bà', province: 'Hải Phòng', desc: 'Vịnh đảo kỳ vĩ', img: imgCatBa, bg: '#f0fff4' },
 ];
 
 
@@ -318,7 +328,10 @@ const BookingPage = () => {
   const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' });
   const destScrollRef = useRef(null);
   const scrollDest = (dir) => {
-    if (destScrollRef.current) destScrollRef.current.scrollBy({ left: dir * 220, behavior: 'smooth' });
+    if (destScrollRef.current) {
+      const scrollAmount = 210; // Card 190px + gap 20px
+      destScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+    }
   };
 
   useEffect(() => {
@@ -361,7 +374,7 @@ const BookingPage = () => {
     setSnackbar({ open: true, msg: '🎉 Đặt phòng thành công! Kiểm tra email xác nhận của bạn.', severity: 'success' });
   };
 
-  const selectDest = (idx) => { setDestIdx(idx); onParam('destination', DESTINATIONS[idx].name); };
+  const selectDest = (idx) => { setDestIdx(idx); onParam('destination', DESTINATIONS[idx].province || DESTINATIONS[idx].name); };
 
   /* ── Room Card ─────────────────────────────────────────── */
   const RoomCard = ({ room, isMock }) => (
@@ -467,8 +480,8 @@ const BookingPage = () => {
 
             {/* Scroll container */}
             <Box ref={destScrollRef} sx={{
-              display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1, px: 1,
-              justifyContent: 'center',
+              display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1, px: 4,
+              justifyContent: 'flex-start',
               scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
             }}>
               {DESTINATIONS.map((d, i) => (
