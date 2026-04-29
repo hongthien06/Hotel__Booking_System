@@ -329,7 +329,14 @@ const BookingPage = () => {
   const destScrollRef = useRef(null);
   const scrollDest = (dir) => {
     if (destScrollRef.current) {
-      const scrollAmount = 210; // Card 190px + gap 20px
+      const { scrollLeft, scrollWidth, clientWidth } = destScrollRef.current;
+      // Distance between cards = (Total Width - Total Gaps) / 5 + Gap
+      // Which simplifies to (clientWidth + gap) / 5
+      const scrollAmount = (clientWidth + 20) / 5;
+      
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
+      if (dir < 0 && scrollLeft <= 10) return;
+
       destScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
     }
   };
@@ -468,10 +475,10 @@ const BookingPage = () => {
 
             {/* Điểm đến phổ biến */}
             <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🗺️ Điểm đến phổ biến</Typography>
-          <Box sx={{ position: 'relative', mb: 4 }}>
+            <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
             {/* Nút cuộn trái */}
             <IconButton onClick={() => scrollDest(-1)} sx={{
-              position: 'absolute', left: -16, top: '50%', transform: 'translateY(-50%)',
+              position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
               zIndex: 2, bgcolor: 'white', boxShadow: 3,
               '&:hover': { bgcolor: PC_LIGHT },
             }}>
@@ -480,14 +487,18 @@ const BookingPage = () => {
 
             {/* Scroll container */}
             <Box ref={destScrollRef} sx={{
-              display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1, px: 4,
+              display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1,
               justifyContent: 'flex-start',
               scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+              scrollSnapType: 'x mandatory',
             }}>
               {DESTINATIONS.map((d, i) => (
                 <Card key={d.name} onClick={() => selectDest(i)} sx={{
-                  cursor: 'pointer', borderRadius: 3, flexShrink: 0, width: 190, height: 160,
+                  cursor: 'pointer', borderRadius: 3, flexShrink: 0, 
+                  width: 'calc((100% - 80px) / 5)', height: 160,
                   position: 'relative', overflow: 'hidden',
+                  scrollSnapAlign: 'start',
+                  scrollSnapStop: 'always',
                   border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
                   transition: 'all 0.2s',
                   '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
@@ -517,7 +528,7 @@ const BookingPage = () => {
 
             {/* Nút cuộn phải */}
             <IconButton onClick={() => scrollDest(1)} sx={{
-              position: 'absolute', right: -16, top: '50%', transform: 'translateY(-50%)',
+              position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
               zIndex: 2, bgcolor: 'white', boxShadow: 3,
               '&:hover': { bgcolor: PC_LIGHT },
             }}>
