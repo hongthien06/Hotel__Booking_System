@@ -27,13 +27,6 @@ const DESTINATIONS = [
   { name: 'Đà Nẵng', desc: 'Thành phố đáng sống', img: imgDaNang, bg: '#f5f0ff' },
 ];
 
-const ACCOM_TYPES = [
-  { name: 'Khách sạn', emoji: '🏨' },
-  { name: 'Căn hộ', emoji: '🏠' },
-  { name: 'Resort', emoji: '🌴' },
-  { name: 'Biệt thự', emoji: '🏡' },
-  { name: 'Villa', emoji: '🏰' },
-];
 
 const ROOM_TYPES = ['Standard', 'Deluxe', 'VIP Suite', 'Family', 'Penthouse'];
 const BED_TYPES = ['Đơn', 'Đôi', 'Ba', 'King', 'Queen'];
@@ -306,7 +299,6 @@ const BookingPage = () => {
   const [loading, setLoading] = useState(true);
   const [searched, setSearched] = useState(false);
   const [destIdx, setDestIdx] = useState(1);
-  const [accomIdx, setAccomIdx] = useState(2);
   const [roomTypes, setRoomTypes] = useState([]);
   const [bedTypes, setBedTypes] = useState([]);
   const [services, setServices] = useState([]);
@@ -520,27 +512,6 @@ const BookingPage = () => {
             </IconButton>
           </Box>
 
-          {/* Loại chỗ nghỉ */}
-          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🏠 Loại chỗ nghỉ</Typography>
-          <Box sx={{
-            display: 'flex', gap: 2, mb: 4, overflowX: 'auto', pb: 1, px: 1, justifyContent: 'center',
-            scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }
-          }}>
-            {ACCOM_TYPES.map((t, i) => (
-              <Card key={t.name} onClick={() => setAccomIdx(i)} sx={{
-                cursor: 'pointer', borderRadius: 3, textAlign: 'center', p: 2, minWidth: 110, flexShrink: 0,
-                border: accomIdx === i ? `2px solid ${PC}` : '2px solid #eee',
-                bgcolor: accomIdx === i ? PC_LIGHT : 'white',
-                transition: 'all 0.2s',
-                '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 },
-              }}>
-                <Typography sx={{ fontSize: 32 }}>{t.emoji}</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600, mt: 0.5, color: accomIdx === i ? PC : 'text.primary' }}>
-                  {t.name}
-                </Typography>
-              </Card>
-            ))}
-          </Box>
 
           {/* Phòng nổi bật */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
