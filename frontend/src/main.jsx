@@ -1,4 +1,5 @@
 import './index.css'
+import './i18n/i18n'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import ReactDOM from 'react-dom/client'

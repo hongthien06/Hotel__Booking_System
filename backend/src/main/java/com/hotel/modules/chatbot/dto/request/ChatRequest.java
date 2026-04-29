@@ -28,4 +28,5 @@ public class ChatRequest {
     private Long hotelId;
     private Long roomId;
     private Long bookingId;
+    private String lang;
 }

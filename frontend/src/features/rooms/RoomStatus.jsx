@@ -1,12 +1,13 @@
 import React from 'react'
 import { Chip } from '@mui/material'
 import { Circle } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 
 export const STATUS_CONFIG = {
-  AVAILABLE:   { label: 'Còn trống', color: '#16a34a', bg: '#dcfce7', border: '#bbf7d0' },
-  OCCUPIED:    { label: 'Đang thuê', color: '#dc2626', bg: '#fee2e2', border: '#fecaca' },
-  MAINTENANCE: { label: 'Bảo trì',   color: '#d97706', bg: '#fef3c7', border: '#fde68a' },
-  INACTIVE:    { label: 'Ngừng HĐ',  color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb' },
+  AVAILABLE:   { label: 'rooms.status_available', color: '#16a34a', bg: '#dcfce7', border: '#bbf7d0' },
+  OCCUPIED:    { label: 'rooms.status_occupied', color: '#dc2626', bg: '#fee2e2', border: '#fecaca' },
+  MAINTENANCE: { label: 'rooms.status_maintenance', color: '#d97706', bg: '#fef3c7', border: '#fde68a' },
+  INACTIVE:    { label: 'rooms.status_inactive', color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb' },
 }
 
 const sizeMap = {
@@ -16,7 +17,8 @@ const sizeMap = {
 }
 
 const RoomStatus = ({ status, size = 'md' }) => {
-  const cfg = STATUS_CONFIG[status] || { label: status || 'Không rõ', color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb' }
+  const { t } = useTranslation()
+  const cfg = STATUS_CONFIG[status] || { label: status || 'common.error', color: '#6b7280', bg: '#f3f4f6', border: '#e5e7eb' }
   const sz  = sizeMap[size] || sizeMap.md
 
   return (
@@ -25,7 +27,7 @@ const RoomStatus = ({ status, size = 'md' }) => {
       icon={
         <Circle sx={{ fontSize: `${sz.iconSize}px !important`, color: `${cfg.color} !important`, ml: '6px !important' }} />
       }
-      label={cfg.label}
+      label={t(cfg.label)}
       sx={{
         height: sz.height,
         fontSize: sz.fontSize,

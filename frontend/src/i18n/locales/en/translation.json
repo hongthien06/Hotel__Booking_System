@@ -1,0 +1,100 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Update",
+    "create": "Create",
+    "delete": "Delete",
+    "search": "Search",
+    "status": "Status",
+    "actions": "Actions",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "success": "Success"
+  },
+  "header": {
+    "home": "Home",
+    "rooms": "Rooms",
+    "bookings": "Bookings",
+    "payments": "Payments",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "login": "Login"
+  },
+  "home": {
+    "hero": {
+      "welcome": "WELCOME TO",
+      "subtitle": "Leading online hotel booking system — fast, convenient, and reliable",
+      "cta": "Book Now"
+    },
+    "stats": {
+      "rooms": "Premium Rooms",
+      "customers": "Customers",
+      "rating": "Rating",
+      "support": "Support"
+    },
+    "features": {
+      "overline": "WHY CHOOSE US?",
+      "title": "Outstanding Services",
+      "rooms": {
+        "title": "Premium Rooms",
+        "desc": "Over 200 rooms designed with luxury and full modern amenities."
+      },
+      "security": {
+        "title": "Safety & Security",
+        "desc": "24/7 security system, surveillance cameras, and in-room safes."
+      },
+      "support": {
+        "title": "Dedicated Support",
+        "desc": "Professional staff team, assisting customers anytime, anywhere."
+      },
+      "experience": {
+        "title": "5-Star Experience",
+        "desc": "International class service, bringing a wonderful vacation experience."
+      }
+    },
+    "amenities": {
+      "overline": "AMENITIES",
+      "title": "Full Facilities",
+      "wifi": "Free Wifi",
+      "pool": "Swimming Pool",
+      "restaurant": "Restaurant",
+      "spa": "Spa & Gym"
+    },
+    "reviews": {
+      "overline": "REVIEWS",
+      "title": "What do our customers say?"
+    },
+    "cta": {
+      "title": "Ready for your next getaway?",
+      "subtitle": "Book today to receive special offers!"
+    },
+    "footer": {
+      "text": "© 2026 Hotel Booking Management System — Course Project"
+    }
+  },
+  "rooms": {
+    "title_add": "Add New Room",
+    "title_edit": "Update Room",
+    "hotel_name": "Hotel Name",
+    "branch": "Branch",
+    "floor": "Floor",
+    "room_number": "Room Number",
+    "room_type": "Room Type",
+    "bed_type": "Bed Type",
+    "price_per_night": "Price / Night",
+    "image_url": "Image URL",
+    "description": "Detailed Description",
+    "status_available": "Available",
+    "status_occupied": "Occupied",
+    "status_cleaning": "Cleaning",
+    "status_maintenance": "Maintenance",
+    "status_inactive": "Inactive",
+    "validation_required": "Please fill in all fields: Hotel, Branch, and Room Type!"
+  },
+  "chatbot": {
+    "placeholder": "Type a message...",
+    "title": "HotelBot Assistant",
+    "welcome": "Hello! How can I help you today?"
+  }
+}

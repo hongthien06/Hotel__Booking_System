@@ -1,0 +1,100 @@
+{
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "edit": "Cập nhật",
+    "create": "Tạo mới",
+    "delete": "Xóa",
+    "search": "Tìm kiếm",
+    "status": "Trạng thái",
+    "actions": "Thao tác",
+    "loading": "Đang tải...",
+    "error": "Có lỗi xảy ra",
+    "success": "Thành công"
+  },
+  "header": {
+    "home": "Trang chủ",
+    "rooms": "Phòng",
+    "bookings": "Đặt phòng",
+    "payments": "Thanh toán",
+    "dashboard": "Dashboard",
+    "logout": "Đăng xuất",
+    "login": "Đăng nhập"
+  },
+  "home": {
+    "hero": {
+      "welcome": "CHÀO MỪNG ĐẾN VỚI",
+      "subtitle": "Hệ thống đặt phòng khách sạn trực tuyến hàng đầu — nhanh chóng, tiện lợi và đáng tin cậy",
+      "cta": "Đặt phòng ngay"
+    },
+    "stats": {
+      "rooms": "Phòng cao cấp",
+      "customers": "Khách hàng",
+      "rating": "Đánh giá",
+      "support": "Hỗ trợ"
+    },
+    "features": {
+      "overline": "TẠI SAO CHỌN CHÚNG TÔI?",
+      "title": "Dịch vụ vượt trội",
+      "rooms": {
+        "title": "Phòng cao cấp",
+        "desc": "Hơn 200 phòng được thiết kế sang trọng với đầy đủ tiện nghi hiện đại."
+      },
+      "security": {
+        "title": "An toàn & Bảo mật",
+        "desc": "Hệ thống bảo mật 24/7, camera giám sát và két sắt trong phòng."
+      },
+      "support": {
+        "title": "Hỗ trợ tận tâm",
+        "desc": "Đội ngũ nhân viên chuyên nghiệp, hỗ trợ khách hàng mọi lúc mọi nơi."
+      },
+      "experience": {
+        "title": "Trải nghiệm 5 sao",
+        "desc": "Dịch vụ đẳng cấp quốc tế, mang đến trải nghiệm nghỉ dưỡng tuyệt vời."
+      }
+    },
+    "amenities": {
+      "overline": "TIỆN ÍCH",
+      "title": "Đầy đủ tiện nghi",
+      "wifi": "Wifi miễn phí",
+      "pool": "Hồ bơi",
+      "restaurant": "Nhà hàng",
+      "spa": "Spa & Gym"
+    },
+    "reviews": {
+      "overline": "ĐÁNH GIÁ",
+      "title": "Khách hàng nói gì về chúng tôi?"
+    },
+    "cta": {
+      "title": "Sẵn sàng cho chuyến nghỉ dưỡng tiếp theo?",
+      "subtitle": "Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt!"
+    },
+    "footer": {
+      "text": "© 2026 Hotel Booking Management System — Đồ án môn học"
+    }
+  },
+  "rooms": {
+    "title_add": "Thêm phòng mới",
+    "title_edit": "Cập nhật phòng",
+    "hotel_name": "Tên Khách sạn",
+    "branch": "Chi nhánh",
+    "floor": "Tầng",
+    "room_number": "Mã phòng (Số)",
+    "room_type": "Loại phòng",
+    "bed_type": "Loại giường",
+    "price_per_night": "Giá / đêm (VNĐ)",
+    "image_url": "URL hình ảnh",
+    "description": "Mô tả chi tiết",
+    "status_available": "Sẵn sàng",
+    "status_occupied": "Đang có khách",
+    "status_cleaning": "Đang dọn dẹp",
+    "status_maintenance": "Bảo trì",
+    "status_inactive": "Ngừng HĐ",
+    "validation_required": "Vui lòng điền đầy đủ: Khách sạn, Chi nhánh và Loại phòng!"
+  },
+  "chatbot": {
+    "placeholder": "Nhập tin nhắn...",
+    "title": "Trợ lý HotelBot",
+    "welcome": "Xin chào! Tôi có thể giúp gì cho bạn?"
+  }
+}

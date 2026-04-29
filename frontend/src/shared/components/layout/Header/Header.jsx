@@ -3,19 +3,22 @@ import { Box, Typography, Button, Avatar, Tooltip, IconButton } from '@mui/mater
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../shared/hooks/useAuth'
 import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
+import LanguageSwitcher from '../../LanguageSwitcher'
 
 const navItems = [
-  { label: 'Trang chủ', path: '/home', icon: <Home fontSize="small" /> },
-  { label: 'Phòng', path: '/rooms', icon: <KingBed fontSize="small" /> },
-  { label: 'Đặt phòng', path: '/bookings', icon: <EventNote fontSize="small" /> },
-  { label: 'Thanh toán', path: '/payment', icon: <AccountBalanceWallet fontSize="small" /> },
+  { label: 'header.home', path: '/home', icon: <Home fontSize="small" /> },
+  { label: 'header.rooms', path: '/rooms', icon: <KingBed fontSize="small" /> },
+  { label: 'header.bookings', path: '/bookings', icon: <EventNote fontSize="small" /> },
+  { label: 'header.payments', path: '/payment', icon: <AccountBalanceWallet fontSize="small" /> },
 ]
 
 const adminNavItems = [
-  { label: 'Dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
+  { label: 'header.dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
 ]
 
 const Header = () => {
+  const { t } = useTranslation()
   const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
@@ -90,7 +93,7 @@ const Header = () => {
                 }
               }}
             >
-              {item.label}
+              {t(item.label)}
             </Button>
           ))}
 
@@ -117,7 +120,7 @@ const Header = () => {
                 }
               }}
             >
-              {item.label}
+              {t(item.label)}
             </Button>
           ))}
         </Box>
@@ -125,6 +128,7 @@ const Header = () => {
 
       {/* Right Section - User info / Login */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <LanguageSwitcher />
         {isAuthenticated && user ? (
           <>
             <Tooltip title="Trang cá nhân">
@@ -143,7 +147,7 @@ const Header = () => {
             <Typography variant="body2" sx={{ fontWeight: 600, color: '#9a1c48', display: { xs: 'none', md: 'block' } }}>
               {user.fullName}
             </Typography>
-            <Tooltip title="Đăng xuất">
+            <Tooltip title={t("header.logout")}>
               <IconButton
                 onClick={handleLogout}
                 sx={{ 
@@ -166,7 +170,7 @@ const Header = () => {
               '&:hover': { bgcolor: '#c02860' }
             }}
           >
-            Đăng nhập
+            {t("header.login")}
           </Button>
         )}
       </Box>

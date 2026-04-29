@@ -90,7 +90,7 @@ public class ChatbotService {
         chatMessageRepository.save(userMsg);
 
         String hotelContext = buildHotelContext();
-        String aiReply = geminiService.chat(history, request.getContent(), hotelContext);
+        String aiReply = geminiService.chat(history, request.getContent(), hotelContext, request.getLang());
 
         ChatMessage assistantMsg = new ChatMessage();
         assistantMsg.setConversation(conv);

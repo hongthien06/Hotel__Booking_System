@@ -9,6 +9,8 @@ import {
   MonetizationOn, Description, AddPhotoAlternate, Layers, CheckCircle
 } from "@mui/icons-material";
 import { STATUS_CONFIG } from "../RoomStatus";
+import { useTranslation } from "react-i18next";
+import { formatCurrency } from "~/shared/utils/formatters";
 
 const BED_TYPES = [
   { value: "SINGLE", label: "Single Bed" },
@@ -114,6 +116,7 @@ const AutoField = ({ icon, label, ...props }) => (
 );
 
 const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
+  const { t } = useTranslation();
   const isEdit = !!editRoom;
   const [form, setForm] = useState(emptyForm);
   const [allHotels, setAllHotels] = useState([]);
@@ -172,7 +175,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
 
   const handleSubmit = () => {
     if (!form.hotelId || !form.roomNumber || !form.typeId) {
-      alert("Vui lòng điền đầy đủ: Khách sạn, Chi nhánh và Loại phòng!");
+      alert(t("rooms.validation_required"));
       return;
     }
     onSubmit({
@@ -190,7 +193,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
 
       <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
         <Typography variant="h5" fontWeight={900} color="primary.main">
-          {isEdit ? "Cập nhật phòng" : "Thêm phòng mới"}
+          {isEdit ? t("rooms.title_edit") : t("rooms.title_add")}
         </Typography>
         <IconButton onClick={onClose} size="small" sx={{ bgcolor: "action.hover" }}><Close /></IconButton>
       </DialogTitle>
@@ -202,7 +205,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
           <AutoField
             fullWidth
             icon={<Hotel color="primary" />}
-            label="Tên Khách sạn"
+            label={t("rooms.hotel_name")}
             options={brands}
             value={selectedBrand}
             onChange={handleBrandChange}
@@ -214,7 +217,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
           <AutoField
             fullWidth
             icon={<Business color="primary" />}
-            label="Chi nhánh"
+            label={t("rooms.branch")}
             options={branches}
             getOptionLabel={(o) => `${o.address}, ${o.district}`}
             value={selectedBranch}
@@ -226,14 +229,14 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
         {/* Hàng 3: Tầng | Mã phòng */}
         <RowHalf
           left={
-            <TextField fullWidth label="Tầng" type="number" value={form.floor}
+            <TextField fullWidth label={t("rooms.floor")} type="number" value={form.floor}
               onChange={(e) => setForm(p => ({ ...p, floor: e.target.value }))}
               sx={fieldSx}
               InputProps={{ startAdornment: <InputAdornment position="start"><Layers color="primary" /></InputAdornment> }}
             />
           }
           right={
-            <TextField fullWidth label="Mã phòng (Số)" value={form.roomNumber}
+            <TextField fullWidth label={t("rooms.room_number")} value={form.roomNumber}
               onChange={(e) => setForm(p => ({ ...p, roomNumber: e.target.value }))}
               sx={fieldSx}
               InputProps={{ startAdornment: <InputAdornment position="start"><CheckCircle color="primary" /></InputAdornment> }}
@@ -247,7 +250,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
             <AutoField
               fullWidth
               icon={<MeetingRoom color="primary" />}
-              label="Loại phòng"
+              label={t("rooms.room_type")}
               options={roomTypes}
               getOptionLabel={(o) => o.typeName || ""}
               value={selectedRoomType}
@@ -259,7 +262,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
             <AutoField
               fullWidth
               icon={<Bed color="primary" />}
-              label="Loại giường"
+              label={t("rooms.bed_type")}
               options={BED_TYPES}
               getOptionLabel={(o) => o.label}
               value={BED_TYPES.find(b => b.value === form.bedType) || null}
@@ -271,11 +274,11 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
         {/* Hàng 5: Trạng thái | Giá / đêm */}
         <RowHalf
           left={
-            <TextField select fullWidth label="Trạng thái" value={form.status}
+            <TextField select fullWidth label={t("common.status")} value={form.status}
               onChange={(e) => setForm(p => ({ ...p, status: e.target.value }))}
               sx={fieldSx}>
               {Object.keys(STATUS_CONFIG).map(k => (
-                <MenuItem key={k} value={k}>{STATUS_CONFIG[k].label}</MenuItem>
+                <MenuItem key={k} value={k}>{t(STATUS_CONFIG[k].label)}</MenuItem>
               ))}
             </TextField>
           }
@@ -284,7 +287,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
               fullWidth
               freeSolo
               icon={<MonetizationOn color="primary" />}
-              label="Giá / đêm (VNĐ)"
+              label={t("rooms.price_per_night")}
               options={PRESET_PRICES.map(p => String(p.value))}
               value={String(form.pricePerNight)}
               onInputChange={(_, v) => setForm(p => ({ ...p, pricePerNight: v }))}
@@ -294,7 +297,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
 
         {/* Hàng 6: URL hình ảnh */}
         <RowFull>
-          <TextField fullWidth label="URL hình ảnh" value={form.imageUrl}
+          <TextField fullWidth label={t("rooms.image_url")} value={form.imageUrl}
             onChange={(e) => setForm(p => ({ ...p, imageUrl: e.target.value }))}
             sx={fieldSx}
             InputProps={{ startAdornment: <InputAdornment position="start"><AddPhotoAlternate color="primary" /></InputAdornment> }}
@@ -303,7 +306,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
 
         {/* Hàng 7: Mô tả */}
         <Box sx={{ width: "100%", mb: 1 }}>
-          <TextField fullWidth label="Mô tả chi tiết" multiline rows={2}
+          <TextField fullWidth label={t("rooms.description")} multiline rows={2}
             value={form.description}
             onChange={(e) => setForm(p => ({ ...p, description: e.target.value }))}
             sx={multilineSx}
@@ -322,11 +325,11 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
       <DialogActions sx={{ px: 3, pb: 3, pt: 2, gap: 2 }}>
         <Button onClick={onClose} variant="outlined" fullWidth
           sx={{ borderRadius: 4, py: 1.5, fontWeight: 800, border: "2px solid", "&:hover": { border: "2px solid" } }}>
-          HỦY
+          {t("common.cancel").toUpperCase()}
         </Button>
         <Button onClick={handleSubmit} variant="contained" color="secondary" fullWidth disabled={loading}
           sx={{ borderRadius: 4, py: 1.5, fontWeight: 800, boxShadow: "0 8px 25px rgba(216,27,96,0.3)" }}>
-          {isEdit ? "CẬP NHẬT" : "TẠO PHÒNG"}
+          {isEdit ? t("common.edit").toUpperCase() : t("common.create").toUpperCase()}
         </Button>
       </DialogActions>
     </Dialog>

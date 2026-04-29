@@ -24,22 +24,23 @@ import {
   EventNote
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import heroBg from '../../assets/hotel_hero.png';
 
 // Dữ liệu giới thiệu dịch vụ
 const features = [
-  { icon: <KingBed sx={{ fontSize: 40 }} />, title: 'Phòng cao cấp', desc: 'Hơn 200 phòng được thiết kế sang trọng với đầy đủ tiện nghi hiện đại.' },
-  { icon: <Security sx={{ fontSize: 40 }} />, title: 'An toàn & Bảo mật', desc: 'Hệ thống bảo mật 24/7, camera giám sát và két sắt trong phòng.' },
-  { icon: <SupportAgent sx={{ fontSize: 40 }} />, title: 'Hỗ trợ tận tâm', desc: 'Đội ngũ nhân viên chuyên nghiệp, hỗ trợ khách hàng mọi lúc mọi nơi.' },
-  { icon: <Star sx={{ fontSize: 40 }} />, title: 'Trải nghiệm 5 sao', desc: 'Dịch vụ đẳng cấp quốc tế, mang đến trải nghiệm nghỉ dưỡng tuyệt vời.' },
+  { icon: <KingBed sx={{ fontSize: 40 }} />, title: 'home.features.rooms.title', desc: 'home.features.rooms.desc' },
+  { icon: <Security sx={{ fontSize: 40 }} />, title: 'home.features.security.title', desc: 'home.features.security.desc' },
+  { icon: <SupportAgent sx={{ fontSize: 40 }} />, title: 'home.features.support.title', desc: 'home.features.support.desc' },
+  { icon: <Star sx={{ fontSize: 40 }} />, title: 'home.features.experience.title', desc: 'home.features.experience.desc' },
 ];
 
 // Dữ liệu tiện ích
 const amenities = [
-  { icon: <Wifi />, label: 'Wifi miễn phí' },
-  { icon: <Pool />, label: 'Hồ bơi' },
-  { icon: <Restaurant />, label: 'Nhà hàng' },
-  { icon: <Spa />, label: 'Spa & Gym' },
+  { icon: <Wifi />, label: 'home.amenities.wifi' },
+  { icon: <Pool />, label: 'home.amenities.pool' },
+  { icon: <Restaurant />, label: 'home.amenities.restaurant' },
+  { icon: <Spa />, label: 'home.amenities.spa' },
 ];
 
 // Dữ liệu đánh giá
@@ -51,6 +52,7 @@ const reviews = [
 ];
 
 const HomePage = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
@@ -71,13 +73,13 @@ const HomePage = () => {
       >
         <Container maxWidth="md" sx={{ textAlign: 'center', zIndex: 1 }}>
           <Typography variant="overline" sx={{ letterSpacing: 4, fontSize: '0.9rem', opacity: 0.9, mb: 2, display: 'block' }}>
-            CHÀO MỪNG ĐẾN VỚI
+            {t("home.hero.welcome")}
           </Typography>
           <Typography variant="h2" sx={{ fontWeight: 900, mb: 2, textShadow: '2px 4px 20px rgba(0,0,0,0.4)' }}>
             Hotel Booking System
           </Typography>
           <Typography variant="h6" sx={{ mb: 5, fontWeight: 300, opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
-            Hệ thống đặt phòng khách sạn trực tuyến hàng đầu — nhanh chóng, tiện lợi và đáng tin cậy
+            {t("home.hero.subtitle")}
           </Typography>
           <Button
             variant="contained"
@@ -97,7 +99,7 @@ const HomePage = () => {
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            Đặt phòng ngay
+            {t("home.hero.cta")}
           </Button>
         </Container>
       </Box>
@@ -143,7 +145,7 @@ const HomePage = () => {
               {stat.number}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: 1, textTransform: 'uppercase', fontSize: { xs: '0.6rem', sm: '0.75rem', md: '0.9rem' } }}>
-              {stat.label}
+              {t(stat.label)}
             </Typography>
           </Box>
         ))}
@@ -153,10 +155,10 @@ const HomePage = () => {
       <Container maxWidth="lg" sx={{ py: 10 }}>
         <Box sx={{ textAlign: 'center', mb: 7 }}>
           <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
-            TẠI SAO CHỌN CHÚNG TÔI?
+            {t("home.features.overline")}
           </Typography>
           <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
-            Dịch vụ vượt trội
+            {t("home.features.title")}
           </Typography>
         </Box>
 
@@ -175,8 +177,8 @@ const HomePage = () => {
                 }}>
                   {f.icon}
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>{f.title}</Typography>
-                <Typography variant="body2" color="text.secondary">{f.desc}</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1 }}>{t(f.title)}</Typography>
+                <Typography variant="body2" color="text.secondary">{t(f.desc)}</Typography>
               </Card>
             </Grid>
           ))}
@@ -188,10 +190,10 @@ const HomePage = () => {
         <Container maxWidth="lg">
           <Box sx={{ textAlign: 'center', mb: 5 }}>
             <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
-              TIỆN ÍCH
+              {t("home.amenities.overline")}
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
-              Đầy đủ tiện nghi
+              {t("home.amenities.title")}
             </Typography>
           </Box>
           <Grid container spacing={3} justifyContent="center">
@@ -202,7 +204,7 @@ const HomePage = () => {
                   transition: 'all 0.3s', '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.light', color: 'primary.contrastText' }
                 }}>
                   <Box sx={{ mb: 1 }}>{a.icon}</Box>
-                  <Typography variant="body1" sx={{ fontWeight: 700 }}>{a.label}</Typography>
+                  <Typography variant="body1" sx={{ fontWeight: 700 }}>{t(a.label)}</Typography>
                 </Paper>
               </Grid>
             ))}
@@ -214,10 +216,10 @@ const HomePage = () => {
       <Container maxWidth="lg" sx={{ py: 10 }}>
         <Box sx={{ textAlign: 'center', mb: 7 }}>
           <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
-            ĐÁNH GIÁ
+            {t("home.reviews.overline")}
           </Typography>
           <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
-            Khách hàng nói gì về chúng tôi?
+            {t("home.reviews.title")}
           </Typography>
         </Box>
 
@@ -255,10 +257,10 @@ const HomePage = () => {
       }}>
         <Container maxWidth="md">
           <Typography variant="h4" sx={{ fontWeight: 900, mb: 2 }}>
-            Sẵn sàng cho chuyến nghỉ dưỡng tiếp theo?
+            {t("home.cta.title")}
           </Typography>
           <Typography variant="body1" sx={{ mb: 4, opacity: 0.9 }}>
-            Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt!
+            {t("home.cta.subtitle")}
           </Typography>
           <Button
             variant="contained"
@@ -284,7 +286,7 @@ const HomePage = () => {
       {/* Footer */}
       <Box sx={{ bgcolor: 'background.paper', py: 4, textAlign: 'center' }}>
         <Typography variant="body2" color="text.secondary">
-          © 2026 Hotel Booking Management System — Đồ án môn học
+          {t("home.footer.text")}
         </Typography>
       </Box>
     </Box>
