@@ -11,14 +11,14 @@ GO
 USE HotelBookingDB;
 GO
 
--- Xóa bảng theo thứ tự chuẩn
+-- Xóa bảng theo thứ tự chuẩn (từ bảng con đến bảng cha)
 DROP TABLE IF EXISTS Reviews;
 DROP TABLE IF EXISTS InvoiceItems;
 DROP TABLE IF EXISTS Invoices;
 DROP TABLE IF EXISTS Payments;
 DROP TABLE IF EXISTS BookingServices;
-DROP TABLE IF EXISTS Bookings;
 DROP TABLE IF EXISTS ChatMessages;
+DROP TABLE IF EXISTS Bookings;
 DROP TABLE IF EXISTS Conversations;
 DROP TABLE IF EXISTS HotelAmenityMap;
 DROP TABLE IF EXISTS HotelServices;
@@ -177,19 +177,109 @@ CREATE TABLE ChatMessages (
     CONSTRAINT FK_Msg_Booking FOREIGN KEY (ref_booking_id) REFERENCES Bookings(booking_id) ON DELETE SET NULL
 );
 
--- Dữ liệu mẫu tối giản
+-- Dữ liệu mẫu mở rộng (15 khách sạn, 5 loại phòng mỗi KS, 50 phòng thực tế)
 GO
 INSERT INTO Roles (role_name) VALUES ('ROLE_ADMIN'), ('ROLE_MANAGER'), ('ROLE_USER');
 
+-- 1. Thêm 15 khách sạn đa dạng vùng miền
 INSERT INTO Hotels (hotel_code, hotel_name, province, province_code, district, address, star_rating) VALUES
 ('HNK-001', N'Mường Thanh Grand Hanoi', N'Hà Nội', 'HN', N'Hoàn Kiếm', N'1 Lý Thái Tổ', 5),
-('DNS-001', N'InterContinental Danang', N'Đà Nẵng', 'DN', N'Sơn Trà', N'Bãi Bắc, Sơn Trà', 5);
+('DNS-001', N'InterContinental Danang', N'Đà Nẵng', 'DN', N'Sơn Trà', N'Bãi Bắc, Sơn Trà', 5),
+('HCM-001', N'Vinpearl Landmark 81', N'TP. Hồ Chí Minh', 'HCM', N'Quận 1', N'720A Điện Biên Phủ', 5),
+('HCM-002', N'Caravelle Saigon', N'TP. Hồ Chí Minh', 'HCM', N'Quận 1', N'19-23 Lam Sơn Square', 5),
+('DLT-001', N'Ana Mandara Villas Dalat', N'Lâm Đồng', 'LD', N'Đà Lạt', N'Lê Lai, Phường 5', 5),
+('NTR-001', N'Sheraton Nha Trang', N'Khánh Hòa', 'KH', N'Nha Trang', N'26-28 Trần Phú', 5),
+('PQU-001', N'JW Marriott Phu Quoc', N'Kiên Giang', 'KG', N'Phú Quốc', N'Bãi Khem, An Thới', 5),
+('SAP-001', N'Silk Path Grand Resort', N'Lào Cai', 'LC', N'Sapa', N'Đồi Quan 6, Tổ 10', 5),
+('HUE-001', N'Azerai La Residence', N'Thừa Thiên Huế', 'TTH', N'Huế', N'5 Lê Lợi, Vĩnh Ninh', 5),
+('HPH-001', N'Flamingo Cat Ba', N'Hải Phòng', 'HP', N'Cát Hải', N'Bãi tắm Cát Cò 1, 2', 5),
+('VTU-001', N'Pullman Vung Tau', N'Bà Rịa - Vũng Tàu', 'VT', N'Vũng Tàu', N'15 Thi Sách, Thắng Tam', 5),
+('HCM-003', N'Rex Hotel', N'TP. Hồ Chí Minh', 'HCM', N'Quận 1', N'141 Nguyễn Huệ', 5),
+('HNK-002', N'Metropole Hanoi', N'Hà Nội', 'HN', N'Hoàn Kiếm', N'15 Ngô Quyền', 5),
+('DNS-002', N'Novotel Danang', N'Đà Nẵng', 'DN', N'Hải Châu', N'36 Bạch Đằng', 5),
+('DLT-002', N'Dalat Palace Heritage', N'Lâm Đồng', 'LD', N'Đà Lạt', N'2 Trần Phú', 5);
 
-INSERT INTO RoomTypes (hotel_id, type_name, base_capacity) VALUES
-(1, N'Standard', 2), (1, N'Deluxe', 2), (1, N'VIP Suite', 2),
-(2, N'Standard', 2), (2, N'Deluxe', 2), (2, N'VIP Suite', 2);
+-- 2. Thêm 5 loại phòng cho mỗi khách sạn (Tổng 75 RoomTypes)
+DECLARE @HotelID BIGINT = 1;
+WHILE @HotelID <= 15
+BEGIN
+    INSERT INTO RoomTypes (hotel_id, type_name, base_capacity) VALUES
+    (@HotelID, N'Standard', 2),
+    (@HotelID, N'Deluxe', 2),
+    (@HotelID, N'Superior', 3),
+    (@HotelID, N'Family Room', 4),
+    (@HotelID, N'Presidential Suite', 2);
+    SET @HotelID = @HotelID + 1;
+END
 
-INSERT INTO Rooms (hotel_id, type_id, room_number, bed_type, price_per_night) VALUES
-(1, 1, 'S-101', 'SINGLE', 500000), (1, 2, 'D-201', 'DOUBLE', 1000000),
-(2, 4, 'S-101', 'SINGLE', 800000), (2, 5, 'D-201', 'DOUBLE', 1500000);
+-- 3. Thêm 50 phòng đa dạng (Phân bổ trên các khách sạn và loại phòng)
+INSERT INTO Rooms (hotel_id, type_id, room_number, floor, bed_type, price_per_night, status) VALUES
+-- Khách sạn 1 (Hà Nội) - Types: 1-5
+(1, 1, '101', 1, 'SINGLE', 850000, 'AVAILABLE'),
+(1, 2, '201', 2, 'DOUBLE', 1350000, 'AVAILABLE'),
+(1, 4, '401', 4, 'TRIPLE', 2800000, 'AVAILABLE'),
+(1, 5, 'P-01', 5, 'KING', 5500000, 'AVAILABLE'),
+-- Khách sạn 2 (Đà Nẵng) - Types: 6-10
+(2, 6, 'V-101', 1, 'SINGLE', 2500000, 'AVAILABLE'),
+(2, 7, 'V-201', 2, 'DOUBLE', 3800000, 'AVAILABLE'),
+(2, 8, 'V-301', 3, 'KING', 5200000, 'AVAILABLE'),
+(2, 10, 'ROYAL', 5, 'KING', 12000000, 'AVAILABLE'),
+-- Khách sạn 3 (Landmark 81) - Types: 11-15
+(3, 11, '8101', 81, 'KING', 6500000, 'AVAILABLE'),
+(3, 13, '8105', 81, 'KING', 9000000, 'AVAILABLE'),
+(3, 15, 'TOP-81', 81, 'KING', 35000000, 'AVAILABLE'),
+-- Khách sạn 4 (Caravelle) - Types: 16-20
+(4, 16, '402', 4, 'DOUBLE', 3200000, 'AVAILABLE'),
+(4, 18, '605', 6, 'KING', 4500000, 'AVAILABLE'),
+(4, 19, '901', 9, 'TRIPLE', 5800000, 'AVAILABLE'),
+-- Khách sạn 5 (Ana Mandara) - Types: 21-25
+(5, 21, 'V1-1', 1, 'QUEEN', 2200000, 'AVAILABLE'),
+(5, 22, 'V2-2', 1, 'KING', 3600000, 'AVAILABLE'),
+(5, 24, 'V4-1', 1, 'TRIPLE', 5200000, 'AVAILABLE'),
+-- Khách sạn 6 (Sheraton NT) - Types: 26-30
+(6, 26, '1201', 12, 'DOUBLE', 2900000, 'AVAILABLE'),
+(6, 27, '1505', 15, 'KING', 4200000, 'AVAILABLE'),
+(6, 30, 'S-101', 20, 'KING', 15000000, 'AVAILABLE'),
+-- Khách sạn 7 (JW Marriott PQ) - Types: 31-35
+(7, 31, 'EM-10', 1, 'KING', 8500000, 'AVAILABLE'),
+(7, 33, 'EM-25', 2, 'KING', 12000000, 'AVAILABLE'),
+(7, 35, 'LAM-01', 1, 'KING', 55000000, 'AVAILABLE'),
+-- Khách sạn 8 (Silk Path Sapa) - Types: 36-40
+(8, 36, '102', 1, 'SINGLE', 2400000, 'AVAILABLE'),
+(8, 38, '205', 2, 'DOUBLE', 3800000, 'AVAILABLE'),
+(8, 39, '308', 3, 'TRIPLE', 4800000, 'AVAILABLE'),
+-- Khách sạn 9 (Azerai Hue) - Types: 41-45
+(9, 41, '105', 1, 'DOUBLE', 3600000, 'AVAILABLE'),
+(9, 44, '201', 2, 'TRIPLE', 6000000, 'AVAILABLE'),
+(9, 45, 'KING-H', 2, 'KING', 18000000, 'AVAILABLE'),
+-- Khách sạn 10 (Flamingo CB) - Types: 46-50
+(10, 46, 'A-101', 1, 'DOUBLE', 2600000, 'AVAILABLE'),
+(10, 48, 'A-301', 3, 'KING', 4200000, 'AVAILABLE'),
+(10, 49, 'A-501', 5, 'TRIPLE', 6500000, 'AVAILABLE'),
+-- Khách sạn 11 (Pullman VT) - Types: 51-55
+(11, 51, '505', 5, 'DOUBLE', 2500000, 'AVAILABLE'),
+(11, 53, '701', 7, 'KING', 3800000, 'AVAILABLE'),
+(11, 54, '901', 9, 'TRIPLE', 5200000, 'AVAILABLE'),
+-- Khách sạn 12 (Rex) - Types: 56-60
+(12, 56, '210', 2, 'DOUBLE', 3400000, 'AVAILABLE'),
+(12, 59, '405', 4, 'TRIPLE', 6200000, 'AVAILABLE'),
+(12, 60, '501', 5, 'KING', 10000000, 'AVAILABLE'),
+-- Khách sạn 13 (Metropole) - Types: 61-65
+(13, 61, '101H', 1, 'KING', 9500000, 'AVAILABLE'),
+(13, 63, '205H', 2, 'KING', 13000000, 'AVAILABLE'),
+(13, 65, 'SOM-01', 3, 'KING', 65000000, 'AVAILABLE'),
+-- Khách sạn 14 (Novotel DN) - Types: 66-70
+(14, 66, '1010', 10, 'DOUBLE', 2300000, 'AVAILABLE'),
+(14, 68, '1405', 14, 'KING', 3800000, 'AVAILABLE'),
+(14, 69, '1801', 18, 'TRIPLE', 5500000, 'AVAILABLE'),
+-- Khách sạn 15 (Dalat Palace) - Types: 71-75
+(15, 71, '105', 1, 'KING', 4500000, 'AVAILABLE'),
+(15, 74, '201', 2, 'TRIPLE', 7500000, 'AVAILABLE'),
+(15, 75, 'ROYAL-D', 2, 'KING', 25000000, 'AVAILABLE'),
+-- Thêm các phòng bổ sung cho đủ 50
+(1, 1, '102', 1, 'SINGLE', 850000, 'AVAILABLE'),
+(1, 2, '202', 2, 'DOUBLE', 1350000, 'AVAILABLE'),
+(2, 6, 'V-102', 1, 'SINGLE', 2500000, 'AVAILABLE'),
+(3, 11, '8102', 81, 'KING', 6500000, 'AVAILABLE'),
+(4, 16, '403', 4, 'DOUBLE', 3200000, 'AVAILABLE');
 GO
