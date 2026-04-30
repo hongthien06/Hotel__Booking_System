@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box, Typography, Grid, TextField, Button, MenuItem,
   IconButton, Skeleton, Alert, Snackbar, Tooltip,
@@ -32,14 +33,16 @@ const SkeletonCard = () => (
 )
 
 // ─── Empty state ──────────────────────────────────────────────────────────────
-const EmptyState = ({ onAdd, canEdit }) => (
+const EmptyState = ({ onAdd, canEdit }) => {
+  const { t } = useTranslation()
+  return (
   <Box sx={{ gridColumn: '1 / -1', textAlign: 'center', py: 10 }}>
     <Typography sx={{ fontSize: 56, mb: 2, opacity: 0.25 }}>🏨</Typography>
     <Typography variant="h6" color="text.secondary" fontWeight={600} mb={0.5}>
-      Không tìm thấy phòng nào
+      {t('rooms.no_rooms_found')}
     </Typography>
     <Typography variant="body2" color="text.disabled" mb={3}>
-      Thử thay đổi bộ lọc hoặc thêm phòng mới
+      {t('rooms.try_changing_filter')}
     </Typography>
     {canEdit && (
       <Button
@@ -47,14 +50,16 @@ const EmptyState = ({ onAdd, canEdit }) => (
         onClick={onAdd}
         sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 700 }}
       >
-        Thêm phòng đầu tiên
+        {t('rooms.add_first_room')}
       </Button>
     )}
   </Box>
-)
+  )
+}
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 const RoomList = () => {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const canEdit = user?.roles?.some(r =>
     ['ADMIN', 'ROLE_ADMIN', 'MANAGER', 'ROLE_MANAGER'].includes(
@@ -163,10 +168,10 @@ const RoomList = () => {
         <Box>
           <Typography variant="h4" fontWeight={900} color="secondary.main"
             sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <KingBed fontSize="large" /> Quản lý phòng
+            <KingBed fontSize="large" /> {t('rooms.management')}
           </Typography>
           <Typography variant="body2" color="text.secondary" mt={0.5}>
-            {rooms.length} phòng trong hệ thống
+            {rooms.length} {t('rooms.rooms_in_system')}
           </Typography>
         </Box>
         {canEdit && (
@@ -176,7 +181,7 @@ const RoomList = () => {
             onClick={handleAddClick}
             sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25 }}
           >
-            Thêm phòng
+            {t('rooms.add_room')}
           </Button>
         )}
       </Box>
@@ -200,7 +205,7 @@ const RoomList = () => {
             )
           }}
         >
-          Tất cả ({summary.ALL})
+          {t('common.all')} ({summary.ALL})
         </Box>
 
         {Object.entries(STATUS_CONFIG).map(([key, cfg]) =>
@@ -223,7 +228,7 @@ const RoomList = () => {
                 )
               }}
             >
-              {cfg.label} ({summary[key]})
+              {t(cfg.label)} ({summary[key]})
             </Box>
           ) : null
         )}
@@ -232,7 +237,7 @@ const RoomList = () => {
       {/* Filter bar */}
       <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap' }}>
         <TextField
-          placeholder="Tìm theo số phòng, loại phòng..."
+          placeholder={t('rooms.search_placeholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           size="small"
@@ -253,7 +258,7 @@ const RoomList = () => {
             onChange={e => setFilterType(e.target.value)}
             sx={{ minWidth: 160, '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
           >
-            <MenuItem value="ALL">Tất cả loại phòng</MenuItem>
+            <MenuItem value="ALL">{t('rooms.all_types')}</MenuItem>
             {roomTypes.map(t => <MenuItem key={t} value={t}>{t}</MenuItem>)}
           </TextField>
         )}
@@ -263,12 +268,12 @@ const RoomList = () => {
           onChange={e => setSortBy(e.target.value)}
           sx={{ minWidth: 180, '& .MuiOutlinedInput-root': { borderRadius: 3 } }}
         >
-          <MenuItem value="roomNumber">Sắp xếp: Số phòng</MenuItem>
-          <MenuItem value="price">Giá: Thấp → Cao</MenuItem>
-          <MenuItem value="priceDesc">Giá: Cao → Thấp</MenuItem>
+          <MenuItem value="roomNumber">{t('rooms.sort_room_number')}</MenuItem>
+          <MenuItem value="price">{t('rooms.sort_price_asc')}</MenuItem>
+          <MenuItem value="priceDesc">{t('rooms.sort_price_desc')}</MenuItem>
         </TextField>
 
-        <Tooltip title="Tải lại">
+        <Tooltip title={t('common.reload')}>
           <IconButton
             onClick={fetchRooms}
             sx={{
@@ -284,33 +289,37 @@ const RoomList = () => {
       {/* Error */}
       {error && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}
-          action={<Button size="small" onClick={fetchRooms} color="error" fontWeight={700}>Thử lại</Button>}>
+          action={<Button size="small" onClick={fetchRooms} color="error" fontWeight={700}>{t('common.retry')}</Button>}>
           {error}
         </Alert>
       )}
 
       {/* Grid */}
-      <Grid container spacing={2.5}>
+      <Box sx={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+        gap: 2.5
+      }}>
         {loading
-          ? Array.from({ length: 8 }).map((_, i) => (
-            <Grid item xs={12} sm={6} md={4} lg={2} key={i} sx={{ display: 'flex' }}>
+          ? Array.from({ length: 10 }).map((_, i) => (
+            <Box key={i} sx={{ display: 'flex', minWidth: 0, '& > *': { width: '100%' } }}>
               <SkeletonCard />
-            </Grid>
+            </Box>
           ))
           : filtered.length === 0
             ? <EmptyState onAdd={handleAddClick} canEdit={canEdit} />
             : filtered.map(room => (
-              <Grid item xs={12} sm={6} md={4} lg={2} key={room.roomId || room.id || room.roomNumber} sx={{ display: 'flex' }}>
+              <Box key={room.roomId || room.id || room.roomNumber} sx={{ display: 'flex', minWidth: 0, '& > *': { width: '100%' } }}>
                 <RoomCard
                   room={room}
                   onClick={handleCardClick}
                   onEdit={handleEditClick}
                   canEdit={canEdit}
                 />
-              </Grid>
+              </Box>
             ))
         }
-      </Grid>
+      </Box>
 
       {/* Detail Drawer */}
       <RoomDetail

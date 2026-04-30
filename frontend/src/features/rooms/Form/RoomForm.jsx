@@ -35,7 +35,7 @@ const emptyForm = {
 };
 
 // Chiều cao thống nhất cho tất cả field đơn dòng
-const FIELD_HEIGHT = 56;
+const FIELD_HEIGHT = 50;
 
 const fieldSx = {
   width: "100%",
@@ -188,22 +188,23 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md"
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm"
       PaperProps={{ sx: { borderRadius: 5, boxShadow: "0 20px 60px rgba(0,0,0,0.15)" } }}>
 
-      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 1 }}>
+      <DialogTitle sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", pb: 2, pt: 3 }}>
         <Typography variant="h5" fontWeight={900} color="primary.main">
           {isEdit ? t("rooms.title_edit") : t("rooms.title_add")}
         </Typography>
         <IconButton onClick={onClose} size="small" sx={{ bgcolor: "action.hover" }}><Close /></IconButton>
       </DialogTitle>
 
-      <DialogContent sx={{ px: 3, pb: 1, pt: 2 }}>
+      <DialogContent sx={{ px: 3, pb: 1, pt: 3 }}>
 
         {/* Hàng 1: Khách sạn */}
-        <RowFull>
-          <AutoField
-            fullWidth
+        <Box sx={{ mt: 1 }}>
+          <RowFull>
+            <AutoField
+              fullWidth
             icon={<Hotel color="primary" />}
             label={t("rooms.hotel_name")}
             options={brands}
@@ -211,6 +212,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
             onChange={handleBrandChange}
           />
         </RowFull>
+        </Box>
 
         {/* Hàng 2: Chi nhánh */}
         <RowFull>

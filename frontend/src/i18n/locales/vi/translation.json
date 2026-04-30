@@ -10,7 +10,10 @@
     "actions": "Thao tác",
     "loading": "Đang tải...",
     "error": "Có lỗi xảy ra",
-    "success": "Thành công"
+    "success": "Thành công",
+    "all": "Tất cả",
+    "reload": "Tải lại",
+    "retry": "Thử lại"
   },
   "header": {
     "home": "Trang chủ",
@@ -90,7 +93,21 @@
     "status_cleaning": "Đang dọn dẹp",
     "status_maintenance": "Bảo trì",
     "status_inactive": "Ngừng HĐ",
-    "validation_required": "Vui lòng điền đầy đủ: Khách sạn, Chi nhánh và Loại phòng!"
+    "validation_required": "Vui lòng điền đầy đủ: Khách sạn, Chi nhánh và Loại phòng!",
+    "management": "Quản lý phòng",
+    "rooms_in_system": "phòng trong hệ thống",
+    "add_room": "Thêm phòng",
+    "no_rooms_found": "Không tìm thấy phòng nào",
+    "try_changing_filter": "Thử thay đổi bộ lọc hoặc thêm phòng mới",
+    "add_first_room": "Thêm phòng đầu tiên",
+    "search_placeholder": "Tìm theo mã phòng, loại phòng...",
+    "all_types": "Tất cả loại phòng",
+    "sort_room_number": "Sắp xếp: Mã phòng",
+    "sort_price_asc": "Giá: Thấp → Cao",
+    "sort_price_desc": "Giá: Cao → Thấp",
+    "floor_number": "Tầng {{floor}}",
+    "guests": "khách",
+    "per_night": "/đêm"
   },
   "chatbot": {
     "placeholder": "Nhập tin nhắn...",

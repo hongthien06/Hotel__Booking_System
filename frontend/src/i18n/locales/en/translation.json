@@ -10,7 +10,10 @@
     "actions": "Actions",
     "loading": "Loading...",
     "error": "An error occurred",
-    "success": "Success"
+    "success": "Success",
+    "all": "All",
+    "reload": "Reload",
+    "retry": "Retry"
   },
   "header": {
     "home": "Home",
@@ -90,7 +93,21 @@
     "status_cleaning": "Cleaning",
     "status_maintenance": "Maintenance",
     "status_inactive": "Inactive",
-    "validation_required": "Please fill in all fields: Hotel, Branch, and Room Type!"
+    "validation_required": "Please fill in all fields: Hotel, Branch, and Room Type!",
+    "management": "Room Management",
+    "rooms_in_system": "rooms in system",
+    "add_room": "Add Room",
+    "no_rooms_found": "No rooms found",
+    "try_changing_filter": "Try changing the filter or add a new room",
+    "add_first_room": "Add the first room",
+    "search_placeholder": "Search by room number, type...",
+    "all_types": "All room types",
+    "sort_room_number": "Sort: Room Number",
+    "sort_price_asc": "Price: Low to High",
+    "sort_price_desc": "Price: High to Low",
+    "floor_number": "Floor {{floor}}",
+    "guests": "guests",
+    "per_night": "/night"
   },
   "chatbot": {
     "placeholder": "Type a message...",

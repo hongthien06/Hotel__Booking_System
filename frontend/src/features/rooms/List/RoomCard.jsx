@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Card, CardContent, CardMedia, Box, Typography,
   IconButton, Tooltip, Skeleton
@@ -14,6 +15,7 @@ const MetaItem = ({ icon, text }) => (
 )
 
 const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
+  const { t } = useTranslation()
   const price = room.pricePerNight
     ? new Intl.NumberFormat('vi-VN').format(room.pricePerNight) + '₫'
     : '—'
@@ -104,7 +106,7 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
             position: 'absolute', bottom: 8, right: 10,
             color: 'rgba(255,255,255,0.85)', fontWeight: 600
           }}>
-            Tầng {room.floor}
+            {t('rooms.floor_number', { floor: room.floor })}
           </Typography>
         )}
       </Box>
@@ -127,13 +129,13 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
             <Typography variant="subtitle2" fontWeight={900} color="secondary.main" lineHeight={1.2} display="block">
               {price}
             </Typography>
-            <Typography variant="caption" color="text.disabled" display="block">/đêm</Typography>
+            <Typography variant="caption" color="text.disabled" display="block">{t('rooms.per_night')}</Typography>
           </Box>
         </Box>
 
         {/* Meta */}
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: amenities.length ? 1.5 : 0 }}>
-          {room.capacity && <MetaItem icon={<People />} text={`${room.capacity} khách`} />}
+          {room.capacity && <MetaItem icon={<People />} text={`${room.capacity} ${t('rooms.guests')}`} />}
           {room.area && <MetaItem icon={<SquareFoot />} text={`${room.area}m²`} />}
           {room.bedType && <MetaItem icon={<KingBed />} text={room.bedType} />}
         </Box>
