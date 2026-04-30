@@ -15,9 +15,12 @@ const MetaItem = ({ icon, text }) => (
 )
 
 const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const price = room.pricePerNight
-    ? new Intl.NumberFormat('vi-VN').format(room.pricePerNight) + '₫'
+    ? new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
+        style: 'currency', 
+        currency: i18n.language === 'vi' ? 'VND' : 'USD' 
+      }).format(i18n.language === 'vi' ? room.pricePerNight : room.pricePerNight / 25000)
     : '—'
 
   const amenities = room.amenities
@@ -53,7 +56,7 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
           <CardMedia
             component="img"
             image={room.imageUrl}
-            alt={`Phòng ${room.roomNumber}`}
+            alt={`${t('booking_page.room')} ${room.roomNumber}`}
             sx={{ height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease',
               '&:hover': { transform: 'scale(1.05)' } }}
           />
@@ -80,7 +83,7 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
 
         {/* Edit button */}
         {canEdit && (
-          <Tooltip title="Chỉnh sửa">
+          <Tooltip title={t('common.edit')}>
             <IconButton
               size="small"
               onClick={e => { e.stopPropagation(); onEdit(room) }}
@@ -122,7 +125,7 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
               {room.hotelName || ''}
             </Typography>
             <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
-              {room.typeName || room.roomType || room.type || 'Standard'}
+              {t(room.typeName || room.roomType || room.type || 'Standard')}
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'right', flexShrink: 0, ml: 1 }}>
@@ -137,7 +140,7 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: amenities.length ? 1.5 : 0 }}>
           {room.capacity && <MetaItem icon={<People />} text={`${room.capacity} ${t('rooms.guests')}`} />}
           {room.area && <MetaItem icon={<SquareFoot />} text={`${room.area}m²`} />}
-          {room.bedType && <MetaItem icon={<KingBed />} text={room.bedType} />}
+          {room.bedType && <MetaItem icon={<KingBed />} text={t(room.bedType)} />}
         </Box>
 
         {/* Amenities */}

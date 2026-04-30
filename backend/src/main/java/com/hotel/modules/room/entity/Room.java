@@ -13,7 +13,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Rooms", schema = "dbo")
+@Table(name = "Rooms", schema = "dbo", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"hotel_id", "room_number"})
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,7 +34,7 @@ public class Room {
     @JoinColumn(name = "type_id", nullable = false)
     private RoomType roomType;
 
-    @Column(name = "room_number", nullable = false, length = 30, unique = true)
+    @Column(name = "room_number", nullable = false, length = 30)
     private String roomNumber;
 
     @Column(name = "floor")

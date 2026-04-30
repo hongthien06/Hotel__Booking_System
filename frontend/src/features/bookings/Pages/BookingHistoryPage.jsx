@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, Grid, TextField, Paper, Skeleton, Alert,
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { getMyBookingsApi } from '../../../shared/api/bookingApi';
 
 const BookingHistoryPage = () => {
+  const { t, i18n } = useTranslation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -19,7 +21,7 @@ const BookingHistoryPage = () => {
       const data = await getMyBookingsApi(checkIn, checkOut);
       setBookings(data || []);
     } catch (err) {
-      setError('Lỗi khi lấy lịch sử đặt phòng');
+      setError(t('bookings_history.fetch_error'));
       console.error(err);
     } finally {
       setLoading(false);
@@ -32,7 +34,10 @@ const BookingHistoryPage = () => {
 
   const formatCurrency = (value) => {
     if (!value) return '0 VND';
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
+      style: 'currency', 
+      currency: i18n.language === 'vi' ? 'VND' : 'USD' 
+    }).format(i18n.language === 'vi' ? value : value / 25000);
   };
 
   return (
@@ -42,11 +47,11 @@ const BookingHistoryPage = () => {
         <Grid item xs={12} md={3}>
           <Paper sx={{ p: 3, bgcolor: '#1e1e1e', color: '#fff', borderRadius: 2, border: '1px solid #333' }}>
             <Typography variant="h6" fontWeight="bold" mb={3}>
-              Tìm theo ngày nhận, trả
+              {t('bookings_history.title')}
             </Typography>
             <Box mb={3}>
               <Typography variant="caption" color="text.secondary" fontWeight="bold" sx={{ display: 'block', mb: 1 }}>
-                NHẬN PHÒNG
+                {t('bookings_history.check_in')}
               </Typography>
               <TextField
                 type="date"
@@ -64,7 +69,7 @@ const BookingHistoryPage = () => {
             </Box>
             <Box>
               <Typography variant="caption" color="text.secondary" fontWeight="bold" sx={{ display: 'block', mb: 1 }}>
-                TRẢ PHÒNG
+                {t('bookings_history.check_out')}
               </Typography>
               <TextField
                 type="date"
@@ -98,7 +103,7 @@ const BookingHistoryPage = () => {
               <Grid item xs={12}>
                 <Paper sx={{ p: 4, textAlign: 'center', bgcolor: '#1e1e1e', color: '#888', border: '1px dashed #444' }}>
                   <Typography variant="body1">
-                    Không có dữ liệu đặt phòng nào.
+                    {t('bookings_history.no_data')}
                   </Typography>
                 </Paper>
               </Grid>
@@ -129,7 +134,7 @@ const BookingHistoryPage = () => {
                       {booking.bookingCode}
                     </Typography>
                     <Typography variant="caption" sx={{ mt: 1, bgcolor: '#333', px: 1, py: 0.5, borderRadius: 1 }}>
-                      {booking.checkInDate} đến {booking.checkOutDate}
+                      {booking.checkInDate} {t('rooms.per_night')} {booking.checkOutDate}
                     </Typography>
                     <Typography variant="body2" color="primary.main" fontWeight="bold" mt={1}>
                       {formatCurrency(booking.grandTotal)}

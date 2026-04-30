@@ -92,7 +92,7 @@ const RoomList = () => {
       const data = await getRoomsApi()
       setRooms(Array.isArray(data) ? data : (data?.content || []))
     } catch {
-      setError('Không thể tải danh sách phòng. Vui lòng thử lại.')
+      setError(t('rooms.fetch_error'))
     } finally {
       setLoading(false)
     }

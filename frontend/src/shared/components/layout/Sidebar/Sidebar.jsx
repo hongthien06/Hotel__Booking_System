@@ -2,6 +2,7 @@ import React from 'react'
 import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../shared/hooks/useAuth'
+import { useTranslation } from 'react-i18next'
 
 // Icon placeholders (Mock MUI icons text for now)
 // Icon placeholders (using character initials as before or importing MUI icons)
@@ -14,14 +15,15 @@ import {
 } from '@mui/icons-material'
 
 const menuItems = [
-  { id: 'home', label: 'Trang chủ', path: '/', roles: [], icon: <Home /> },
-  { id: 'bookings', label: 'Đặt phòng', path: '/bookings', roles: [], icon: <EventNote /> },
-  { id: 'payment', label: 'Thanh toán', path: '/payment', roles: [], icon: <AccountBalanceWallet /> },
-  { id: 'profile', label: 'Tài khoản', path: '/profile', roles: [], icon: <Person /> },
-  { id: 'dashboard', label: 'Dashboard', path: '/dashboard', roles: ['ADMIN', 'MANAGER'], icon: <Dashboard /> }
+  { id: 'home', labelKey: 'header.home', path: '/', roles: [], icon: <Home /> },
+  { id: 'bookings', labelKey: 'header.bookings', path: '/bookings', roles: [], icon: <EventNote /> },
+  { id: 'payment', labelKey: 'header.payments', path: '/payment', roles: [], icon: <AccountBalanceWallet /> },
+  { id: 'profile', labelKey: 'header.profile', path: '/profile', roles: [], icon: <Person /> },
+  { id: 'dashboard', labelKey: 'header.dashboard', path: '/dashboard', roles: ['ADMIN', 'MANAGER'], icon: <Dashboard /> }
 ]
 
 const Sidebar = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
@@ -77,7 +79,7 @@ const Sidebar = () => {
               <ListItemIcon sx={{ color: location.pathname.startsWith(item.path) ? 'inherit' : 'primary.main' }}>
                 {item.icon}
               </ListItemIcon>
-              <ListItemText primary={item.label} primaryTypographyProps={{ fontWeight: location.pathname.startsWith(item.path) ? 'bold' : 'normal' }} />
+              <ListItemText primary={t(item.labelKey)} primaryTypographyProps={{ fontWeight: location.pathname.startsWith(item.path) ? 'bold' : 'normal' }} />
             </ListItemButton>
           </ListItem>
         ))}

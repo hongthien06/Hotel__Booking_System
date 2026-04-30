@@ -148,6 +148,17 @@ CREATE TABLE Bookings (
     CONSTRAINT UQ_Bookings_Code UNIQUE (booking_code)
 );
 
+CREATE TABLE BookingServices (
+    booking_id BIGINT NOT NULL,
+    service_id INT NOT NULL,
+    quantity SMALLINT NOT NULL DEFAULT 1,
+    unit_price_snap DECIMAL(18,2) NOT NULL,
+    subtotal AS (quantity * unit_price_snap),
+    CONSTRAINT PK_BookingServices PRIMARY KEY (booking_id, service_id),
+    CONSTRAINT FK_BS_Booking FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id) ON DELETE CASCADE,
+    CONSTRAINT FK_BS_Service FOREIGN KEY (service_id) REFERENCES ExtraServices(service_id) ON DELETE CASCADE
+);
+
 CREATE TABLE Conversations (
     conversation_id BIGINT NOT NULL IDENTITY(1,1),
     user_id BIGINT NULL,
@@ -179,7 +190,7 @@ CREATE TABLE ChatMessages (
 
 -- Dữ liệu mẫu mở rộng (15 khách sạn, 5 loại phòng mỗi KS, 50 phòng thực tế)
 GO
-INSERT INTO Roles (role_name) VALUES ('ROLE_ADMIN'), ('ROLE_MANAGER'), ('ROLE_USER');
+INSERT INTO Roles (role_name) VALUES ('ADMIN'), ('MANAGER'), ('CUSTOMER');
 
 -- 1. Thêm 15 khách sạn đa dạng vùng miền
 INSERT INTO Hotels (hotel_code, hotel_name, province, province_code, district, address, star_rating) VALUES

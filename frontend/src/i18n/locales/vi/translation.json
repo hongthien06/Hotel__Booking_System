@@ -13,7 +13,11 @@
     "success": "Thành công",
     "all": "Tất cả",
     "reload": "Tải lại",
-    "retry": "Thử lại"
+    "retry": "Thử lại",
+    "book_now": "Đặt ngay",
+    "confirm": "Xác nhận",
+    "booking": "Đặt phòng",
+    "details": "Chi tiết"
   },
   "header": {
     "home": "Trang chủ",
@@ -22,7 +26,31 @@
     "payments": "Thanh toán",
     "dashboard": "Dashboard",
     "logout": "Đăng xuất",
-    "login": "Đăng nhập"
+    "login": "Đăng nhập",
+    "profile": "Trang cá nhân",
+    "bookings_history": "Lịch sử đặt phòng"
+  },
+  "dashboard": {
+    "title": "Tổng quan Dashboard",
+    "welcome": "Chào mừng trở lại",
+    "subtitle": "Đây là tình hình kinh doanh hôm nay.",
+    "total_rooms": "Tổng số phòng",
+    "available": "Đang trống",
+    "occupied": "Đang thuê",
+    "maintenance": "Bảo trì",
+    "inactive": "Ngừng hoạt động",
+    "total_bookings": "Lượt đặt phòng",
+    "total_revenue": "Tổng doanh thu",
+    "recent_bookings": "Đơn đặt phòng gần đây",
+    "booking_id": "Mã đơn",
+    "customer": "Khách hàng",
+    "room_number": "Số phòng",
+    "date": "Ngày đặt",
+    "amount": "Tổng tiền",
+    "status": "Trạng thái",
+    "no_data": "Chưa có dữ liệu đặt phòng nào.",
+    "fetch_error": "Không thể tải dữ liệu thống kê.",
+    "refresh": "Làm mới"
   },
   "home": {
     "hero": {
@@ -66,7 +94,11 @@
     },
     "reviews": {
       "overline": "ĐÁNH GIÁ",
-      "title": "Khách hàng nói gì về chúng tôi?"
+      "title": "Khách hàng nói gì về chúng tôi?",
+      "item1": { "name": "Nguyễn Văn Anh", "comment": "Dịch vụ tuyệt vời! Phòng sạch sẽ, nhân viên thân thiện. Chắc chắn sẽ quay lại lần nữa." },
+      "item2": { "name": "Trần Thị Minh", "comment": "View đẹp, đồ ăn ngon, giá cả hợp lý. Rất hài lòng với trải nghiệm tại đây!" },
+      "item3": { "name": "Lê Hoàng Phúc", "comment": "Vị trí thuận tiện, gần trung tâm. Phòng rộng rãi và thoáng mát. Recommend cho mọi người!" },
+      "item4": { "name": "Phạm Quỳnh Như", "comment": "Đã đặt phòng cho gia đình qua hệ thống này, rất tiện lợi và nhanh chóng. 10 điểm!" }
     },
     "cta": {
       "title": "Sẵn sàng cho chuyến nghỉ dưỡng tiếp theo?",
@@ -75,6 +107,93 @@
     "footer": {
       "text": "© 2026 Hotel Booking Management System — Đồ án môn học"
     }
+  },
+  "profile": {
+    "title": "Quản lý tài khoản",
+    "subtitle": "Cập nhật thông tin cá nhân và quản lý bảo mật",
+    "personal_info": "Thông tin cá nhân",
+    "security": "Bảo mật tài khoản",
+    "full_name": "Họ và tên",
+    "email": "Email",
+    "phone": "Số điện thoại",
+    "save_changes": "Lưu thay đổi",
+    "saving": "Đang lưu...",
+    "change_password": "Đổi mật khẩu",
+    "old_password": "Mật khẩu cũ",
+    "new_password": "Mật khẩu mới",
+    "confirm_password": "Xác nhận mật khẩu",
+    "update_now": "Cập nhật ngay",
+    "cancel": "Hủy",
+    "avatar_tooltip": "Thay đổi ảnh đại diện",
+    "member_since": "Thành viên từ",
+    "fetch_error": "Không thể tải thông tin cá nhân.",
+    "update_success": "Cập nhật thông tin thành công!",
+    "update_error": "Có lỗi xảy ra khi cập nhật.",
+    "pw_not_match": "Mật khẩu xác nhận không khớp!",
+    "pw_too_short": "Mật khẩu mới phải có ít nhất 6 ký tự!",
+    "pw_success": "Đổi mật khẩu thành công!",
+    "pw_old_wrong": "Mật khẩu cũ không chính xác."
+  },
+  "bookings_history": {
+    "title": "Tìm theo ngày nhận, trả",
+    "check_in": "NHẬN PHÒNG",
+    "check_out": "TRẢ PHÒNG",
+    "no_data": "Không có dữ liệu đặt phòng nào.",
+    "fetch_error": "Lỗi khi lấy lịch sử đặt phòng"
+  },
+  "destinations": {
+    "title": "🗺️ Điểm đến phổ biến",
+    "hcm": { "name": "TP. Hồ Chí Minh", "desc": "Thành phố sôi động" },
+    "hanoi": { "name": "Hà Nội", "desc": "Thủ đô ngàn năm" },
+    "vungtau": { "name": "Vũng Tàu", "desc": "Biển xanh cát trắng" },
+    "dalat": { "name": "Đà Lạt", "desc": "Thành phố ngàn hoa" },
+    "danang": { "name": "Đà Nẵng", "desc": "Thành phố đáng sống" },
+    "nhatrang": { "name": "Nha Trang", "desc": "Hòn ngọc Biển Đông" },
+    "phuquoc": { "name": "Phú Quốc", "desc": "Đảo Ngọc thiên đường" },
+    "sapa": { "name": "Sapa", "desc": "Thành phố trong sương" },
+    "hue": { "name": "Huế", "desc": "Cố đô cổ kính" },
+    "catba": { "name": "Cát Bà", "desc": "Vịnh đảo kỳ vĩ" }
+  },
+  "booking_page": {
+    "search_title": "Tìm kiếm phòng",
+    "destination": "NƠI ĐẾN",
+    "check_in": "NHẬN PHÒNG",
+    "check_out": "TRẢ PHÒNG",
+    "adults": "NGƯỜI LỚN",
+    "children": "TRẺ EM",
+    "price_per_night": "GIÁ / ĐÊM (VNĐ)",
+    "min_price": "Tối thiểu",
+    "max_price": "Tối đa",
+    "no_limit": "không giới hạn",
+    "room_type": "LOẠI PHÒNG",
+    "bed_type": "LOẠI GIƯỜNG",
+    "extra_services": "DỊCH VỤ ĐI KÈM",
+    "searching": "Đang tìm...",
+    "find_room": "Tìm phòng",
+    "available_rooms": "Phòng còn trống",
+    "featured_rooms": "Phòng nổi bật",
+    "no_rooms_found": "Không tìm thấy phòng trống trong thời gian này. Vui lòng thử ngày khác!",
+    "booking_success": "🎉 Đặt phòng thành công! Kiểm tra email xác nhận của bạn.",
+    "booking_confirm": "Xác nhận đặt phòng",
+    "special_request": "Yêu cầu đặc biệt (tuỳ chọn)",
+    "special_request_placeholder": "Ví dụ: phòng tầng cao, view biển...",
+    "num_guests": "Số khách",
+    "processing": "Đang xử lý...",
+    "total": "Tổng cộng",
+    "room": "Phòng"
+  },
+  "room_detail": {
+    "hotel": "Khách sạn",
+    "address": "Địa chỉ",
+    "capacity": "Sức chứa",
+    "area": "Diện tích",
+    "bed_type": "Loại giường",
+    "bedrooms": "Số phòng ngủ",
+    "bathrooms": "Số phòng tắm",
+    "description": "Mô tả",
+    "amenities": "Tiện nghi",
+    "edit_room": "Chỉnh sửa phòng",
+    "reviews": "đánh giá"
   },
   "rooms": {
     "title_add": "Thêm phòng mới",
@@ -107,11 +226,41 @@
     "sort_price_desc": "Giá: Cao → Thấp",
     "floor_number": "Tầng {{floor}}",
     "guests": "khách",
-    "per_night": "/đêm"
+    "per_night": "/đêm",
+    "bed_single": "Giường Đơn",
+    "bed_double": "Giường Đôi",
+    "bed_triple": "Giường Ba",
+    "bed_king": "Giường King",
+    "bed_queen": "Giường Queen",
+    "SINGLE": "Giường Đơn",
+    "DOUBLE": "Giường Đôi",
+    "TRIPLE": "Giường Ba",
+    "KING": "Giường King",
+    "QUEEN": "Giường Queen",
+    "Standard": "Phòng Tiêu chuẩn",
+    "Deluxe": "Phòng Sang trọng",
+    "Superior": "Phòng Cao cấp",
+    "Family Room": "Phòng Gia đình",
+    "Presidential Suite": "Phòng Tổng thống",
+    "fetch_error": "Không thể tải danh sách phòng. Vui lòng thử lại."
   },
   "chatbot": {
     "placeholder": "Nhập tin nhắn...",
     "title": "Trợ lý HotelBot",
     "welcome": "Xin chào! Tôi có thể giúp gì cho bạn?"
+  },
+  "room_types": {
+    "standard": "Standard",
+    "deluxe": "Deluxe",
+    "superior": "Superior",
+    "family": "Family Room",
+    "president": "Presidential Suite"
+  },
+  "services": {
+    "breakfast": "Bữa sáng",
+    "shuttle": "Đưa đón sân bay",
+    "bike": "Thuê xe máy",
+    "spa": "Spa & Massage",
+    "pool": "Hồ bơi"
   }
 }

@@ -13,7 +13,11 @@
     "success": "Success",
     "all": "All",
     "reload": "Reload",
-    "retry": "Retry"
+    "retry": "Retry",
+    "book_now": "Book Now",
+    "confirm": "Confirm",
+    "booking": "Booking",
+    "details": "Details"
   },
   "header": {
     "home": "Home",
@@ -22,7 +26,31 @@
     "payments": "Payments",
     "dashboard": "Dashboard",
     "logout": "Logout",
-    "login": "Login"
+    "login": "Login",
+    "profile": "Profile",
+    "bookings_history": "Booking History"
+  },
+  "dashboard": {
+    "title": "Dashboard Overview",
+    "welcome": "Welcome back",
+    "subtitle": "Here is the business situation today.",
+    "total_rooms": "Total Rooms",
+    "available": "Available",
+    "occupied": "Occupied",
+    "maintenance": "Maintenance",
+    "inactive": "Inactive",
+    "total_bookings": "Total Bookings",
+    "total_revenue": "Total Revenue",
+    "recent_bookings": "Recent Bookings",
+    "booking_id": "Order ID",
+    "customer": "Customer",
+    "room_number": "Room No.",
+    "date": "Date",
+    "amount": "Total Amount",
+    "status": "Status",
+    "no_data": "No booking data available.",
+    "fetch_error": "Unable to load statistics data.",
+    "refresh": "Refresh"
   },
   "home": {
     "hero": {
@@ -66,7 +94,11 @@
     },
     "reviews": {
       "overline": "REVIEWS",
-      "title": "What do our customers say?"
+      "title": "What do our customers say?",
+      "item1": { "name": "John Doe", "comment": "Excellent service! The room was clean, staff was friendly. Will definitely come back." },
+      "item2": { "name": "Mary Jane", "comment": "Beautiful view, delicious food, reasonable price. Very satisfied with the experience here!" },
+      "item3": { "name": "Robert Smith", "comment": "Convenient location, near center. Spacious and airy room. Recommend to everyone!" },
+      "item4": { "name": "Alice Brown", "comment": "Booked a room for my family through this system, very convenient and fast. 10 points!" }
     },
     "cta": {
       "title": "Ready for your next getaway?",
@@ -75,6 +107,93 @@
     "footer": {
       "text": "© 2026 Hotel Booking Management System — Course Project"
     }
+  },
+  "profile": {
+    "title": "Account Management",
+    "subtitle": "Update personal information and manage security",
+    "personal_info": "Personal Information",
+    "security": "Account Security",
+    "full_name": "Full Name",
+    "email": "Email",
+    "phone": "Phone Number",
+    "save_changes": "Save Changes",
+    "saving": "Saving...",
+    "change_password": "Change Password",
+    "old_password": "Old Password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "update_now": "Update Now",
+    "cancel": "Cancel",
+    "avatar_tooltip": "Change Avatar",
+    "member_since": "Member since",
+    "fetch_error": "Unable to load personal information.",
+    "update_success": "Profile updated successfully!",
+    "update_error": "An error occurred during update.",
+    "pw_not_match": "Confirm password does not match!",
+    "pw_too_short": "New password must be at least 6 characters!",
+    "pw_success": "Password changed successfully!",
+    "pw_old_wrong": "Old password is incorrect."
+  },
+  "bookings_history": {
+    "title": "Search by check-in/out date",
+    "check_in": "CHECK IN",
+    "check_out": "CHECK OUT",
+    "no_data": "No booking data available.",
+    "fetch_error": "Error fetching booking history"
+  },
+  "destinations": {
+    "title": "🗺️ Popular Destinations",
+    "hcm": { "name": "Ho Chi Minh City", "desc": "The vibrant city" },
+    "hanoi": { "name": "Hanoi", "desc": "The millennial capital" },
+    "vungtau": { "name": "Vung Tau", "desc": "Blue sea and white sand" },
+    "dalat": { "name": "Da Lat", "desc": "The city of flowers" },
+    "danang": { "name": "Da Nang", "desc": "The worth-living city" },
+    "nhatrang": { "name": "Nha Trang", "desc": "The pearl of the East Sea" },
+    "phuquoc": { "name": "Phu Quoc", "desc": "The pearl island paradise" },
+    "sapa": { "name": "Sapa", "desc": "The city in the clouds" },
+    "hue": { "name": "Hue", "desc": "The ancient capital" },
+    "catba": { "name": "Cat Ba", "desc": "The majestic bay island" }
+  },
+  "booking_page": {
+    "search_title": "Search Rooms",
+    "destination": "DESTINATION",
+    "check_in": "CHECK IN",
+    "check_out": "CHECK OUT",
+    "adults": "ADULTS",
+    "children": "CHILDREN",
+    "price_per_night": "PRICE / NIGHT (VND)",
+    "min_price": "Min price",
+    "max_price": "Max price",
+    "no_limit": "no limit",
+    "room_type": "ROOM TYPE",
+    "bed_type": "BED TYPE",
+    "extra_services": "EXTRA SERVICES",
+    "searching": "Searching...",
+    "find_room": "Find Room",
+    "available_rooms": "Available Rooms",
+    "featured_rooms": "Featured Rooms",
+    "no_rooms_found": "No available rooms found for this period. Please try another date!",
+    "booking_success": "🎉 Booking successful! Check your confirmation email.",
+    "booking_confirm": "Confirm Booking",
+    "special_request": "Special Request (optional)",
+    "special_request_placeholder": "Example: high floor, sea view...",
+    "num_guests": "Guests",
+    "processing": "Processing...",
+    "total": "Total",
+    "room": "Room"
+  },
+  "room_detail": {
+    "hotel": "Hotel",
+    "address": "Address",
+    "capacity": "Capacity",
+    "area": "Area",
+    "bed_type": "Bed Type",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "description": "Description",
+    "amenities": "Amenities",
+    "edit_room": "Edit Room",
+    "reviews": "reviews"
   },
   "rooms": {
     "title_add": "Add New Room",
@@ -107,11 +226,41 @@
     "sort_price_desc": "Price: High to Low",
     "floor_number": "Floor {{floor}}",
     "guests": "guests",
-    "per_night": "/night"
+    "per_night": "/night",
+    "bed_single": "Single Bed",
+    "bed_double": "Double Bed",
+    "bed_triple": "Triple Bed",
+    "bed_king": "King Bed",
+    "bed_queen": "Queen Bed",
+    "SINGLE": "Single Bed",
+    "DOUBLE": "Double Bed",
+    "TRIPLE": "Triple Bed",
+    "KING": "King Bed",
+    "QUEEN": "Queen Bed",
+    "Standard": "Standard",
+    "Deluxe": "Deluxe",
+    "Superior": "Superior",
+    "Family Room": "Family Room",
+    "Presidential Suite": "Presidential Suite",
+    "fetch_error": "Could not load rooms. Please try again."
   },
   "chatbot": {
     "placeholder": "Type a message...",
     "title": "HotelBot Assistant",
     "welcome": "Hello! How can I help you today?"
+  },
+  "room_types": {
+    "standard": "Standard",
+    "deluxe": "Deluxe",
+    "superior": "Superior",
+    "family": "Family Room",
+    "president": "Presidential Suite"
+  },
+  "services": {
+    "breakfast": "Breakfast",
+    "shuttle": "Airport Shuttle",
+    "bike": "Bike Rental",
+    "spa": "Spa & Massage",
+    "pool": "Swimming Pool"
   }
 }

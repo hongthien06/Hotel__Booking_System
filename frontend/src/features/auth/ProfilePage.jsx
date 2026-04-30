@@ -9,10 +9,12 @@ import {
   Person, Phone, Email, Shield, Save, Lock,
   Visibility, VisibilityOff, CameraAlt, VerifiedUser, Info
 } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import { getMyProfileApi, updateMyProfileApi } from '../../shared/api/userApi'
 import { changePasswordApi } from '../../shared/api/authApi'
 
 const ProfilePage = () => {
+  const { t } = useTranslation()
   const [profile, setProfile] = useState(null)
   const [formData, setFormData] = useState({ fullName: '', phone: '' })
   const [loading, setLoading] = useState(true)
@@ -40,7 +42,7 @@ const ProfilePage = () => {
       })
     } catch (err) {
       console.error('Fetch profile error:', err)
-      setMessage({ type: 'error', content: 'Không thể tải thông tin cá nhân.' })
+      setMessage({ type: 'error', content: t('profile.fetch_error') })
     } finally {
       setLoading(false)
     }
@@ -57,7 +59,7 @@ const ProfilePage = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
-      setMessage({ type: 'success', content: 'Đã chọn ảnh mới. Tính năng lưu ảnh sẽ sớm hoàn thiện!' })
+      setMessage({ type: 'success', content: t('profile.update_success') + ' (Avatar feature coming soon!)' })
     }
   }
 
@@ -72,10 +74,10 @@ const ProfilePage = () => {
         fullName: updated.fullName || '',
         phone: updated.phone || ''
       })
-      setMessage({ type: 'success', content: 'Cập nhật thông tin thành công!' })
+      setMessage({ type: 'success', content: t('profile.update_success') })
     } catch (err) {
       console.error('Update profile error:', err)
-      setMessage({ type: 'error', content: err.response?.data?.message || 'Có lỗi xảy ra khi cập nhật.' })
+      setMessage({ type: 'error', content: err.response?.data?.message || t('profile.update_error') })
     } finally {
       setSaving(false)
     }
@@ -85,29 +87,29 @@ const ProfilePage = () => {
     setPwData({ ...pwData, [e.target.name]: e.target.value })
   }
 
-  const handlePwSubmit = async () => {
-    setPwError('')
-    if (pwData.newPassword !== pwData.confirmPassword) {
-      setPwError('Mật khẩu xác nhận không khớp!')
-      return
+    const handlePwSubmit = async () => {
+      setPwError('')
+      if (pwData.newPassword !== pwData.confirmPassword) {
+        setPwError(t('profile.pw_not_match'))
+        return
+      }
+      if (pwData.newPassword.length < 6) {
+        setPwError(t('profile.pw_too_short'))
+        return
+      }
+  
+      setPwLoading(true)
+      try {
+        await changePasswordApi(pwData.oldPassword, pwData.newPassword)
+        setOpenPwDialog(false)
+        setPwData({ oldPassword: '', newPassword: '', confirmPassword: '' })
+        setMessage({ type: 'success', content: t('profile.pw_success') })
+      } catch (err) {
+        setPwError(err.response?.data?.message || t('profile.pw_old_wrong'))
+      } finally {
+        setPwLoading(false)
+      }
     }
-    if (pwData.newPassword.length < 6) {
-      setPwError('Mật khẩu mới phải có ít nhất 6 ký tự!')
-      return
-    }
-
-    setPwLoading(true)
-    try {
-      await changePasswordApi(pwData.oldPassword, pwData.newPassword)
-      setOpenPwDialog(false)
-      setPwData({ oldPassword: '', newPassword: '', confirmPassword: '' })
-      setMessage({ type: 'success', content: 'Đổi mật khẩu thành công!' })
-    } catch (err) {
-      setPwError(err.response?.data?.message || 'Mật khẩu cũ không chính xác.')
-    } finally {
-      setPwLoading(false)
-    }
-  }
 
   if (loading) {
     return (
@@ -134,10 +136,10 @@ const ProfilePage = () => {
         <VerifiedUser sx={{ color: '#9a1c48', fontSize: 50 }} />
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 900, color: '#9a1c48' }}>
-            Quản lý tài khoản
+            {t('profile.title')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Cập nhật thông tin cá nhân và quản lý bảo mật
+            {t('profile.subtitle')}
           </Typography>
         </Box>
       </Box>
@@ -162,7 +164,7 @@ const ProfilePage = () => {
               >
                 {profile?.fullName?.charAt(0)?.toUpperCase() || 'U'}
               </Avatar>
-              <Tooltip title="Thay đổi ảnh đại diện">
+              <Tooltip title={t('profile.avatar_tooltip')}>
                 <IconButton
                   onClick={handleAvatarClick}
                   sx={{
@@ -196,7 +198,7 @@ const ProfilePage = () => {
               borderColor: '#ffdae5'
             }} />
             <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-              Thành viên từ: {new Date().getFullYear()}
+              {t('profile.member_since')}: {new Date().getFullYear()}
             </Typography>
           </Paper>
         </Grid>
@@ -217,7 +219,7 @@ const ProfilePage = () => {
             }}>
               <Info sx={{ color: '#9a1c48' }} />
               <Typography variant="h6" sx={{ fontWeight: 800, color: '#333' }}>
-                Thông tin cá nhân
+                {t('profile.personal_info')}
               </Typography>
             </Box>
 
@@ -233,18 +235,18 @@ const ProfilePage = () => {
                 gap: 3 // Khoảng cách giữa các ô nhập liệu (TextField)
               }}>
                 <TextField
-                  fullWidth label="Họ và tên" name="fullName"
+                  fullWidth label={t('profile.full_name')} name="fullName"
                   value={formData.fullName || ''} onChange={handleChange} required
                   InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#9a1c48' }} /></InputAdornment> }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
                 <TextField
-                  fullWidth label="Email" value={profile?.email || ''} disabled
+                  fullWidth label={t('profile.email')} value={profile?.email || ''} disabled
                   InputProps={{ startAdornment: <InputAdornment position="start"><Email sx={{ color: '#9a1c48' }} /></InputAdornment> }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
                 <TextField
-                  fullWidth label="Số điện thoại" name="phone"
+                  fullWidth label={t('profile.phone')} name="phone"
                   value={formData.phone || ''} onChange={handleChange}
                   InputProps={{ startAdornment: <InputAdornment position="start"><Phone sx={{ color: '#9a1c48' }} /></InputAdornment> }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
@@ -267,7 +269,7 @@ const ProfilePage = () => {
                     '&:hover': { bgcolor: '#9a1c48', color: 'white' }
                   }}
                 >
-                  {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+                  {saving ? t('profile.saving') : t('profile.save_changes')}
                 </Button>
               </Box>
             </form>
@@ -291,7 +293,7 @@ const ProfilePage = () => {
                 gap: 2 // Khoảng cách giữa Icon Shield và text "Bảo mật tài khoản"
               }}>
                 <Shield sx={{ color: '#9a1c48' }} />
-                <Typography sx={{ fontWeight: 700 }}>Bảo mật tài khoản</Typography>
+                <Typography sx={{ fontWeight: 700 }}>{t('profile.security')}</Typography>
               </Box>
               <Button
                 variant="contained"
@@ -304,7 +306,7 @@ const ProfilePage = () => {
                   px: 4 // Padding ngang của nút đổi mật khẩu
                 }}
               >
-                Đổi mật khẩu
+                {t('profile.change_password')}
               </Button>
             </Box>
           </Paper>
@@ -320,12 +322,12 @@ const ProfilePage = () => {
           sx: { borderRadius: 6, p: 1 } // Bo tròn khung Dialog
         }}
       >
-        <DialogTitle sx={{ fontWeight: 800, textAlign: 'center' }}>Thay đổi mật khẩu</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 800, textAlign: 'center' }}>{t('profile.change_password')}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {pwError && <Alert severity="error">{pwError}</Alert>}
             <TextField
-              fullWidth label="Mật khẩu cũ" name="oldPassword" type={showPw.old ? 'text' : 'password'}
+              fullWidth label={t('profile.old_password')} name="oldPassword" type={showPw.old ? 'text' : 'password'}
               value={pwData.oldPassword} onChange={handlePwChange}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }} // Bo tròn ô nhập liệu
               InputProps={{
@@ -339,7 +341,7 @@ const ProfilePage = () => {
               }}
             />
             <TextField
-              fullWidth label="Mật khẩu mới" name="newPassword" type={showPw.new ? 'text' : 'password'}
+              fullWidth label={t('profile.new_password')} name="newPassword" type={showPw.new ? 'text' : 'password'}
               value={pwData.newPassword} onChange={handlePwChange}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }} // Bo tròn ô nhập liệu
               InputProps={{
@@ -353,7 +355,7 @@ const ProfilePage = () => {
               }}
             />
             <TextField
-              fullWidth label="Xác nhận mật khẩu" name="confirmPassword" type={showPw.confirm ? 'text' : 'password'}
+              fullWidth label={t('profile.confirm_password')} name="confirmPassword" type={showPw.confirm ? 'text' : 'password'}
               value={pwData.confirmPassword} onChange={handlePwChange}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }} // Bo tròn ô nhập liệu
               InputProps={{
@@ -369,7 +371,7 @@ const ProfilePage = () => {
           </Box>
         </DialogContent>
         <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 2 }}>
-          <Button onClick={() => setOpenPwDialog(false)} sx={{ borderRadius: 3 }}>Hủy</Button>
+          <Button onClick={() => setOpenPwDialog(false)} sx={{ borderRadius: 3 }}>{t('profile.cancel')}</Button>
           <Button 
             onClick={handlePwSubmit} 
             variant="contained" 
@@ -382,7 +384,7 @@ const ProfilePage = () => {
               '&:hover': { bgcolor: '#80163b' }
             }}
           >
-            {pwLoading ? <CircularProgress size={24} color="inherit" /> : 'Cập nhật ngay'}
+            {pwLoading ? <CircularProgress size={24} color="inherit" /> : t('profile.update_now')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -24,10 +24,14 @@ import {
   AccountBalanceWallet, 
   Refresh,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  MeetingRoom,
+  Handyman,
+  Block
 } from '@mui/icons-material';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { getDashboardStats } from '../../shared/api/dashboardApi';
+import { useTranslation } from 'react-i18next';
 
 const StatCard = ({ title, value, icon, color, loading }) => (
   <Card sx={{ 
@@ -67,6 +71,7 @@ const StatCard = ({ title, value, icon, color, loading }) => (
 );
 
 const DashboardPage = () => {
+  const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +84,7 @@ const DashboardPage = () => {
       setStats(data);
     } catch (err) {
       console.error('Error fetching dashboard stats:', err);
-      setError('Không thể tải dữ liệu thống kê.');
+      setError(t('dashboard.fetch_error'));
     } finally {
       setLoading(false);
     }
@@ -90,7 +95,10 @@ const DashboardPage = () => {
   }, []);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
+      style: 'currency', 
+      currency: i18n.language === 'vi' ? 'VND' : 'USD' 
+    }).format(i18n.language === 'vi' ? amount : amount / 25000); // Tạm tính tỷ giá
   };
 
   const getStatusColor = (status) => {
@@ -108,13 +116,13 @@ const DashboardPage = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 900, color: '#9a1c48', mb: 0.5 }}>
-            Dashboard Overview
+            {t('dashboard.title')}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Chào mừng trở lại, <strong>{user?.fullName}</strong>. Đây là tình hình kinh doanh hôm nay.
+            {t('dashboard.welcome')}, <strong>{user?.fullName}</strong>. {t('dashboard.subtitle')}
           </Typography>
         </Box>
-        <Tooltip title="Làm mới">
+        <Tooltip title={t('dashboard.refresh')}>
           <IconButton onClick={fetchStats} sx={{ bgcolor: 'background.paper', boxShadow: 1 }}>
             <Refresh />
           </IconButton>
@@ -124,7 +132,7 @@ const DashboardPage = () => {
       <Grid container spacing={3} sx={{ mb: 5 }}>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Tổng số phòng" 
+            title={t('dashboard.total_rooms')} 
             value={stats?.totalRooms || 0} 
             icon={<KingBed fontSize="large" />} 
             color="#3f51b5"
@@ -133,7 +141,7 @@ const DashboardPage = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Đang trống" 
+            title={t('dashboard.available')} 
             value={stats?.availableRooms || 0} 
             icon={<TrendingUp fontSize="large" />} 
             color="#4caf50"
@@ -142,7 +150,34 @@ const DashboardPage = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Lượt đặt phòng" 
+            title={t('dashboard.occupied')} 
+            value={stats?.occupiedRooms || 0} 
+            icon={<MeetingRoom fontSize="large" />} 
+            color="#f44336"
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard 
+            title={t('dashboard.maintenance')} 
+            value={stats?.maintenanceRooms || 0} 
+            icon={<Handyman fontSize="large" />} 
+            color="#9e9e9e"
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard 
+            title={t('dashboard.inactive')} 
+            value={stats?.inactiveRooms || 0} 
+            icon={<Block fontSize="large" />} 
+            color="#000000"
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard 
+            title={t('dashboard.total_bookings')} 
             value={stats?.totalBookings || 0} 
             icon={<EventNote fontSize="large" />} 
             color="#ff9800"
@@ -151,7 +186,7 @@ const DashboardPage = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard 
-            title="Tổng doanh thu" 
+            title={t('dashboard.total_revenue')} 
             value={formatCurrency(stats?.totalRevenue || 0)} 
             icon={<AccountBalanceWallet fontSize="large" />} 
             color="#e91e63"
@@ -161,19 +196,19 @@ const DashboardPage = () => {
       </Grid>
 
       <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, color: '#9a1c48' }}>
-        Đơn đặt phòng gần đây
+        {t('dashboard.recent_bookings')}
       </Typography>
       
       <TableContainer component={Paper} sx={{ borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.05)' }}>
         <Table sx={{ minWidth: 650 }}>
           <TableHead sx={{ bgcolor: 'background.default' }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Mã đơn</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Khách hàng</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Số phòng</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Ngày đặt</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Tổng tiền</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Trạng thái</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.booking_id')}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.customer')}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.room_number')}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.date')}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.amount')}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.status')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -191,7 +226,7 @@ const DashboardPage = () => {
                   <TableCell>#BK-{booking.id}</TableCell>
                   <TableCell sx={{ fontWeight: 600 }}>{booking.customerName}</TableCell>
                   <TableCell>{booking.roomNumber}</TableCell>
-                  <TableCell>{new Date(booking.bookingDate).toLocaleString('vi-VN')}</TableCell>
+                  <TableCell>{new Date(booking.bookingDate).toLocaleString(i18n.language === 'vi' ? 'vi-VN' : 'en-US')}</TableCell>
                   <TableCell sx={{ fontWeight: 700, color: 'secondary.main' }}>
                     {formatCurrency(booking.amount)}
                   </TableCell>
@@ -208,7 +243,7 @@ const DashboardPage = () => {
             ) : (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
-                  Chưa có dữ liệu đặt phòng nào.
+                  {t('dashboard.no_data')}
                 </TableCell>
               </TableRow>
             )}

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Drawer, Box, Typography, Divider, Button,
   IconButton, Stack, Chip
@@ -18,6 +19,7 @@ const InfoRow = ({ label, value, icon }) => (
 )
 
 const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
+  const { t, i18n } = useTranslation()
   if (!room) return null
 
   const amenities = room.amenities
@@ -27,7 +29,10 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
     : []
 
   const price = room.pricePerNight
-    ? new Intl.NumberFormat('vi-VN').format(room.pricePerNight) + '₫'
+    ? new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
+        style: 'currency', 
+        currency: i18n.language === 'vi' ? 'VND' : 'USD' 
+      }).format(i18n.language === 'vi' ? room.pricePerNight : room.pricePerNight / 25000)
     : '—'
 
   return (
@@ -51,7 +56,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
           <Box
             component="img"
             src={room.imageUrl}
-            alt={`Phòng ${room.roomNumber}`}
+            alt={`${t('booking_page.room')} ${room.roomNumber}`}
             sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         )}
@@ -76,7 +81,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
           <Box>
             <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.7)',
               textTransform: 'uppercase', letterSpacing: 2, display: 'block', mb: 0.25 }}>
-              Phòng
+              {t('booking_page.room')}
             </Typography>
             <Typography variant="h4" fontWeight={900} color="white">
               #{room.roomNumber}
@@ -92,29 +97,29 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
           <Box>
             <Typography variant="h6" fontWeight={800} color="text.primary">
-              {room.typeName || room.roomType || room.type || 'Standard'}
+              {t(room.typeName || room.roomType || room.type || 'Standard')}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Tầng {room.floor || '—'}
+              {t('rooms.floor')} {room.floor || '—'}
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'right' }}>
             <Typography variant="h5" fontWeight={900} color="secondary.main" lineHeight={1.1}>
               {price}
             </Typography>
-            <Typography variant="caption" color="text.disabled">/ đêm</Typography>
+            <Typography variant="caption" color="text.disabled">{t('rooms.per_night')}</Typography>
           </Box>
         </Box>
 
         {/* Details */}
         <Box sx={{ bgcolor: 'background.default', borderRadius: 3, px: 2, py: 0.5, mb: 2.5 }}>
-          <InfoRow label="Khach san" value={room.hotelName || '—'} icon={<Business />} />
-          <InfoRow label="Dia chi" value={room.address || '—'} icon={<LocationOn />} />
-          <InfoRow label="Suc chua" value={`${room.capacity || '—'} khach`} icon={<People />} />
-          <InfoRow label="Dien tich" value={room.area ? `${room.area} m²` : '—'} icon={<SquareFoot />} />
-          <InfoRow label="Loai giuong" value={room.bedType || '—'} icon={<KingBed />} />
-          <InfoRow label="So phong ngu" value={room.bedrooms || '1'} icon={<Layers />} />
-          <InfoRow label="So phong tam" value={room.bathrooms || '1'} icon={<Bathtub />} />
+          <InfoRow label={t('room_detail.hotel')} value={room.hotelName || '—'} icon={<Business />} />
+          <InfoRow label={t('room_detail.address')} value={room.address || '—'} icon={<LocationOn />} />
+          <InfoRow label={t('room_detail.capacity')} value={`${room.capacity || '—'} ${t('rooms.guests')}`} icon={<People />} />
+          <InfoRow label={t('room_detail.area')} value={room.area ? `${room.area} m²` : '—'} icon={<SquareFoot />} />
+          <InfoRow label={t('room_detail.bed_type')} value={t(room.bedType) || '—'} icon={<KingBed />} />
+          <InfoRow label={t('room_detail.bedrooms')} value={room.bedrooms || '1'} icon={<Layers />} />
+          <InfoRow label={t('room_detail.bathrooms')} value={room.bathrooms || '1'} icon={<Bathtub />} />
         </Box>
 
         {/* Description */}
@@ -122,7 +127,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
           <Box sx={{ mb: 2.5 }}>
             <Typography variant="caption" fontWeight={700} color="text.secondary"
               sx={{ textTransform: 'uppercase', letterSpacing: 1, display: 'block', mb: 1 }}>
-              Mô tả
+              {t('room_detail.description')}
             </Typography>
             <Typography variant="body2" color="text.secondary" lineHeight={1.7}>
               {room.description}
@@ -135,7 +140,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
           <Box>
             <Typography variant="caption" fontWeight={700} color="text.secondary"
               sx={{ textTransform: 'uppercase', letterSpacing: 1, display: 'block', mb: 1.5 }}>
-              Tiện nghi
+              {t('room_detail.amenities')}
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
               {amenities.map((item, i) => (
@@ -170,7 +175,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
             onClick={() => { onClose(); onEdit(room) }}
             sx={{ borderRadius: 3, py: 1.25, fontWeight: 700, textTransform: 'none', fontSize: '0.875rem' }}
           >
-            Chỉnh sửa phòng
+            {t('room_detail.edit_room')}
           </Button>
         </Box>
       )}

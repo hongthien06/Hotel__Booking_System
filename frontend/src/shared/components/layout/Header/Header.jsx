@@ -2,9 +2,10 @@ import React from 'react'
 import { Box, Typography, Button, Avatar, Tooltip, IconButton } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../shared/hooks/useAuth'
-import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed, History } from '@mui/icons-material'
+import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed, History, Menu as MenuIcon, Person } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../LanguageSwitcher'
+import { Menu, MenuItem, Divider } from '@mui/material'
 
 const navItems = [
   { label: 'header.home', path: '/home', icon: <Home fontSize="small" /> },
@@ -22,6 +23,15 @@ const Header = () => {
   const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  const [anchorEl, setAnchorEl] = React.useState(null)
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handleMenuClose = () => {
+    setAnchorEl(null)
+  }
 
   const handleLogout = () => {
     logout()
@@ -127,58 +137,49 @@ const Header = () => {
       )}
 
       {/* Right Section - User info / Login */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <LanguageSwitcher />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         {isAuthenticated && user ? (
           <>
-            <Button
-              onClick={() => navigate('/booking-history')}
-              startIcon={<History fontSize="small" />}
-              sx={{
-                color: isActive('/booking-history') ? '#fff' : '#9a1c48',
-                fontWeight: isActive('/booking-history') ? 800 : 600,
-                fontSize: '0.85rem',
-                textTransform: 'none',
-                borderRadius: 2,
-                px: 2,
-                py: 0.6,
-                mr: 1,
-                backgroundColor: isActive('/booking-history') ? '#9a1c48' : 'transparent',
-                '&:hover': {
-                  color: '#fff',
-                  backgroundColor: '#c02860',
+            <Tooltip title="Menu">
+              <IconButton
+                onClick={handleMenuOpen}
+                sx={{
+                  color: '#9a1c48',
+                  backgroundColor: 'rgba(154,28,72,0.05)',
+                  '&:hover': { backgroundColor: 'rgba(154,28,72,0.15)' }
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+            </Tooltip>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              PaperProps={{
+                sx: {
+                  mt: 1.5,
+                  borderRadius: 3,
+                  minWidth: 180,
+                  boxShadow: '0 8px 24px rgba(154,28,72,0.15)',
+                  border: '1px solid rgba(154,28,72,0.1)'
                 }
               }}
             >
-              Lịch sử đặt phòng
-            </Button>
-            <Tooltip title="Trang cá nhân">
-              <IconButton
-                onClick={() => navigate('/profile')}
-                sx={{
-                  p: 0.5,
-                  '&:hover': { opacity: 0.8 }
-                }}
-              >
-                <Avatar sx={{ width: 34, height: 34, bgcolor: '#9a1c48', color: '#fff', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                  {user.fullName?.charAt(0).toUpperCase() || 'U'}
-                </Avatar>
-              </IconButton>
-            </Tooltip>
-            <Typography variant="body2" sx={{ fontWeight: 600, color: '#9a1c48', display: { xs: 'none', md: 'block' } }}>
-              {user.fullName}
-            </Typography>
-            <Tooltip title={t("header.logout")}>
-              <IconButton
-                onClick={handleLogout}
-                sx={{
-                  color: '#9a1c48',
-                  '&:hover': { backgroundColor: 'rgba(154,28,72,0.1)' }
-                }}
-              >
-                <Logout fontSize="small" />
-              </IconButton>
-            </Tooltip>
+              <MenuItem onClick={() => { navigate('/profile'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
+                <Person fontSize="small" color="primary" /> {t("header.profile") || "Trang cá nhân"}
+              </MenuItem>
+              <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
+                <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
+              </MenuItem>
+              <Divider sx={{ my: 1 }} />
+              <MenuItem onClick={handleLogout} sx={{ py: 1.2, gap: 1.5, fontWeight: 600, color: 'error.main' }}>
+                <Logout fontSize="small" /> {t("header.logout")}
+              </MenuItem>
+            </Menu>
           </>
         ) : (
           <Button
@@ -188,12 +189,19 @@ const Header = () => {
             sx={{
               fontWeight: 700, textTransform: 'none',
               bgcolor: '#9a1c48', color: '#fff',
+              borderRadius: 2,
+              px: 3,
               '&:hover': { bgcolor: '#c02860' }
             }}
           >
             {t("header.login")}
           </Button>
         )}
+        
+        {/* Language Switcher at the very corner */}
+        <Box sx={{ ml: 1, pl: 1, borderLeft: '1px solid rgba(154,28,72,0.2)' }}>
+          <LanguageSwitcher />
+        </Box>
       </Box>
     </Box>
   )

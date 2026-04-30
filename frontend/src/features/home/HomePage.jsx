@@ -45,10 +45,10 @@ const amenities = [
 
 // Dữ liệu đánh giá
 const reviews = [
-  { name: 'Nguyễn Văn Anh', avatar: 'A', rating: 5, comment: 'Dịch vụ tuyệt vời! Phòng sạch sẽ, nhân viên thân thiện. Chắc chắn sẽ quay lại lần nữa.', date: '15/04/2026' },
-  { name: 'Trần Thị Minh', avatar: 'M', rating: 5, comment: 'View đẹp, đồ ăn ngon, giá cả hợp lý. Rất hài lòng với trải nghiệm tại đây!', date: '10/04/2026' },
-  { name: 'Lê Hoàng Phúc', avatar: 'P', rating: 4, comment: 'Vị trí thuận tiện, gần trung tâm. Phòng rộng rãi và thoáng mát. Recommend cho mọi người!', date: '05/04/2026' },
-  { name: 'Phạm Quỳnh Như', avatar: 'N', rating: 5, comment: 'Đã đặt phòng cho gia đình qua hệ thống này, rất tiện lợi và nhanh chóng. 10 điểm!', date: '01/04/2026' },
+  { key: 'item1', avatar: 'A', rating: 5, date: '15/04/2026' },
+  { key: 'item2', avatar: 'M', rating: 5, date: '10/04/2026' },
+  { key: 'item3', avatar: 'P', rating: 4, date: '05/04/2026' },
+  { key: 'item4', avatar: 'N', rating: 5, date: '01/04/2026' },
 ];
 
 const HomePage = () => {
@@ -124,10 +124,10 @@ const HomePage = () => {
         }}
       >
         {[
-          { number: '200+', label: 'Phòng cao cấp' },
-          { number: '50K+', label: 'Khách hàng' },
-          { number: '4.8★', label: 'Đánh giá' },
-          { number: '24/7', label: 'Hỗ trợ' },
+          { number: '200+', labelKey: 'home.stats.rooms' },
+          { number: '50K+', labelKey: 'home.stats.customers' },
+          { number: '4.8★', labelKey: 'home.stats.rating' },
+          { number: '24/7', labelKey: 'home.stats.support' },
         ].map((stat, i) => (
           <Box 
             key={i}
@@ -145,7 +145,7 @@ const HomePage = () => {
               {stat.number}
             </Typography>
             <Typography variant="body1" sx={{ fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: 1, textTransform: 'uppercase', fontSize: { xs: '0.6rem', sm: '0.75rem', md: '0.9rem' } }}>
-              {t(stat.label)}
+              {t(stat.labelKey)}
             </Typography>
           </Box>
         ))}
@@ -235,13 +235,13 @@ const HomePage = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                     <Avatar sx={{ bgcolor: 'secondary.main', fontWeight: 700 }}>{r.avatar}</Avatar>
                     <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{r.name}</Typography>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(`home.reviews.${r.key}.name`)}</Typography>
                       <Typography variant="caption" color="text.secondary">{r.date}</Typography>
                     </Box>
                   </Box>
                   <Rating value={r.rating} readOnly size="small" sx={{ mb: 1.5 }} />
                   <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.7 }}>
-                    "{r.comment}"
+                    "{t(`home.reviews.${r.key}.comment`)}"
                   </Typography>
                 </CardContent>
               </Card>
@@ -278,7 +278,7 @@ const HomePage = () => {
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            Đặt phòng ngay
+            {t("home.hero.cta")}
           </Button>
         </Container>
       </Box>

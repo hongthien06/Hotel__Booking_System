@@ -69,7 +69,13 @@ public class User implements UserDetails {
         if (roles == null)
             return List.of();
         return roles.stream()
-                .map(r -> new SimpleGrantedAuthority("ROLE_" + r.getRoleName()))
+                .map(r -> {
+                    String roleName = r.getRoleName();
+                    if (!roleName.startsWith("ROLE_")) {
+                        roleName = "ROLE_" + roleName;
+                    }
+                    return new SimpleGrantedAuthority(roleName);
+                })
                 .collect(Collectors.toList());
     }
 

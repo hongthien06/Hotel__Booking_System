@@ -16,6 +16,7 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Snackbar, CircularProgress
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList } from '@mui/icons-material';
 import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi';
 import { createBookingApi } from '../../shared/api/bookingApi';
@@ -25,36 +26,52 @@ const PC_LIGHT = '#fce4ec';
 const SIDEBAR_W = 300;
 
 const DESTINATIONS = [
-  { name: 'TP. Hồ Chí Minh', province: 'TP. Hồ Chí Minh', desc: 'Thành phố sôi động', img: imgHCM, bg: '#fff0f3' },
-  { name: 'Hà Nội', province: 'Hà Nội', desc: 'Thủ đô ngàn năm', img: imgHaNoi, bg: '#f0f4ff' },
-  { name: 'Vũng Tàu', province: 'Bà Rịa - Vũng Tàu', desc: 'Biển xanh cát trắng', img: imgVungTau, bg: '#f0fff4' },
-  { name: 'Đà Lạt', province: 'Lâm Đồng', desc: 'Thành phố ngàn hoa', img: imgDaLat, bg: '#fff8f0' },
-  { name: 'Đà Nẵng', province: 'Đà Nẵng', desc: 'Thành phố đáng sống', img: imgDaNang, bg: '#f5f0ff' },
-  { name: 'Nha Trang', province: 'Khánh Hòa', desc: 'Hòn ngọc Biển Đông', img: imgNhaTrang, bg: '#f0f9ff' },
-  { name: 'Phú Quốc', province: 'Kiên Giang', desc: 'Đảo Ngọc thiên đường', img: imgPhuQuoc, bg: '#f0fff4' },
-  { name: 'Sapa', province: 'Lào Cai', desc: 'Thành phố trong sương', img: imgSapa, bg: '#f5f5f5' },
-  { name: 'Huế', province: 'Thừa Thiên Huế', desc: 'Cố đô cổ kính', img: imgHue, bg: '#fff5f0' },
-  { name: 'Cát Bà', province: 'Hải Phòng', desc: 'Vịnh đảo kỳ vĩ', img: imgCatBa, bg: '#f0fff4' },
+  { key: 'hcm', province: 'TP. Hồ Chí Minh', img: imgHCM, bg: '#fff0f3' },
+  { key: 'hanoi', province: 'Hà Nội', img: imgHaNoi, bg: '#f0f4ff' },
+  { key: 'vungtau', province: 'Bà Rịa - Vũng Tàu', img: imgVungTau, bg: '#f0fff4' },
+  { key: 'dalat', province: 'Lâm Đồng', img: imgDaLat, bg: '#fff8f0' },
+  { key: 'danang', province: 'Đà Nẵng', img: imgDaNang, bg: '#f5f0ff' },
+  { key: 'nhatrang', province: 'Khánh Hòa', img: imgNhaTrang, bg: '#f0f9ff' },
+  { key: 'phuquoc', province: 'Kiên Giang', img: imgPhuQuoc, bg: '#f0fff4' },
+  { key: 'sapa', province: 'Lào Cai', img: imgSapa, bg: '#f5f5f5' },
+  { key: 'hue', province: 'Thừa Thiên Huế', img: imgHue, bg: '#fff5f0' },
+  { key: 'catba', province: 'Hải Phòng', img: imgCatBa, bg: '#f0fff4' },
 ];
 
 
-const ROOM_TYPES = ['Standard', 'Deluxe', 'Superior', 'Family Room', 'Presidential Suite'];
-const BED_TYPES = ['Đơn', 'Đôi', 'Ba', 'King', 'Queen'];
-const BED_TYPE_MAP = {
-  'Đơn': 'SINGLE',
-  'Đôi': 'DOUBLE',
-  'Ba': 'TRIPLE',
-  'King': 'KING',
-  'Queen': 'QUEEN'
-};
-const BED_TYPE_LABELS = {
-  'SINGLE': 'Giường Đơn',
-  'DOUBLE': 'Giường Đôi',
-  'TRIPLE': 'Giường Ba',
-  'KING': 'Giường King',
-  'QUEEN': 'Giường Queen'
-};
-const SERVICES = ['Bữa sáng', 'Đưa đón sân bay', 'Thuê xe máy', 'Spa & Massage', 'Hồ bơi'];
+const ROOM_TYPES = [
+  { key: 'standard', label: 'room_types.standard' },
+  { key: 'deluxe', label: 'room_types.deluxe' },
+  { key: 'superior', label: 'room_types.superior' },
+  { key: 'family', label: 'room_types.family' },
+  { key: 'president', label: 'room_types.president' }
+];
+const BED_TYPES = [
+  { key: 'SINGLE', label: 'rooms.bed_single' },
+  { key: 'DOUBLE', label: 'rooms.bed_double' },
+  { key: 'TRIPLE', label: 'rooms.bed_triple' },
+  { key: 'KING', label: 'rooms.bed_king' },
+  { key: 'QUEEN', label: 'rooms.bed_queen' }
+];
+const BED_TYPE_LABELS = (t) => ({
+  'SINGLE': t('rooms.bed_single') || 'Giường Đơn',
+  'DOUBLE': t('rooms.bed_double') || 'Giường Đôi',
+  'TRIPLE': t('rooms.bed_triple') || 'Giường Ba',
+  'KING': t('rooms.bed_king') || 'Giường King',
+  'QUEEN': t('rooms.bed_queen') || 'Giường Queen'
+});
+const formatCurrency = (n, lang) => new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', { 
+  style: 'currency', 
+  currency: lang === 'vi' ? 'VND' : 'USD' 
+}).format(lang === 'vi' ? n : n / 25000);
+
+const SERVICES = [
+  { key: 'breakfast', label: 'services.breakfast' },
+  { key: 'shuttle', label: 'services.shuttle' },
+  { key: 'bike', label: 'services.bike' },
+  { key: 'spa', label: 'services.spa' },
+  { key: 'pool', label: 'services.pool' }
+];
 
 const MOCK_ROOMS = [
   { id: 'm1', name: 'Phòng Deluxe View Biển', location: 'Vũng Tàu', bed: 'King', reviews: 124, rating: 4.8, type: 'Deluxe', price: 1200000, bg: '#dbeafe', emoji: '🌊' },
@@ -62,7 +79,6 @@ const MOCK_ROOMS = [
   { id: 'm3', name: 'Family Room', location: 'Đà Nẵng', bed: 'Ba', reviews: 155, rating: 4.6, type: 'Family', price: 1500000, bg: '#fef9c3', emoji: '🌉' },
 ];
 
-const fmtVND = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
 const nightsBetween = (a, b) => {
   const diff = new Date(b) - new Date(a);
   return diff > 0 ? Math.round(diff / 86400000) : 1;
@@ -70,6 +86,7 @@ const nightsBetween = (a, b) => {
 
 /* ─── Sidebar ─────────────────────────────────────────── */
 const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes, services, setServices, minPrice, setMinPrice, maxPrice, setMaxPrice, onSearch, loading }) => {
+  const { t } = useTranslation();
   const toggle = (list, setList, v) =>
     setList(list.includes(v) ? list.filter(x => x !== v) : [...list, v]);
   const labelSx = { fontWeight: 700, color: '#888', letterSpacing: 1, fontSize: 11, display: 'block', mb: 0.5 };
@@ -78,20 +95,20 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
     <Box sx={{ width: SIDEBAR_W, p: 2.5, height: '100%', overflowY: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
         <Search sx={{ color: PC }} />
-        <Typography variant="h6" sx={{ fontWeight: 700, color: PC }}>Tìm kiếm phòng</Typography>
+        <Typography variant="h6" sx={{ fontWeight: 700, color: PC }}>{t('booking_page.search_title')}</Typography>
       </Box>
       <Divider sx={{ mb: 2 }} />
 
-      <Typography sx={labelSx}>NƠI ĐẾN</Typography>
+      <Typography sx={labelSx}>{t('booking_page.destination')}</Typography>
       <TextField fullWidth size="small" value={params.destination}
         onChange={e => onParam('destination', e.target.value)} sx={{ mb: 2 }}
         InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: PC, fontSize: 18 }} /></InputAdornment> }}
       />
 
       <Grid container spacing={1.5} sx={{ mb: 2 }}>
-        {[['checkIn', 'NHẬN PHÒNG'], ['checkOut', 'TRẢ PHÒNG']].map(([k, lbl]) => (
+        {[['checkIn', 'booking_page.check_in'], ['checkOut', 'booking_page.check_out']].map(([k, lblKey]) => (
           <Grid item xs={6} key={k}>
-            <Typography sx={labelSx}>{lbl}</Typography>
+            <Typography sx={labelSx}>{t(lblKey)}</Typography>
             <TextField fullWidth size="small" type="date" value={params[k]}
               onChange={e => onParam(k, e.target.value)}
               InputLabelProps={{ shrink: true }} inputProps={{ style: { fontSize: 12 } }}
@@ -101,9 +118,9 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
       </Grid>
 
       <Grid container spacing={1.5} sx={{ mb: 3 }}>
-        {[['adults', 'NGƯỜI LỚN', 1], ['children', 'TRẺ EM', 0]].map(([k, lbl, min]) => (
+        {[['adults', 'booking_page.adults', 1], ['children', 'booking_page.children', 0]].map(([k, lblKey, min]) => (
           <Grid item xs={6} key={k}>
-            <Typography sx={labelSx}>{lbl}</Typography>
+            <Typography sx={labelSx}>{t(lblKey)}</Typography>
             <TextField fullWidth size="small" type="number" value={params[k]}
               onChange={e => onParam(k, Math.max(min, parseInt(e.target.value) || min))}
               inputProps={{ min }}
@@ -113,11 +130,11 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
       </Grid>
 
       {/* Price range */}
-      <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>GIÁ / ĐÊM (VNĐ)</Typography>
+      <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>{t('booking_page.price_per_night')}</Typography>
       <Grid container spacing={1.5} sx={{ mb: 1 }}>
         <Grid item xs={6}>
           <TextField
-            fullWidth size="small" type="number" placeholder="Tối thiểu"
+            fullWidth size="small" type="number" placeholder={t('booking_page.min_price')}
             value={minPrice ?? ''}
             onChange={e => setMinPrice(e.target.value === '' ? undefined : Number(e.target.value))}
             inputProps={{ min: 0, step: 50000 }}
@@ -126,7 +143,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         </Grid>
         <Grid item xs={6}>
           <TextField
-            fullWidth size="small" type="number" placeholder="Tối đa"
+            fullWidth size="small" type="number" placeholder={t('booking_page.max_price')}
             value={maxPrice ?? ''}
             onChange={e => setMaxPrice(e.target.value === '' ? undefined : Number(e.target.value))}
             inputProps={{ min: 0, step: 50000 }}
@@ -138,26 +155,26 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         <Typography variant="caption" sx={{ color: '#aaa', display: 'block', mb: 1 }}>
           {minPrice != null ? new Intl.NumberFormat('vi-VN').format(minPrice) + '₫' : '0₫'}
           {' — '}
-          {maxPrice != null ? new Intl.NumberFormat('vi-VN').format(maxPrice) + '₫' : 'không giới hạn'}
+          {maxPrice != null ? new Intl.NumberFormat('vi-VN').format(maxPrice) + '₫' : t('booking_page.no_limit')}
         </Typography>
       )}
       <Divider sx={{ mb: 2 }} />
 
       {[
-        ['LOẠI PHÒNG', ROOM_TYPES, roomTypes, setRoomTypes],
-        ['LOẠI GIƯỜNG', BED_TYPES, bedTypes, setBedTypes],
-        ['DỊCH VỤ ĐI KÈM', SERVICES, services, setServices],
-      ].map(([title, items, list, setList]) => (
-        <Box key={title}>
-          <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>{title}</Typography>
+        ['booking_page.room_type', ROOM_TYPES, roomTypes, setRoomTypes],
+        ['booking_page.bed_type', BED_TYPES, bedTypes, setBedTypes],
+        ['booking_page.extra_services', SERVICES, services, setServices],
+      ].map(([titleKey, items, list, setList]) => (
+        <Box key={titleKey}>
+          <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>{t(titleKey)}</Typography>
           <FormGroup sx={{ mb: 1 }}>
             {items.map(v => (
-              <FormControlLabel key={v}
-                control={<Checkbox size="small" checked={list.includes(v)}
-                  onChange={() => toggle(list, setList, v)}
+              <FormControlLabel key={v.key}
+                control={<Checkbox size="small" checked={list.includes(v.key)}
+                  onChange={() => toggle(list, setList, v.key)}
                   sx={{ color: PC, '&.Mui-checked': { color: PC } }}
                 />}
-                label={<Typography variant="body2">{v}</Typography>}
+                label={<Typography variant="body2">{t(v.label)}</Typography>}
                 sx={{ mb: 0.1 }}
               />
             ))}
@@ -170,7 +187,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         startIcon={<Search />}
         sx={{ borderRadius: 2, py: 1.2, fontWeight: 700 }}
       >
-        {loading ? 'Đang tìm...' : 'Tìm phòng'}
+        {loading ? t('booking_page.searching') : t('booking_page.find_room')}
       </Button>
     </Box>
   );
@@ -178,6 +195,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 
 /* ─── BookingDialog ────────────────────────────────────── */
 const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess }) => {
+  const { t, i18n } = useTranslation();
   const [form, setForm] = useState({
     checkIn: searchParams?.checkIn || '',
     checkOut: searchParams?.checkOut || '',
@@ -201,15 +219,16 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
   if (!room) return null;
 
-  const roomName = isMock ? room.name : `Phòng ${room.roomNumber}`;
+  const roomName = isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`;
   const roomType = isMock ? room.type : (room.roomTypeName || 'Standard');
   const roomPrice = isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0);
   const nights = nightsBetween(form.checkIn, form.checkOut);
+  
   const total = roomPrice * nights;
 
   const handleBook = async () => {
-    if (!form.checkIn || !form.checkOut) { setError('Vui lòng chọn ngày nhận và trả phòng.'); return; }
-    if (new Date(form.checkOut) <= new Date(form.checkIn)) { setError('Ngày trả phòng phải sau ngày nhận phòng.'); return; }
+    if (!form.checkIn || !form.checkOut) { setError(t('rooms.validation_required')); return; }
+    if (new Date(form.checkOut) <= new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return; }
     if (isMock) { setError('Phòng mẫu — vui lòng tìm kiếm phòng thực trên hệ thống.'); return; }
 
     setSubmitting(true);
@@ -224,8 +243,8 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
       });
       onSuccess();
     } catch (err) {
-      const msg = err?.response?.data?.message || err?.response?.data || 'Đặt phòng thất bại. Vui lòng thử lại.';
-      setError(typeof msg === 'string' ? msg : 'Đặt phòng thất bại. Vui lòng thử lại.');
+      const msg = err?.response?.data?.message || err?.response?.data || t('common.error');
+      setError(typeof msg === 'string' ? msg : t('common.error'));
     } finally {
       setSubmitting(false);
     }
@@ -235,7 +254,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
         <Box>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: PC }}>Xác nhận đặt phòng</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 800, color: PC }}>{t('booking_page.booking_confirm')}</Typography>
           <Typography variant="body2" color="text.secondary">{roomName}</Typography>
         </Box>
         <IconButton onClick={onClose} size="small"><Close /></IconButton>
@@ -245,10 +264,10 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         {/* Room summary */}
         <Box sx={{ display: 'flex', gap: 2, mb: 2.5, p: 2, bgcolor: '#fafafa', borderRadius: 2, border: '1px solid #eee' }}>
           <Box sx={{ flex: 1 }}>
-            <Chip label={roomType} size="small" sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, mb: 0.5 }} />
+            <Chip label={t(roomType)} size="small" sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, mb: 0.5 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{roomName}</Typography>
             <Typography variant="body2" color="text.secondary">
-              {fmtVND(roomPrice)} / đêm
+              {formatCurrency(roomPrice, i18n.language)} {t('rooms.per_night')}
             </Typography>
           </Box>
         </Box>
@@ -256,14 +275,14 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         {/* Date pickers */}
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={6}>
-            <TextField fullWidth label="Ngày nhận phòng" type="date" size="small"
+            <TextField fullWidth label={t('booking_page.check_in')} type="date" size="small"
               value={form.checkIn}
               onChange={e => setForm(f => ({ ...f, checkIn: e.target.value }))}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
           <Grid item xs={6}>
-            <TextField fullWidth label="Ngày trả phòng" type="date" size="small"
+            <TextField fullWidth label={t('booking_page.check_out')} type="date" size="small"
               value={form.checkOut}
               onChange={e => setForm(f => ({ ...f, checkOut: e.target.value }))}
               InputLabelProps={{ shrink: true }}
@@ -271,17 +290,17 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
           </Grid>
         </Grid>
 
-        <TextField fullWidth label="Số khách" type="number" size="small"
+        <TextField fullWidth label={t('booking_page.num_guests')} type="number" size="small"
           value={form.numGuests}
           onChange={e => setForm(f => ({ ...f, numGuests: Math.max(1, parseInt(e.target.value) || 1) }))}
           inputProps={{ min: 1 }}
           sx={{ mb: 2 }}
         />
 
-        <TextField fullWidth label="Yêu cầu đặc biệt (tuỳ chọn)" multiline rows={2} size="small"
+        <TextField fullWidth label={t('booking_page.special_request')} multiline rows={2} size="small"
           value={form.specialRequest}
           onChange={e => setForm(f => ({ ...f, specialRequest: e.target.value }))}
-          placeholder="Ví dụ: phòng tầng cao, view biển..."
+          placeholder={t('booking_page.special_request_placeholder')}
           sx={{ mb: 2 }}
         />
 
@@ -289,13 +308,13 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         {form.checkIn && form.checkOut && nights > 0 && (
           <Box sx={{ p: 2, bgcolor: PC_LIGHT, borderRadius: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-              <Typography variant="body2" color="text.secondary">{fmtVND(roomPrice)} × {nights} đêm</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>{fmtVND(total)}</Typography>
+              <Typography variant="body2" color="text.secondary">{formatCurrency(roomPrice, i18n.language)} × {nights} {t('rooms.per_night')}</Typography>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>{formatCurrency(total, i18n.language)}</Typography>
             </Box>
             <Divider sx={{ my: 1 }} />
             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>Tổng cộng</Typography>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>{fmtVND(total)}</Typography>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{t('booking_page.total')}</Typography>
+              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>{formatCurrency(total, i18n.language)}</Typography>
             </Box>
           </Box>
         )}
@@ -304,12 +323,12 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onClose} sx={{ borderRadius: 2 }}>Huỷ</Button>
+        <Button onClick={onClose} sx={{ borderRadius: 2 }}>{t('common.cancel')}</Button>
         <Button variant="contained" color="primary" onClick={handleBook} disabled={submitting}
           sx={{ borderRadius: 2, fontWeight: 700, px: 3 }}
           startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : null}
         >
-          {submitting ? 'Đang xử lý...' : 'Xác nhận đặt phòng'}
+          {submitting ? t('booking_page.processing') : t('booking_page.booking_confirm')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -318,6 +337,8 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
 /* ─── Main ─────────────────────────────────────────────── */
 const BookingPage = () => {
+  const { t, i18n } = useTranslation();
+  
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -368,8 +389,8 @@ const BookingPage = () => {
     if (!params.checkIn || !params.checkOut) return;
     setLoading(true); setSearched(true);
     try {
-      const typeName = roomTypes.length === 1 ? roomTypes[0] : undefined;
-      const bedType = bedTypes.length === 1 ? BED_TYPE_MAP[bedTypes[0]] : undefined;
+      const typeName = roomTypes.length === 1 ? ROOM_TYPES.find(t => t.key === roomTypes[0])?.key : undefined;
+      const bedType = bedTypes.length === 1 ? bedTypes[0] : undefined;
       const d = await getAvailableRoomsApi(
         params.checkIn,
         params.checkOut,
@@ -392,14 +413,16 @@ const BookingPage = () => {
 
   const handleBookingSuccess = () => {
     setDialogOpen(false);
-    setSnackbar({ open: true, msg: '🎉 Đặt phòng thành công! Kiểm tra email xác nhận của bạn.', severity: 'success' });
+    setSnackbar({ open: true, msg: t('booking_page.booking_success'), severity: 'success' });
   };
 
   const selectDest = (idx) => { setDestIdx(idx); onParam('destination', DESTINATIONS[idx].province || DESTINATIONS[idx].name); };
 
   /* ── Room Card ─────────────────────────────────────────── */
-  const RoomCard = ({ room, isMock }) => (
-    <Card sx={{
+  const RoomCard = ({ room, isMock }) => {
+    const { t, i18n } = useTranslation();
+    return (
+      <Card sx={{
       borderRadius: 3, overflow: 'hidden', transition: 'all 0.3s',
       '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
     }}>
@@ -409,41 +432,42 @@ const BookingPage = () => {
         </Box>
         : <CardMedia component="img" height="160"
           image={room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600'}
-          alt={isMock ? room.name : `Phòng ${room.roomNumber}`}
+          alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
         />
       }
       <CardContent sx={{ p: 2 }}>
-        <Chip label={isMock ? room.type : (room.roomTypeName || 'Standard')} size="small"
+        <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.roomTypeName || 'Standard')} size="small"
           sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, fontSize: 11, mb: 1 }} />
         <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}>
-          {isMock ? room.name : `Phòng ${room.roomNumber}`}
+          {isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
         </Typography>
         <Typography variant="caption" color="text.secondary"
           sx={{ display: 'flex', alignItems: 'center', gap: 0.3, mb: 1 }}>
           <LocationOn fontSize="inherit" />
           {isMock 
             ? `${room.location} · ${room.bed}` 
-            : `${room.province || 'Hà Nội'} · ${BED_TYPE_LABELS[room.bedType] || room.bedType}`}
+            : `${room.province || 'Hà Nội'} · ${BED_TYPE_LABELS(t)[room.bedType] || room.bedType}`}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
           <Rating value={isMock ? room.rating : 5} precision={0.1} readOnly size="small"
             sx={{ '& .MuiRating-iconFilled': { color: PC } }} />
           <Typography variant="caption" color="text.secondary">
-            ({isMock ? room.reviews : 48} đánh giá)
+            ({isMock ? room.reviews : 48} {t('room_detail.reviews')})
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
-            {fmtVND(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0))}
+            {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
           </Typography>
           <Button size="small" variant="contained" color="primary" onClick={() => openBooking(room, isMock)}
             sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}>
-            Đặt ngay
+            {t('common.book_now')}
           </Button>
         </Box>
       </CardContent>
     </Card>
-  );
+    );
+  };
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh', bgcolor: '#f7f8fa' }}>
@@ -490,7 +514,7 @@ const BookingPage = () => {
           <Box sx={{ maxWidth: 1080, mx: 'auto' }}>
 
             {/* Điểm đến phổ biến */}
-            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>🗺️ Điểm đến phổ biến</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>{t('destinations.title')}</Typography>
             <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
               {/* Nút cuộn trái */}
               <IconButton onClick={() => scrollDest(-1)} sx={{
@@ -534,9 +558,9 @@ const BookingPage = () => {
                     {/* Text */}
                     <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 1.2, textAlign: 'center' }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
-                        {d.name}
+                        {t(`destinations.${d.key}.name`)}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.82)' }}>{d.desc}</Typography>
+                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.82)' }}>{t(`destinations.${d.key}.desc`)}</Typography>
                     </Box>
                   </Card>
                 ))}
@@ -556,11 +580,11 @@ const BookingPage = () => {
             {/* Phòng nổi bật */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 800 }}>
-                ⭐ {searched ? 'Phòng còn trống' : 'Phòng nổi bật'}
+                ⭐ {searched ? t('booking_page.available_rooms') : t('booking_page.featured_rooms')}
               </Typography>
               {!loading && (
                 <Typography variant="body2" color="text.secondary">
-                  {rooms.length > 0 ? `${rooms.length} phòng` : `${MOCK_ROOMS.length} phòng mẫu`}
+                  {rooms.length > 0 ? `${rooms.length} ${t('header.rooms').toLowerCase()}` : `3 ${t('header.rooms').toLowerCase()} (mock)`}
                 </Typography>
               )}
             </Box>
@@ -583,7 +607,7 @@ const BookingPage = () => {
               ) : searched ? (
                 <Grid item xs={12}>
                   <Alert severity="info" sx={{ borderRadius: 3 }}>
-                    Không tìm thấy phòng trống trong thời gian này. Vui lòng thử ngày khác!
+                    {t('booking_page.no_rooms_found')}
                   </Alert>
                 </Grid>
               ) : (

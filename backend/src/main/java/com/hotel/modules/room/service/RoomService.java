@@ -55,8 +55,8 @@ public class RoomService {
     //Command Operations
     @Transactional
     public RoomResponse create(RoomRequest req) {
-        if(roomRepository.existsByRoomNumber(req.getRoomNumber())) {
-            throw new RuntimeException("Room number " + req.getRoomNumber() + " already exists");
+        if(roomRepository.existsByRoomNumberAndHotel_HotelId(req.getRoomNumber(), req.getHotelId())) {
+            throw new RuntimeException("Room number " + req.getRoomNumber() + " already exists in this hotel");
         }
         Room room=new Room();
         RoomType type=roomTypeService.findEntityById(req.getTypeId());
@@ -71,8 +71,8 @@ public class RoomService {
     @Transactional
     public RoomResponse update(Long id,RoomRequest req) {
         Room room=findEntityById(id);
-        if(!room.getRoomNumber().equals(req.getRoomNumber()) && roomRepository.existsByRoomNumber(req.getRoomNumber())) {
-            throw new RuntimeException("Room number " + req.getRoomNumber() + " already exists");
+        if(!room.getRoomNumber().equals(req.getRoomNumber()) && roomRepository.existsByRoomNumberAndHotel_HotelId(req.getRoomNumber(), req.getHotelId())) {
+            throw new RuntimeException("Room number " + req.getRoomNumber() + " already exists in this hotel");
         }
         RoomType type=roomTypeService.findEntityById(req.getTypeId());
         Hotel hotel=hotelService.findEntityById(req.getHotelId());

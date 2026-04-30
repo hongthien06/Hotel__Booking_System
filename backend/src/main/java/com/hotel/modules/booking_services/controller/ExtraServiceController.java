@@ -25,7 +25,7 @@ public class ExtraServiceController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<List<ExtraServiceDTO>> getAllServices() {
         return ResponseEntity.ok(extraServiceService.getAllServices());
     }

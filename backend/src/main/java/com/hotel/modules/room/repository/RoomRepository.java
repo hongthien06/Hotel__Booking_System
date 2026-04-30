@@ -34,7 +34,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.hotel.province = :province")
     List<Room> findByHotel_Province(@Param("province") String province);
 
-    boolean existsByRoomNumber(String roomNumber);
+    boolean existsByRoomNumberAndHotel_HotelId(String roomNumber, Long hotelId);
     boolean existsByRoomType_TypeId(Integer typeId);
 
     @Query("""

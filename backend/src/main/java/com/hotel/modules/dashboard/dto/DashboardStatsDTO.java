@@ -9,6 +9,9 @@ import java.util.List;
 public class DashboardStatsDTO {
     private long totalRooms;
     private long availableRooms;
+    private long occupiedRooms;
+    private long maintenanceRooms;
+    private long inactiveRooms;
     private long totalBookings;
     private long totalCustomers;
     private double totalRevenue;

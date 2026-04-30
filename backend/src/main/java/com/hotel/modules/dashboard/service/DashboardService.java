@@ -32,6 +32,9 @@ public class DashboardService {
         try {
             long totalRooms = roomRepository.count();
             long availableRooms = roomRepository.findByStatus(RoomStatus.AVAILABLE).size();
+            long occupiedRooms = roomRepository.findByStatus(RoomStatus.OCCUPIED).size();
+            long maintenanceRooms = roomRepository.findByStatus(RoomStatus.MAINTENANCE).size();
+            long inactiveRooms = roomRepository.findByStatus(RoomStatus.INACTIVE).size();
             long totalBookings = bookingRepository.count();
             long totalCustomers = userRepository.count();
 
@@ -61,6 +64,9 @@ public class DashboardService {
             return DashboardStatsDTO.builder()
                     .totalRooms(totalRooms)
                     .availableRooms(availableRooms)
+                    .occupiedRooms(occupiedRooms)
+                    .maintenanceRooms(maintenanceRooms)
+                    .inactiveRooms(inactiveRooms)
                     .totalBookings(totalBookings)
                     .totalCustomers(totalCustomers)
                     .totalRevenue(totalRevenue)
