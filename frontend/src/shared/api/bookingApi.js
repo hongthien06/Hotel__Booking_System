@@ -4,7 +4,7 @@ const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
 const API_URL = `${BASE_URL}/bookings`;
 
 export const createBookingApi = async (bookingData) => {
-  // bookingData: { roomId, checkIn, checkOut, numGuests, specialRequest }
+  // bookingData: { roomId, checkIn, checkOut, numAdults, numChildren, specialRequest }
   const response = await axiosInstance.post(API_URL, bookingData);
   return response.data;
 };

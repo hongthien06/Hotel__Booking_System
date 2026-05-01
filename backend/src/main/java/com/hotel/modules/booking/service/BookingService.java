@@ -85,41 +85,41 @@ public class BookingService {
             }
         }
 
-        // Trong toDTO()
+        // Tính toán tiền phòng
+        BigDecimal roomTotal = BigDecimal.ZERO;
         if (booking.getRoomPriceSnapshot() != null && booking.getTotalNights() != null) {
-            dto.setTotalAmount(
-                    booking.getRoomPriceSnapshot()
-                            .multiply(BigDecimal.valueOf(booking.getTotalNights())));
+            roomTotal = booking.getRoomPriceSnapshot()
+                    .multiply(BigDecimal.valueOf(booking.getTotalNights()));
         }
+        dto.setTotalAmount(roomTotal);
 
-        // Tính toán dịch vụ Booking
-        if (booking.getBookingServices() != null) {
+        // Tính toán dịch vụ
+        BigDecimal serviceTotal = BigDecimal.ZERO;
+        if (booking.getBookingServices() != null && !booking.getBookingServices().isEmpty()) {
             List<BookingServiceResponse> serviceResponses = booking.getBookingServices().stream()
-                    // lấy từng dịch vụ ra xét
                     .map(bs -> {
                         BookingServiceResponse res = new BookingServiceResponse();
                         res.setServiceId(bs.getId().getServiceId());
-                        res.setServiceName(bs.getExtraService().getServiceName());
+                        if (bs.getExtraService() != null) {
+                            res.setServiceName(bs.getExtraService().getServiceName());
+                        }
                         res.setQuantity(bs.getQuantity());
                         res.setUnitPriceSnap(bs.getUnitPriceSnap());
+                        
                         BigDecimal subtotal = bs.getSubtotal() != null ? bs.getSubtotal()
-                                : bs.getUnitPriceSnap().multiply(BigDecimal.valueOf(bs.getQuantity()));
+                                : (bs.getUnitPriceSnap() != null ? bs.getUnitPriceSnap().multiply(BigDecimal.valueOf(bs.getQuantity())) : BigDecimal.ZERO);
                         res.setSubtotal(subtotal);
                         return res;
                     }).toList();
 
             dto.setBookingServices(serviceResponses);
-            // tính giá tiền dịch vụ
-            BigDecimal serviceTotal = serviceResponses.stream()
+            serviceTotal = serviceResponses.stream()
                     .map(BookingServiceResponse::getSubtotal)
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            dto.setServiceTotal(serviceTotal);
-            dto.setGrandTotal(dto.getTotalAmount().add(serviceTotal));
-        } else {
-            dto.setServiceTotal(BigDecimal.ZERO);
-            dto.setGrandTotal(dto.getTotalAmount());
         }
+
+        dto.setServiceTotal(serviceTotal);
+        dto.setGrandTotal(roomTotal.add(serviceTotal));
 
         return dto;
     }

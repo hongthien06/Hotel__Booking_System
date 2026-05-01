@@ -60,9 +60,9 @@ const BED_TYPE_LABELS = (t) => ({
   'KING': t('rooms.bed_king') || 'Giường King',
   'QUEEN': t('rooms.bed_queen') || 'Giường Queen'
 });
-const formatCurrency = (n, lang) => new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', { 
-  style: 'currency', 
-  currency: lang === 'vi' ? 'VND' : 'USD' 
+const formatCurrency = (n, lang) => new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', {
+  style: 'currency',
+  currency: lang === 'vi' ? 'VND' : 'USD'
 }).format(lang === 'vi' ? n : n / 25000);
 
 const SERVICES = [
@@ -199,7 +199,8 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
   const [form, setForm] = useState({
     checkIn: searchParams?.checkIn || '',
     checkOut: searchParams?.checkOut || '',
-    numGuests: (searchParams?.adults || 1),
+    numAdults: (searchParams?.adults || 2),
+    numChildren: (searchParams?.children || 0),
     specialRequest: '',
   });
   const [submitting, setSubmitting] = useState(false);
@@ -210,7 +211,8 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
       setForm({
         checkIn: searchParams?.checkIn || '',
         checkOut: searchParams?.checkOut || '',
-        numGuests: (searchParams?.adults || 1),
+        numAdults: (searchParams?.adults || 2),
+        numChildren: (searchParams?.children || 0),
         specialRequest: '',
       });
       setError('');
@@ -223,7 +225,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
   const roomType = isMock ? room.type : (room.roomTypeName || 'Standard');
   const roomPrice = isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0);
   const nights = nightsBetween(form.checkIn, form.checkOut);
-  
+
   const total = roomPrice * nights;
 
   const handleBook = async () => {
@@ -238,7 +240,8 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         roomId: room.roomId,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
-        numGuests: Number(form.numGuests),
+        numAdults: Number(form.numAdults),
+        numChildren: Number(form.numChildren),
         specialRequest: form.specialRequest,
       });
       onSuccess();
@@ -290,12 +293,30 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
           </Grid>
         </Grid>
 
+
         <TextField fullWidth label={t('booking_page.num_guests')} type="number" size="small"
           value={form.numGuests}
           onChange={e => setForm(f => ({ ...f, numGuests: Math.max(1, parseInt(e.target.value) || 1) }))}
           inputProps={{ min: 1 }}
           sx={{ mb: 2 }}
         />
+=======
+        <Grid container spacing={2} sx={{ mb: 2 }}>
+          <Grid item xs={6}>
+            <TextField fullWidth label="Người lớn" type="number" size="small"
+              value={form.numAdults}
+              onChange={e => setForm(f => ({ ...f, numAdults: Math.max(1, parseInt(e.target.value) || 1) }))}
+              inputProps={{ min: 1 }}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField fullWidth label="Trẻ em" type="number" size="small"
+              value={form.numChildren}
+              onChange={e => setForm(f => ({ ...f, numChildren: Math.max(0, parseInt(e.target.value) || 0) }))}
+              inputProps={{ min: 0 }}
+            />
+          </Grid>
+        </Grid>
 
         <TextField fullWidth label={t('booking_page.special_request')} multiline rows={2} size="small"
           value={form.specialRequest}
@@ -338,7 +359,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 /* ─── Main ─────────────────────────────────────────────── */
 const BookingPage = () => {
   const { t, i18n } = useTranslation();
-  
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -444,8 +465,8 @@ const BookingPage = () => {
         <Typography variant="caption" color="text.secondary"
           sx={{ display: 'flex', alignItems: 'center', gap: 0.3, mb: 1 }}>
           <LocationOn fontSize="inherit" />
-          {isMock 
-            ? `${room.location} · ${room.bed}` 
+          {isMock
+            ? `${room.location} · ${room.bed}`
             : `${room.province || 'Hà Nội'} · ${BED_TYPE_LABELS(t)[room.bedType] || room.bedType}`}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
