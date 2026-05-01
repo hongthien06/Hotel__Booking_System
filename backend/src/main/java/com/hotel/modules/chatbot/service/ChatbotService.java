@@ -134,7 +134,10 @@ public class ChatbotService {
     }
 
     private List<Message> buildHistory(Long conversationId) {
-        return chatMessageRepository.findByConversationId(conversationId)
+        List<ChatMessage> allMessages = chatMessageRepository.findByConversationId(conversationId);
+        int maxHistory = 6;
+        int startIndex = Math.max(0, allMessages.size() - maxHistory);
+        return allMessages.subList(startIndex, allMessages.size())
                 .stream()
                 .filter(m -> m.getRole() == MessageRole.USER || m.getRole() == MessageRole.ASSISTANT)
                 .map(m -> m.getRole() == MessageRole.USER

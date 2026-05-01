@@ -4,13 +4,13 @@ spring:
   profiles:
     active: local
   ai:
-    google:
-      genai:
-        api-key: ${GEMINI_API_KEY}
-        chat:
-          options:
-            model: gemini-1.5-pro
-            temperature: 0.7
+    openai:
+      api-key: ${OPENROUTER_API_KEY}
+      base-url: https://openrouter.ai/api
+      chat:
+        options:
+          model: google/gemini-2.0-flash-lite-001
+          temperature: 0.7
   jpa:
     hibernate:
       ddl-auto: none
@@ -67,9 +67,9 @@ spring:
   flyway:
     enabled: false
   ai:
-    google:
-      genai:
-        api-key: ${GEMINI_API_KEY}
+    openai:
+      api-key: ${OPENROUTER_API_KEY}
+      base-url: https://openrouter.ai/api
   datasource:
     url: jdbc:sqlserver://localhost:1433;databaseName=HotelBookingDB;encrypt=false;trustServerCertificate=true
     username: sa
@@ -115,9 +115,9 @@ spring:
     activate:
       on-profile: docker
   ai:
-    google:
-      genai:
-        api-key: ${GEMINI_API_KEY}
+    openai:
+      api-key: ${OPENROUTER_API_KEY}
+      base-url: https://openrouter.ai/api
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}

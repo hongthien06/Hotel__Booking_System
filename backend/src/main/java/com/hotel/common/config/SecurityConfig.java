@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // ── Public (ai cũng gọi được) ──
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/chatbot/**").permitAll()
                         .requestMatchers(GET, "/rooms/**", "/hotels/**", "/room-types/**", "/extra-services/active").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/v3/api-docs").permitAll()
                         .requestMatchers("/actuator/**").permitAll()
