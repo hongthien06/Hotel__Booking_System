@@ -18,7 +18,7 @@ const InfoRow = ({ label, value, icon }) => (
   </Box>
 )
 
-const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
+const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
   const { t, i18n } = useTranslation()
   if (!room) return null
 
@@ -165,8 +165,8 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
       </Box>
 
       {/* Footer */}
-      {canEdit && (
-        <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', flexShrink: 0 }}>
+      <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', flexShrink: 0, display: 'flex', gap: 1.5 }}>
+        {canEdit ? (
           <Button
             fullWidth
             variant="contained"
@@ -177,8 +177,27 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit }) => {
           >
             {t('room_detail.edit_room')}
           </Button>
-        </Box>
-      )}
+        ) : (
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={() => { onClose(); onBook(room) }}
+            sx={{ 
+              borderRadius: 3, py: 1.25, fontWeight: 700, textTransform: 'none', fontSize: '0.875rem',
+              bgcolor: '#9a1c48', '&:hover': { bgcolor: '#c02860' }
+            }}
+          >
+            {t('common.book_now')}
+          </Button>
+        )}
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          sx={{ borderRadius: 3, py: 1.25, fontWeight: 700, textTransform: 'none', fontSize: '0.875rem', px: 3 }}
+        >
+          {t('common.cancel')}
+        </Button>
+      </Box>
     </Drawer>
   )
 }

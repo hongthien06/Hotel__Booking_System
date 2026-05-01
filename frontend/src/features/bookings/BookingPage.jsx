@@ -17,9 +17,13 @@ import {
   Snackbar, CircularProgress, Slider
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList } from '@mui/icons-material';
+import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material';
 import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi';
 import { createBookingApi } from '../../shared/api/bookingApi';
+import { useAuth } from '../../shared/hooks/useAuth';
+import LoginPromptModal from '../../shared/components/modals/LoginPromptModal';
+import { useNavigate } from 'react-router-dom';
+import RoomDetail from '../rooms/Details/RoomDetail';
 
 const PC = '#c0496e';
 const PC_LIGHT = '#fce4ec';
@@ -247,7 +251,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
     setError('');
     try {
       await createBookingApi({
-        roomId: room.roomId,
+        roomId: room.roomId || room.id,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
         numAdults: Number(form.numAdults),
@@ -256,8 +260,10 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
       });
       onSuccess();
     } catch (err) {
-      const msg = err?.response?.data?.message || err?.response?.data || t('common.error');
-      setError(typeof msg === 'string' ? msg : t('common.error'));
+      console.error('Booking error:', err);
+      const data = err?.response?.data;
+      const msg = data?.error || data?.message || (typeof data === 'string' ? data : t('common.error'));
+      setError(msg);
     } finally {
       setSubmitting(false);
     }
@@ -362,7 +368,9 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 /* ─── Main ─────────────────────────────────────────────── */
 const BookingPage = () => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
 
+  const { user, isAuthenticated } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -382,6 +390,8 @@ const BookingPage = () => {
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [selectedIsMock, setSelectedIsMock] = useState(false);
   const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' });
@@ -526,9 +536,19 @@ const BookingPage = () => {
   };
 
   const openBooking = (room, isMock) => {
+    if (!isAuthenticated) {
+      setLoginPromptOpen(true);
+      return;
+    }
     setSelectedRoom(room);
     setSelectedIsMock(isMock);
     setDialogOpen(true);
+  };
+
+  const openDetail = (room, isMock) => {
+    setSelectedRoom(room);
+    setSelectedIsMock(isMock);
+    setDetailOpen(true);
   };
 
   const handleBookingSuccess = () => {
@@ -560,11 +580,15 @@ const BookingPage = () => {
   const RoomCard = ({ room, isMock }) => {
     const { t, i18n } = useTranslation();
     return (
-      <Card sx={{
-      borderRadius: 3, overflow: 'hidden', transition: 'all 0.3s',
-      boxShadow: 1,
-      '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
-    }}>
+      <Card 
+        onClick={() => openDetail(room, isMock)}
+        sx={{
+          cursor: 'pointer',
+          borderRadius: 3, overflow: 'hidden', transition: 'all 0.3s',
+          boxShadow: 1,
+          '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
+        }}
+      >
       {isMock
         ? <Box sx={{ height: 160, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
@@ -598,8 +622,11 @@ const BookingPage = () => {
           <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
             {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
           </Typography>
-          <Button size="small" variant="contained" color="primary" onClick={() => openBooking(room, isMock)}
-            sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}>
+          <Button 
+            size="small" variant="contained" color="primary" 
+            onClick={(e) => { e.stopPropagation(); openBooking(room, isMock); }}
+            sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
+          >
             {t('common.book_now')}
           </Button>
         </Box>
@@ -836,18 +863,25 @@ const BookingPage = () => {
             {/* 4. Phòng nổi bật */}
             <Box sx={{ mb: 2, pl: 6 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>
-                  {searched ? t('booking_page.available_rooms') : t('booking_page.featured_rooms')}
-                </Typography>
-                {!loading && (
-                  <Typography variant="body2" color="text.secondary">
-                    {rooms.length > 0 ? `${rooms.length} ${t('header.rooms').toLowerCase()}` : `${MOCK_ROOMS.length} ${t('header.rooms').toLowerCase()} (mock)`}
+                <Box>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                    {searched ? t('booking_page.available_rooms') : t('booking_page.featured_rooms')}
                   </Typography>
-                )}
+                  <Typography variant="body2" color="text.secondary">
+                    {searched ? t('booking_page.available_rooms_sub') : t('booking_page.featured_rooms_sub')}
+                  </Typography>
+                </Box>
+                <Button 
+                  endIcon={<ArrowForward />} 
+                  onClick={() => navigate('/rooms')}
+                  sx={{ 
+                    color: PC, fontWeight: 700, textTransform: 'none',
+                    '&:hover': { bgcolor: PC_LIGHT }
+                  }}
+                >
+                  {t('common.see_all') || 'Xem tất cả'}
+                </Button>
               </Box>
-              <Typography variant="body2" color="text.secondary">
-                {searched ? t('booking_page.available_rooms_sub') : t('booking_page.featured_rooms_sub')}
-              </Typography>
             </Box>
 
             <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
@@ -912,8 +946,22 @@ const BookingPage = () => {
             {topRatedRooms.length > 0 && (
               <>
                 <Box sx={{ mb: 2, pl: 6 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.top_rated')}</Typography>
-                  <Typography variant="body2" color="text.secondary">{t('booking_page.top_rated_sub')}</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.top_rated')}</Typography>
+                      <Typography variant="body2" color="text.secondary">{t('booking_page.top_rated_sub')}</Typography>
+                    </Box>
+                    <Button 
+                      endIcon={<ArrowForward />} 
+                      onClick={() => navigate('/rooms')}
+                      sx={{ 
+                        color: PC, fontWeight: 700, textTransform: 'none',
+                        '&:hover': { bgcolor: PC_LIGHT }
+                      }}
+                    >
+                      {t('common.see_all') || 'Xem tất cả'}
+                    </Button>
+                  </Box>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
                   {topRatedRooms.length > 3 && (
@@ -957,8 +1005,22 @@ const BookingPage = () => {
             {budgetRooms.length > 0 && (
               <>
                 <Box sx={{ mb: 2, pl: 6 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.budget_friendly')}</Typography>
-                  <Typography variant="body2" color="text.secondary">{t('booking_page.budget_friendly_sub')}</Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.budget_friendly')}</Typography>
+                      <Typography variant="body2" color="text.secondary">{t('booking_page.budget_friendly_sub')}</Typography>
+                    </Box>
+                    <Button 
+                      endIcon={<ArrowForward />} 
+                      onClick={() => navigate('/rooms')}
+                      sx={{ 
+                        color: PC, fontWeight: 700, textTransform: 'none',
+                        '&:hover': { bgcolor: PC_LIGHT }
+                      }}
+                    >
+                      {t('common.see_all') || 'Xem tất cả'}
+                    </Button>
+                  </Box>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
                   {budgetRooms.length > 3 && (
@@ -1001,6 +1063,15 @@ const BookingPage = () => {
         </Box>
       </Box>
 
+      {/* Room Detail Drawer */}
+      <RoomDetail
+        open={detailOpen}
+        room={selectedRoom}
+        onClose={() => setDetailOpen(false)}
+        onBook={(room) => openBooking(room, selectedIsMock)}
+        canEdit={false}
+      />
+
       {/* Booking Dialog */}
       <BookingDialog
         open={dialogOpen}
@@ -1009,6 +1080,12 @@ const BookingPage = () => {
         searchParams={params}
         onClose={() => setDialogOpen(false)}
         onSuccess={handleBookingSuccess}
+      />
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        open={loginPromptOpen}
+        onClose={() => setLoginPromptOpen(false)}
       />
 
       {/* Success Snackbar */}

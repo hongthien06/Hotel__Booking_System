@@ -19,10 +19,8 @@ const AppRoutes = () => {
 
   return (
     <Routes>
-      {/* Điều hướng mặc định khi truy cập vào "/" */}
-      <Route path="/" element={
-        isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />
-      } />
+      {/* Điều hướng mặc định về "/home" */}
+      <Route path="/" element={<Navigate to="/home" replace />} />
 
       {/* Các trang công khai - không có Header */}
       <Route path='/login' element={<LoginPage />} />
@@ -32,23 +30,25 @@ const AppRoutes = () => {
 
       {/* Các trang sử dụng MainLayout (Có Header + Navbar) */}
       <Route element={<MainLayout />}>
-        {/* Trang chủ công khai */}
+        {/* Các trang công khai */}
         <Route path='/home' element={<HomePage />} />
+        <Route path='/bookings' element={<BookingPage />} />
+        <Route path='/rooms' element={<RoomList />} />
         
-        
-        
-        {/* Các trang yêu cầu đăng nhập */}
+        {/* Các trang yêu cầu đăng nhập (Customer / Admin / Manager) */}
         <Route element={<PrivateRoute />}>
-          <Route path='/bookings' element={<BookingPage />} />
+          <Route path='/profile' element={<ProfilePage />} />
           <Route path='/booking-history' element={<BookingHistoryPage />} />
           <Route path='/payment' element={<Payments />} />
-          <Route path='/profile' element={<ProfilePage />} />
-          <Route path='/rooms' element={<RoomList />} />
         </Route>
 
-        {/* Các trang chỉ dành cho Admin/Manager */}
+        {/* Các trang dành cho Admin và Manager */}
         <Route element={<PrivateRoute requiredRoles={['ADMIN', 'MANAGER']} />}>
           <Route path='/dashboard' element={<DashboardPage />} />
+        </Route>
+
+        {/* Trang chỉ dành riêng cho Manager */}
+        <Route element={<PrivateRoute requiredRoles={['MANAGER']} />}>
           <Route path='/admin/users' element={<UserManagementPage />} />
         </Route>
       </Route>
