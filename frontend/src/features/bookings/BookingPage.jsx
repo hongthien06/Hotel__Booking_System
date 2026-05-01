@@ -797,19 +797,25 @@ const BookingPage = () => {
                 scrollSnapType: 'x mandatory',
               }}>
                 {ROOM_TYPES.map((type) => (
-                  <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
-                    cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                    width: 'calc((100% - 48px) / 4)', height: 180,
+                  <Card key={type.key} onClick={() => toggleRoomType(type.key)} sx={{
+                    cursor: 'pointer', borderRadius: 4, flexShrink: 0,
+                    width: 'calc((100% - 48px) / 4)', height: 160,
                     position: 'relative', overflow: 'hidden',
                     scrollSnapAlign: 'start',
                     boxShadow: 1,
                     border: roomTypes.includes(type.key) ? `3px solid ${PC}` : '3px solid transparent',
                     transition: 'all 0.2s',
                   }}>
-                    <CardMedia component="img" height="120" image={type.img} alt={t(type.label)} />
-                    <CardContent sx={{ p: 1.5, textAlign: 'center' }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(type.label)}</Typography>
-                    </CardContent>
+                    <CardMedia component="img" image={type.img} alt={t(type.label)} sx={{ height: '100%', objectFit: 'cover' }} />
+                    <Box sx={{
+                      position: 'absolute', bottom: 0, left: 0, right: 0, p: 2,
+                      background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+                      color: 'white', textAlign: 'center'
+                    }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                        {t(type.label)}
+                      </Typography>
+                    </Box>
                   </Card>
                 ))}
               </Box>
