@@ -1,8 +1,8 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
-  Drawer, Box, Typography, Divider, Button,
-  IconButton, Stack, Chip
+  Dialog, Box, Typography, Button,
+  IconButton, Chip
 } from '@mui/material'
 import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub, Business, LocationOn } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
@@ -36,16 +36,19 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
     : '—'
 
   return (
-    <Drawer
-      anchor="right"
+    <Dialog
       open={open}
       onClose={onClose}
+      fullWidth
+      maxWidth="sm"
       PaperProps={{
         sx: {
-          width: { xs: '100%', sm: 440 },
-          display: 'flex', flexDirection: 'column',
-          borderRadius: '16px 0 0 16px',
+          borderRadius: 5,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
           overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '90vh',
         }
       }}
     >
@@ -165,7 +168,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
       </Box>
 
       {/* Footer */}
-      <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', flexShrink: 0, display: 'flex', gap: 1.5 }}>
+      <Box sx={{ px: 3, py: 2, borderTop: '1px solid', borderColor: 'divider', flexShrink: 0, display: 'flex', gap: 2 }}>
         {canEdit ? (
           <Button
             fullWidth
@@ -173,7 +176,8 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
             color="secondary"
             startIcon={<Edit />}
             onClick={() => { onClose(); onEdit(room) }}
-            sx={{ borderRadius: 3, py: 1.25, fontWeight: 700, textTransform: 'none', fontSize: '0.875rem' }}
+            sx={{ borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem',
+              boxShadow: '0 8px 25px rgba(216,27,96,0.3)' }}
           >
             {t('room_detail.edit_room')}
           </Button>
@@ -183,8 +187,9 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
             variant="contained"
             onClick={() => { onClose(); onBook(room) }}
             sx={{ 
-              borderRadius: 3, py: 1.25, fontWeight: 700, textTransform: 'none', fontSize: '0.875rem',
-              bgcolor: '#9a1c48', '&:hover': { bgcolor: '#c02860' }
+              borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem',
+              bgcolor: '#9a1c48', '&:hover': { bgcolor: '#c02860' },
+              boxShadow: '0 8px 25px rgba(216,27,96,0.3)'
             }}
           >
             {t('common.book_now')}
@@ -193,12 +198,13 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
         <Button
           variant="outlined"
           onClick={onClose}
-          sx={{ borderRadius: 3, py: 1.25, fontWeight: 700, textTransform: 'none', fontSize: '0.875rem', px: 3 }}
+          sx={{ borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem', px: 3,
+            border: '2px solid', '&:hover': { border: '2px solid' } }}
         >
           {t('common.cancel')}
         </Button>
       </Box>
-    </Drawer>
+    </Dialog>
   )
 }
 

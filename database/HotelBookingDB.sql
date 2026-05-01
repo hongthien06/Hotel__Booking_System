@@ -295,16 +295,13 @@ INSERT INTO Rooms (hotel_id, type_id, room_number, floor, bed_type, price_per_ni
 (4, 16, '403', 4, 'DOUBLE', 3200000, 'AVAILABLE');
 GO
 
--- ============================================================
--- 4 tài khoản CUSTOMER mẫu
--- ============================================================
+
 INSERT INTO Users (full_name, email, phone, password_hash) VALUES
 (N'Hoàng Đức Anh',    'ducanhdz2403@gmail.com',       '0387310342', '$2b$10$BM5J07/Yhf5iNtxYrLJyq.dbO1s8wl2Y93/dasivHZd6d41oo0UF.'),
 (N'Hồng Thiên',       'hongthienn280706@gmail.com',    '0961934724', '$2b$10$FPfhOitDtpwfPzi4QGuVp..UYc59jkItb9LHLLZwJTTZHKSTMG.V2'),
 (N'Nguyễn Gia Khang', 'khangnguyek135@gmail.com',      '0326409667', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
 (N'Dư Nguyên An',     'nguyenann1204@gmail.com',       '0939163059', '$2b$10$2/0z4V1G9T0bnnfbvV2F7.cCvUvEDEgJVRC3xXBgcOjhlKQz7oTji');
 
--- Gán role CUSTOMER (role_id = 3) cho 4 user vừa thêm
 INSERT INTO UserRoles (user_id, role_id)
 SELECT user_id, 3
 FROM Users
