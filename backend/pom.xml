@@ -70,7 +70,8 @@
         <!-- Spring AI - Google GenAI / Gemini (API key từ aistudio.google.com) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-openai</artifactId>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <version>${spring-ai.version}</version>
         </dependency>
 
         <!-- Lombok -->

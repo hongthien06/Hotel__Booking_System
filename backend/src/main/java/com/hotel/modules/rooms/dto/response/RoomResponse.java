@@ -1,8 +1,8 @@
-package com.hotel.modules.room.dto.response;
+package com.hotel.modules.rooms.dto.response;
 
-import com.hotel.modules.room.entity.enums.BedType;
-import com.hotel.modules.room.entity.Room;
-import com.hotel.modules.room.entity.enums.RoomStatus;
+import com.hotel.modules.rooms.entity.enums.BedType;
+import com.hotel.modules.rooms.entity.Room;
+import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import lombok.*;
 
 import java.math.BigDecimal;

@@ -1,9 +1,9 @@
-package com.hotel.modules.room.controller;
+package com.hotel.modules.rooms.controller;
 
-import com.hotel.modules.room.dto.request.RoomRequest;
-import com.hotel.modules.room.dto.response.RoomResponse;
-import com.hotel.modules.room.entity.enums.RoomStatus;
-import com.hotel.modules.room.service.RoomService;
+import com.hotel.modules.rooms.dto.request.RoomRequest;
+import com.hotel.modules.rooms.dto.response.RoomResponse;
+import com.hotel.modules.rooms.entity.enums.RoomStatus;
+import com.hotel.modules.rooms.service.RoomService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;

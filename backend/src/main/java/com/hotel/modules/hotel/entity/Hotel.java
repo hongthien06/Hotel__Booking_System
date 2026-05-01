@@ -73,7 +73,7 @@ public class Hotel {
     private java.util.Set<Amenity> amenities = new java.util.HashSet<>();
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
-    private java.util.List<com.hotel.modules.room.entity.Room> rooms = new java.util.ArrayList<>();
+    private java.util.List<com.hotel.modules.rooms.entity.Room> rooms = new java.util.ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

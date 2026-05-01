@@ -17,7 +17,7 @@ import com.hotel.modules.payment.entity.Payment;
 import com.hotel.modules.payment.entity.PaymentGateway;
 import com.hotel.modules.payment.entity.PaymentStatus;
 import com.hotel.modules.payment.repository.PaymentRepository;
-import com.hotel.modules.room.entity.Room;
+import com.hotel.modules.rooms.entity.Room;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

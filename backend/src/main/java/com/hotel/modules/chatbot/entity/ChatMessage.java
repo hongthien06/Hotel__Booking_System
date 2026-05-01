@@ -3,7 +3,7 @@ package com.hotel.modules.chatbot.entity;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.chatbot.entity.enums.MessageRole;
 import com.hotel.modules.hotel.entity.Hotel;
-import com.hotel.modules.room.entity.Room;
+import com.hotel.modules.rooms.entity.Room;
 import jakarta.persistence.*;
 import lombok.*;
 

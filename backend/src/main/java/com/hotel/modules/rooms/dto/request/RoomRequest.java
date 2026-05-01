@@ -1,7 +1,7 @@
-package com.hotel.modules.room.dto.request;
+package com.hotel.modules.rooms.dto.request;
 
-import com.hotel.modules.room.entity.enums.BedType;
-import com.hotel.modules.room.entity.enums.RoomStatus;
+import com.hotel.modules.rooms.entity.enums.BedType;
+import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import jakarta.validation.constraints.*;
 import lombok.*;
 

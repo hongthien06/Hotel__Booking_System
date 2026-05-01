@@ -1,6 +1,6 @@
-package com.hotel.modules.room.dto.response;
+package com.hotel.modules.rooms.dto.response;
 
-import com.hotel.modules.room.entity.RoomType;
+import com.hotel.modules.rooms.entity.RoomType;
 import lombok.*;
 
 @Getter @Setter

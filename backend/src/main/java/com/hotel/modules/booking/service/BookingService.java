@@ -9,9 +9,9 @@ import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.entity.CancelActor;
 import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.booking_services.dto.BookingServiceResponse;
-import com.hotel.modules.room.entity.Room;
-import com.hotel.modules.room.entity.enums.RoomStatus;
-import com.hotel.modules.room.repository.RoomRepository;
+import com.hotel.modules.rooms.entity.Room;
+import com.hotel.modules.rooms.entity.enums.RoomStatus;
+import com.hotel.modules.rooms.repository.RoomRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -2,7 +2,7 @@ package com.hotel.modules.review.entity;
 
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.booking.entity.Booking;
-import com.hotel.modules.room.entity.Room;
+import com.hotel.modules.rooms.entity.Room;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;

@@ -1,7 +1,7 @@
-package com.hotel.modules.room.repository;
+package com.hotel.modules.rooms.repository;
 
-import com.hotel.modules.room.entity.Room;
-import com.hotel.modules.room.entity.enums.RoomStatus;
+import com.hotel.modules.rooms.entity.Room;
+import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,7 +41,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     SELECT r FROM Room r 
     JOIN FETCH r.roomType rt
     JOIN FETCH r.hotel h
-    WHERE r.status = com.hotel.modules.room.entity.enums.RoomStatus.AVAILABLE
+    WHERE r.status = com.hotel.modules.rooms.entity.enums.RoomStatus.AVAILABLE
     AND (:hotelId IS NULL OR h.hotelId = :hotelId)
     AND (:province IS NULL OR h.province = :province)
     AND (:minPrice IS NULL OR r.pricePerNight >= :minPrice)
