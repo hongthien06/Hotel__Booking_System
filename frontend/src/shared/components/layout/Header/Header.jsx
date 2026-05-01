@@ -9,13 +9,13 @@ import { Menu, MenuItem, Divider } from '@mui/material'
 
 const navItems = [
   { label: 'header.home', path: '/home', icon: <Home fontSize="small" /> },
-  { label: 'header.rooms', path: '/rooms', icon: <KingBed fontSize="small" /> },
   { label: 'header.bookings', path: '/bookings', icon: <EventNote fontSize="small" /> },
-  { label: 'header.payments', path: '/payment', icon: <AccountBalanceWallet fontSize="small" /> },
 ]
 
 const adminNavItems = [
   { label: 'header.dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
+  { label: 'header.rooms', path: '/rooms', icon: <KingBed fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
+  { label: 'header.users', path: '/admin/users', icon: <Person fontSize="small" />, roles: ['MANAGER'] },
 ]
 
 const Header = () => {
@@ -38,7 +38,7 @@ const Header = () => {
     navigate('/login')
   }
 
-  const hasAdminAccess = () => {
+  const hasRole = (roles) => {
     if (!user || !user.roles) return false
     const userRoleStrings = user.roles.map(r => {
       if (typeof r === 'string') return r
@@ -47,7 +47,10 @@ const Header = () => {
 
     return userRoleStrings.some(role => {
       const norm = role.startsWith('ROLE_') ? role : `ROLE_${role}`
-      return norm === 'ROLE_ADMIN' || norm === 'ROLE_MANAGER'
+      return roles.some(target => {
+        const targetNorm = target.startsWith('ROLE_') ? target : `ROLE_${target}`
+        return norm === targetNorm
+      })
     })
   }
 
@@ -74,67 +77,66 @@ const Header = () => {
       <Typography
         variant="h6"
         sx={{ fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: '#9a1c48' }}
-        onClick={() => navigate(isAuthenticated ? '/home' : '/login')}
+        onClick={() => navigate('/home')}
       >
         🏨 Hotel Booking
       </Typography>
 
-      {/* Navigation Links - chỉ hiện khi đã đăng nhập */}
-      {isAuthenticated && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {navItems.map((item) => (
-            <Button
-              key={item.path}
-              startIcon={item.icon}
-              onClick={() => navigate(item.path)}
-              sx={{
-                color: isActive(item.path) ? '#fff' : '#9a1c48',
-                fontWeight: isActive(item.path) ? 800 : 600,
-                fontSize: '0.85rem',
-                textTransform: 'none',
-                borderRadius: 2,
-                px: 2,
-                py: 0.8,
-                minWidth: 120,
-                backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
-                '&:hover': {
-                  color: '#fff',
-                  backgroundColor: '#c02860',
-                }
-              }}
-            >
-              {t(item.label)}
-            </Button>
-          ))}
+      {/* Navigation Links */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+        {/* Chỉ hiện Home/Booking cho Customer hoặc Guest */}
+        {!hasRole(['ADMIN', 'MANAGER']) && navItems.map((item) => (
+          <Button
+            key={item.path}
+            startIcon={item.icon}
+            onClick={() => navigate(item.path)}
+            sx={{
+              color: isActive(item.path) ? '#fff' : '#9a1c48',
+              fontWeight: isActive(item.path) ? 800 : 600,
+              fontSize: '0.85rem',
+              textTransform: 'none',
+              borderRadius: 2,
+              px: 2,
+              py: 0.8,
+              minWidth: 100,
+              backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
+              '&:hover': {
+                color: '#fff',
+                backgroundColor: '#c02860',
+              }
+            }}
+          >
+            {t(item.label)}
+          </Button>
+        ))}
 
-          {/* Admin/Manager items */}
-          {hasAdminAccess() && adminNavItems.map((item) => (
-            <Button
-              key={item.path}
-              startIcon={item.icon}
-              onClick={() => navigate(item.path)}
-              sx={{
-                color: isActive(item.path) ? '#fff' : '#9a1c48',
-                fontWeight: isActive(item.path) ? 800 : 600,
-                fontSize: '0.85rem',
-                textTransform: 'none',
-                borderRadius: 2,
-                px: 2,
-                py: 0.8,
-                backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
-                borderLeft: '1px solid rgba(154,28,72,0.2)',
-                ml: 1,
-                '&:hover': {
-                  color: '#fff',
-                  backgroundColor: '#c02860',
-                }
-              }}
-            >
-              {t(item.label)}
-            </Button>
-          ))}
-        </Box>
-      )}
+        {/* Admin/Manager items */}
+        {adminNavItems.filter(item => hasRole(item.roles)).map((item) => (
+          <Button
+            key={item.path}
+            startIcon={item.icon}
+            onClick={() => navigate(item.path)}
+            sx={{
+              color: isActive(item.path) ? '#fff' : '#9a1c48',
+              fontWeight: isActive(item.path) ? 800 : 600,
+              fontSize: '0.85rem',
+              textTransform: 'none',
+              borderRadius: 2,
+              px: 2,
+              py: 0.8,
+              backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
+              borderLeft: '1px solid rgba(154,28,72,0.2)',
+              ml: 1,
+              '&:hover': {
+                color: '#fff',
+                backgroundColor: '#c02860',
+              }
+            }}
+          >
+            {t(item.label)}
+          </Button>
+        ))}
+      </Box>
 
       {/* Right Section - User info / Login */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -172,9 +174,14 @@ const Header = () => {
               <MenuItem onClick={() => { navigate('/profile'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
                 <Person fontSize="small" color="primary" /> {t("header.profile") || "Trang cá nhân"}
               </MenuItem>
-              <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
-                <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
-              </MenuItem>
+              
+              {/* Chỉ hiện Lịch sử đặt phòng cho Customer/Guest */}
+              {!hasRole(['ADMIN', 'MANAGER']) && (
+                <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
+                  <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
+                </MenuItem>
+              )}
+              
               <Divider sx={{ my: 1 }} />
               <MenuItem onClick={handleLogout} sx={{ py: 1.2, gap: 1.5, fontWeight: 600, color: 'error.main' }}>
                 <Logout fontSize="small" /> {t("header.logout")}
