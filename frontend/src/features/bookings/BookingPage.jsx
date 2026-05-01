@@ -40,11 +40,11 @@ const DESTINATIONS = [
 
 
 const ROOM_TYPES = [
-  { key: 'standard', label: 'room_types.standard' },
-  { key: 'deluxe', label: 'room_types.deluxe' },
-  { key: 'superior', label: 'room_types.superior' },
-  { key: 'family', label: 'room_types.family' },
-  { key: 'president', label: 'room_types.president' }
+  { key: 'standard', label: 'room_types.standard', img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=400' },
+  { key: 'deluxe', label: 'room_types.deluxe', img: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400' },
+  { key: 'superior', label: 'room_types.superior', img: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400' },
+  { key: 'family', label: 'room_types.family', img: 'https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f?w=400' },
+  { key: 'president', label: 'room_types.president', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400' }
 ];
 const BED_TYPES = [
   { key: 'SINGLE', label: 'rooms.bed_single' },
@@ -77,6 +77,13 @@ const MOCK_ROOMS = [
   { id: 'm1', name: 'Phòng Deluxe View Biển', location: 'Vũng Tàu', bed: 'King', reviews: 124, rating: 4.8, type: 'Deluxe', price: 1200000, bg: '#dbeafe', emoji: '🌊' },
   { id: 'm2', name: 'Phòng Standard Classic', location: 'Hà Nội', bed: 'Đôi', reviews: 210, rating: 4.5, type: 'Standard', price: 800000, bg: '#e0e7ff', emoji: '🏛️' },
   { id: 'm3', name: 'Family Room', location: 'Đà Nẵng', bed: 'Ba', reviews: 155, rating: 4.6, type: 'Family', price: 1500000, bg: '#fef9c3', emoji: '🌉' },
+  { id: 'm4', name: 'Superior Mountain View', location: 'Sa Pa', bed: 'Queen', reviews: 98, rating: 4.7, type: 'Superior', price: 1100000, bg: '#f0fdf4', emoji: '🏔️' },
+  { id: 'm5', name: 'President Suite', location: 'TP. Hồ Chí Minh', bed: 'King', reviews: 45, rating: 4.9, type: 'President', price: 5500000, bg: '#fff7ed', emoji: '👑' },
+  { id: 'm6', name: 'Deluxe Garden View', location: 'Huế', bed: 'Double', reviews: 88, rating: 4.4, type: 'Deluxe', price: 950000, bg: '#fdf2f8', emoji: '🌸' },
+  { id: 'm7', name: 'Bungalow Beachfront', location: 'Phú Quốc', bed: 'King', reviews: 167, rating: 4.8, type: 'Superior', price: 2200000, bg: '#ecfeff', emoji: '🏖️' },
+  { id: 'm8', name: 'Vintage Studio', location: 'Đà Lạt', bed: 'Single', reviews: 132, rating: 4.6, type: 'Standard', price: 750000, bg: '#fffbeb', emoji: '☕' },
+  { id: 'm9', name: 'Modern City Room', location: 'Hải Phòng', bed: 'Double', reviews: 76, rating: 4.3, type: 'Standard', price: 850000, bg: '#f1f5f9', emoji: '🏙️' },
+  { id: 'm10', name: 'Luxury Penthouse', location: 'Nha Trang', bed: 'King', reviews: 34, rating: 5.0, type: 'President', price: 8000000, bg: '#faf5ff', emoji: '💎' },
 ];
 
 const nightsBetween = (a, b) => {
@@ -379,14 +386,32 @@ const BookingPage = () => {
   const scrollDest = (dir) => {
     if (destScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = destScrollRef.current;
-      // Distance between cards = (Total Width - Total Gaps) / 5 + Gap
-      // Which simplifies to (clientWidth + gap) / 5
       const scrollAmount = (clientWidth + 20) / 5;
-
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
       if (dir < 0 && scrollLeft <= 10) return;
-
       destScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const roomScrollRef = useRef(null);
+  const scrollRooms = (dir) => {
+    if (roomScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = roomScrollRef.current;
+      const scrollAmount = (clientWidth + 24) / 3;
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
+      if (dir < 0 && scrollLeft <= 10) return;
+      roomScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const typeScrollRef = useRef(null);
+  const scrollTypes = (dir) => {
+    if (typeScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = typeScrollRef.current;
+      const scrollAmount = (clientWidth + 16) / 4; // Show ~4 types at once
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
+      if (dir < 0 && scrollLeft <= 10) return;
+      typeScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
     }
   };
 
@@ -428,6 +453,24 @@ const BookingPage = () => {
   const handleBookingSuccess = () => {
     setDialogOpen(false);
     setSnackbar({ open: true, msg: t('booking_page.booking_success'), severity: 'success' });
+  };
+
+  const handleTypeClick = async (typeKey) => {
+    setRoomTypes([typeKey]);
+    setLoading(true); setSearched(true);
+    try {
+      const d = await getAvailableRoomsApi(
+        params.checkIn,
+        params.checkOut,
+        params.destination || undefined,
+        minPrice,
+        maxPrice,
+        typeKey,
+        bedTypes.length === 1 ? bedTypes[0] : undefined
+      );
+      setRooms(Array.isArray(d) ? d : []);
+    } catch { setRooms([]); }
+    finally { setLoading(false); }
   };
 
   const selectDest = (idx) => { setDestIdx(idx); onParam('destination', DESTINATIONS[idx].province || DESTINATIONS[idx].name); };
@@ -591,6 +634,51 @@ const BookingPage = () => {
             </Box>
 
 
+            {/* Tìm kiếm theo loại phòng */}
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>{t('booking_page.room_type')}</Typography>
+            <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+              <IconButton onClick={() => scrollTypes(-1)} sx={{
+                position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                '&:hover': { bgcolor: PC_LIGHT },
+              }}>
+                <ChevronLeft sx={{ color: PC }} />
+              </IconButton>
+
+              <Box ref={typeScrollRef} sx={{
+                display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
+                justifyContent: 'flex-start',
+                scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                scrollSnapType: 'x mandatory',
+              }}>
+                {ROOM_TYPES.map((type) => (
+                  <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
+                    cursor: 'pointer', borderRadius: 3, flexShrink: 0,
+                    width: 'calc((100% - 48px) / 4)', height: 180,
+                    position: 'relative', overflow: 'hidden',
+                    scrollSnapAlign: 'start',
+                    border: roomTypes.includes(type.key) ? `3px solid ${PC}` : '3px solid transparent',
+                    transition: 'all 0.2s',
+                    '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
+                  }}>
+                    <CardMedia component="img" height="120" image={type.img} alt={t(type.label)} />
+                    <CardContent sx={{ p: 1.5, textAlign: 'center' }}>
+                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(type.label)}</Typography>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+
+              <IconButton onClick={() => scrollTypes(1)} sx={{
+                position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                '&:hover': { bgcolor: PC_LIGHT },
+              }}>
+                <ChevronRight sx={{ color: PC }} />
+              </IconButton>
+            </Box>
+
+
             {/* Phòng nổi bật */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 800 }}>
@@ -603,35 +691,61 @@ const BookingPage = () => {
               )}
             </Box>
 
-            <Grid container spacing={3}>
-              {loading ? (
-                [...Array(3)].map((_, i) => (
-                  <Grid item xs={12} sm={6} md={4} key={i}>
-                    <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
-                    <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
-                    <Skeleton width="50%" height={18} />
-                  </Grid>
-                ))
-              ) : rooms.length > 0 ? (
-                rooms.map(r => (
-                  <Grid item xs={12} sm={6} md={4} key={r.id}>
-                    <RoomCard room={r} isMock={false} />
-                  </Grid>
-                ))
-              ) : searched ? (
-                <Grid item xs={12}>
-                  <Alert severity="info" sx={{ borderRadius: 3 }}>
-                    {t('booking_page.no_rooms_found')}
-                  </Alert>
-                </Grid>
-              ) : (
-                MOCK_ROOMS.map(r => (
-                  <Grid item xs={12} sm={6} md={4} key={r.id}>
-                    <RoomCard room={r} isMock={true} />
-                  </Grid>
-                ))
-              )}
-            </Grid>
+            <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
+              {/* Nút cuộn trái */}
+              <IconButton onClick={() => scrollRooms(-1)} sx={{
+                position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                '&:hover': { bgcolor: PC_LIGHT },
+              }}>
+                <ChevronLeft sx={{ color: PC }} />
+              </IconButton>
+
+              {/* Scroll container */}
+              <Box ref={roomScrollRef} sx={{
+                display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
+                justifyContent: 'flex-start',
+                scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                scrollSnapType: 'x mandatory',
+              }}>
+                {loading ? (
+                  [...Array(3)].map((_, i) => (
+                    <Box key={i} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0 }}>
+                      <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
+                      <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
+                      <Skeleton width="50%" height={18} />
+                    </Box>
+                  ))
+                ) : rooms.length > 0 ? (
+                  rooms.map(r => (
+                    <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                      <RoomCard room={r} isMock={false} />
+                    </Box>
+                  ))
+                ) : searched ? (
+                  <Box sx={{ width: '100%' }}>
+                    <Alert severity="info" sx={{ borderRadius: 3 }}>
+                      {t('booking_page.no_rooms_found')}
+                    </Alert>
+                  </Box>
+                ) : (
+                  MOCK_ROOMS.map(r => (
+                    <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                      <RoomCard room={r} isMock={true} />
+                    </Box>
+                  ))
+                )}
+              </Box>
+
+              {/* Nút cuộn phải */}
+              <IconButton onClick={() => scrollRooms(1)} sx={{
+                position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                '&:hover': { bgcolor: PC_LIGHT },
+              }}>
+                <ChevronRight sx={{ color: PC }} />
+              </IconButton>
+            </Box>
 
           </Box>
         </Box>
