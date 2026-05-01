@@ -95,10 +95,22 @@
     "reviews": {
       "overline": "REVIEWS",
       "title": "What do our customers say?",
-      "item1": { "name": "John Doe", "comment": "Excellent service! The room was clean, staff was friendly. Will definitely come back." },
-      "item2": { "name": "Mary Jane", "comment": "Beautiful view, delicious food, reasonable price. Very satisfied with the experience here!" },
-      "item3": { "name": "Robert Smith", "comment": "Convenient location, near center. Spacious and airy room. Recommend to everyone!" },
-      "item4": { "name": "Alice Brown", "comment": "Booked a room for my family through this system, very convenient and fast. 10 points!" }
+      "item1": {
+        "name": "John Doe",
+        "comment": "Excellent service! The room was clean, staff was friendly. Will definitely come back."
+      },
+      "item2": {
+        "name": "Mary Jane",
+        "comment": "Beautiful view, delicious food, reasonable price. Very satisfied with the experience here!"
+      },
+      "item3": {
+        "name": "Robert Smith",
+        "comment": "Convenient location, near center. Spacious and airy room. Recommend to everyone!"
+      },
+      "item4": {
+        "name": "Alice Brown",
+        "comment": "Booked a room for my family through this system, very convenient and fast. 10 points!"
+      }
     },
     "cta": {
       "title": "Ready for your next getaway?",
@@ -136,23 +148,55 @@
   },
   "bookings_history": {
     "title": "Search by check-in/out date",
+    "subtitle": "Review your previous booking requests and status.",
     "check_in": "CHECK IN",
     "check_out": "CHECK OUT",
     "no_data": "No booking data available.",
     "fetch_error": "Error fetching booking history"
   },
   "destinations": {
-    "title": "Popular destinations",
-    "hcm": { "name": "Ho Chi Minh City", "desc": "The vibrant city" },
-    "hanoi": { "name": "Hanoi", "desc": "The millennial capital" },
-    "vungtau": { "name": "Vung Tau", "desc": "Blue sea and white sand" },
-    "dalat": { "name": "Da Lat", "desc": "The city of flowers" },
-    "danang": { "name": "Da Nang", "desc": "The worth-living city" },
-    "nhatrang": { "name": "Nha Trang", "desc": "The pearl of the East Sea" },
-    "phuquoc": { "name": "Phu Quoc", "desc": "The pearl island paradise" },
-    "sapa": { "name": "Sapa", "desc": "The city in the clouds" },
-    "hue": { "name": "Hue", "desc": "The ancient capital" },
-    "catba": { "name": "Cat Ba", "desc": "The majestic bay island" }
+    "title": "Popular Destinations",
+    "subtitle": "The most attractive destinations for travelers in Vietnam.",
+    "hcm": {
+      "name": "Ho Chi Minh City",
+      "desc": "The vibrant city"
+    },
+    "hanoi": {
+      "name": "Hanoi",
+      "desc": "The millennial capital"
+    },
+    "vungtau": {
+      "name": "Vung Tau",
+      "desc": "Blue sea and white sand"
+    },
+    "dalat": {
+      "name": "Da Lat",
+      "desc": "The city of flowers"
+    },
+    "danang": {
+      "name": "Da Nang",
+      "desc": "The worth-living city"
+    },
+    "nhatrang": {
+      "name": "Nha Trang",
+      "desc": "The pearl of the East Sea"
+    },
+    "phuquoc": {
+      "name": "Phu Quoc",
+      "desc": "The pearl island paradise"
+    },
+    "sapa": {
+      "name": "Sapa",
+      "desc": "The city in the clouds"
+    },
+    "hue": {
+      "name": "Hue",
+      "desc": "The ancient capital"
+    },
+    "catba": {
+      "name": "Cat Ba",
+      "desc": "The majestic bay island"
+    }
   },
   "booking_page": {
     "search_title": "Search Rooms",
@@ -181,7 +225,18 @@
     "processing": "Processing...",
     "total": "Total",
     "room": "Room",
-    "budget_friendly": "Budget-friendly options"
+    "budget_friendly": "Budget-friendly options",
+    "budget_friendly_sub": "Great deals to help you have a budget-friendly and fulfilling trip.",
+    "recent_searches": "Your recent searches",
+    "recent_searches_sub": "Continue your journey planning from where you left off.",
+    "top_rated": "Top rated rooms",
+    "top_rated_sub": "Experience exceptional service quality as told by our guests.",
+    "room_type": "Accommodation Type",
+    "room_type_sub": "Find the perfect accommodation that fits your style.",
+    "featured_rooms": "Featured Rooms",
+    "featured_rooms_sub": "Top-tier selections with beautiful locations and excellent amenities.",
+    "available_rooms": "Available Rooms",
+    "available_rooms_sub": "List of rooms matching your search requirements."
   },
   "room_detail": {
     "hotel": "Hotel",

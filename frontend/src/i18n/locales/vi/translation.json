@@ -95,10 +95,22 @@
     "reviews": {
       "overline": "ĐÁNH GIÁ",
       "title": "Khách hàng nói gì về chúng tôi?",
-      "item1": { "name": "Nguyễn Văn Anh", "comment": "Dịch vụ tuyệt vời! Phòng sạch sẽ, nhân viên thân thiện. Chắc chắn sẽ quay lại lần nữa." },
-      "item2": { "name": "Trần Thị Minh", "comment": "View đẹp, đồ ăn ngon, giá cả hợp lý. Rất hài lòng với trải nghiệm tại đây!" },
-      "item3": { "name": "Lê Hoàng Phúc", "comment": "Vị trí thuận tiện, gần trung tâm. Phòng rộng rãi và thoáng mát. Recommend cho mọi người!" },
-      "item4": { "name": "Phạm Quỳnh Như", "comment": "Đã đặt phòng cho gia đình qua hệ thống này, rất tiện lợi và nhanh chóng. 10 điểm!" }
+      "item1": {
+        "name": "Nguyễn Văn Anh",
+        "comment": "Dịch vụ tuyệt vời! Phòng sạch sẽ, nhân viên thân thiện. Chắc chắn sẽ quay lại lần nữa."
+      },
+      "item2": {
+        "name": "Trần Thị Minh",
+        "comment": "View đẹp, đồ ăn ngon, giá cả hợp lý. Rất hài lòng với trải nghiệm tại đây!"
+      },
+      "item3": {
+        "name": "Lê Hoàng Phúc",
+        "comment": "Vị trí thuận tiện, gần trung tâm. Phòng rộng rãi và thoáng mát. Recommend cho mọi người!"
+      },
+      "item4": {
+        "name": "Phạm Quỳnh Như",
+        "comment": "Đã đặt phòng cho gia đình qua hệ thống này, rất tiện lợi và nhanh chóng. 10 điểm!"
+      }
     },
     "cta": {
       "title": "Sẵn sàng cho chuyến nghỉ dưỡng tiếp theo?",
@@ -143,16 +155,47 @@
   },
   "destinations": {
     "title": "Điểm đến phổ biến",
-    "hcm": { "name": "TP. Hồ Chí Minh", "desc": "Thành phố sôi động" },
-    "hanoi": { "name": "Hà Nội", "desc": "Thủ đô ngàn năm" },
-    "vungtau": { "name": "Vũng Tàu", "desc": "Biển xanh cát trắng" },
-    "dalat": { "name": "Đà Lạt", "desc": "Thành phố ngàn hoa" },
-    "danang": { "name": "Đà Nẵng", "desc": "Thành phố đáng sống" },
-    "nhatrang": { "name": "Nha Trang", "desc": "Hòn ngọc Biển Đông" },
-    "phuquoc": { "name": "Phú Quốc", "desc": "Đảo Ngọc thiên đường" },
-    "sapa": { "name": "Sapa", "desc": "Thành phố trong sương" },
-    "hue": { "name": "Huế", "desc": "Cố đô cổ kính" },
-    "catba": { "name": "Cát Bà", "desc": "Vịnh đảo kỳ vĩ" }
+    "subtitle": "Những địa danh đang thu hút nhiều du khách nhất tại Việt Nam.",
+    "hcm": {
+      "name": "TP. Hồ Chí Minh",
+      "desc": "Thành phố sôi động"
+    },
+    "hanoi": {
+      "name": "Hà Nội",
+      "desc": "Thủ đô ngàn năm"
+    },
+    "vungtau": {
+      "name": "Vũng Tàu",
+      "desc": "Biển xanh cát trắng"
+    },
+    "dalat": {
+      "name": "Đà Lạt",
+      "desc": "Thành phố ngàn hoa"
+    },
+    "danang": {
+      "name": "Đà Nẵng",
+      "desc": "Thành phố đáng sống"
+    },
+    "nhatrang": {
+      "name": "Nha Trang",
+      "desc": "Hòn ngọc Biển Đông"
+    },
+    "phuquoc": {
+      "name": "Phú Quốc",
+      "desc": "Đảo Ngọc thiên đường"
+    },
+    "sapa": {
+      "name": "Sapa",
+      "desc": "Thành phố trong sương"
+    },
+    "hue": {
+      "name": "Huế",
+      "desc": "Cố đô cổ kính"
+    },
+    "catba": {
+      "name": "Cát Bà",
+      "desc": "Vịnh đảo kỳ vĩ"
+    }
   },
   "booking_page": {
     "search_title": "Tìm kiếm phòng",
@@ -166,12 +209,15 @@
     "max_price": "Tối đa",
     "no_limit": "không giới hạn",
     "room_type": "Loại phòng",
+    "room_type_sub": "Tìm không gian nghỉ ngơi phù hợp nhất với phong cách của bạn.",
     "bed_type": "Loại giường",
     "extra_services": "Dịch vụ đi kèm",
     "searching": "Đang tìm...",
     "find_room": "Tìm phòng",
     "available_rooms": "Phòng còn trống",
+    "available_rooms_sub": "Danh sách phòng phù hợp với yêu cầu tìm kiếm của bạn.",
     "featured_rooms": "Phòng nổi bật",
+    "featured_rooms_sub": "Các lựa chọn hàng đầu với vị trí đẹp và tiện nghi xuất sắc.",
     "no_rooms_found": "Không tìm thấy phòng trống trong thời gian này. Vui lòng thử ngày khác!",
     "booking_success": "🎉 Đặt phòng thành công! Kiểm tra email xác nhận của bạn.",
     "booking_confirm": "Xác nhận đặt phòng",
@@ -181,7 +227,12 @@
     "processing": "Đang xử lý...",
     "total": "Tổng cộng",
     "room": "Phòng",
-    "budget_friendly": "Phòng có giá ưu đãi nhất"
+    "budget_friendly": "Phòng có giá ưu đãi nhất",
+    "budget_friendly_sub": "Ưu đãi hấp dẫn giúp bạn có chuyến đi tiết kiệm và trọn vẹn.",
+    "recent_searches": "Tìm kiếm gần đây",
+    "recent_searches_sub": "Tiếp tục kế hoạch hành trình từ những gì bạn đã xem.",
+    "top_rated": "Phòng được đánh giá cao nhất",
+    "top_rated_sub": "Trải nghiệm chất lượng dịch vụ tuyệt vời qua lời kể của khách hàng."
   },
   "room_detail": {
     "hotel": "Khách sạn",
