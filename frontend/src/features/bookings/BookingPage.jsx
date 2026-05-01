@@ -294,23 +294,16 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         </Grid>
 
 
-        <TextField fullWidth label={t('booking_page.num_guests')} type="number" size="small"
-          value={form.numGuests}
-          onChange={e => setForm(f => ({ ...f, numGuests: Math.max(1, parseInt(e.target.value) || 1) }))}
-          inputProps={{ min: 1 }}
-          sx={{ mb: 2 }}
-        />
-=======
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={6}>
-            <TextField fullWidth label="Người lớn" type="number" size="small"
+            <TextField fullWidth label={t('booking_page.adults')} type="number" size="small"
               value={form.numAdults}
               onChange={e => setForm(f => ({ ...f, numAdults: Math.max(1, parseInt(e.target.value) || 1) }))}
               inputProps={{ min: 1 }}
             />
           </Grid>
           <Grid item xs={6}>
-            <TextField fullWidth label="Trẻ em" type="number" size="small"
+            <TextField fullWidth label={t('booking_page.children')} type="number" size="small"
               value={form.numChildren}
               onChange={e => setForm(f => ({ ...f, numChildren: Math.max(0, parseInt(e.target.value) || 0) }))}
               inputProps={{ min: 0 }}
