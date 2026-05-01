@@ -142,7 +142,7 @@
     "fetch_error": "Lỗi khi lấy lịch sử đặt phòng"
   },
   "destinations": {
-    "title": "🗺️ Điểm đến phổ biến",
+    "title": "Điểm đến phổ biến",
     "hcm": { "name": "TP. Hồ Chí Minh", "desc": "Thành phố sôi động" },
     "hanoi": { "name": "Hà Nội", "desc": "Thủ đô ngàn năm" },
     "vungtau": { "name": "Vũng Tàu", "desc": "Biển xanh cát trắng" },
@@ -165,9 +165,9 @@
     "min_price": "Tối thiểu",
     "max_price": "Tối đa",
     "no_limit": "không giới hạn",
-    "room_type": "LOẠI PHÒNG",
-    "bed_type": "LOẠI GIƯỜNG",
-    "extra_services": "DỊCH VỤ ĐI KÈM",
+    "room_type": "Loại phòng",
+    "bed_type": "Loại giường",
+    "extra_services": "Dịch vụ đi kèm",
     "searching": "Đang tìm...",
     "find_room": "Tìm phòng",
     "available_rooms": "Phòng còn trống",
@@ -180,7 +180,8 @@
     "num_guests": "Số khách",
     "processing": "Đang xử lý...",
     "total": "Tổng cộng",
-    "room": "Phòng"
+    "room": "Phòng",
+    "budget_friendly": "Phòng có giá ưu đãi nhất"
   },
   "room_detail": {
     "hotel": "Khách sạn",

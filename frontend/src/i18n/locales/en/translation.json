@@ -142,7 +142,7 @@
     "fetch_error": "Error fetching booking history"
   },
   "destinations": {
-    "title": "🗺️ Popular Destinations",
+    "title": "Popular destinations",
     "hcm": { "name": "Ho Chi Minh City", "desc": "The vibrant city" },
     "hanoi": { "name": "Hanoi", "desc": "The millennial capital" },
     "vungtau": { "name": "Vung Tau", "desc": "Blue sea and white sand" },
@@ -165,9 +165,9 @@
     "min_price": "Min price",
     "max_price": "Max price",
     "no_limit": "no limit",
-    "room_type": "ROOM TYPE",
-    "bed_type": "BED TYPE",
-    "extra_services": "EXTRA SERVICES",
+    "room_type": "Room type",
+    "bed_type": "Bed type",
+    "extra_services": "Extra services",
     "searching": "Searching...",
     "find_room": "Find Room",
     "available_rooms": "Available Rooms",
@@ -180,7 +180,8 @@
     "num_guests": "Guests",
     "processing": "Processing...",
     "total": "Total",
-    "room": "Room"
+    "room": "Room",
+    "budget_friendly": "Budget-friendly options"
   },
   "room_detail": {
     "hotel": "Hotel",

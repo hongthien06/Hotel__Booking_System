@@ -408,12 +408,32 @@ const BookingPage = () => {
   const scrollTypes = (dir) => {
     if (typeScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = typeScrollRef.current;
-      const scrollAmount = (clientWidth + 16) / 4; // Show ~4 types at once
+      const scrollAmount = (clientWidth + 16) / 4;
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
       if (dir < 0 && scrollLeft <= 10) return;
       typeScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
     }
   };
+
+  const budgetScrollRef = useRef(null);
+  const scrollBudget = (dir) => {
+    if (budgetScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = budgetScrollRef.current;
+      const scrollAmount = (clientWidth + 24) / 3;
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
+      if (dir < 0 && scrollLeft <= 10) return;
+      budgetScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const budgetRooms = React.useMemo(() => {
+    const list = rooms.length > 0 ? rooms : MOCK_ROOMS;
+    return [...list].sort((a, b) => {
+      const pA = Number(a.pricePerNight || a.priceDay || a.price || 0);
+      const pB = Number(b.pricePerNight || b.priceDay || b.price || 0);
+      return pA - pB;
+    }).slice(0, 10);
+  }, [rooms]);
 
   useEffect(() => {
     getRoomsApi()
@@ -481,6 +501,7 @@ const BookingPage = () => {
     return (
       <Card sx={{
       borderRadius: 3, overflow: 'hidden', transition: 'all 0.3s',
+      boxShadow: 1,
       '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
     }}>
       {isMock
@@ -571,7 +592,7 @@ const BookingPage = () => {
           <Box sx={{ maxWidth: 1080, mx: 'auto' }}>
 
             {/* Điểm đến phổ biến */}
-            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2, textAlign: 'center' }}>{t('destinations.title')}</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>{t('destinations.title')}</Typography>
             <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
               {/* Nút cuộn trái */}
               <IconButton onClick={() => scrollDest(-1)} sx={{
@@ -657,6 +678,7 @@ const BookingPage = () => {
                     width: 'calc((100% - 48px) / 4)', height: 180,
                     position: 'relative', overflow: 'hidden',
                     scrollSnapAlign: 'start',
+                    boxShadow: 1,
                     border: roomTypes.includes(type.key) ? `3px solid ${PC}` : '3px solid transparent',
                     transition: 'all 0.2s',
                     '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
@@ -679,10 +701,44 @@ const BookingPage = () => {
             </Box>
 
 
+            {/* Phòng giá tốt nhất */}
+            <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>{t('booking_page.budget_friendly') || 'Phòng có giá ưu đãi nhất'}</Typography>
+            <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+              <IconButton onClick={() => scrollBudget(-1)} sx={{
+                position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                '&:hover': { bgcolor: PC_LIGHT },
+              }}>
+                <ChevronLeft sx={{ color: PC }} />
+              </IconButton>
+
+              <Box ref={budgetScrollRef} sx={{
+                display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
+                justifyContent: 'flex-start',
+                scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                scrollSnapType: 'x mandatory',
+              }}>
+                {budgetRooms.map(r => (
+                  <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                    <RoomCard room={r} isMock={rooms.length === 0} />
+                  </Box>
+                ))}
+              </Box>
+
+              <IconButton onClick={() => scrollBudget(1)} sx={{
+                position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                '&:hover': { bgcolor: PC_LIGHT },
+              }}>
+                <ChevronRight sx={{ color: PC }} />
+              </IconButton>
+            </Box>
+
+
             {/* Phòng nổi bật */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 800 }}>
-                ⭐ {searched ? t('booking_page.available_rooms') : t('booking_page.featured_rooms')}
+                {searched ? t('booking_page.available_rooms') : t('booking_page.featured_rooms')}
               </Typography>
               {!loading && (
                 <Typography variant="body2" color="text.secondary">
