@@ -762,8 +762,20 @@ const BookingPage = () => {
                             scrollSnapAlign: 'start', boxShadow: 1,
                             border: '1px solid #eee',
                             transition: 'all 0.2s',
+                            minHeight: 100, // Cố định chiều cao tối thiểu
+                            display: 'flex', flexDirection: 'column', justifyContent: 'center'
                           }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC, mb: 0.5 }}>{s.destination}</Typography>
+                            <Typography variant="subtitle2" sx={{ 
+                              fontWeight: 800, 
+                              color: PC, 
+                              mb: 0.5,
+                              minHeight: '1.2em', // Đảm bảo luôn có khoảng trống cho tiêu đề
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
+                            }}>
+                              {s.destination || t('booking_page.anywhere')}
+                            </Typography>
                             <Typography variant="caption" display="block" color="text.secondary">
                               {s.checkIn} — {s.checkOut}
                             </Typography>
