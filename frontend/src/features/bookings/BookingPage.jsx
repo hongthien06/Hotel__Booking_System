@@ -14,7 +14,7 @@ import {
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
   Divider, InputAdornment, Skeleton, Alert,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Snackbar, CircularProgress, Slider
+  Snackbar, CircularProgress, Slider, MenuItem
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material';
@@ -111,10 +111,31 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
       <Divider sx={{ mb: 2 }} />
 
       <Typography sx={labelSx}>{t('booking_page.destination')}</Typography>
-      <TextField fullWidth size="small" value={params.destination}
-        onChange={e => onParam('destination', e.target.value)} sx={{ mb: 2 }}
-        InputProps={{ startAdornment: <InputAdornment position="start"><LocationOn sx={{ color: PC, fontSize: 18 }} /></InputAdornment> }}
-      />
+      <TextField
+        select
+        fullWidth
+        size="small"
+        value={params.destination}
+        onChange={e => onParam('destination', e.target.value)}
+        sx={{ mb: 2 }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <LocationOn sx={{ color: PC, fontSize: 18 }} />
+            </InputAdornment>
+          ),
+        }}
+        SelectProps={{
+          native: false,
+          MenuProps: { PaperProps: { sx: { maxHeight: 300, borderRadius: 2 } } }
+        }}
+      >
+        {DESTINATIONS.map((d) => (
+          <MenuItem key={d.key} value={d.province || d.name} sx={{ fontSize: 13 }}>
+            {t(`destinations.${d.key}.name`)}
+          </MenuItem>
+        ))}
+      </TextField>
 
       <Grid container spacing={1.5} sx={{ mb: 2 }}>
         {[['checkIn', 'booking_page.check_in'], ['checkOut', 'booking_page.check_out']].map(([k, lblKey]) => (
@@ -530,6 +551,14 @@ const BookingPage = () => {
     finally { setLoading(false); }
   };
 
+  const handleClearSearch = () => {
+    setSearched(false);
+    // Optionally reset rooms to all rooms, or just let them be
+    getRoomsApi()
+      .then(d => setRooms(Array.isArray(d) ? d : []))
+      .catch(() => setRooms([]));
+  };
+
   const handleRecentSearchClick = (s) => {
     setParams(s);
     handleSearch(s);
@@ -574,7 +603,15 @@ const BookingPage = () => {
     finally { setLoading(false); }
   };
 
-  const selectDest = (idx) => { setDestIdx(idx); onParam('destination', DESTINATIONS[idx].province || DESTINATIONS[idx].name); };
+  const selectDest = (idx) => { 
+    const dest = DESTINATIONS[idx].province || DESTINATIONS[idx].name;
+    setDestIdx(idx); 
+    setParams(p => {
+      const newParams = { ...p, destination: dest };
+      handleSearch(newParams);
+      return newParams;
+    });
+  };
 
   /* ── Room Card ─────────────────────────────────────────── */
   const RoomCard = ({ room, isMock }) => {
@@ -679,16 +716,72 @@ const BookingPage = () => {
         <Box sx={{ px: 3, py: 2, pb: 8 }}>
           <Box sx={{ maxWidth: 1080, mx: 'auto' }}>
 
-            {/* 1. Tìm kiếm gần đây */}
-            {recentSearches.length > 0 && (
+            {!searched ? (
               <>
+                {/* 1. Tìm kiếm gần đây */}
+                {recentSearches.length > 0 && (
+                  <>
+                    <Box sx={{ mb: 2, pl: 6 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.recent_searches')}</Typography>
+                      <Typography variant="body2" color="text.secondary">{t('booking_page.recent_searches_sub')}</Typography>
+                    </Box>
+                    <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                      {recentSearches.length > 4 && (
+                        <IconButton onClick={() => scrollRecent(-1)} sx={{
+                          position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                          zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                          '&:hover': { bgcolor: PC_LIGHT },
+                        }}>
+                          <ChevronLeft sx={{ color: PC }} />
+                        </IconButton>
+                      )}
+
+                      <Box ref={recentScrollRef} sx={{
+                        display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
+                        justifyContent: 'flex-start',
+                        scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                        scrollSnapType: 'x mandatory',
+                      }}>
+                        {recentSearches.map((s, i) => (
+                          <Card key={i} onClick={() => handleRecentSearchClick(s)} sx={{
+                            cursor: 'pointer', borderRadius: 3, flexShrink: 0,
+                            width: 'calc((100% - 48px) / 4)', p: 2,
+                            scrollSnapAlign: 'start', boxShadow: 1,
+                            border: '1px solid #eee',
+                            transition: 'all 0.2s',
+                          }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC, mb: 0.5 }}>{s.destination}</Typography>
+                            <Typography variant="caption" display="block" color="text.secondary">
+                              {s.checkIn} — {s.checkOut}
+                            </Typography>
+                            <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                              {s.adults} {t('booking_page.adults').toLowerCase()}, {s.children} {t('booking_page.children').toLowerCase()}
+                            </Typography>
+                          </Card>
+                        ))}
+                      </Box>
+
+                      {recentSearches.length > 4 && (
+                        <IconButton onClick={() => scrollRecent(1)} sx={{
+                          position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                          zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                          '&:hover': { bgcolor: PC_LIGHT },
+                        }}>
+                          <ChevronRight sx={{ color: PC }} />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </>
+                )}
+
+                {/* 2. Điểm đến phổ biến */}
                 <Box sx={{ mb: 2, pl: 6 }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.recent_searches')}</Typography>
-                  <Typography variant="body2" color="text.secondary">{t('booking_page.recent_searches_sub')}</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('destinations.title')}</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('destinations.subtitle')}</Typography>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
-                  {recentSearches.length > 4 && (
-                    <IconButton onClick={() => scrollRecent(-1)} sx={{
+                  {DESTINATIONS.length > 5 && (
+                    <IconButton onClick={() => scrollDest(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
                       '&:hover': { bgcolor: PC_LIGHT },
@@ -697,33 +790,106 @@ const BookingPage = () => {
                     </IconButton>
                   )}
 
-                  <Box ref={recentScrollRef} sx={{
+                  {/* Scroll container */}
+                  <Box ref={destScrollRef} sx={{
+                    display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1,
+                    justifyContent: 'flex-start',
+                    scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                    scrollSnapType: 'x mandatory',
+                  }}>
+                    {DESTINATIONS.map((d, i) => (
+                      <Card key={d.name} onClick={() => selectDest(i)} sx={{
+                        cursor: 'pointer', borderRadius: 3, flexShrink: 0,
+                        width: 'calc((100% - 80px) / 5)', height: 160,
+                        position: 'relative', overflow: 'hidden',
+                        scrollSnapAlign: 'start',
+                        scrollSnapStop: 'always',
+                        border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
+                        transition: 'all 0.2s',
+                        boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1,
+                      }}>
+                        {/* Ảnh tràn kín */}
+                        <img
+                          src={d.img}
+                          alt={d.name}
+                          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        {/* Gradient overlay */}
+                        <Box sx={{
+                          position: 'absolute', inset: 0,
+                          background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)',
+                        }} />
+                        {/* Text */}
+                        <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 1.2, textAlign: 'center' }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
+                            {t(`destinations.${d.key}.name`)}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.82)' }}>{t(`destinations.${d.key}.desc`)}</Typography>
+                        </Box>
+                      </Card>
+                    ))}
+                  </Box>
+
+                  {DESTINATIONS.length > 5 && (
+                    <IconButton onClick={() => scrollDest(1)} sx={{
+                      position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                      zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                      '&:hover': { bgcolor: PC_LIGHT },
+                    }}>
+                      <ChevronRight sx={{ color: PC }} />
+                    </IconButton>
+                  )}
+                </Box>
+
+
+                {/* 3. Tìm kiếm theo loại phòng */}
+                <Box sx={{ mb: 2, pl: 6 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.room_type')}</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('booking_page.room_type_sub')}</Typography>
+                </Box>
+                <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                  {ROOM_TYPES.length > 4 && (
+                    <IconButton onClick={() => scrollTypes(-1)} sx={{
+                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                      zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                      '&:hover': { bgcolor: PC_LIGHT },
+                    }}>
+                      <ChevronLeft sx={{ color: PC }} />
+                    </IconButton>
+                  )}
+
+                  <Box ref={typeScrollRef} sx={{
                     display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                     scrollSnapType: 'x mandatory',
                   }}>
-                    {recentSearches.map((s, i) => (
-                      <Card key={i} onClick={() => handleRecentSearchClick(s)} sx={{
-                        cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                        width: 'calc((100% - 48px) / 4)', p: 2,
-                        scrollSnapAlign: 'start', boxShadow: 1,
-                        border: '1px solid #eee',
+                    {ROOM_TYPES.map((type) => (
+                      <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
+                        cursor: 'pointer', borderRadius: 4, flexShrink: 0,
+                        width: 'calc((100% - 48px) / 4)', height: 160,
+                        position: 'relative', overflow: 'hidden',
+                        scrollSnapAlign: 'start',
+                        boxShadow: 1,
+                        border: roomTypes.includes(type.key) ? `3px solid ${PC}` : '3px solid transparent',
                         transition: 'all 0.2s',
                       }}>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC, mb: 0.5 }}>{s.destination}</Typography>
-                        <Typography variant="caption" display="block" color="text.secondary">
-                          {s.checkIn} — {s.checkOut}
-                        </Typography>
-                        <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                          {s.adults} {t('booking_page.adults').toLowerCase()}, {s.children} {t('booking_page.children').toLowerCase()}
-                        </Typography>
+                        <CardMedia component="img" image={type.img} alt={t(type.label)} sx={{ height: '100%', objectFit: 'cover' }} />
+                        <Box sx={{
+                          position: 'absolute', bottom: 0, left: 0, right: 0, p: 2,
+                          background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
+                          color: 'white', textAlign: 'center'
+                        }}>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
+                            {t(type.label)}
+                          </Typography>
+                        </Box>
                       </Card>
                     ))}
                   </Box>
 
-                  {recentSearches.length > 4 && (
-                    <IconButton onClick={() => scrollRecent(1)} sx={{
+                  {ROOM_TYPES.length > 4 && (
+                    <IconButton onClick={() => scrollTypes(1)} sx={{
                       position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
                       '&:hover': { bgcolor: PC_LIGHT },
@@ -732,331 +898,250 @@ const BookingPage = () => {
                     </IconButton>
                   )}
                 </Box>
-              </>
-            )}
 
-            {/* 2. Điểm đến phổ biến */}
-            <Box sx={{ mb: 2, pl: 6 }}>
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('destinations.title')}</Typography>
-              <Typography variant="body2" color="text.secondary">{t('destinations.subtitle')}</Typography>
-            </Box>
-            <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
-              {DESTINATIONS.length > 5 && (
-                <IconButton onClick={() => scrollDest(-1)} sx={{
-                  position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-                  zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                  '&:hover': { bgcolor: PC_LIGHT },
-                }}>
-                  <ChevronLeft sx={{ color: PC }} />
-                </IconButton>
-              )}
-
-              {/* Scroll container */}
-              <Box ref={destScrollRef} sx={{
-                display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1,
-                justifyContent: 'flex-start',
-                scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                scrollSnapType: 'x mandatory',
-              }}>
-                {DESTINATIONS.map((d, i) => (
-                  <Card key={d.name} onClick={() => selectDest(i)} sx={{
-                    cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                    width: 'calc((100% - 80px) / 5)', height: 160,
-                    position: 'relative', overflow: 'hidden',
-                    scrollSnapAlign: 'start',
-                    scrollSnapStop: 'always',
-                    border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
-                    transition: 'all 0.2s',
-                    boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1,
-                  }}>
-                    {/* Ảnh tràn kín */}
-                    <img
-                      src={d.img}
-                      alt={d.name}
-                      style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-                    />
-                    {/* Gradient overlay */}
-                    <Box sx={{
-                      position: 'absolute', inset: 0,
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)',
-                    }} />
-                    {/* Text */}
-                    <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 1.2, textAlign: 'center' }}>
-                      <Typography variant="body2" sx={{ fontWeight: 700, color: 'white', lineHeight: 1.2 }}>
-                        {t(`destinations.${d.key}.name`)}
+                {/* 4. Phòng nổi bật */}
+                <Box sx={{ mb: 2, pl: 6 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Box>
+                      <Typography variant="h6" sx={{ fontWeight: 800 }}>
+                        {t('booking_page.featured_rooms')}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.82)' }}>{t(`destinations.${d.key}.desc`)}</Typography>
-                    </Box>
-                  </Card>
-                ))}
-              </Box>
-
-              {DESTINATIONS.length > 5 && (
-                <IconButton onClick={() => scrollDest(1)} sx={{
-                  position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                  zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                  '&:hover': { bgcolor: PC_LIGHT },
-                }}>
-                  <ChevronRight sx={{ color: PC }} />
-                </IconButton>
-              )}
-            </Box>
-
-
-            {/* 3. Tìm kiếm theo loại phòng */}
-            <Box sx={{ mb: 2, pl: 6 }}>
-              <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.room_type')}</Typography>
-              <Typography variant="body2" color="text.secondary">{t('booking_page.room_type_sub')}</Typography>
-            </Box>
-            <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
-              {ROOM_TYPES.length > 4 && (
-                <IconButton onClick={() => scrollTypes(-1)} sx={{
-                  position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-                  zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                  '&:hover': { bgcolor: PC_LIGHT },
-                }}>
-                  <ChevronLeft sx={{ color: PC }} />
-                </IconButton>
-              )}
-
-              <Box ref={typeScrollRef} sx={{
-                display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
-                justifyContent: 'flex-start',
-                scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                scrollSnapType: 'x mandatory',
-              }}>
-                {ROOM_TYPES.map((type) => (
-                  <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
-                    cursor: 'pointer', borderRadius: 4, flexShrink: 0,
-                    width: 'calc((100% - 48px) / 4)', height: 160,
-                    position: 'relative', overflow: 'hidden',
-                    scrollSnapAlign: 'start',
-                    boxShadow: 1,
-                    border: roomTypes.includes(type.key) ? `3px solid ${PC}` : '3px solid transparent',
-                    transition: 'all 0.2s',
-                  }}>
-                    <CardMedia component="img" image={type.img} alt={t(type.label)} sx={{ height: '100%', objectFit: 'cover' }} />
-                    <Box sx={{
-                      position: 'absolute', bottom: 0, left: 0, right: 0, p: 2,
-                      background: 'linear-gradient(transparent, rgba(0,0,0,0.8))',
-                      color: 'white', textAlign: 'center'
-                    }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>
-                        {t(type.label)}
+                      <Typography variant="body2" color="text.secondary">
+                        {t('booking_page.featured_rooms_sub')}
                       </Typography>
                     </Box>
-                  </Card>
-                ))}
-              </Box>
-
-              {ROOM_TYPES.length > 4 && (
-                <IconButton onClick={() => scrollTypes(1)} sx={{
-                  position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                  zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                  '&:hover': { bgcolor: PC_LIGHT },
-                }}>
-                  <ChevronRight sx={{ color: PC }} />
-                </IconButton>
-              )}
-            </Box>
-
-            {/* 4. Phòng nổi bật */}
-            <Box sx={{ mb: 2, pl: 6 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>
-                    {searched ? t('booking_page.available_rooms') : t('booking_page.featured_rooms')}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {searched ? t('booking_page.available_rooms_sub') : t('booking_page.featured_rooms_sub')}
-                  </Typography>
+                    <Button 
+                      endIcon={<ArrowForward />} 
+                      onClick={() => navigate('/rooms')}
+                      sx={{ 
+                        color: PC, fontWeight: 700, textTransform: 'none',
+                        '&:hover': { bgcolor: PC_LIGHT }
+                      }}
+                    >
+                      {t('common.see_all') || 'Xem tất cả'}
+                    </Button>
+                  </Box>
                 </Box>
-                <Button 
-                  endIcon={<ArrowForward />} 
-                  onClick={() => navigate('/rooms')}
-                  sx={{ 
-                    color: PC, fontWeight: 700, textTransform: 'none',
-                    '&:hover': { bgcolor: PC_LIGHT }
-                  }}
-                >
-                  {t('common.see_all') || 'Xem tất cả'}
-                </Button>
-              </Box>
-            </Box>
 
-            <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
-              {(searched ? rooms.length > 3 : MOCK_ROOMS.length > 3) && (
-                <IconButton onClick={() => scrollRooms(-1)} sx={{
-                  position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-                  zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                  '&:hover': { bgcolor: PC_LIGHT },
-                }}>
-                  <ChevronLeft sx={{ color: PC }} />
-                </IconButton>
-              )}
+                <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
+                  {MOCK_ROOMS.length > 3 && (
+                    <IconButton onClick={() => scrollRooms(-1)} sx={{
+                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                      zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                      '&:hover': { bgcolor: PC_LIGHT },
+                    }}>
+                      <ChevronLeft sx={{ color: PC }} />
+                    </IconButton>
+                  )}
 
-              <Box ref={roomScrollRef} sx={{
-                display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
-                justifyContent: 'flex-start',
-                scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                scrollSnapType: 'x mandatory',
-              }}>
+                  <Box ref={roomScrollRef} sx={{
+                    display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
+                    justifyContent: 'flex-start',
+                    scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                    scrollSnapType: 'x mandatory',
+                  }}>
+                    {loading ? (
+                      [...Array(3)].map((_, i) => (
+                        <Box key={i} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0 }}>
+                          <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
+                          <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
+                          <Skeleton width="50%" height={18} />
+                        </Box>
+                      ))
+                    ) : (
+                      MOCK_ROOMS.map(r => (
+                        <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                          <RoomCard room={r} isMock={true} />
+                        </Box>
+                      ))
+                    )}
+                  </Box>
+
+                  {MOCK_ROOMS.length > 3 && (
+                    <IconButton onClick={() => scrollRooms(1)} sx={{
+                      position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                      zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                      '&:hover': { bgcolor: PC_LIGHT },
+                    }}>
+                      <ChevronRight sx={{ color: PC }} />
+                    </IconButton>
+                  )}
+                </Box>
+
+
+                {/* 5. Phòng được đánh giá cao nhất */}
+                {topRatedRooms.length > 0 && (
+                  <>
+                    <Box sx={{ mb: 2, pl: 6 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.top_rated')}</Typography>
+                          <Typography variant="body2" color="text.secondary">{t('booking_page.top_rated_sub')}</Typography>
+                        </Box>
+                        <Button 
+                          endIcon={<ArrowForward />} 
+                          onClick={() => navigate('/rooms')}
+                          sx={{ 
+                            color: PC, fontWeight: 700, textTransform: 'none',
+                            '&:hover': { bgcolor: PC_LIGHT }
+                          }}
+                        >
+                          {t('common.see_all') || 'Xem tất cả'}
+                        </Button>
+                      </Box>
+                    </Box>
+                    <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                      {topRatedRooms.length > 3 && (
+                        <IconButton onClick={() => scrollTopRated(-1)} sx={{
+                          position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                          zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                          '&:hover': { bgcolor: PC_LIGHT },
+                        }}>
+                          <ChevronLeft sx={{ color: PC }} />
+                        </IconButton>
+                      )}
+
+                      <Box ref={topRatedScrollRef} sx={{
+                        display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
+                        justifyContent: 'flex-start',
+                        scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                        scrollSnapType: 'x mandatory',
+                      }}>
+                        {topRatedRooms.map(r => (
+                          <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                            <RoomCard room={r} isMock={rooms.length === 0} />
+                          </Box>
+                        ))}
+                      </Box>
+
+                      {topRatedRooms.length > 3 && (
+                        <IconButton onClick={() => scrollTopRated(1)} sx={{
+                          position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                          zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                          '&:hover': { bgcolor: PC_LIGHT },
+                        }}>
+                          <ChevronRight sx={{ color: PC }} />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </>
+                )}
+
+
+                {/* 6. Phòng có giá ưu đãi nhất */}
+                {budgetRooms.length > 0 && (
+                  <>
+                    <Box sx={{ mb: 2, pl: 6 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box>
+                          <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.budget_friendly')}</Typography>
+                          <Typography variant="body2" color="text.secondary">{t('booking_page.budget_friendly_sub')}</Typography>
+                        </Box>
+                        <Button 
+                          endIcon={<ArrowForward />} 
+                          onClick={() => navigate('/rooms')}
+                          sx={{ 
+                            color: PC, fontWeight: 700, textTransform: 'none',
+                            '&:hover': { bgcolor: PC_LIGHT }
+                          }}
+                        >
+                          {t('common.see_all') || 'Xem tất cả'}
+                        </Button>
+                      </Box>
+                    </Box>
+                    <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                      {budgetRooms.length > 3 && (
+                        <IconButton onClick={() => scrollBudget(-1)} sx={{
+                          position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                          zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                          '&:hover': { bgcolor: PC_LIGHT },
+                        }}>
+                          <ChevronLeft sx={{ color: PC }} />
+                        </IconButton>
+                      )}
+
+                      <Box ref={budgetScrollRef} sx={{
+                        display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
+                        justifyContent: 'flex-start',
+                        scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                        scrollSnapType: 'x mandatory',
+                      }}>
+                        {budgetRooms.map(r => (
+                          <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                            <RoomCard room={r} isMock={rooms.length === 0} />
+                          </Box>
+                        ))}
+                      </Box>
+
+                      {budgetRooms.length > 3 && (
+                        <IconButton onClick={() => scrollBudget(1)} sx={{
+                          position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                          zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                          '&:hover': { bgcolor: PC_LIGHT },
+                        }}>
+                          <ChevronRight sx={{ color: PC }} />
+                        </IconButton>
+                      )}
+                    </Box>
+                  </>
+                )}
+              </>
+            ) : (
+              /* Search Results View */
+              <Box sx={{ px: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+                  <Box>
+                    <Typography variant="h5" sx={{ fontWeight: 800, color: PC }}>
+                      {t('booking_page.search_results')}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {rooms.length} {t('booking_page.available_rooms_sub')}
+                    </Typography>
+                  </Box>
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<ChevronLeft />}
+                    onClick={handleClearSearch}
+                    sx={{ 
+                      borderRadius: 2, color: PC, borderColor: PC, fontWeight: 700,
+                      '&:hover': { bgcolor: PC_LIGHT, borderColor: PC }
+                    }}
+                  >
+                    {t('booking_page.back_to_home')}
+                  </Button>
+                </Box>
+
                 {loading ? (
-                  [...Array(3)].map((_, i) => (
-                    <Box key={i} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0 }}>
-                      <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
-                      <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
-                      <Skeleton width="50%" height={18} />
-                    </Box>
-                  ))
+                  <Grid container spacing={3}>
+                    {[...Array(6)].map((_, i) => (
+                      <Grid item xs={12} sm={6} md={4} key={i}>
+                        <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 3, mb: 1 }} />
+                        <Skeleton width="70%" height={24} sx={{ mb: 0.5 }} />
+                        <Skeleton width="40%" height={20} />
+                      </Grid>
+                    ))}
+                  </Grid>
                 ) : rooms.length > 0 ? (
-                  rooms.map(r => (
-                    <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
-                      <RoomCard room={r} isMock={false} />
-                    </Box>
-                  ))
-                ) : searched ? (
-                  <Box sx={{ width: '100%' }}>
-                    <Alert severity="info" sx={{ borderRadius: 3 }}>
+                  <Grid container spacing={3}>
+                    {rooms.map(r => (
+                      <Grid item xs={12} sm={6} md={4} key={r.id}>
+                        <RoomCard room={r} isMock={false} />
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 10 }}>
+                    <Alert severity="info" sx={{ borderRadius: 3, display: 'inline-flex', px: 5 }}>
                       {t('booking_page.no_rooms_found')}
                     </Alert>
-                  </Box>
-                ) : (
-                  MOCK_ROOMS.map(r => (
-                    <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
-                      <RoomCard room={r} isMock={true} />
+                    <Box sx={{ mt: 3 }}>
+                      <Button variant="contained" onClick={handleClearSearch} sx={{ bgcolor: PC, borderRadius: 2 }}>
+                        {t('booking_page.back_to_home')}
+                      </Button>
                     </Box>
-                  ))
+                  </Box>
                 )}
               </Box>
-
-              {(searched ? rooms.length > 3 : MOCK_ROOMS.length > 3) && (
-                <IconButton onClick={() => scrollRooms(1)} sx={{
-                  position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                  zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                  '&:hover': { bgcolor: PC_LIGHT },
-                }}>
-                  <ChevronRight sx={{ color: PC }} />
-                </IconButton>
-              )}
-            </Box>
-
-
-            {/* 5. Phòng được đánh giá cao nhất */}
-            {topRatedRooms.length > 0 && (
-              <>
-                <Box sx={{ mb: 2, pl: 6 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.top_rated')}</Typography>
-                      <Typography variant="body2" color="text.secondary">{t('booking_page.top_rated_sub')}</Typography>
-                    </Box>
-                    <Button 
-                      endIcon={<ArrowForward />} 
-                      onClick={() => navigate('/rooms')}
-                      sx={{ 
-                        color: PC, fontWeight: 700, textTransform: 'none',
-                        '&:hover': { bgcolor: PC_LIGHT }
-                      }}
-                    >
-                      {t('common.see_all') || 'Xem tất cả'}
-                    </Button>
-                  </Box>
-                </Box>
-                <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
-                  {topRatedRooms.length > 3 && (
-                    <IconButton onClick={() => scrollTopRated(-1)} sx={{
-                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-                      zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
-                    }}>
-                      <ChevronLeft sx={{ color: PC }} />
-                    </IconButton>
-                  )}
-
-                  <Box ref={topRatedScrollRef} sx={{
-                    display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
-                    justifyContent: 'flex-start',
-                    scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory',
-                  }}>
-                    {topRatedRooms.map(r => (
-                      <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
-                        <RoomCard room={r} isMock={rooms.length === 0} />
-                      </Box>
-                    ))}
-                  </Box>
-
-                  {topRatedRooms.length > 3 && (
-                    <IconButton onClick={() => scrollTopRated(1)} sx={{
-                      position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                      zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
-                    }}>
-                      <ChevronRight sx={{ color: PC }} />
-                    </IconButton>
-                  )}
-                </Box>
-              </>
-            )}
-
-
-            {/* 6. Phòng có giá ưu đãi nhất */}
-            {budgetRooms.length > 0 && (
-              <>
-                <Box sx={{ mb: 2, pl: 6 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box>
-                      <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.budget_friendly')}</Typography>
-                      <Typography variant="body2" color="text.secondary">{t('booking_page.budget_friendly_sub')}</Typography>
-                    </Box>
-                    <Button 
-                      endIcon={<ArrowForward />} 
-                      onClick={() => navigate('/rooms')}
-                      sx={{ 
-                        color: PC, fontWeight: 700, textTransform: 'none',
-                        '&:hover': { bgcolor: PC_LIGHT }
-                      }}
-                    >
-                      {t('common.see_all') || 'Xem tất cả'}
-                    </Button>
-                  </Box>
-                </Box>
-                <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
-                  {budgetRooms.length > 3 && (
-                    <IconButton onClick={() => scrollBudget(-1)} sx={{
-                      position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-                      zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
-                    }}>
-                      <ChevronLeft sx={{ color: PC }} />
-                    </IconButton>
-                  )}
-
-                  <Box ref={budgetScrollRef} sx={{
-                    display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
-                    justifyContent: 'flex-start',
-                    scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory',
-                  }}>
-                    {budgetRooms.map(r => (
-                      <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
-                        <RoomCard room={r} isMock={rooms.length === 0} />
-                      </Box>
-                    ))}
-                  </Box>
-
-                  {budgetRooms.length > 3 && (
-                    <IconButton onClick={() => scrollBudget(1)} sx={{
-                      position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                      zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
-                    }}>
-                      <ChevronRight sx={{ color: PC }} />
-                    </IconButton>
-                  )}
-                </Box>
-              </>
             )}
 
           </Box>
