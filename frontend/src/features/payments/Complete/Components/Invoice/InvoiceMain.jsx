@@ -11,9 +11,9 @@ const InvoiceMain = ({ invoiceData }) => {
       </Typography>
       <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5, mb: 2 }}>
         {[
-          { k: 'Tên phòng', v: invoiceData.room },
+          { k: 'Tên phòng', v: invoiceData?.items?.[0]?.description || 'Phòng Standard' },
           { k: 'Địa chỉ', v: invoiceData.address },
-          { k: 'Người thuê', v: invoiceData.tenant },
+          { k: 'Người thuê', v: 'Khách hàng' },
           { k: 'Số người ở', v: invoiceData.numGuests },
           { k: 'Ngày nhận phòng', v: invoiceData.checkInDate },
           { k: 'Ngày trả phòng', v: invoiceData.checkOutDate }

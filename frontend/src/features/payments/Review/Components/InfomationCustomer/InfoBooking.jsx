@@ -6,8 +6,28 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import { Box } from '@mui/system'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
+import { useBookingContext } from '../../../_id'
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr)
+  if (isNaN(d)) return String(dateStr)
+  return d.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' })
+}
 
 const InfoBooking = () => {
+  // booking = BookingDTO: checkInDate, checkOutDate, totalNights, numAdults, numChildren, specialRequest
+  // form = raw form data passed alongside booking
+  const { form, booking } = useBookingContext() || {}
+
+  const checkIn = booking?.checkInDate || form?.checkIn || ''
+  const checkOut = booking?.checkOutDate || form?.checkOut || ''
+  const nights = booking?.totalNights ?? (form ? Math.max(1, Math.round((new Date(form.checkOut) - new Date(form.checkIn)) / 86400000)) : 0)
+  const numAdults = booking?.numAdults ?? form?.numAdults ?? 2
+  const numChildren = booking?.numChildren ?? form?.numChildren ?? 0
+  const specialRequest = booking?.specialRequest || form?.specialRequest || ''
+  const totalPeople = Number(numAdults) + Number(numChildren)
+
   const roomOptions = [
     'Phòng liên thông',
     'Tầng lầu',
@@ -16,9 +36,10 @@ const InfoBooking = () => {
     'Bàn bida',
     'Loại giường'
   ]
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box >
+      <Box>
         <Typography variant='h6' sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: '550' }}>
           <KingBedOutlinedIcon />Thông tin đặt phòng
         </Typography>
@@ -31,8 +52,6 @@ const InfoBooking = () => {
         display: 'flex',
         justifyContent: 'space-between'
       }}>
-
-
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={{ xs: 3, sm: 4 }}
@@ -47,7 +66,7 @@ const InfoBooking = () => {
                 Checkin
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#3f3f3f', fontWeight: '700', fontSize: { xs: '1rem', sm: '1.125rem' }, mt: 1.5 }}>
-                Thứ 7, 4 thg 4
+                {formatDate(checkIn)}
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#5e5e5e', fontWeight: '500', fontSize: '0.8rem' }}>
                 Từ 14:00
@@ -59,7 +78,7 @@ const InfoBooking = () => {
                 Checkout
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#3f3f3f', fontWeight: '700', fontSize: { xs: '1rem', sm: '1.125rem' }, mt: 1.5 }}>
-                Thứ 2, 8 thg 4
+                {formatDate(checkOut)}
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#5e5e5e', fontWeight: '500', fontSize: '0.8rem' }}>
                 Trước 12:00
@@ -73,7 +92,7 @@ const InfoBooking = () => {
                 Nights
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#3f3f3f', fontWeight: '700', fontSize: '1.25rem', mt: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                2<DarkModeOutlinedIcon />
+                {nights}<DarkModeOutlinedIcon />
               </Typography>
             </Box>
 
@@ -82,12 +101,19 @@ const InfoBooking = () => {
                 People
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#3f3f3f', fontWeight: '700', fontSize: '1.25rem', mt: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
-                4<PeopleOutlineOutlinedIcon />
+                {totalPeople}<PeopleOutlineOutlinedIcon />
               </Typography>
             </Box>
           </Stack>
         </Stack>
       </Box>
+
+      {specialRequest && (
+        <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px dashed #f19fb9' }}>
+          <Typography variant="body2" color="text.secondary" fontWeight={600}>Yêu cầu đặc biệt:</Typography>
+          <Typography variant="body2" sx={{ mt: 0.5 }}>{specialRequest}</Typography>
+        </Box>
+      )}
 
       <Box sx={{ marginTop: 1 }}>
         <Typography variant='h6' sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: '550' }}>
@@ -104,7 +130,7 @@ const InfoBooking = () => {
           />
         ))}
       </Box>
-    </Box >
+    </Box>
   )
 }
 

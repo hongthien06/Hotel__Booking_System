@@ -4,7 +4,7 @@ import com.hotel.modules.booking.dto.BookingDTO;
 import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.invoice.dto.response.InvoiceItemResponse;
 import com.hotel.modules.invoice.dto.response.InvoiceResponse;
-import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.io.font.PdfEncodings;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.colors.Color;
@@ -22,6 +22,7 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.layout.properties.VerticalAlignment;
+import org.springframework.core.io.ClassPathResource;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -41,341 +42,201 @@ import java.util.Locale;
 @Service
 @RequiredArgsConstructor
 public class PdfService implements IPdfService {
-        // color const
-        private static final Color DARK_NAVY = new DeviceRgb(0x1a, 0x1a, 0x2e);
-        private static final Color GOLD = new DeviceRgb(0xe2, 0xb9, 0x6f);
-        private static final Color LIGHT_GRAY = new DeviceRgb(0xf8, 0xf9, 0xff);
-        private static final Color BORDER_GRAY = new DeviceRgb(0xe8, 0xec, 0xf0);
-        private static final Color TEXT_MUTED = new DeviceRgb(0x71, 0x80, 0x96);
-        private static final Color RED = new DeviceRgb(0xe5, 0x3e, 0x3e);
-        private static final Color GREEN = new DeviceRgb(0x38, 0xa1, 0x69);
+    private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("MMM dd, yyyy");
 
-        private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        private static final DateTimeFormatter DATE_ONLY = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private final IInvoiceService invoiceService;
+    private final BookingRepository bookingRepo;
 
-        private final IInvoiceService invoiceService;
-        private final BookingRepository bookingRepo;
+    @Transactional
+    public byte[] generateInvoicePdf(Long invoiceId) {
+        InvoiceResponse invoice = invoiceService.getInvoiceById(invoiceId);
 
-        @Transactional
-        public byte[] generateInvoicePdf(Long invoiceId) {
-                // found invoice
-                InvoiceResponse invoice = invoiceService.getInvoiceById(invoiceId);
+        var booking = bookingRepo.findById(invoice.getBookingId())
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy booking #" + invoice.getBookingId()));
 
-                // found booking
-                var booking = bookingRepo.findById(invoice.getBookingId())
-                                .orElseThrow(() -> new EntityNotFoundException(
-                                                "Không tìm thấy booking #" + invoice.getBookingId()));
-
-                BookingDTO dto = new BookingDTO();
-                dto.setBookingId(booking.getBookingId());
-                dto.setCheckInDate(booking.getCheckInDate());
-                dto.setCheckOutDate(booking.getCheckOutDate());
-                dto.setTotalNights(booking.getTotalNights());
-                if (booking.getUser() != null) {
-                        dto.setUserName(booking.getUser().getFullName());
-                        dto.setUserEmail(booking.getUser().getEmail());
-                }
-                if (booking.getRoom() != null) {
-                        dto.setRoomNumber(booking.getRoom().getRoomNumber());
-                        if (booking.getRoom().getRoomType() != null) {
-                                dto.setRoomTypeName(booking.getRoom().getRoomType().getTypeName());
-                        }
-                }
-
-                return buildPdf(invoice, dto);
+        BookingDTO dto = new BookingDTO();
+        dto.setBookingId(booking.getBookingId());
+        dto.setCheckInDate(booking.getCheckInDate());
+        dto.setCheckOutDate(booking.getCheckOutDate());
+        dto.setTotalNights(booking.getTotalNights());
+        if (booking.getUser() != null) {
+            dto.setUserName(booking.getUser().getFullName());
+            dto.setUserEmail(booking.getUser().getEmail());
+        }
+        if (booking.getRoom() != null) {
+            dto.setRoomNumber(booking.getRoom().getRoomNumber());
+            if (booking.getRoom().getRoomType() != null) {
+                dto.setRoomTypeName(booking.getRoom().getRoomType().getTypeName());
+            }
         }
 
-        // PDF Builder
-        @Transactional
-        private byte[] buildPdf(InvoiceResponse invoice, BookingDTO booking) {
-                try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-                        PdfWriter writer = new PdfWriter(baos);
-                        PdfDocument pdf = new PdfDocument(writer);
-                        Document doc = new Document(pdf, PageSize.A4);
-                        doc.setMargins(0, 0, 30, 0);
+        return buildPdf(invoice, dto);
+    }
 
-                        PdfFont regular = PdfFontFactory.createFont(StandardFonts.HELVETICA);
-                        PdfFont bold = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+    @Transactional
+    private byte[] buildPdf(InvoiceResponse invoice, BookingDTO booking) {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            PdfWriter writer = new PdfWriter(baos);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document doc = new Document(pdf, PageSize.A4);
+            doc.setMargins(40, 40, 40, 40);
 
-                        addHeader(doc, invoice, bold, regular);
-                        addInfoGrid(doc, invoice, booking, bold, regular);
-                        addItemsTable(doc, invoice.getItems(), bold, regular);
-                        addTotals(doc, invoice, bold, regular);
-                        addNotes(doc, invoice.getNotes(), bold, regular);
-                        addFooter(doc, bold, regular);
+            byte[] regBytes = new ClassPathResource("fonts/Roboto-Regular.ttf").getInputStream().readAllBytes();
+            PdfFont regular = PdfFontFactory.createFont(regBytes, PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
 
-                        doc.close();
-                        return baos.toByteArray();
+            byte[] boldBytes = new ClassPathResource("fonts/Roboto-Bold.ttf").getInputStream().readAllBytes();
+            PdfFont bold = PdfFontFactory.createFont(boldBytes, PdfEncodings.IDENTITY_H, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
 
-                } catch (IOException e) {
-                        log.error("Lỗi xuất PDF: {}", e.getMessage());
-                        throw new RuntimeException("Không thể tạo file PDF: " + e.getMessage(), e);
-                }
+            addHeader(doc, invoice, bold, regular);
+            addAddresses(doc, booking, bold, regular);
+            addAmountDue(doc, invoice, bold, regular);
+            addItemsTable(doc, invoice, bold, regular);
+            addTotals(doc, invoice, bold, regular);
+
+            doc.close();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            log.error("Lỗi xuất PDF: {}", e.getMessage());
+            throw new RuntimeException("Không thể tạo file PDF: " + e.getMessage(), e);
+        }
+    }
+
+    private void addHeader(Document doc, InvoiceResponse invoice, PdfFont bold, PdfFont regular) {
+        Table headerTable = new Table(new float[]{1, 1}).setWidth(UnitValue.createPercentValue(100));
+        Cell titleCell = new Cell().setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.LEFT);
+        titleCell.add(new Paragraph("Invoice").setFont(bold).setFontSize(28));
+        headerTable.addCell(titleCell);
+
+        Cell logoCell = new Cell().setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.RIGHT).setVerticalAlignment(VerticalAlignment.MIDDLE);
+        logoCell.add(new Paragraph("AI").setFont(bold).setFontSize(40));
+        headerTable.addCell(logoCell);
+        doc.add(headerTable);
+
+        doc.add(new Paragraph("\n").setFontSize(10));
+
+        Table metaTable = new Table(new float[]{100f, 250f}).setTextAlignment(TextAlignment.LEFT);
+        String issueDate = invoice.getIssuedAt() != null ? invoice.getIssuedAt().format(DATE_ONLY) : "-";
+        addMetaRow(metaTable, "Invoice number", invoice.getInvoiceNumber(), bold, regular);
+        addMetaRow(metaTable, "Date of issue", issueDate, regular, regular);
+        addMetaRow(metaTable, "Date due", issueDate, regular, regular);
+        addMetaRow(metaTable, "VAT Registration", "Vietnam VAT: 9000020034", regular, regular);
+        
+        doc.add(metaTable);
+        doc.add(new Paragraph("\n").setFontSize(10));
+    }
+
+    private void addMetaRow(Table t, String label, String value, PdfFont valueFont, PdfFont labelFont) {
+        t.addCell(new Cell().setBorder(Border.NO_BORDER).setPadding(2).add(new Paragraph(label).setFont(labelFont).setFontSize(10).setFontColor(new DeviceRgb(50, 50, 50))));
+        t.addCell(new Cell().setBorder(Border.NO_BORDER).setPadding(2).add(new Paragraph(value).setFont(valueFont).setFontSize(10)));
+    }
+
+    private void addAddresses(Document doc, BookingDTO booking, PdfFont bold, PdfFont regular) {
+        Table t = new Table(new float[]{1, 1}).setWidth(UnitValue.createPercentValue(100));
+        
+        Cell left = new Cell().setBorder(Border.NO_BORDER).setPaddingRight(20);
+        left.add(new Paragraph("Anthropic, PBC").setFont(bold).setFontSize(10));
+        left.add(new Paragraph("548 Market Street\nPMB 90375\nSan Francisco, California 94104\nUnited States\nsupport@anthropic.com").setFont(regular).setFontSize(10));
+        t.addCell(left);
+
+        Cell right = new Cell().setBorder(Border.NO_BORDER);
+        right.add(new Paragraph("Bill to").setFont(bold).setFontSize(10));
+        String name = booking.getUserName() != null ? booking.getUserName() : "Khách hàng";
+        String email = booking.getUserEmail() != null ? booking.getUserEmail() : "";
+        right.add(new Paragraph(name + "\n" + email).setFont(regular).setFontSize(10));
+        t.addCell(right);
+
+        doc.add(t);
+        doc.add(new Paragraph("\n").setFontSize(10));
+    }
+
+    private void addAmountDue(Document doc, InvoiceResponse invoice, PdfFont bold, PdfFont regular) {
+        String issueDate = invoice.getIssuedAt() != null ? invoice.getIssuedAt().format(DATE_ONLY) : "-";
+        Paragraph p = new Paragraph(fmtVnd(invoice.getTotalAmount()) + " USD due " + issueDate)
+                .setFont(bold).setFontSize(16);
+        doc.add(p);
+        
+        Paragraph link = new Paragraph("Pay online")
+                .setFont(bold).setFontSize(10).setFontColor(new DeviceRgb(0, 0, 255)).setUnderline();
+        doc.add(link);
+
+        doc.add(new Paragraph("\n").setFontSize(10));
+        
+        doc.add(new Paragraph("While we prefer electronic payment methods,\nany checks must be sent to the address below, NOT to our San Francisco office.")
+                .setFont(regular).setFontSize(10));
+        doc.add(new Paragraph("--------------------------------------------------")
+                .setFont(regular).setFontSize(10));
+        doc.add(new Paragraph("PAYMENT ADDRESS:\nAnthropic, PBC\nP.O. Box 104477\nPasadena, CA 91189-4477")
+                .setFont(regular).setFontSize(10));
+        
+        doc.add(new Paragraph("\n").setFontSize(10));
+    }
+
+    private void addItemsTable(Document doc, InvoiceResponse invoice, PdfFont bold, PdfFont regular) {
+        float[] colWidths = { 200f, 40f, 80f, 60f, 80f };
+        Table table = new Table(colWidths).setWidth(UnitValue.createPercentValue(100));
+
+        String[] headers = { "Description", "Qty", "Unit price", "Tax", "Amount" };
+        TextAlignment[] aligns = { TextAlignment.LEFT, TextAlignment.RIGHT, TextAlignment.RIGHT, TextAlignment.RIGHT, TextAlignment.RIGHT };
+        
+        for (int i = 0; i < headers.length; i++) {
+            table.addHeaderCell(new Cell().setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(ColorConstants.BLACK, 1f))
+                    .setPaddingTop(5).setPaddingBottom(5)
+                    .add(new Paragraph(headers[i]).setFont(regular).setFontSize(9).setTextAlignment(aligns[i])));
         }
 
-        private void addHeader(Document doc, InvoiceResponse invoice,
-                        PdfFont bold, PdfFont regular) {
-                Table header = new Table(new float[] { 1, 1 })
-                                .setWidth(UnitValue.createPercentValue(100))
-                                .setBackgroundColor(DARK_NAVY)
-                                .setPadding(30)
-                                .setMarginBottom(0);
+        for (InvoiceItemResponse item : invoice.getItems()) {
+            table.addCell(itemCell(item.getDescription(), regular, TextAlignment.LEFT));
+            table.addCell(itemCell(String.valueOf(item.getQuantity()), regular, TextAlignment.RIGHT));
+            table.addCell(itemCell(fmtVnd(item.getUnitPrice()), regular, TextAlignment.RIGHT));
+            table.addCell(itemCell(invoice.getTaxRate().stripTrailingZeros().toPlainString() + "%", regular, TextAlignment.RIGHT));
+            table.addCell(itemCell(fmtVnd(item.getLineTotal()), regular, TextAlignment.RIGHT));
+        }
+        
+        doc.add(table);
+    }
 
-                Cell brandCell = new Cell()
-                                .setBorder(Border.NO_BORDER)
-                                .setVerticalAlignment(VerticalAlignment.TOP);
-                brandCell.add(new Paragraph("\u2605 LUXURY HOTEL")
-                                .setFont(bold).setFontSize(18).setFontColor(GOLD));
-                brandCell.add(new Paragraph("Where Every Stay Becomes a Memory")
-                                .setFont(regular).setFontSize(9).setFontColor(TEXT_MUTED));
-                header.addCell(brandCell);
+    private Cell itemCell(String text, PdfFont font, TextAlignment align) {
+        return new Cell().setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(new DeviceRgb(230, 230, 230), 0.5f))
+                .setPaddingTop(8).setPaddingBottom(8)
+                .add(new Paragraph(text).setFont(font).setFontSize(10).setTextAlignment(align));
+    }
 
-                Cell titleCell = new Cell()
-                                .setBorder(Border.NO_BORDER)
-                                .setTextAlignment(TextAlignment.RIGHT)
-                                .setVerticalAlignment(VerticalAlignment.TOP);
-                titleCell.add(new Paragraph("HÓA ĐƠN")
-                                .setFont(bold).setFontSize(24).setFontColor(GOLD));
-                titleCell.add(new Paragraph("#" + invoice.getInvoiceNumber())
-                                .setFont(regular).setFontSize(10).setFontColor(TEXT_MUTED));
-                header.addCell(titleCell);
+    private void addTotals(Document doc, InvoiceResponse invoice, PdfFont bold, PdfFont regular) {
+        Table t = new Table(new float[]{300f, 160f}).setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.RIGHT)
+                .setMarginTop(10);
 
-                doc.add(header);
-
-                Table meta = new Table(new float[] { 1, 1, 1 })
-                                .setWidth(UnitValue.createPercentValue(100))
-                                .setBackgroundColor(DARK_NAVY)
-                                .setPaddingLeft(30).setPaddingRight(30)
-                                .setPaddingBottom(20).setPaddingTop(10)
-                                .setMarginBottom(0);
-
-                meta.addCell(metaCell("Ngày xuất hóa đơn",
-                                invoice.getIssuedAt() != null ? invoice.getIssuedAt().format(DATE_FMT) : "-",
-                                bold, regular));
-                meta.addCell(metaCell("Mã đặt phòng", "#" + invoice.getBookingId(), bold, regular));
-                meta.addCell(metaCell("Thanh toán", "#" + invoice.getPaymentId(), bold, regular));
-
-                doc.add(meta);
+        addTotalRow(t, "Subtotal", fmtVnd(invoice.getSubtotal()), regular, regular);
+        addTotalRow(t, "Total excluding tax", fmtVnd(invoice.getSubtotal()), regular, regular);
+        addTotalRow(t, "VAT - Vietnam (" + invoice.getTaxRate().stripTrailingZeros().toPlainString() + "% on " + fmtVnd(invoice.getSubtotal()) + ")", fmtVnd(invoice.getTaxAmount()), regular, regular);
+        
+        if (invoice.getDiscountAmount() != null && invoice.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
+            addTotalRow(t, "Discount", "-" + fmtVnd(invoice.getDiscountAmount()), regular, regular);
         }
 
-        private Cell metaCell(String label, String value, PdfFont bold, PdfFont regular) {
-                Cell c = new Cell().setBorder(Border.NO_BORDER);
-                c.add(new Paragraph(label).setFont(regular).setFontSize(9).setFontColor(TEXT_MUTED));
-                c.add(new Paragraph(value).setFont(bold).setFontSize(11).setFontColor(GOLD));
-                return c;
-        }
+        addTotalRow(t, "Total", fmtVnd(invoice.getTotalAmount()), regular, regular);
+        
+        t.addCell(new Cell().setBorder(Border.NO_BORDER).setPaddingTop(5).setPaddingBottom(5)
+                .add(new Paragraph("Amount due").setFont(bold).setFontSize(10)));
+        t.addCell(new Cell().setBorder(Border.NO_BORDER).setPaddingTop(5).setPaddingBottom(5)
+                .add(new Paragraph(fmtVnd(invoice.getTotalAmount()) + " USD").setFont(bold).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)));
 
-        private void addInfoGrid(Document doc, InvoiceResponse invoice, BookingDTO booking,
-                        PdfFont bold, PdfFont regular) {
-                Table grid = new Table(new float[] { 1, 1, 1 })
-                                .setWidth(UnitValue.createPercentValue(100))
-                                .setMarginLeft(30).setMarginRight(30)
-                                .setMarginTop(20).setMarginBottom(10)
-                                // shrink actual width due to margins
-                                .setWidth(UnitValue.createPercentValue(88));
+        doc.add(t);
+    }
 
-                grid.addCell(infoCard("KHÁCH HÀNG",
-                                (booking.getUserName() != null ? booking.getUserName() : "Khách lẻ")
-                                                + "\n" + (booking.getUserEmail() != null ? booking.getUserEmail() : ""),
-                                bold, regular));
-                grid.addCell(infoCard("PHÒNG",
-                                booking.getRoomNumber() + " — " +
-                                                (booking.getRoomTypeName() != null ? booking.getRoomTypeName() : ""),
-                                bold, regular));
+    private void addTotalRow(Table t, String label, String value, PdfFont fontLabel, PdfFont fontValue) {
+        t.addCell(new Cell().setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(new DeviceRgb(230, 230, 230), 0.5f))
+                .setPaddingTop(5).setPaddingBottom(5)
+                .add(new Paragraph(label).setFont(fontLabel).setFontSize(10).setFontColor(new DeviceRgb(80, 80, 80))));
+        t.addCell(new Cell().setBorder(Border.NO_BORDER).setBorderBottom(new SolidBorder(new DeviceRgb(230, 230, 230), 0.5f))
+                .setPaddingTop(5).setPaddingBottom(5)
+                .add(new Paragraph(value).setFont(fontValue).setFontSize(10).setTextAlignment(TextAlignment.RIGHT)));
+    }
 
-                String stay = "-";
-                if (booking.getCheckInDate() != null && booking.getCheckOutDate() != null) {
-                        stay = booking.getCheckInDate().format(DATE_ONLY)
-                                        + " → " + booking.getCheckOutDate().format(DATE_ONLY)
-                                        + "\n" + booking.getTotalNights() + " đêm";
-                }
-                grid.addCell(infoCard("THỜI GIAN LƯU TRÚ", stay, bold, regular));
-
-                doc.add(grid);
-        }
-
-        private Cell infoCard(String label, String value, PdfFont bold, PdfFont regular) {
-                Cell c = new Cell()
-                                .setBackgroundColor(LIGHT_GRAY)
-                                .setBorderLeft(new SolidBorder(GOLD, 3))
-                                .setBorderTop(Border.NO_BORDER)
-                                .setBorderRight(Border.NO_BORDER)
-                                .setBorderBottom(Border.NO_BORDER)
-                                .setPadding(12)
-                                .setMarginRight(8);
-                c.add(new Paragraph(label)
-                                .setFont(regular).setFontSize(8)
-                                .setFontColor(TEXT_MUTED));
-                for (String line : value.split("\n")) {
-                        c.add(new Paragraph(line)
-                                        .setFont(bold).setFontSize(11)
-                                        .setFontColor(DARK_NAVY)
-                                        .setMarginTop(2));
-                }
-                return c;
-        }
-
-        private void addItemsTable(Document doc, List<InvoiceItemResponse> items,
-                        PdfFont bold, PdfFont regular) {
-                doc.add(new Paragraph("CHI TIẾT HÓA ĐƠN")
-                                .setFont(bold).setFontSize(10)
-                                .setFontColor(TEXT_MUTED)
-                                .setMarginLeft(30).setMarginTop(10).setMarginBottom(6));
-
-                float[] colWidths = { 30f, 60f, 200f, 40f, 90f, 90f };
-                Table table = new Table(colWidths)
-                                .setWidth(UnitValue.createPercentValue(88))
-                                .setMarginLeft(30).setMarginRight(30);
-
-                String[] headers = { "#", "Loại", "Mô tả", "SL", "Đơn giá", "Thành tiền" };
-                for (String h : headers) {
-                        table.addHeaderCell(new Cell()
-                                        .setBackgroundColor(DARK_NAVY)
-                                        .setBorder(Border.NO_BORDER)
-                                        .setPadding(8)
-                                        .add(new Paragraph(h)
-                                                        .setFont(bold).setFontSize(9)
-                                                        .setFontColor(GOLD)));
-                }
-
-                int idx = 1;
-                for (InvoiceItemResponse item : items) {
-                        boolean even = (idx % 2 == 0);
-                        Color bg = even ? LIGHT_GRAY : ColorConstants.WHITE;
-
-                        table.addCell(rowCell(String.valueOf(idx), regular, bg, TextAlignment.LEFT));
-                        table.addCell(rowCell(item.getItemType(), bold, bg, TextAlignment.LEFT));
-                        table.addCell(rowCell(item.getDescription(), regular, bg, TextAlignment.LEFT));
-                        table.addCell(rowCell(String.valueOf(item.getQuantity()), regular, bg, TextAlignment.CENTER));
-                        table.addCell(rowCell(fmtVnd(item.getUnitPrice()), regular, bg, TextAlignment.RIGHT));
-                        table.addCell(rowCell(fmtVnd(item.getLineTotal()), bold, bg, TextAlignment.RIGHT));
-                        idx++;
-                }
-
-                doc.add(table);
-        }
-
-        private Cell rowCell(String text, PdfFont font, Color bg, TextAlignment align) {
-                return new Cell()
-                                .setBackgroundColor(bg)
-                                .setBorderLeft(Border.NO_BORDER)
-                                .setBorderRight(Border.NO_BORDER)
-                                .setBorderTop(Border.NO_BORDER)
-                                .setBorderBottom(new SolidBorder(BORDER_GRAY, 0.5f))
-                                .setPadding(8)
-                                .add(new Paragraph(text)
-                                                .setFont(font).setFontSize(10)
-                                                .setTextAlignment(align));
-        }
-
-        private void addTotals(Document doc, InvoiceResponse invoice,
-                        PdfFont bold, PdfFont regular) {
-                float[] cols = { 150f, 120f };
-                Table t = new Table(cols)
-                                .setHorizontalAlignment(com.itextpdf.layout.properties.HorizontalAlignment.RIGHT)
-                                .setMarginRight(30).setMarginTop(16).setMarginBottom(16);
-
-                // Tạm tính
-                addTotalRow(t, "Tạm tính", fmtVnd(invoice.getSubtotal()),
-                                regular, DARK_NAVY, ColorConstants.WHITE);
-                // VAT
-                addTotalRow(t, "Thuế VAT (" + invoice.getTaxRate().stripTrailingZeros().toPlainString() + "%)",
-                                "+ " + fmtVnd(invoice.getTaxAmount()),
-                                regular, TEXT_MUTED, ColorConstants.WHITE);
-                // Discount
-                if (invoice.getDiscountAmount() != null
-                                && invoice.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
-                        addTotalRow(t, "Giảm giá",
-                                        "- " + fmtVnd(invoice.getDiscountAmount()),
-                                        regular, RED, ColorConstants.WHITE);
-                }
-                // Grand total
-                addGrandTotal(t, "TỔNG CỘNG", fmtVnd(invoice.getTotalAmount()), bold);
-
-                doc.add(t);
-        }
-
-        private void addTotalRow(Table t, String label, String value,
-                        PdfFont font, Color textColor, Color bg) {
-                t.addCell(new Cell()
-                                .setBackgroundColor(bg)
-                                .setBorderLeft(Border.NO_BORDER).setBorderRight(Border.NO_BORDER)
-                                .setBorderTop(Border.NO_BORDER)
-                                .setBorderBottom(new SolidBorder(BORDER_GRAY, 0.5f))
-                                .setPaddingTop(7).setPaddingBottom(7)
-                                .add(new Paragraph(label).setFont(font).setFontSize(11).setFontColor(textColor)));
-                t.addCell(new Cell()
-                                .setBackgroundColor(bg)
-                                .setBorderLeft(Border.NO_BORDER).setBorderRight(Border.NO_BORDER)
-                                .setBorderTop(Border.NO_BORDER)
-                                .setBorderBottom(new SolidBorder(BORDER_GRAY, 0.5f))
-                                .setPaddingTop(7).setPaddingBottom(7)
-                                .add(new Paragraph(value).setFont(font).setFontSize(11)
-                                                .setFontColor(textColor).setTextAlignment(TextAlignment.RIGHT)));
-        }
-
-        private void addGrandTotal(Table t, String label, String value, PdfFont bold) {
-                t.addCell(new Cell()
-                                .setBackgroundColor(DARK_NAVY).setBorder(Border.NO_BORDER)
-                                .setPadding(10)
-                                .add(new Paragraph(label).setFont(bold).setFontSize(13).setFontColor(GOLD)));
-                t.addCell(new Cell()
-                                .setBackgroundColor(DARK_NAVY).setBorder(Border.NO_BORDER)
-                                .setPadding(10)
-                                .add(new Paragraph(value).setFont(bold).setFontSize(13)
-                                                .setFontColor(GOLD).setTextAlignment(TextAlignment.RIGHT)));
-        }
-
-        /** Notes block */
-        private void addNotes(Document doc, String notes, PdfFont bold, PdfFont regular) {
-                if (notes == null || notes.isBlank())
-                        return;
-
-                Table t = new Table(1)
-                                .setWidth(UnitValue.createPercentValue(88))
-                                .setMarginLeft(30).setMarginBottom(16);
-                t.addCell(new Cell()
-                                .setBackgroundColor(new DeviceRgb(0xff, 0xfb, 0xf0))
-                                .setBorderLeft(new SolidBorder(GOLD, 2))
-                                .setBorderTop(new SolidBorder(BORDER_GRAY, 0.5f))
-                                .setBorderRight(new SolidBorder(BORDER_GRAY, 0.5f))
-                                .setBorderBottom(new SolidBorder(BORDER_GRAY, 0.5f))
-                                .setPadding(12)
-                                .add(new Paragraph("GHI CHÚ").setFont(bold).setFontSize(9).setFontColor(TEXT_MUTED))
-                                .add(new Paragraph(notes).setFont(regular).setFontSize(10).setFontColor(DARK_NAVY)));
-
-                doc.add(t);
-        }
-
-        private void addFooter(Document doc, PdfFont bold, PdfFont regular) {
-                doc.add(new Paragraph("\u0110\u00C3 THANH TO\u00C1N")
-                                .setFont(bold).setFontSize(13)
-                                .setFontColor(GREEN)
-                                .setBorder(new SolidBorder(GREEN, 1.5f))
-                                .setPadding(6)
-                                .setTextAlignment(TextAlignment.CENTER)
-                                .setMarginLeft(30).setMarginRight(30).setMarginBottom(8));
-
-                doc.add(new Paragraph("Cảm ơn quý khách đã sử dụng dịch vụ!")
-                                .setFont(bold).setFontSize(12).setFontColor(DARK_NAVY)
-                                .setTextAlignment(TextAlignment.CENTER));
-
-                doc.add(new Paragraph(
-                                "123 Đường Khách Sạn, Quận 1, TP. Hồ Chí Minh  |  Tel: (028) 1234-5678  |  Email: info@luxuryhotel.vn")
-                                .setFont(regular).setFontSize(9).setFontColor(TEXT_MUTED)
-                                .setTextAlignment(TextAlignment.CENTER));
-
-                doc.add(new Paragraph("Hóa đơn được xuất tự động. Vui lòng liên hệ lễ tân nếu có thắc mắc.")
-                                .setFont(regular).setFontSize(9).setFontColor(TEXT_MUTED)
-                                .setTextAlignment(TextAlignment.CENTER));
-        }
-
-        private String fmtVnd(BigDecimal amount) {
-                if (amount == null)
-                        return "0 d";
-                DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
-                symbols.setGroupingSeparator(',');
-                DecimalFormat df = new DecimalFormat("#,###", symbols);
-                return df.format(amount) + " d";
-        }
+    private String fmtVnd(BigDecimal amount) {
+        if (amount == null) return "$0.00";
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        symbols.setGroupingSeparator(',');
+        DecimalFormat df = new DecimalFormat("#,###.00", symbols);
+        return "$" + df.format(amount);
+    }
 }

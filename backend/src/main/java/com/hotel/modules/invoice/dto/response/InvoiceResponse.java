@@ -16,7 +16,6 @@ public class InvoiceResponse {
     private Long bookingId;
     private Long paymentId;
     private String invoiceNumber;
-    private String transactionId;
     private String bookingCode;
 
     private LocalDate checkInDate;

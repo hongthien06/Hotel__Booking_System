@@ -2,16 +2,40 @@ import { Box } from '@mui/material'
 import Invoice from './Components/Invoice'
 import StatusSuccess from './Components/statusSuccess'
 import { getInvoiceByBookingCodeAPI } from '~/shared/api/invoiceApi'
+import { processVNPayReturnApi } from '~/shared/api/paymentApi'
 import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 
 const Complete = () => {
   const [searchParams] = useSearchParams()
   const bookingCode = searchParams.get('vnp_TxnRef')
-  const { data: invoiceData = [] } = useQuery({
-    queryKey: ['invoice', bookingCode],
-    queryFn: () => getInvoiceByBookingCodeAPI(bookingCode)
+  // Extract only vnp_ params for IPN to avoid signature mismatch
+  const vnpParams = new URLSearchParams()
+  searchParams.forEach((value, key) => {
+    if (key.startsWith('vnp_')) {
+      vnpParams.append(key, value)
+    }
   })
+  const ipnQueryString = `?${vnpParams.toString()}`
+  
+  // 1. Simulate IPN call locally using Return URL params
+  const { isSuccess: isIpnProcessed } = useQuery({
+    queryKey: ['vnpay_ipn', ipnQueryString],
+    queryFn: () => processVNPayReturnApi(ipnQueryString),
+    enabled: !!bookingCode && ipnQueryString.includes('vnp_TxnRef'),
+    retry: false
+  })
+
+  // 2. Fetch invoice only after IPN is processed (or immediately if not VNPay)
+  const { data: invoiceData = {}, isLoading } = useQuery({
+    queryKey: ['invoice', bookingCode],
+    queryFn: () => getInvoiceByBookingCodeAPI(bookingCode),
+    enabled: !!bookingCode && (!ipnQueryString.includes('vnp_TxnRef') || isIpnProcessed),
+    retry: 3,
+    retryDelay: 1000
+  })
+
+  if (isLoading || !invoiceData.id) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>Loading...</Box>
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', px: 2, mt: { xs: 2, md: 4 } }} >

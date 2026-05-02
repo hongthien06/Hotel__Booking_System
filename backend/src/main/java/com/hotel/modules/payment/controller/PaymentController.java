@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hotel.common.utils.RequestUtil;
 import com.hotel.modules.payment.dto.request.PaymentRequest;
 import com.hotel.modules.payment.dto.response.IpnResponse;
 import com.hotel.modules.payment.dto.response.PaymentCreateResponse;
