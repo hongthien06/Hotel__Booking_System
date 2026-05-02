@@ -488,6 +488,12 @@ const BookingPage = () => {
     }).slice(0, 10);
   }, [rooms, searched]);
 
+  const featuredRooms = React.useMemo(() => {
+    if (searched && rooms.length === 0) return [];
+    const list = rooms.length > 0 ? rooms : MOCK_ROOMS;
+    return list.slice(0, 10);
+  }, [rooms, searched]);
+
   const topRatedRooms = React.useMemo(() => {
     if (searched && rooms.length === 0) return [];
     const list = rooms.length > 0 ? rooms : MOCK_ROOMS;
@@ -973,9 +979,9 @@ const BookingPage = () => {
                         </Box>
                       ))
                     ) : (
-                      MOCK_ROOMS.map(r => (
-                        <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
-                          <RoomCard room={r} isMock={true} />
+                      featuredRooms.map(r => (
+                        <Box key={r.id || r.roomId} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                          <RoomCard room={r} isMock={rooms.length === 0} />
                         </Box>
                       ))
                     )}
