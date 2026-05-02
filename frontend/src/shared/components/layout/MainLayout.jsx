@@ -2,6 +2,7 @@ import React from 'react'
 import { Box } from '@mui/material'
 import { Outlet } from 'react-router-dom'
 import Header from './Header/Header'
+import Chatbot from '~/features/chatbot/Chatbot'
 
 const MainLayout = () => {
   return (
@@ -21,6 +22,8 @@ const MainLayout = () => {
       >
         <Outlet />
       </Box>
+
+      <Chatbot />
     </Box>
   )
 }
