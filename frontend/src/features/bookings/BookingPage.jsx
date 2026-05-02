@@ -433,7 +433,7 @@ const BookingPage = () => {
   const scrollDest = (dir) => {
     if (destScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = destScrollRef.current;
-      const scrollAmount = (clientWidth + 20) / 5;
+      const scrollAmount = (clientWidth + 20) / 4;
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
       if (dir < 0 && scrollLeft <= 10) return;
       destScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
@@ -825,7 +825,7 @@ const BookingPage = () => {
                     {DESTINATIONS.map((d, i) => (
                       <Card key={d.name} onClick={() => selectDest(i)} sx={{
                         cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                        width: 'calc((100% - 80px) / 5)', height: 160,
+                        width: 'calc((100% - 60px) / 4)', height: 216,
                         position: 'relative', overflow: 'hidden',
                         scrollSnapAlign: 'start',
                         scrollSnapStop: 'always',
@@ -892,7 +892,7 @@ const BookingPage = () => {
                     {ROOM_TYPES.map((type) => (
                       <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
                         cursor: 'pointer', borderRadius: 4, flexShrink: 0,
-                        width: 'calc((100% - 48px) / 4)', height: 160,
+                        width: 'calc((100% - 48px) / 4)', height: 180,
                         position: 'relative', overflow: 'hidden',
                         scrollSnapAlign: 'start',
                         boxShadow: 1,
