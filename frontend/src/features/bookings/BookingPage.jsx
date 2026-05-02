@@ -257,7 +257,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
   if (!room) return null;
 
   const roomName = isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`;
-  const roomType = isMock ? room.type : (room.roomTypeName || 'Standard');
+  const roomType = isMock ? room.type : (room.typeName || 'Standard');
   const roomPrice = isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0);
   const nights = nightsBetween(form.checkIn, form.checkOut);
 
@@ -655,7 +655,7 @@ const BookingPage = () => {
           />
         }
         <CardContent sx={{ p: 2 }}>
-          <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.roomTypeName || 'Standard')} size="small"
+          <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.typeName || 'Standard')} size="small"
             sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, fontSize: 11, mb: 1 }} />
           <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}>
             {isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
