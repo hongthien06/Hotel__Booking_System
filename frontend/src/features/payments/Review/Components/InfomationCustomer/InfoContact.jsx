@@ -5,13 +5,18 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import FormGroup from '@mui/material/FormGroup'
 import TextField from '@mui/material/TextField'
 import CountryCode from './CountryCode'
-// import FieldErrorAlert from '~/components/common/Form/FieldErrorAlert'
-
+import { useBookingContext } from '../../../_id'
 
 const InfoContact = () => {
+  const { booking } = useBookingContext() || {}
+
+  // BookingDTO exposes: userName, userEmail
+  const defaultName = booking?.userName || ''
+  const defaultEmail = booking?.userEmail || ''
+
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Box >
+      <Box>
         <Typography variant='h6' sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: '550' }}>
           <CallOutlinedIcon />Thông tin liên hệ
         </Typography>
@@ -31,6 +36,7 @@ const InfoContact = () => {
             fullWidth
             type="text"
             variant="outlined"
+            defaultValue={defaultName}
             sx={{
               '& .MuiOutlinedInput-root': {
                 height: '48px',
@@ -40,17 +46,7 @@ const InfoContact = () => {
                 fontSize: '1rem'
               }
             }}
-          // error={!!errors['email']}
-          // {...register('email', {
-          //   required: FIELD_REQUIRED_MESSAGE,
-          //   pattern: {
-          //     value: EMAIL_RULE,
-          //     message: EMAIL_RULE_MESSAGE
-          //   }
-          // })}
           />
-          {/* <FieldErrorAlert errors={errors} fieldName={'email'} /> */}
-          {/* <FieldErrorAlert fieldName={'email'} /> */}
         </Box>
         <Box
           sx={{
@@ -67,7 +63,6 @@ const InfoContact = () => {
                 fullWidth
                 type="tel"
                 variant="outlined"
-
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     height: '48px',
@@ -85,6 +80,7 @@ const InfoContact = () => {
             <TextField
               fullWidth
               variant="outlined"
+              defaultValue={defaultEmail}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   height: '48px',

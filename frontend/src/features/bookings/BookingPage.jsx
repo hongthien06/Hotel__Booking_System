@@ -208,7 +208,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 };
 
 /* ─── BookingDialog ────────────────────────────────────── */
-const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess }) => {
+const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, navigate }) => {
   const { t, i18n } = useTranslation();
   const [form, setForm] = useState({
     checkIn: searchParams?.checkIn || '',
@@ -250,7 +250,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
     setSubmitting(true);
     setError('');
     try {
-      await createBookingApi({
+      const bookingResult = await createBookingApi({
         roomId: room.roomId || room.id,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
@@ -258,7 +258,20 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         numChildren: Number(form.numChildren),
         specialRequest: form.specialRequest,
       });
-      onSuccess();
+      // Navigate directly to payment step (skip review)
+      navigate('/payment?step=1', {
+        state: {
+          booking: bookingResult,
+          room: room,
+          form: {
+            checkIn: form.checkIn,
+            checkOut: form.checkOut,
+            numAdults: Number(form.numAdults),
+            numChildren: Number(form.numChildren),
+            specialRequest: form.specialRequest,
+          },
+        },
+      });
     } catch (err) {
       console.error('Booking error:', err);
       const data = err?.response?.data;
@@ -502,10 +515,10 @@ const BookingPage = () => {
     // Distinguish between a search object and a React event
     const isOverride = overrideParams && typeof overrideParams === 'object' && 'checkIn' in overrideParams;
     const searchParams = isOverride ? overrideParams : params;
-    
+
     if (!searchParams.checkIn || !searchParams.checkOut) return;
     setLoading(true); setSearched(true);
-    
+
     // Save to history (only for new manual searches)
     if (!isOverride) {
       const newHistory = [searchParams, ...recentSearches.filter(s => s.destination !== searchParams.destination)].slice(0, 10);
@@ -580,7 +593,7 @@ const BookingPage = () => {
   const RoomCard = ({ room, isMock }) => {
     const { t, i18n } = useTranslation();
     return (
-      <Card 
+      <Card
         onClick={() => openDetail(room, isMock)}
         sx={{
           cursor: 'pointer',
@@ -589,49 +602,49 @@ const BookingPage = () => {
           '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
         }}
       >
-      {isMock
-        ? <Box sx={{ height: 160, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
-        </Box>
-        : <CardMedia component="img" height="160"
-          image={room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600'}
-          alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
-        />
-      }
-      <CardContent sx={{ p: 2 }}>
-        <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.roomTypeName || 'Standard')} size="small"
-          sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, fontSize: 11, mb: 1 }} />
-        <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}>
-          {isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
-        </Typography>
-        <Typography variant="caption" color="text.secondary"
-          sx={{ display: 'flex', alignItems: 'center', gap: 0.3, mb: 1 }}>
-          <LocationOn fontSize="inherit" />
-          {isMock
-            ? `${room.location} · ${room.bed}`
-            : `${room.province || 'Hà Nội'} · ${BED_TYPE_LABELS(t)[room.bedType] || room.bedType}`}
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
-          <Rating value={isMock ? room.rating : 5} precision={0.1} readOnly size="small"
-            sx={{ '& .MuiRating-iconFilled': { color: PC } }} />
-          <Typography variant="caption" color="text.secondary">
-            ({isMock ? room.reviews : 48} {t('room_detail.reviews')})
+        {isMock
+          ? <Box sx={{ height: 160, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
+          </Box>
+          : <CardMedia component="img" height="160"
+            image={room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600'}
+            alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
+          />
+        }
+        <CardContent sx={{ p: 2 }}>
+          <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.roomTypeName || 'Standard')} size="small"
+            sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, fontSize: 11, mb: 1 }} />
+          <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}>
+            {isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
           </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
-            {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
+          <Typography variant="caption" color="text.secondary"
+            sx={{ display: 'flex', alignItems: 'center', gap: 0.3, mb: 1 }}>
+            <LocationOn fontSize="inherit" />
+            {isMock
+              ? `${room.location} · ${room.bed}`
+              : `${room.province || 'Hà Nội'} · ${BED_TYPE_LABELS(t)[room.bedType] || room.bedType}`}
           </Typography>
-          <Button 
-            size="small" variant="contained" color="primary" 
-            onClick={(e) => { e.stopPropagation(); openBooking(room, isMock); }}
-            sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
-          >
-            {t('common.book_now')}
-          </Button>
-        </Box>
-      </CardContent>
-    </Card>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
+            <Rating value={isMock ? room.rating : 5} precision={0.1} readOnly size="small"
+              sx={{ '& .MuiRating-iconFilled': { color: PC } }} />
+            <Typography variant="caption" color="text.secondary">
+              ({isMock ? room.reviews : 48} {t('room_detail.reviews')})
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
+              {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
+            </Typography>
+            <Button
+              size="small" variant="contained" color="primary"
+              onClick={(e) => { e.stopPropagation(); openBooking(room, isMock); }}
+              sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
+            >
+              {t('common.book_now')}
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
     );
   };
 
@@ -871,10 +884,10 @@ const BookingPage = () => {
                     {searched ? t('booking_page.available_rooms_sub') : t('booking_page.featured_rooms_sub')}
                   </Typography>
                 </Box>
-                <Button 
-                  endIcon={<ArrowForward />} 
+                <Button
+                  endIcon={<ArrowForward />}
                   onClick={() => navigate('/rooms')}
-                  sx={{ 
+                  sx={{
                     color: PC, fontWeight: 700, textTransform: 'none',
                     '&:hover': { bgcolor: PC_LIGHT }
                   }}
@@ -951,10 +964,10 @@ const BookingPage = () => {
                       <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.top_rated')}</Typography>
                       <Typography variant="body2" color="text.secondary">{t('booking_page.top_rated_sub')}</Typography>
                     </Box>
-                    <Button 
-                      endIcon={<ArrowForward />} 
+                    <Button
+                      endIcon={<ArrowForward />}
                       onClick={() => navigate('/rooms')}
-                      sx={{ 
+                      sx={{
                         color: PC, fontWeight: 700, textTransform: 'none',
                         '&:hover': { bgcolor: PC_LIGHT }
                       }}
@@ -1010,10 +1023,10 @@ const BookingPage = () => {
                       <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.budget_friendly')}</Typography>
                       <Typography variant="body2" color="text.secondary">{t('booking_page.budget_friendly_sub')}</Typography>
                     </Box>
-                    <Button 
-                      endIcon={<ArrowForward />} 
+                    <Button
+                      endIcon={<ArrowForward />}
                       onClick={() => navigate('/rooms')}
-                      sx={{ 
+                      sx={{
                         color: PC, fontWeight: 700, textTransform: 'none',
                         '&:hover': { bgcolor: PC_LIGHT }
                       }}
@@ -1080,6 +1093,7 @@ const BookingPage = () => {
         searchParams={params}
         onClose={() => setDialogOpen(false)}
         onSuccess={handleBookingSuccess}
+        navigate={navigate}
       />
 
       {/* Login Prompt Modal */}
