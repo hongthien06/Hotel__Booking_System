@@ -158,7 +158,7 @@ public class PaymentService implements IPaymentService {
             // lấy thông tin cần thiết cho req
             InvoiceItemRequest roomItem = new InvoiceItemRequest();
             Room room = booking.getRoom();
-            roomItem.setItemType(room.getRoomType().getTypeName());
+            roomItem.setItemType("ROOM");
             roomItem.setDescription("Phòng " + room.getRoomNumber()
                     + " x " + booking.getTotalNights() + " đêm");
             roomItem.setQuantity(booking.getTotalNights());

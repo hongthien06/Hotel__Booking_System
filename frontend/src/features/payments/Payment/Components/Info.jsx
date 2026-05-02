@@ -9,7 +9,7 @@ import { useState } from 'react'
 import { useBookingContext } from '../../_id'
 
 const Info = () => {
-  const [selectedMethod, setSelectedMethod] = useState('vnpay')
+  const [selectedMethod, setSelectedMethod] = useState('VNPAY')
   const { booking } = useBookingContext() || {}
 
   const handleNext = async () => {

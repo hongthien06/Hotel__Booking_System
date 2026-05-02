@@ -188,6 +188,64 @@ CREATE TABLE ChatMessages (
     CONSTRAINT FK_Msg_Booking FOREIGN KEY (ref_booking_id) REFERENCES Bookings(booking_id) ON DELETE SET NULL
 );
 
+CREATE TABLE Payments (
+    payment_id      BIGINT          NOT NULL IDENTITY(1,1),
+    booking_id      BIGINT          NOT NULL,
+    gateway         VARCHAR(20)     NOT NULL,
+    transaction_id  VARCHAR(255)    NULL,   -- TxnRef/OrderId từ MoMo, VNPAY
+    amount          DECIMAL(18,2)   NOT NULL,
+    currency        VARCHAR(10)     NOT NULL DEFAULT 'VND',
+    status          VARCHAR(20)     NOT NULL DEFAULT 'PENDING',
+    paid_at         DATETIME2       NULL,   -- Thời điểm thanh toán thành công
+    raw_response    NVARCHAR(MAX)   NULL,   -- JSON response từ gateway (audit log)
+    ip_address      VARCHAR(50)     NULL,   -- IP của khách lúc thanh toán
+    created_at      DATETIME2       NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT PK_Payments              PRIMARY KEY (payment_id),
+    CONSTRAINT FK_Payments_Booking      FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id),
+    CONSTRAINT UQ_Payments_TxnId        UNIQUE (transaction_id),
+    CONSTRAINT CK_Payments_Amount       CHECK (amount > 0),
+    CONSTRAINT CK_Payments_Gateway      CHECK (gateway IN ('MOMO','VNPAY','ZALOPAY','CASH','TRANSFER')),
+    CONSTRAINT CK_Payments_Status       CHECK (status  IN ('PENDING','SUCCESS','FAILED','REFUNDED'))
+)
+
+CREATE TABLE Invoices (
+    invoice_id      BIGINT          NOT NULL IDENTITY(1,1),
+    booking_id      BIGINT          NOT NULL,
+    payment_id      BIGINT          NOT NULL,
+    invoice_number  VARCHAR(30)     NOT NULL,   -- VD: INV-20240615-00001
+    subtotal        DECIMAL(18,2)   NOT NULL,   -- Tổng trước thuế (phòng + dịch vụ)
+    tax_rate        DECIMAL(5,2)    NOT NULL DEFAULT 10.00,  -- VAT 10%
+    tax_amount      DECIMAL(18,2)   NOT NULL,
+    discount_amount DECIMAL(18,2)   NOT NULL DEFAULT 0,
+    total_amount    DECIMAL(18,2)   NOT NULL,   -- = subtotal + tax_amount - discount
+    pdf_url         VARCHAR(512)    NULL,
+    issued_at       DATETIME2       NOT NULL DEFAULT SYSDATETIME(),
+    notes           NVARCHAR(500)   NULL,
+
+    CONSTRAINT PK_Invoices              PRIMARY KEY (invoice_id),
+    CONSTRAINT FK_Invoices_Booking      FOREIGN KEY (booking_id)  REFERENCES Bookings(booking_id),
+    CONSTRAINT FK_Invoices_Payment      FOREIGN KEY (payment_id)  REFERENCES Payments(payment_id),
+    CONSTRAINT UQ_Invoices_Number       UNIQUE (invoice_number),
+    CONSTRAINT UQ_Invoices_Booking      UNIQUE (booking_id),     -- 1 booking chỉ có 1 invoice
+    CONSTRAINT CK_Invoices_Total        CHECK (total_amount >= 0)
+);
+
+
+CREATE TABLE InvoiceItems (
+    item_id         BIGINT          NOT NULL IDENTITY(1,1),
+    invoice_id      BIGINT          NOT NULL,
+    item_type       VARCHAR(20)     NOT NULL,
+    description     NVARCHAR(255)   NOT NULL,   -- "Phòng 101 - 3 đêm", "Bữa sáng x2"
+    quantity        SMALLINT        NOT NULL DEFAULT 1,
+    unit_price      DECIMAL(18,2)   NOT NULL,
+    line_total      AS (quantity * unit_price) PERSISTED,
+
+    CONSTRAINT PK_InvoiceItems          PRIMARY KEY (item_id),
+    CONSTRAINT FK_InvoiceItems_Invoice  FOREIGN KEY (invoice_id) REFERENCES Invoices(invoice_id) ON DELETE CASCADE,
+    CONSTRAINT CK_InvoiceItems_Type     CHECK (item_type IN ('ROOM','SERVICE','DISCOUNT','TAX'))
+)
+
 -- Dữ liệu mẫu mở rộng (15 khách sạn, 5 loại phòng mỗi KS, 50 phòng thực tế)
 GO
 INSERT INTO Roles (role_name) VALUES ('ADMIN'), ('MANAGER'), ('CUSTOMER');

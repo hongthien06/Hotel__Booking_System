@@ -37,9 +37,6 @@ public class Invoice {
     @Column(name = "invoice_number", length = 30, nullable = false, unique = true)
     private String invoiceNumber;
 
-    @Column(name = "transaction_id", length = 50, nullable = false, unique = true)
-    private String transactionId;
-
     @Column(name = "subtotal", precision = 18, scale = 2, nullable = false)
     private BigDecimal subtotal;
 
