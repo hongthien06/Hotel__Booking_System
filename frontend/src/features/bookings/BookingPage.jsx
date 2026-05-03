@@ -279,20 +279,8 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
         numChildren: Number(form.numChildren),
         specialRequest: form.specialRequest,
       });
-      // Navigate directly to payment step (skip review)
-      navigate('/payment?step=1', {
-        state: {
-          booking: bookingResult,
-          room: room,
-          form: {
-            checkIn: form.checkIn,
-            checkOut: form.checkOut,
-            numAdults: Number(form.numAdults),
-            numChildren: Number(form.numChildren),
-            specialRequest: form.specialRequest,
-          },
-        },
-      });
+      // Navigate to history instead of payment review
+      navigate('/bookings-history');
     } catch (err) {
       console.error('Booking error:', err);
       const data = err?.response?.data;

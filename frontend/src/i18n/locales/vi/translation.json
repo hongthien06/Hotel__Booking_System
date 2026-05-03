@@ -18,7 +18,8 @@
     "confirm": "Xác nhận",
     "booking": "Đặt phòng",
     "details": "Chi tiết",
-    "see_all": "Xem tất cả"
+    "see_all": "Xem tất cả",
+    "pay_now": "Thanh toán"
   },
   "header": {
     "home": "Trang chủ",
@@ -152,7 +153,9 @@
     "check_in": "NHẬN PHÒNG",
     "check_out": "TRẢ PHÒNG",
     "no_data": "Không có dữ liệu đặt phòng nào.",
-    "fetch_error": "Lỗi khi lấy lịch sử đặt phòng"
+    "fetch_error": "Lỗi khi lấy lịch sử đặt phòng",
+    "confirm_cancel": "Bạn có chắc chắn muốn hủy đặt phòng này?",
+    "cancel_error": "Lỗi khi hủy đặt phòng"
   },
   "destinations": {
     "title": "Điểm đến phổ biến",

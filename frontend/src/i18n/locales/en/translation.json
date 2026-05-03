@@ -18,7 +18,8 @@
     "confirm": "Confirm",
     "booking": "Booking",
     "details": "Details",
-    "see_all": "See all"
+    "see_all": "See all",
+    "pay_now": "Pay Now"
   },
   "header": {
     "home": "Home",
@@ -153,7 +154,9 @@
     "check_in": "CHECK IN",
     "check_out": "CHECK OUT",
     "no_data": "No booking data available.",
-    "fetch_error": "Error fetching booking history"
+    "fetch_error": "Error fetching booking history",
+    "confirm_cancel": "Are you sure you want to cancel this booking?",
+    "cancel_error": "Error cancelling booking"
   },
   "destinations": {
     "title": "Popular Destinations",

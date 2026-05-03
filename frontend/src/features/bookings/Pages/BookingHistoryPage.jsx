@@ -46,13 +46,18 @@ const BookingHistoryPage = () => {
   };
 
   const handleCancel = async (bookingId) => {
-    if (!window.confirm(t('bookings_history.confirm_cancel') || 'Bạn có chắc chắn muốn hủy đặt phòng này?')) return;
+    if (!window.confirm(t('bookings_history.confirm_cancel'))) return;
     try {
       await cancelBookingApi(bookingId);
       fetchBookings();
     } catch (err) {
-      alert(t('bookings_history.cancel_error') || 'Lỗi khi hủy đặt phòng');
+      alert(t('bookings_history.cancel_error'));
     }
+  };
+
+  const nightsBetween = (a, b) => {
+    const diff = new Date(b) - new Date(a);
+    return diff > 0 ? Math.round(diff / 86400000) : 1;
   };
 
   const handlePayment = (booking) => {
@@ -350,7 +355,7 @@ const BookingHistoryPage = () => {
                           onClick={() => handleCancel(booking.bookingId)}
                           sx={{ borderRadius: 2, fontSize: 11, fontWeight: 700 }}
                         >
-                          {t('common.cancel') || 'Hủy'}
+                          {t('common.cancel')}
                         </Button>
                         <Button 
                           fullWidth 
@@ -365,7 +370,7 @@ const BookingHistoryPage = () => {
                             '&:hover': { bgcolor: '#a0365a' }
                           }}
                         >
-                          {t('common.pay_now') || 'Thanh toán'}
+                          {t('common.pay_now')}
                         </Button>
                       </Box>
                     )}
