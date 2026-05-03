@@ -105,8 +105,8 @@ const BookingHistoryPage = () => {
       case 'CANCELLED':
       case 'REFUNDED': return '#f44336';
       case 'CHECKED_IN': return '#c0496e';
-      case 'CHECKED_OUT': return '#9e9e9e';
-      default: return '#9e9e9e';
+      case 'CHECKED_OUT': return '#607d8b'; // Blue Grey cho Checkout
+      default: return '#757575';
     }
   };
 
