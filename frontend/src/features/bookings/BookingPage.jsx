@@ -44,11 +44,11 @@ const DESTINATIONS = [
 
 
 const ROOM_TYPES = [
-  { key: 'standard', label: 'room_types.standard', img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=400' },
-  { key: 'deluxe', label: 'room_types.deluxe', img: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400' },
-  { key: 'superior', label: 'room_types.superior', img: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400' },
-  { key: 'family', label: 'room_types.family', img: 'https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f?w=400' },
-  { key: 'president', label: 'room_types.president', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400' }
+  { key: 'Standard', label: 'room_types.standard', img: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=400' },
+  { key: 'Deluxe', label: 'room_types.deluxe', img: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=400' },
+  { key: 'Superior', label: 'room_types.superior', img: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400' },
+  { key: 'Family Room', label: 'room_types.family', img: 'https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f?w=400' },
+  { key: 'Presidential Suite', label: 'room_types.president', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400' }
 ];
 const BED_TYPES = [
   { key: 'SINGLE', label: 'rooms.bed_single' },
@@ -542,14 +542,13 @@ const BookingPage = () => {
     }
 
     try {
-      const typeName = roomTypes.length === 1 ? ROOM_TYPES.find(t => t.key === roomTypes[0])?.key : undefined;
       const d = await getAvailableRoomsApi(
         searchParams.checkIn,
         searchParams.checkOut,
         searchParams.destination || undefined,
         minPrice,
         maxPrice,
-        typeName,
+        roomTypes.length > 0 ? roomTypes : undefined,
         bedTypes.length > 0 ? bedTypes : undefined
       );
       setRooms(Array.isArray(d) ? d : []);
@@ -601,7 +600,7 @@ const BookingPage = () => {
         params.destination || undefined,
         minPrice,
         maxPrice,
-        typeKey,
+        [typeKey],
         bedTypes.length > 0 ? bedTypes : undefined
       );
       setRooms(Array.isArray(d) ? d : []);

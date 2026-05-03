@@ -116,9 +116,25 @@ public class RoomService {
     public List<RoomResponse> getAvailableRooms(
             LocalDate checkIn, LocalDate checkOut,
             Long hotelId, String province, BigDecimal minPrice, BigDecimal maxPrice,
-            String typeName, List<String> bedTypes) {
+            List<String> typeNames, List<String> bedTypes) {
         if (!checkOut.isAfter(checkIn)) throw new RuntimeException("Check out date must be after check in");
         List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
+
+        // Convert List<String> to List<BedType> enum
+        List<com.hotel.modules.rooms.entity.enums.BedType> bedTypeEnums = null;
+        if (bedTypes != null && !bedTypes.isEmpty()) {
+            bedTypeEnums = bedTypes.stream()
+                    .map(bt -> {
+                        try {
+                            return com.hotel.modules.rooms.entity.enums.BedType.valueOf(bt.toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                            return null;
+                        }
+                    })
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+        }
+
         // Pass all filters directly to the repository @Query
         List<Room> availableRooms = roomRepository.findAvailableRooms(
                 (busyIds == null || busyIds.isEmpty()) ? null : busyIds,
@@ -126,8 +142,8 @@ public class RoomService {
                 (province != null && !province.isBlank()) ? province : null,
                 minPrice,
                 maxPrice,
-                (typeName != null && !typeName.isBlank()) ? typeName : null,
-                (bedTypes != null && !bedTypes.isEmpty()) ? bedTypes : null
+                (typeNames != null && !typeNames.isEmpty()) ? typeNames : null,
+                (bedTypeEnums == null || bedTypeEnums.isEmpty()) ? null : bedTypeEnums
         );
         return availableRooms.stream().map(RoomResponse::from).toList();
     }

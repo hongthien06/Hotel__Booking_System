@@ -46,7 +46,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     AND (:province IS NULL OR h.province = :province)
     AND (:minPrice IS NULL OR r.pricePerNight >= :minPrice)
     AND (:maxPrice IS NULL OR r.pricePerNight <= :maxPrice)
-    AND (:typeName IS NULL OR rt.typeName = :typeName)
+    AND (:typeNames IS NULL OR rt.typeName IN :typeNames)
     AND (:bedTypes IS NULL OR r.bedType IN :bedTypes)
     AND (:occupiedIds IS NULL OR r.roomId NOT IN :occupiedIds)
 """)
@@ -56,7 +56,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("province") String province,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
-            @Param("typeName") String typeName,
-            @Param("bedTypes") List<String> bedTypes
+            @Param("typeNames") List<String> typeNames,
+            @Param("bedTypes") List<com.hotel.modules.rooms.entity.enums.BedType> bedTypes
     );
 }

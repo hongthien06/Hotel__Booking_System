@@ -67,10 +67,10 @@ public class RoomController {
             @RequestParam(required = false) String province,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false) String typeName,
+            @RequestParam(required = false) List<String> typeNames,
             @RequestParam(required = false) List<String> bedTypes) {
         return ResponseEntity.ok(roomService.getAvailableRooms(
-                checkIn, checkOut, hotelId, province, minPrice, maxPrice, typeName, bedTypes
+                checkIn, checkOut, hotelId, province, minPrice, maxPrice, typeNames, bedTypes
         ));
     }
 
