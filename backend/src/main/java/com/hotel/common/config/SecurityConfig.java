@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/rooms/**", "/hotels/**", "/room-types/**", "/extra-services/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/bookings/my-bookings").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.POST, "/bookings").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.PUT, "/bookings/*/cancel").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
                         .requestMatchers("/bookings/occupied-rooms").permitAll()
                         .requestMatchers("/bookings/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/dashboard/**", "/admin/**").hasAnyRole("ADMIN", "MANAGER")

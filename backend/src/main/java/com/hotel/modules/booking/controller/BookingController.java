@@ -82,8 +82,9 @@ public class BookingController {
     @PutMapping("/{id}/cancel")
     public ResponseEntity<?> cancelBooking(
             @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(bookingService.cancelBooking(id, user.getUserId(), USER));
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = ((User) userDetails).getUserId();
+        return ResponseEntity.ok(bookingService.cancelBooking(id, userId, USER));
     }
 
     // Admin hủy

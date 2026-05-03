@@ -51,7 +51,9 @@ const BookingHistoryPage = () => {
       await cancelBookingApi(bookingId);
       fetchBookings();
     } catch (err) {
-      alert(t('bookings_history.cancel_error'));
+      console.error('Cancel error:', err);
+      const msg = err.response?.data?.message || err.response?.data?.error || t('bookings_history.cancel_error');
+      alert(msg);
     }
   };
 
