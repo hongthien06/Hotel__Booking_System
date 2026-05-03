@@ -8,13 +8,13 @@ export const getRoomsApi = async () => {
   return response.data;
 };
 
-export const getAvailableRoomsApi = async (checkIn, checkOut, province, minPrice, maxPrice, typeName, bedType) => {
+export const getAvailableRoomsApi = async (checkIn, checkOut, province, minPrice, maxPrice, typeName, bedTypes) => {
   const params = { checkIn, checkOut };
   if (province && province.trim())   params.province  = province.trim();
   if (minPrice  != null)             params.minPrice  = minPrice;
   if (maxPrice  != null)             params.maxPrice  = maxPrice;
   if (typeName  && typeName.trim())  params.typeName  = typeName.trim();
-  if (bedType   && bedType.trim())   params.bedType   = bedType.trim();
+  if (bedTypes && bedTypes.length > 0) params.bedTypes = bedTypes.join(',');
   const response = await axiosInstance.get(`${API_URL}/available`, { params });
   return response.data;
 };

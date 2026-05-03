@@ -116,7 +116,7 @@ public class RoomService {
     public List<RoomResponse> getAvailableRooms(
             LocalDate checkIn, LocalDate checkOut,
             Long hotelId, String province, BigDecimal minPrice, BigDecimal maxPrice,
-            String typeName, String bedType) {
+            String typeName, List<String> bedTypes) {
         if (!checkOut.isAfter(checkIn)) throw new RuntimeException("Check out date must be after check in");
         List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
         // Pass all filters directly to the repository @Query
@@ -127,7 +127,7 @@ public class RoomService {
                 minPrice,
                 maxPrice,
                 (typeName != null && !typeName.isBlank()) ? typeName : null,
-                (bedType != null && !bedType.isBlank()) ? bedType : null
+                (bedTypes != null && !bedTypes.isEmpty()) ? bedTypes : null
         );
         return availableRooms.stream().map(RoomResponse::from).toList();
     }

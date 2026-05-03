@@ -555,7 +555,6 @@ const BookingPage = () => {
 
     try {
       const typeName = roomTypes.length === 1 ? ROOM_TYPES.find(t => t.key === roomTypes[0])?.key : undefined;
-      const bedType = bedTypes.length === 1 ? bedTypes[0] : undefined;
       const d = await getAvailableRoomsApi(
         searchParams.checkIn,
         searchParams.checkOut,
@@ -563,7 +562,7 @@ const BookingPage = () => {
         minPrice,
         maxPrice,
         typeName,
-        bedType
+        bedTypes.length > 0 ? bedTypes : undefined
       );
       setRooms(Array.isArray(d) ? d : []);
     } catch { setRooms([]); }
@@ -615,7 +614,7 @@ const BookingPage = () => {
         minPrice,
         maxPrice,
         typeKey,
-        bedTypes.length === 1 ? bedTypes[0] : undefined
+        bedTypes.length > 0 ? bedTypes : undefined
       );
       setRooms(Array.isArray(d) ? d : []);
     } catch { setRooms([]); }
