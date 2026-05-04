@@ -105,7 +105,14 @@ public class RoomService {
        room.setFloor(req.getFloor());
        room.setBedType(req.getBedType());
        room.setPricePerNight(req.getPricePerNight());
-       room.setImageUrls(req.getImageUrls());
+       if (req.getImageUrls() != null && !req.getImageUrls().isEmpty()) {
+           java.util.List<String> validUrls = req.getImageUrls().stream()
+               .filter(url -> url != null && !url.trim().isEmpty())
+               .toList();
+           room.setImageUrls(String.join(",", validUrls));
+       } else {
+           room.setImageUrls(null);
+       }
        room.setDescription(req.getDescription());
        room.setStatus(req.getStatus());
     }

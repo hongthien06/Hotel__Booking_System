@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog, Box, Typography, Button,
   IconButton, Chip
 } from '@mui/material'
-import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub, Business, LocationOn } from '@mui/icons-material'
+import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub, Business, LocationOn, ChevronLeft, ChevronRight } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
 
 const InfoRow = ({ label, value, icon }) => (
@@ -20,6 +20,22 @@ const InfoRow = ({ label, value, icon }) => (
 
 const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
   const { t, i18n } = useTranslation()
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+
+  useEffect(() => {
+    if (open) setCurrentImageIndex(0)
+  }, [open, room])
+
+  const handlePrevImage = (e) => {
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => (prev === 0 ? room.imageUrls.length - 1 : prev - 1))
+  }
+
+  const handleNextImage = (e) => {
+    e.stopPropagation()
+    setCurrentImageIndex((prev) => (prev === room.imageUrls.length - 1 ? 0 : prev + 1))
+  }
+
   if (!room) return null
 
   const amenities = room.amenities
@@ -55,20 +71,36 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
       {/* Hero image */}
       <Box sx={{ position: 'relative', height: 210, flexShrink: 0, overflow: 'hidden',
         background: 'linear-gradient(135deg, #ffc7db 0%, #c02860 100%)' }}>
-        {room.imageUrl && (
-          <Box
-            component="img"
-            src={room.imageUrl}
-            alt={`${t('booking_page.room')} ${room.roomNumber}`}
-            sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          />
-        )}
-        {!room.imageUrl && (
+        {room.imageUrls && room.imageUrls.length > 0 ? (
+          <>
+            <Box
+              component="img"
+              src={room.imageUrls[currentImageIndex]}
+              alt={`${t('booking_page.room')} ${room.roomNumber}`}
+              sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+            {room.imageUrls.length > 1 && (
+              <>
+                <IconButton onClick={handlePrevImage} size="small" sx={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.3)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.5)' }, zIndex: 2 }}>
+                  <ChevronLeft />
+                </IconButton>
+                <IconButton onClick={handleNextImage} size="small" sx={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', bgcolor: 'rgba(255,255,255,0.3)', color: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.5)' }, zIndex: 2 }}>
+                  <ChevronRight />
+                </IconButton>
+                <Box sx={{ position: 'absolute', bottom: 40, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 0.5, zIndex: 2 }}>
+                  {room.imageUrls.map((_, idx) => (
+                    <Box key={idx} sx={{ width: 6, height: 6, borderRadius: '50%', bgcolor: idx === currentImageIndex ? 'white' : 'rgba(255,255,255,0.5)' }} />
+                  ))}
+                </Box>
+              </>
+            )}
+          </>
+        ) : (
           <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Typography sx={{ fontSize: 72, opacity: 0.25 }}>🏨</Typography>
           </Box>
         )}
-        <Box sx={{ position: 'absolute', inset: 0,
+        <Box sx={{ position: 'absolute', inset: 0, pointerEvents: 'none',
           background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 55%)' }} />
 
         <IconButton onClick={onClose} size="small" sx={{

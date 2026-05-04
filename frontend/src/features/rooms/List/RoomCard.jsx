@@ -52,10 +52,10 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
     >
       {/* Image */}
       <Box sx={{ position: 'relative', height: 140, overflow: 'hidden' }}>
-        {room.imageUrl ? (
+        {room.imageUrls && room.imageUrls.length > 0 ? (
           <CardMedia
             component="img"
-            image={room.imageUrl}
+            image={room.imageUrls[0]}
             alt={`${t('booking_page.room')} ${room.roomNumber}`}
             sx={{ height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease',
               '&:hover': { transform: 'scale(1.05)' } }}

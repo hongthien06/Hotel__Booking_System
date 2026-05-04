@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import com.hotel.modules.rooms.entity.enums.RoomStatus;
+import com.hotel.modules.rooms.entity.enums.BedType;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
@@ -41,7 +43,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     SELECT r FROM Room r 
     JOIN FETCH r.roomType rt
     JOIN FETCH r.hotel h
-    WHERE r.status = com.hotel.modules.rooms.entity.enums.RoomStatus.AVAILABLE
+    WHERE r.status = RoomStatus.AVAILABLE
     AND (:hotelId IS NULL OR h.hotelId = :hotelId)
     AND (:province IS NULL OR h.province = :province)
     AND (:minPrice IS NULL OR r.pricePerNight >= :minPrice)
@@ -57,6 +59,6 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
             @Param("typeNames") List<String> typeNames,
-            @Param("bedTypes") List<com.hotel.modules.rooms.entity.enums.BedType> bedTypes
+            @Param("bedTypes") List<BedType> bedTypes
     );
 }

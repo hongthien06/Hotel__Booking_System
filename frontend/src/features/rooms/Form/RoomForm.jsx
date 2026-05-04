@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import {
   Close, Hotel, Business, MeetingRoom, Bed,
-  MonetizationOn, Description, AddPhotoAlternate, Layers, CheckCircle
+  MonetizationOn, Description, AddPhotoAlternate, Layers, CheckCircle, Add, Remove
 } from "@mui/icons-material";
 import { STATUS_CONFIG } from "../RoomStatus";
 import { useTranslation } from "react-i18next";
@@ -31,7 +31,7 @@ const PRESET_PRICES = [
 const emptyForm = {
   roomNumber: "", hotelId: "", typeId: "", floor: "",
   bedType: "DOUBLE", pricePerNight: 1000000,
-  status: "AVAILABLE", imageUrl: "", description: "",
+  status: "AVAILABLE", imageUrls: [""], description: "",
 };
 
 // Chiều cao thống nhất cho tất cả field đơn dòng
@@ -151,7 +151,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
   useEffect(() => {
     if (!open) return;
     if (isEdit && editRoom && allHotels.length > 0) {
-      setForm({ ...editRoom });
+      setForm({ ...editRoom, imageUrls: editRoom.imageUrls?.length > 0 ? editRoom.imageUrls : [""] });
       const hotel = allHotels.find(h => h.hotelId === editRoom.hotelId);
       if (hotel) { setSelectedBrand(hotel.hotelName); setSelectedBranch(hotel); }
     } else {
@@ -180,6 +180,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
     }
     onSubmit({
       ...form,
+      imageUrls: form.imageUrls.filter(url => url && url.trim() !== ""),
       hotelId: Number(form.hotelId),
       typeId: Number(form.typeId),
       floor: form.floor ? Number(form.floor) : null,
@@ -298,13 +299,40 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
         />
 
         {/* Hàng 6: URL hình ảnh */}
-        <RowFull>
-          <TextField fullWidth label={t("rooms.image_url")} value={form.imageUrl}
-            onChange={(e) => setForm(p => ({ ...p, imageUrl: e.target.value }))}
-            sx={fieldSx}
-            InputProps={{ startAdornment: <InputAdornment position="start"><AddPhotoAlternate color="primary" /></InputAdornment> }}
-          />
-        </RowFull>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="caption" fontWeight={700} color="text.secondary" sx={{ display: 'block', mb: 1, ml: 1 }}>
+            {t("rooms.image_url")}s
+          </Typography>
+          {form.imageUrls.map((url, index) => (
+            <RowFull key={index}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <TextField fullWidth placeholder="https://..." value={url}
+                  onChange={(e) => {
+                    const newUrls = [...form.imageUrls];
+                    newUrls[index] = e.target.value;
+                    setForm(p => ({ ...p, imageUrls: newUrls }));
+                  }}
+                  sx={fieldSx}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><AddPhotoAlternate color="primary" /></InputAdornment> }}
+                />
+                <IconButton onClick={() => {
+                  if (form.imageUrls.length > 1) {
+                    setForm(p => ({ ...p, imageUrls: p.imageUrls.filter((_, i) => i !== index) }));
+                  } else {
+                    setForm(p => ({ ...p, imageUrls: [""] }));
+                  }
+                }} color="error">
+                  <Remove />
+                </IconButton>
+                {index === form.imageUrls.length - 1 && (
+                  <IconButton onClick={() => setForm(p => ({ ...p, imageUrls: [...p.imageUrls, ""] }))} color="primary">
+                    <Add />
+                  </IconButton>
+                )}
+              </Box>
+            </RowFull>
+          ))}
+        </Box>
 
         {/* Hàng 7: Mô tả */}
         <Box sx={{ width: "100%", mb: 1 }}>
