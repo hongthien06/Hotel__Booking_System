@@ -221,12 +221,19 @@ const ChatWindow = ({
                       sx={{ color: '#aaa', fontSize: '0.7rem' }}
                     >
                       {conv.createdAt
-                        ? new Date(conv.createdAt).toLocaleDateString('vi-VN', {
-                            day: '2-digit',
-                            month: '2-digit',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })
+                        ? (() => {
+                            const dateStr = conv.createdAt;
+                            const normalizedDateStr =
+                              dateStr.endsWith('Z') || dateStr.includes('+')
+                                ? dateStr
+                                : `${dateStr}Z`;
+                            return new Date(normalizedDateStr).toLocaleDateString('vi-VN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            });
+                          })()
                         : ''}
                     </Typography>
                   }
