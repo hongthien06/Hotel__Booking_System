@@ -13,11 +13,11 @@ const Info = () => {
   const { booking } = useBookingContext() || {}
 
   const handleNext = async () => {
-    const bookingId = booking?.bookingId
+    const bookingCode = booking?.bookingCode
     const amount = Number(booking?.grandTotal || booking?.totalAmount || 0)
 
     const payload = {
-      bookingId: bookingId,
+      bookingCode: bookingCode,
       amount: amount,
       gateway: selectedMethod
     }
@@ -37,5 +37,6 @@ const Info = () => {
     </Box>
   )
 }
+
 
 export default Info

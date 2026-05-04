@@ -46,7 +46,12 @@ public class PaymentService implements IPaymentService {
     @Transactional
     public PaymentCreateResponse createInitialPayment(PaymentRequest request, String ipAddress) {
         log.info(ipAddress);
-        Booking booking = bookingService.findById(request.getBookingId());
+        Booking booking = bookingService.findByBookingCode(request.getBookingCode());
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new IllegalStateException("Booking #" + booking.getBookingId()
+                    + " đã không còn ở trạng thái PENDING (hiện tại: " + booking.getStatus()
+                    + "). Vui lòng tạo booking mới để thanh toán.");
+        }
         Payment payment = Payment.builder()
                 .booking(booking)
                 .amount(request.getAmount())
@@ -63,7 +68,7 @@ public class PaymentService implements IPaymentService {
         if (gateway == PaymentGateway.VNPAY) {
             VNPayRequest vnpRequest = VNPayRequest.builder()
                     .amount(payment.getAmount().toPlainString())
-                    .txnRef(payment.getBooking().getBookingCode())
+                    .txnRef(payment.getBooking().getBookingId().toString()) // bookingId: số nguyên, không ký tự đặc biệt
                     .requestId(payment.getTransactionId())
                     .ipAddress(ipAddress)
                     .build();
@@ -72,7 +77,7 @@ public class PaymentService implements IPaymentService {
         } else if (gateway == PaymentGateway.MOMO) {
             MoMoRequest moMoRequest = MoMoRequest.builder()
                     .amount(payment.getAmount().longValue())
-                    .orderId(payment.getBooking().getBookingCode())
+                    .orderId(payment.getBooking().getBookingId().toString()) // bookingId: số nguyên, không ký tự đặc biệt
                     .requestId(payment.getTransactionId())
                     .build();
             MomoResponse momoResponse = momoService.createQR(moMoRequest);
@@ -111,6 +116,18 @@ public class PaymentService implements IPaymentService {
     @Transactional
     public Payment findByBookingCode(String bookingCode) {
         return paymentRepository.findByBookingCode(bookingCode).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public Payment findByPaymentId(Long paymentId) {
+        return paymentRepository.findById(paymentId).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public Payment findByBookingId(Long bookingId) {
+        return paymentRepository.findByBookingId(bookingId).orElse(null);
     }
 
     // Cập nhật kết quả thanh toán sau khi IPN

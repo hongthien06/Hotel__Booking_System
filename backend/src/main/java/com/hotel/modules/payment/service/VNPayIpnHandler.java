@@ -31,12 +31,12 @@ public class VNPayIpnHandler implements IpnHandler {
             return VnpIpnResponseConst.SIGNATURE_FAILED;
         }
         IpnResponse ipnResponse;
-        String txnRef = params.get(VNPayParams.TXN_REF);// bookingCode
+        String txnRef = params.get(VNPayParams.TXN_REF); // paymentId
         String vnpAmount = params.get(VNPayParams.AMOUNT);
         String responseCode = params.get("vnp_ResponseCode");
         String transactionNo = params.get("vnp_TransactionNo");
         try {
-            Payment payment = paymentService.findByBookingCode(txnRef);
+            Payment payment = paymentService.findByBookingId(Long.parseLong(txnRef));
             if (payment == null) {
                 return VnpIpnResponseConst.ORDER_NOT_FOUND;
             }

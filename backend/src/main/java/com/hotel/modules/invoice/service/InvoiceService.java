@@ -112,8 +112,8 @@ public class InvoiceService implements IInvoiceService {
 
         @Override
         @Transactional
-        public InvoiceResponse getInvoiceByBookingCode(String BookingCode) {
-                Invoice invoice = invoiceRepository.findByBooking_BookingCode(BookingCode)
+        public InvoiceResponse getInvoiceByBookingId(Long BookingCode) {
+                Invoice invoice = invoiceRepository.findByBooking_BookingId(BookingCode)
                                 .orElseThrow(() -> new EntityNotFoundException(
                                                 "Không tìm thấy hóa đơn cho booking #" + BookingCode));
                 List<InvoiceItem> items = invoiceItemRepository.findByInvoice_Id(invoice.getId());
@@ -222,7 +222,8 @@ public class InvoiceService implements IInvoiceService {
                                 .checkInDate(invoice.getBooking().getCheckInDate())
                                 .checkOutDate(invoice.getBooking().getCheckOutDate())
                                 .totalNight(invoice.getBooking().getTotalNights())
-                                .numGuests((byte) (invoice.getBooking().getNumAdults() + invoice.getBooking().getNumChildren()))
+                                .numGuests((byte) (invoice.getBooking().getNumAdults()
+                                                + invoice.getBooking().getNumChildren()))
                                 .address(invoice.getBooking().getRoom().getHotel().getAddress())
                                 .subtotal(invoice.getSubtotal())
                                 .taxRate(invoice.getTaxRate())

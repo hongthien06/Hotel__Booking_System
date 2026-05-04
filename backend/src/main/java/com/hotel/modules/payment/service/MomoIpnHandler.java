@@ -25,12 +25,12 @@ public class MomoIpnHandler implements IpnHandler {
             return MomoIpnResponseConst.SIGNATURE_MISMATCH;
         }
 
-        String orderId = params.get("orderId"); // bookingCode
+        String orderId = params.get("orderId"); // paymentId
         String resultCode = params.get("resultCode");
         String transId = params.get("transId");
 
         try {
-            Payment payment = paymentService.findByBookingCode(orderId);
+            Payment payment = paymentService.findByBookingId(Long.parseLong(orderId));
             if (payment == null) {
                 return MomoIpnResponseConst.ORDER_NOT_FOUND;
             }

@@ -12,7 +12,7 @@ public interface IInvoiceService {
 
     InvoiceResponse getInvoiceById(Long id);
 
-    InvoiceResponse getInvoiceByBookingCode(String BookingCode);
+    InvoiceResponse getInvoiceByBookingId(Long BookingCode);
 
     InvoiceResponse getInvoiceByPaymentId(Long paymentId);
 

@@ -12,4 +12,7 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query("SELECT p FROM Payment p JOIN FETCH p.booking b JOIN FETCH b.user WHERE p.booking.bookingCode = :bookingCode")
     Optional<Payment> findByBookingCode(@Param("bookingCode") String bookingCode);
+
+    @Query("SELECT p FROM Payment p JOIN FETCH p.booking b JOIN FETCH b.user WHERE b.bookingId = :bookingId")
+    Optional<Payment> findByBookingId(@Param("bookingId") Long bookingId);
 }

@@ -4,9 +4,10 @@ import DownloadIcon from '@mui/icons-material/Download'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { toast } from 'react-toastify'
 import { downloadInvoicePdfApi } from '~/shared/api/invoiceApi'
+import { useNavigate } from 'react-router-dom'
 
 const StatusSuccess = ({ invoiceData }) => {
-
+  const navigate = useNavigate()
   const handledownLoad = async () => {
     toast.promise(downloadInvoicePdfApi(invoiceData.id), {
       pending: 'Processing...',
@@ -44,7 +45,7 @@ const StatusSuccess = ({ invoiceData }) => {
 
       <Box sx={{ width: '100%', bgcolor: '#57ff5760', borderRadius: '8px', p: 1.5, textAlign: 'center' }}>
         <Typography sx={{ fontSize: 12, fontWeight: '500', color: '#124c09', mb: 0.25 }}>Mã đặt phòng</Typography>
-        <Typography sx={{ fontSize: 15, fontWeight: '600', color: '#124c09', letterSpacing: 1 }}>${invoiceData.bookingCode}</Typography>
+        <Typography sx={{ fontSize: 15, fontWeight: '600', color: '#124c09', letterSpacing: 1 }}>{invoiceData.bookingCode}</Typography>
       </Box>
 
       <Stack spacing={1} width="100%" mt={0.5}>
@@ -53,14 +54,15 @@ const StatusSuccess = ({ invoiceData }) => {
           fullWidth
           startIcon={<DownloadIcon />}
           onClick={handledownLoad}
-          sx={{ bgcolor: '#c91832', '&:hover': { boxShadow: 'none' }, borderRadius: '10px', textTransform: 'none', fontWeight: 500, boxShadow: 'none' }}
+          sx={{ bgcolor: '#e41030ff', color: 'white', '&:hover': { boxShadow: 'none' }, borderRadius: '10px', textTransform: 'none', fontWeight: 500, boxShadow: 'none' }}
         >
           Tải hóa đơn PDF
         </Button>
         <Button
           variant="outlined"
           fullWidth
-          sx={{ borderRadius: '10px', textTransform: 'none', color: 'text.secondary', borderColor: 'divider', '&:hover': { bgcolor: 'grey.50' } }}
+          onClick={() => navigate('/booking-history')}
+          sx={{ borderRadius: '10px', textTransform: 'none', color: 'text.secondary', borderColor: 'divider', '&:hover': { bgcolor: 'grey.50', color: 'black' } }}
         >
           Xem phòng của tôi
         </Button>

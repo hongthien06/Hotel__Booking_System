@@ -9,6 +9,10 @@ public interface IPaymentService {
 
   public Payment findByBookingCode(String bookingCode);
 
+  public Payment findByPaymentId(Long paymentId);
+
+  public Payment findByBookingId(Long bookingId);
+
   public void updatePaymentResult(Payment payment,
       String gatewayTransactionNo,
       String rawResponse,

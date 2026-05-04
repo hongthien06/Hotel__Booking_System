@@ -46,8 +46,8 @@ public class InvoiceController {
     }
 
     @GetMapping("/booking/{bookingId}")
-    public ResponseEntity<InvoiceResponse> getInvoiceByBookingId(@PathVariable("bookingId") String bookingId) {
-        InvoiceResponse invoice = invoiceService.getInvoiceByBookingCode(bookingId);
+    public ResponseEntity<InvoiceResponse> getInvoiceByBookingId(@PathVariable("bookingId") Long bookingId) {
+        InvoiceResponse invoice = invoiceService.getInvoiceByBookingId(bookingId);
         return ResponseEntity.ok(invoice);
     }
 

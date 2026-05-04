@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class BookingService {
@@ -216,11 +217,10 @@ public class BookingService {
 
     }
 
-    // Generate booking code: HB20260425-0001
-    private String generateBookingCode(LocalDate checkIn) {
+    // Generate booking code dựa trên bookingId (auto-increment) để đảm bảo không trùng
+    private String generateBookingCode(LocalDate checkIn, Long bookingId) {
         String datePart = checkIn.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        long count = bookingRepository.count() + 1;
-        return String.format("HB%s-%04d", datePart, count);
+        return String.format("HB%s-%04d", datePart, bookingId);
     }
 
     // Tao Booking tu userId va Request
@@ -261,9 +261,9 @@ public class BookingService {
             throw new RuntimeException("Số lượng trẻ em vượt quá sức chứa của phòng (" + room.getBedType().getMaxChildren() + ")");
         }
 
-        // 7. Tạo booking
+        // 7. Tạo booking — lưu trước với temp code để lấy bookingId (auto-increment)
         Booking booking = new Booking();
-        booking.setBookingCode(generateBookingCode(request.getCheckIn()));
+        booking.setBookingCode(UUID.randomUUID().toString().replace("-", "").substring(0, 20));
         booking.setUser(user);
         booking.setRoom(room);
         booking.setCheckInDate(request.getCheckIn());
@@ -278,9 +278,12 @@ public class BookingService {
         booking.setCreatedAt(LocalDateTime.now());
         booking.setUpdatedAt(LocalDateTime.now());
 
-        bookingRepository.save(booking);
+        // Flush ngay để lấy bookingId, rồi cập nhật bookingCode theo ID (đảm bảo không trùng)
+        Booking saved = bookingRepository.saveAndFlush(booking);
+        saved.setBookingCode(generateBookingCode(request.getCheckIn(), saved.getBookingId()));
+        bookingRepository.save(saved);
 
-        return toDTO(booking);
+        return toDTO(saved);
     }
 
     // Thao tac Cancel booking
@@ -360,6 +363,11 @@ public class BookingService {
     public Booking findById(Long bookingId) {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy booking #" + bookingId));
+    }
+
+    public Booking findByBookingCode(String bookingCode) {
+        return bookingRepository.findByBookingCode(bookingCode)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking với mã: " + bookingCode));
     }
 
 }

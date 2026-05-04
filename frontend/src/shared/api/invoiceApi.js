@@ -1,7 +1,7 @@
 import axiosInstance from './axiosInstance'
 
-export const getInvoiceByBookingCodeAPI = async (bookingCode) => {
-  const response = await axiosInstance.get(`/api/v1/invoices/booking/${bookingCode}`)
+export const getInvoiceByBookingIdAPI = async (bookingId) => {
+  const response = await axiosInstance.get(`/api/v1/invoices/booking/${bookingId}`)
   return response.data
 }
 
