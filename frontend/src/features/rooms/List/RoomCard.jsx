@@ -138,7 +138,12 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
 
         {/* Meta */}
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: amenities.length ? 1.5 : 0 }}>
-          {room.capacity && <MetaItem icon={<People />} text={`${room.capacity} ${t('rooms.guests')}`} />}
+          {(room.maxAdults !== undefined || room.capacity) && (
+            <MetaItem 
+              icon={<People />} 
+              text={room.maxAdults !== undefined ? `${room.maxAdults} ${t('booking_page.adults').toLowerCase()} - ${room.maxChildren} ${t('booking_page.children').toLowerCase()}` : `${room.capacity} ${t('rooms.guests')}`} 
+            />
+          )}
           {room.area && <MetaItem icon={<SquareFoot />} text={`${room.area}m²`} />}
           {room.bedType && <MetaItem icon={<KingBed />} text={t(room.bedType)} />}
         </Box>

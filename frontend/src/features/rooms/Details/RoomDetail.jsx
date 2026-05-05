@@ -150,7 +150,11 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
         <Box sx={{ bgcolor: 'background.default', borderRadius: 3, px: 2, py: 0.5, mb: 2.5 }}>
           <InfoRow label={t('room_detail.hotel')} value={room.hotelName || '—'} icon={<Business />} />
           <InfoRow label={t('room_detail.address')} value={room.address || '—'} icon={<LocationOn />} />
-          <InfoRow label={t('room_detail.capacity')} value={`${room.capacity || '—'} ${t('rooms.guests')}`} icon={<People />} />
+          <InfoRow 
+            label={t('room_detail.capacity')} 
+            value={room.maxAdults !== undefined ? `${room.maxAdults} ${t('booking_page.adults').toLowerCase()} - ${room.maxChildren} ${t('booking_page.children').toLowerCase()}` : `${room.capacity || '—'} ${t('rooms.guests')}`} 
+            icon={<People />} 
+          />
           <InfoRow label={t('room_detail.area')} value={room.area ? `${room.area} m²` : '—'} icon={<SquareFoot />} />
           <InfoRow label={t('room_detail.bed_type')} value={t(room.bedType) || '—'} icon={<KingBed />} />
           <InfoRow label={t('room_detail.bedrooms')} value={room.bedrooms || '1'} icon={<Layers />} />

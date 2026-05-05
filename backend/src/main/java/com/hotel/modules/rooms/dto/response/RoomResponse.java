@@ -20,6 +20,8 @@ public class RoomResponse {
     private List<String> imageUrls;
     private String description;
     private RoomStatus status;
+    private Integer maxAdults;
+    private Integer maxChildren;
 
     //Thong tin phong
     private Integer typeId;
@@ -43,6 +45,11 @@ public class RoomResponse {
         res.imageUrls    = room.getImageUrls() != null && !room.getImageUrls().isEmpty() ? java.util.Arrays.asList(room.getImageUrls().split(",")) : new java.util.ArrayList<>();
         res.description  = room.getDescription();
         res.status       = room.getStatus();
+
+        if (room.getBedType() != null) {
+            res.maxAdults = room.getBedType().getMaxAdults();
+            res.maxChildren = room.getBedType().getMaxChildren();
+        }
 
         if (room.getRoomType() != null) {
             res.typeId = room.getRoomType().getTypeId();
