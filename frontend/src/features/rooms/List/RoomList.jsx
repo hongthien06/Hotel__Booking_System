@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import {
   Box, Typography, Grid, TextField, Button, MenuItem,
   IconButton, Skeleton, Alert, Snackbar, Tooltip,
-  InputAdornment, Paper
+  InputAdornment, Paper, Dialog
 } from '@mui/material'
 import {
   Add, Search, Refresh, KingBed
@@ -19,6 +19,7 @@ import RoomStatus, { STATUS_CONFIG } from '../RoomStatus'
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const createRoomApi = (data) => axiosInstance.post(`${BASE_URL}/rooms`, data).then(r => r.data)
 const updateRoomApi = (id, data) => axiosInstance.put(`${BASE_URL}/rooms/${id}`, data).then(r => r.data)
+const deleteRoomApi = (id) => axiosInstance.delete(`${BASE_URL}/rooms/${id}`).then(r => r.data)
 
 // ─── Skeleton card ────────────────────────────────────────────────────────────
 const SkeletonCard = () => (
@@ -36,24 +37,24 @@ const SkeletonCard = () => (
 const EmptyState = ({ onAdd, canEdit }) => {
   const { t } = useTranslation()
   return (
-  <Box sx={{ gridColumn: '1 / -1', textAlign: 'center', py: 10 }}>
-    <Typography sx={{ fontSize: 56, mb: 2, opacity: 0.25 }}>🏨</Typography>
-    <Typography variant="h6" color="text.secondary" fontWeight={600} mb={0.5}>
-      {t('rooms.no_rooms_found')}
-    </Typography>
-    <Typography variant="body2" color="text.disabled" mb={3}>
-      {t('rooms.try_changing_filter')}
-    </Typography>
-    {canEdit && (
-      <Button
-        variant="contained" color="secondary" startIcon={<Add />}
-        onClick={onAdd}
-        sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 700 }}
-      >
-        {t('rooms.add_first_room')}
-      </Button>
-    )}
-  </Box>
+    <Box sx={{ gridColumn: '1 / -1', textAlign: 'center', py: 10 }}>
+      <Typography sx={{ fontSize: 56, mb: 2, opacity: 0.25 }}>🏨</Typography>
+      <Typography variant="h6" color="text.secondary" fontWeight={600} mb={0.5}>
+        {t('rooms.no_rooms_found')}
+      </Typography>
+      <Typography variant="body2" color="text.disabled" mb={3}>
+        {t('rooms.try_changing_filter')}
+      </Typography>
+      {canEdit && (
+        <Button
+          variant="contained" color="secondary" startIcon={<Add />}
+          onClick={onAdd}
+          sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 700 }}
+        >
+          {t('rooms.add_first_room')}
+        </Button>
+      )}
+    </Box>
   )
 }
 
@@ -81,6 +82,7 @@ const RoomList = () => {
   const [editRoom, setEditRoom] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
   const [toast, setToast] = useState({ open: false, msg: '', severity: 'success' })
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, roomId: null, roomNumber: '' })
 
   const showToast = (msg, severity = 'success') =>
     setToast({ open: true, msg, severity })
@@ -157,6 +159,22 @@ const RoomList = () => {
       showToast(err?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.', 'error')
     } finally {
       setFormLoading(false)
+    }
+  }
+
+  const handleDeleteClick = (room) => {
+    setDeleteConfirm({ open: true, roomId: room.roomId || room.id, roomNumber: room.roomNumber })
+  }
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteRoomApi(deleteConfirm.roomId)
+      setRooms(prev => prev.filter(r => (r.roomId || r.id) !== deleteConfirm.roomId))
+      showToast(`Đã xóa phòng #${deleteConfirm.roomNumber}`)
+    } catch (err) {
+      showToast(err?.response?.data?.message || 'Không thể xóa phòng này.', 'error')
+    } finally {
+      setDeleteConfirm({ open: false, roomId: null, roomNumber: '' })
     }
   }
 
@@ -314,12 +332,46 @@ const RoomList = () => {
                   room={room}
                   onClick={handleCardClick}
                   onEdit={handleEditClick}
+                  onDelete={handleDeleteClick}
                   canEdit={canEdit}
                 />
               </Box>
             ))
         }
       </Box>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteConfirm.open}
+        onClose={() => setDeleteConfirm({ open: false, roomId: null, roomNumber: '' })}
+        PaperProps={{ sx: { borderRadius: 4, px: 1, py: 1 } }}
+      >
+        <Box sx={{ p: 2, textAlign: 'center' }}>
+          <Typography variant="h6" fontWeight={800} color="error.main" mb={1}>
+            Xác nhận xóa phòng
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Bạn có chắc chắn muốn xóa phòng <strong>#{deleteConfirm.roomNumber}</strong>?
+            Thao tác này sẽ chuyển trạng thái phòng thành INACTIVE.
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
+          <Button
+            fullWidth variant="outlined"
+            onClick={() => setDeleteConfirm({ open: false, roomId: null, roomNumber: '' })}
+            sx={{ borderRadius: 3, fontWeight: 700 }}
+          >
+            HỦY BỎ
+          </Button>
+          <Button
+            fullWidth variant="contained" color="error"
+            onClick={handleConfirmDelete}
+            sx={{ borderRadius: 3, fontWeight: 700 }}
+          >
+            XÓA PHÒNG
+          </Button>
+        </Box>
+      </Dialog>
 
       {/* Detail Drawer */}
       <RoomDetail
