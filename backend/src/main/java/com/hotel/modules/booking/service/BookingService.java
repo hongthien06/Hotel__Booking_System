@@ -310,11 +310,11 @@ public class BookingService {
 
                 // Nếu CONFIRMED → kiểm tra có trước 24h không
                 if (booking.getStatus() == BookingStatus.CONFIRMED) {
-                    LocalDateTime deadline = booking.getCheckInDate()
-                            .atStartOfDay()
-                            .minusHours(24);
+                    // Mốc giờ nhận phòng tiêu chuẩn là 14:00
+                    LocalDateTime checkInDeadline = booking.getCheckInDate().atTime(14, 0);
+                    LocalDateTime refundDeadline = checkInDeadline.minusHours(24);
 
-                    if (LocalDateTime.now().isBefore(deadline)) {
+                    if (LocalDateTime.now().isBefore(refundDeadline)) {
                         // Hủy trước 24h → hoàn tiền
                         booking.setStatus(BookingStatus.REFUNDED);
                     } else {
@@ -322,7 +322,7 @@ public class BookingService {
                         booking.setStatus(BookingStatus.CANCELLED);
                     }
                 } else {
-                    // PENDING → hủy bình thường
+                    // PENDING hoặc các trạng thái khác (chưa thanh toán) → hủy bình thường
                     booking.setStatus(BookingStatus.CANCELLED);
                 }
             }

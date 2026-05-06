@@ -358,17 +358,33 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
 
         {/* Price summary */}
         {form.checkIn && form.checkOut && nights > 0 && (
-          <Box sx={{ p: 2, bgcolor: PC_LIGHT, borderRadius: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-              <Typography variant="body2" color="text.secondary">{formatCurrency(roomPrice, i18n.language)} × {nights} {t('rooms.per_night')}</Typography>
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>{formatCurrency(total, i18n.language)}</Typography>
+          <>
+            {(() => {
+              const checkInDateTime = new Date(`${form.checkIn}T14:00:00`);
+              const refundDeadline = new Date(checkInDateTime.getTime() - 24 * 60 * 60 * 1000);
+              const isNonRefundable = new Date() > refundDeadline;
+              
+              return isNonRefundable && (
+                <Alert severity="warning" sx={{ mb: 2, borderRadius: 2, fontSize: '0.85rem', '& .MuiAlert-message': { fontWeight: 600 } }}>
+                  {t('booking_page.non_refundable_warning') === 'booking_page.non_refundable_warning' 
+                    ? "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy."
+                    : t('booking_page.non_refundable_warning')}
+                </Alert>
+              );
+            })()}
+
+            <Box sx={{ p: 2, bgcolor: PC_LIGHT, borderRadius: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
+                <Typography variant="body2" color="text.secondary">{formatCurrency(roomPrice, i18n.language)} × {nights} {t('rooms.per_night')}</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>{formatCurrency(total, i18n.language)}</Typography>
+              </Box>
+              <Divider sx={{ my: 1 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{t('booking_page.total')}</Typography>
+                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>{formatCurrency(total, i18n.language)}</Typography>
+              </Box>
             </Box>
-            <Divider sx={{ my: 1 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{t('booking_page.total')}</Typography>
-              <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>{formatCurrency(total, i18n.language)}</Typography>
-            </Box>
-          </Box>
+          </>
         )}
 
         {error && <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>{error}</Alert>}

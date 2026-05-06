@@ -102,8 +102,8 @@ const BookingHistoryPage = () => {
     switch (status) {
       case 'CONFIRMED': return '#4caf50';
       case 'PENDING': return '#ff9800';
-      case 'CANCELLED':
-      case 'REFUNDED': return '#f44336';
+      case 'CANCELLED': return '#f44336';
+      case 'REFUNDED': return '#03a9f4'; // Light Blue cho Hoàn tiền
       case 'CHECKED_IN': return '#c0496e';
       case 'CHECKED_OUT': return '#607d8b'; // Blue Grey cho Checkout
       default: return '#757575';
@@ -347,7 +347,7 @@ const BookingHistoryPage = () => {
                       </IconButton>
                     </Box>
 
-                    {booking.status === 'PENDING' && (
+                    {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
                       <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
                         <Button 
                           fullWidth 
@@ -359,21 +359,23 @@ const BookingHistoryPage = () => {
                         >
                           {t('common.cancel')}
                         </Button>
-                        <Button 
-                          fullWidth 
-                          variant="contained" 
-                          size="small"
-                          onClick={() => handlePayment(booking)}
-                          sx={{ 
-                            borderRadius: 2, 
-                            fontSize: 11, 
-                            fontWeight: 700,
-                            bgcolor: PC,
-                            '&:hover': { bgcolor: '#a0365a' }
-                          }}
-                        >
-                          {t('common.pay_now')}
-                        </Button>
+                        {booking.status === 'PENDING' && (
+                          <Button 
+                            fullWidth 
+                            variant="contained" 
+                            size="small"
+                            onClick={() => handlePayment(booking)}
+                            sx={{ 
+                              borderRadius: 2, 
+                              fontSize: 11, 
+                              fontWeight: 700,
+                              bgcolor: PC,
+                              '&:hover': { bgcolor: '#a0365a' }
+                            }}
+                          >
+                            {t('common.pay_now')}
+                          </Button>
+                        )}
                       </Box>
                     )}
                   </CardContent>
