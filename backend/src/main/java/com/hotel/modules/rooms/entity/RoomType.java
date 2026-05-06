@@ -1,5 +1,6 @@
 package com.hotel.modules.rooms.entity;
 
+import com.hotel.modules.hotel.entity.Hotel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,6 +27,6 @@ public class RoomType {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hotel_id", nullable = false)
-    private com.hotel.modules.hotel.entity.Hotel hotel;
+    private Hotel hotel;
 }
 

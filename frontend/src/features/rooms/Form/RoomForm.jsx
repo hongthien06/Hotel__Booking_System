@@ -2,15 +2,17 @@ import React, { useState, useEffect } from "react";
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
   Typography, TextField, MenuItem,
-  IconButton, Button, Autocomplete, InputAdornment, Box
+  IconButton, Button, Autocomplete, InputAdornment, Box, Tooltip
 } from "@mui/material";
 import {
   Close, Hotel, Business, MeetingRoom, Bed,
-  MonetizationOn, Description, AddPhotoAlternate, Layers, CheckCircle
+  MonetizationOn, Description, AddPhotoAlternate, Layers, CheckCircle, Add, Remove, CloudUpload
 } from "@mui/icons-material";
 import { STATUS_CONFIG } from "../RoomStatus";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "~/shared/utils/formatters";
+import axiosInstance from "~/shared/api/axiosInstance";
+import { CircularProgress } from "@mui/material";
 
 const BED_TYPES = [
   { value: "SINGLE", label: "Single Bed" },
@@ -28,10 +30,12 @@ const PRESET_PRICES = [
   { value: 10000000, label: "10,000,000đ (Penthouse)" },
 ];
 
+const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+
 const emptyForm = {
   roomNumber: "", hotelId: "", typeId: "", floor: "",
   bedType: "DOUBLE", pricePerNight: 1000000,
-  status: "AVAILABLE", imageUrl: "", description: "",
+  status: "AVAILABLE", imageUrls: [""], description: "",
 };
 
 // Chiều cao thống nhất cho tất cả field đơn dòng
@@ -124,6 +128,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
+  const [formLoading, setFormLoading] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -151,7 +156,7 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
   useEffect(() => {
     if (!open) return;
     if (isEdit && editRoom && allHotels.length > 0) {
-      setForm({ ...editRoom });
+      setForm({ ...editRoom, imageUrls: editRoom.imageUrls?.length > 0 ? editRoom.imageUrls : [""] });
       const hotel = allHotels.find(h => h.hotelId === editRoom.hotelId);
       if (hotel) { setSelectedBrand(hotel.hotelName); setSelectedBranch(hotel); }
     } else {
@@ -180,11 +185,59 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
     }
     onSubmit({
       ...form,
+      imageUrls: form.imageUrls.filter(url => url && url.trim() !== ""),
       hotelId: Number(form.hotelId),
       typeId: Number(form.typeId),
       floor: form.floor ? Number(form.floor) : null,
       pricePerNight: Number(form.pricePerNight),
     });
+  };
+
+  const handleFileUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    // Filter out existing empty string if any
+    const currentUrls = form.imageUrls.filter(url => url !== "");
+    setFormLoading(true);
+
+    try {
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await axiosInstance.post(`${BASE_URL}/files/upload`, formData, {
+          headers: { "Content-Type": "multipart/form-data" }
+        });
+        currentUrls.push(res.data.url);
+      }
+      setForm(p => ({ ...p, imageUrls: currentUrls.length > 0 ? currentUrls : [""] }));
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert(t("rooms.upload_error"));
+    } finally {
+      setFormLoading(false);
+      e.target.value = null;
+    }
+  };
+
+  const handleCloudifyUrl = async (index) => {
+    const urlToCloudify = form.imageUrls[index];
+    if (!urlToCloudify || !urlToCloudify.startsWith("http")) return;
+
+    setFormLoading(true);
+    try {
+      const res = await axiosInstance.post(`${BASE_URL}/files/upload-url`, null, {
+        params: { url: urlToCloudify }
+      });
+      const newUrls = [...form.imageUrls];
+      newUrls[index] = res.data.url;
+      setForm(p => ({ ...p, imageUrls: newUrls }));
+    } catch (err) {
+      console.error("Cloudify failed:", err);
+      alert(t("rooms.upload_error"));
+    } finally {
+      setFormLoading(false);
+    }
   };
 
   return (
@@ -297,14 +350,102 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
           }
         />
 
-        {/* Hàng 6: URL hình ảnh */}
-        <RowFull>
-          <TextField fullWidth label={t("rooms.image_url")} value={form.imageUrl}
-            onChange={(e) => setForm(p => ({ ...p, imageUrl: e.target.value }))}
-            sx={fieldSx}
-            InputProps={{ startAdornment: <InputAdornment position="start"><AddPhotoAlternate color="primary" /></InputAdornment> }}
-          />
-        </RowFull>
+        {/* Hàng 6: Hình ảnh (Upload & URLs) */}
+        <Box sx={{ mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, ml: 1 }}>
+            <Typography variant="caption" fontWeight={700} color="text.secondary">
+              {t("rooms.image_url")}s
+            </Typography>
+            <Button
+              variant="contained"
+              component="label"
+              size="small"
+              disabled={formLoading}
+              startIcon={formLoading ? <CircularProgress size={20} color="inherit" /> : <AddPhotoAlternate />}
+              sx={{ borderRadius: 2, textTransform: 'none' }}
+            >
+              {formLoading ? t("rooms.uploading") : t("rooms.upload")}
+              <input type="file" hidden multiple accept="image/*" onChange={handleFileUpload} />
+            </Button>
+          </Box>
+
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+            {form.imageUrls.filter(url => url).map((url, index) => (
+              <Box key={index} sx={{ position: 'relative', width: 80, height: 80 }}>
+                <Box
+                  component="img"
+                  src={url}
+                  sx={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 2, border: '1px solid #eee' }}
+                />
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    const newUrls = form.imageUrls.filter((_, i) => i !== index);
+                    setForm(p => ({ ...p, imageUrls: newUrls.length > 0 ? newUrls : [""] }));
+                  }}
+                  sx={{
+                    position: 'absolute', top: -5, right: -5,
+                    bgcolor: 'error.main', color: 'white',
+                    '&:hover': { bgcolor: 'error.dark' },
+                    width: 20, height: 20
+                  }}
+                >
+                  <Close sx={{ fontSize: 14 }} />
+                </IconButton>
+              </Box>
+            ))}
+          </Box>
+
+          {/* Fallback text input for manual URLs if needed */}
+          {form.imageUrls.map((url, index) => (
+            <RowFull key={index}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <TextField fullWidth placeholder="https://..." value={url}
+                  onChange={(e) => {
+                    const newUrls = [...form.imageUrls];
+                    newUrls[index] = e.target.value;
+                    setForm(p => ({ ...p, imageUrls: newUrls }));
+                  }}
+                  sx={fieldSx}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><AddPhotoAlternate color="primary" /></InputAdornment>,
+                    endAdornment: (
+                      url && url.startsWith("http") && !url.includes("cloudinary.com") && (
+                        <InputAdornment position="end">
+                          <Tooltip title={t("rooms.save_to_cloud")}>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              disabled={formLoading}
+                              onClick={() => handleCloudifyUrl(index)}
+                              sx={{ bgcolor: 'primary.50' }}
+                            >
+                              {formLoading ? <CircularProgress size={16} /> : <CloudUpload fontSize="small" />}
+                            </IconButton>
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    )
+                  }}
+                />
+                <IconButton onClick={() => {
+                  if (form.imageUrls.length > 1) {
+                    setForm(p => ({ ...p, imageUrls: p.imageUrls.filter((_, i) => i !== index) }));
+                  } else {
+                    setForm(p => ({ ...p, imageUrls: [""] }));
+                  }
+                }} color="error">
+                  <Remove />
+                </IconButton>
+                {index === form.imageUrls.length - 1 && (
+                  <IconButton onClick={() => setForm(p => ({ ...p, imageUrls: [...p.imageUrls, ""] }))} color="primary">
+                    <Add />
+                  </IconButton>
+                )}
+              </Box>
+            </RowFull>
+          ))}
+        </Box>
 
         {/* Hàng 7: Mô tả */}
         <Box sx={{ width: "100%", mb: 1 }}>

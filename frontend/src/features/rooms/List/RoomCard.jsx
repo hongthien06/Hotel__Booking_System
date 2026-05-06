@@ -4,7 +4,7 @@ import {
   Card, CardContent, CardMedia, Box, Typography,
   IconButton, Tooltip, Skeleton
 } from '@mui/material'
-import { Edit, People, SquareFoot, KingBed } from '@mui/icons-material'
+import { Edit, People, SquareFoot, KingBed, Delete } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
 
 const MetaItem = ({ icon, text }) => (
@@ -14,19 +14,19 @@ const MetaItem = ({ icon, text }) => (
   </Box>
 )
 
-const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
+const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
   const { t, i18n } = useTranslation()
   const price = room.pricePerNight
-    ? new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
-        style: 'currency', 
-        currency: i18n.language === 'vi' ? 'VND' : 'USD' 
-      }).format(i18n.language === 'vi' ? room.pricePerNight : room.pricePerNight / 25000)
+    ? new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
+      style: 'currency',
+      currency: i18n.language === 'vi' ? 'VND' : 'USD'
+    }).format(i18n.language === 'vi' ? room.pricePerNight : room.pricePerNight / 25000)
     : '—'
 
   const amenities = room.amenities
     ? (typeof room.amenities === 'string'
-        ? room.amenities.split(',').map(a => a.trim()).filter(Boolean)
-        : room.amenities)
+      ? room.amenities.split(',').map(a => a.trim()).filter(Boolean)
+      : room.amenities)
     : []
 
   return (
@@ -52,13 +52,15 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
     >
       {/* Image */}
       <Box sx={{ position: 'relative', height: 140, overflow: 'hidden' }}>
-        {room.imageUrl ? (
+        {room.imageUrls && room.imageUrls.length > 0 ? (
           <CardMedia
             component="img"
-            image={room.imageUrl}
+            image={room.imageUrls[0]}
             alt={`${t('booking_page.room')} ${room.roomNumber}`}
-            sx={{ height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease',
-              '&:hover': { transform: 'scale(1.05)' } }}
+            sx={{
+              height: '100%', objectFit: 'cover', transition: 'transform 0.3s ease',
+              '&:hover': { transform: 'scale(1.05)' }
+            }}
           />
         ) : (
           <Box sx={{
@@ -81,26 +83,45 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
           <RoomStatus status={room.status} size="sm" />
         </Box>
 
-        {/* Edit button */}
+        {/* Action buttons */}
         {canEdit && (
-          <Tooltip title={t('common.edit')}>
-            <IconButton
-              size="small"
-              onClick={e => { e.stopPropagation(); onEdit(room) }}
-              sx={{
-                position: 'absolute', top: 6, right: 6,
-                bgcolor: 'rgba(255,255,255,0.85)',
-                backdropFilter: 'blur(4px)',
-                opacity: 0,
-                transition: 'opacity 0.2s',
-                '.MuiCard-root:hover &': { opacity: 1 },
-                '&:hover': { bgcolor: 'white', color: 'secondary.main' },
-                width: 30, height: 30,
-              }}
-            >
-              <Edit sx={{ fontSize: 14 }} />
-            </IconButton>
-          </Tooltip>
+          <Box sx={{
+            position: 'absolute', top: 6, right: 6,
+            display: 'flex', flexDirection: 'column', gap: 0.5,
+            opacity: 0,
+            transition: 'opacity 0.2s',
+            '.MuiCard-root:hover &': { opacity: 1 },
+          }}>
+            <Tooltip title={t('common.edit')}>
+              <IconButton
+                size="small"
+                onClick={e => { e.stopPropagation(); onEdit(room) }}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.85)',
+                  backdropFilter: 'blur(4px)',
+                  '&:hover': { bgcolor: 'white', color: 'primary.main' },
+                  width: 30, height: 30,
+                }}
+              >
+                <Edit sx={{ fontSize: 14 }} />
+              </IconButton>
+            </Tooltip>
+
+            <Tooltip title={t('common.delete') || 'Xóa'}>
+              <IconButton
+                size="small"
+                onClick={e => { e.stopPropagation(); onDelete(room) }}
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.85)',
+                  backdropFilter: 'blur(4px)',
+                  '&:hover': { bgcolor: 'error.main', color: 'white' },
+                  width: 30, height: 30,
+                }}
+              >
+                <Delete sx={{ fontSize: 14 }} />
+              </IconButton>
+            </Tooltip>
+          </Box>
         )}
 
         {/* Floor */}
@@ -138,7 +159,12 @@ const RoomCard = ({ room, onClick, onEdit, canEdit }) => {
 
         {/* Meta */}
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: amenities.length ? 1.5 : 0 }}>
-          {room.capacity && <MetaItem icon={<People />} text={`${room.capacity} ${t('rooms.guests')}`} />}
+          {(room.maxAdults !== undefined || room.capacity) && (
+            <MetaItem
+              icon={<People />}
+              text={room.maxAdults !== undefined ? `${room.maxAdults} ${t('booking_page.adults').toLowerCase()} - ${room.maxChildren} ${t('booking_page.children').toLowerCase()}` : `${room.capacity} ${t('rooms.guests')}`}
+            />
+          )}
           {room.area && <MetaItem icon={<SquareFoot />} text={`${room.area}m²`} />}
           {room.bedType && <MetaItem icon={<KingBed />} text={t(room.bedType)} />}
         </Box>

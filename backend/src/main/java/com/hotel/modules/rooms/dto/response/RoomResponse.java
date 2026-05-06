@@ -4,6 +4,7 @@ import com.hotel.modules.rooms.entity.enums.BedType;
 import com.hotel.modules.rooms.entity.Room;
 import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import lombok.*;
+import java.util.List;
 
 import java.math.BigDecimal;
 
@@ -16,9 +17,11 @@ public class RoomResponse {
     private Short floor;
     private BedType bedType;
     private BigDecimal pricePerNight;
-    private String imageUrls;
+    private List<String> imageUrls;
     private String description;
     private RoomStatus status;
+    private Integer maxAdults;
+    private Integer maxChildren;
 
     //Thong tin phong
     private Integer typeId;
@@ -39,9 +42,14 @@ public class RoomResponse {
         res.floor        = room.getFloor();
         res.bedType      = room.getBedType();
         res.pricePerNight = room.getPricePerNight();
-        res.imageUrls    = room.getImageUrls();
+        res.imageUrls    = room.getImageUrls() != null && !room.getImageUrls().isEmpty() ? java.util.Arrays.asList(room.getImageUrls().split(",")) : new java.util.ArrayList<>();
         res.description  = room.getDescription();
         res.status       = room.getStatus();
+
+        if (room.getBedType() != null) {
+            res.maxAdults = room.getBedType().getMaxAdults();
+            res.maxChildren = room.getBedType().getMaxChildren();
+        }
 
         if (room.getRoomType() != null) {
             res.typeId = room.getRoomType().getTypeId();

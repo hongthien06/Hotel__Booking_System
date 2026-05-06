@@ -4,6 +4,7 @@ import com.hotel.modules.rooms.entity.enums.BedType;
 import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import jakarta.validation.constraints.*;
 import lombok.*;
+import java.util.*;
 
 import java.math.BigDecimal;
 
@@ -30,7 +31,7 @@ public class RoomRequest {
     @DecimalMin(value = "0.0",inclusive = false)
     private BigDecimal pricePerNight;
 
-    private String imageUrls;
+    private List<String> imageUrls;
     private String description;
 
     @NotNull

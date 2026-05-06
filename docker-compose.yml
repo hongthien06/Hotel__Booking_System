@@ -36,16 +36,35 @@ services:
       - ./database/HotelBookingDB.sql:/HotelBookingDB.sql:ro
     env_file:
       - .env
-    entrypoint: /bin/bash -c "
-      echo 'Đợi SQL Server...';
-      for i in {1..60}; do
-        /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P \"$SQL_SA_PASSWORD\" -Q 'SELECT 1' -No -C && break;
-        echo 'Thử lại sau 2s...';
-        sleep 2;
-      done;
-      echo 'Đang nạp SQL...';
-      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P \"$SQL_SA_PASSWORD\" -i /HotelBookingDB.sql -No -C;
-      echo 'Xong!';"
+    entrypoint: 
+      - /bin/bash
+      - -c
+      - |
+        echo 'Đợi SQL Server...';
+        for i in {1..60}; do
+          /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q 'SELECT 1' -No -C && break;
+          echo 'Thử lại sau 2s...';
+          sleep 2;
+        done;
+
+        echo 'Kiểm tra trạng thái database...';
+        DB_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q "SET NOCOUNT ON; SELECT count(*) FROM master.sys.databases WHERE name = 'HotelBookingDB'" -h -1 -No -C | tr -d '[:space:]');
+        
+        INIT_NEEDED="1";
+        if [ "$$DB_EXISTS" == "1" ]; then
+          TABLE_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -d HotelBookingDB -Q "SET NOCOUNT ON; SELECT count(*) FROM sys.tables WHERE name = 'Users'" -h -1 -No -C | tr -d '[:space:]');
+          if [ "$$TABLE_EXISTS" == "1" ]; then
+            INIT_NEEDED="0";
+          fi;
+        fi;
+
+        if [ "$$INIT_NEEDED" == "1" ]; then
+          echo 'Đang nạp SQL khởi tạo...';
+          /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -i /HotelBookingDB.sql -No -C;
+        else
+          echo 'Dữ liệu đã tồn tại, bỏ qua bước khởi tạo để bảo toàn dữ liệu.';
+        fi;
+        echo 'Xong!';
     depends_on:
       - sqlserver
 
@@ -80,6 +99,9 @@ services:
       APP_MOMO_ACCESS_KEY: "${MOMO_ACCESS_KEY}"
       APP_MOMO_SECRET_KEY: "${MOMO_SECRET_KEY}"
       GEMINI_API_KEY: "${GEMINI_API_KEY}"
+      CLOUDINARY_CLOUD_NAME: "${CLOUDINARY_CLOUD_NAME}"
+      CLOUDINARY_API_KEY: "${CLOUDINARY_API_KEY}"
+      CLOUDINARY_API_SECRET: "${CLOUDINARY_API_SECRET}"
       SPRING_PROFILES_ACTIVE: "docker"
       JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseContainerSupport"
     volumes:

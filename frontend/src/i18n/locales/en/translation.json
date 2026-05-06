@@ -306,7 +306,12 @@
     "Superior": "Superior",
     "Family Room": "Family Room",
     "Presidential Suite": "Presidential Suite",
-    "fetch_error": "Could not load rooms. Please try again."
+    "fetch_error": "Could not load rooms. Please try again.",
+    "upload": "Upload image",
+    "save_to_cloud": "Save to Cloud",
+    "uploading": "Uploading...",
+    "cloudify_success": "Saved to Cloud!",
+    "upload_error": "Error uploading image"
   },
   "chatbot": {
     "placeholder": "Type a message...",
