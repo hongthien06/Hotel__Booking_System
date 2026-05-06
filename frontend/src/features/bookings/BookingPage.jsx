@@ -951,7 +951,7 @@ const BookingPage = () => {
                   )}
 
                   <Box ref={roomScrollRef} sx={{
-                    display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
+                    display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                     scrollSnapType: 'x mandatory',
@@ -1018,7 +1018,7 @@ const BookingPage = () => {
                       )}
 
                       <Box ref={topRatedScrollRef} sx={{
-                        display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
+                        display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                         scrollSnapType: 'x mandatory',
@@ -1077,7 +1077,7 @@ const BookingPage = () => {
                       )}
 
                       <Box ref={budgetScrollRef} sx={{
-                        display: 'flex', gap: 3, overflowX: 'auto', pb: 2,
+                        display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                         scrollSnapType: 'x mandatory',
