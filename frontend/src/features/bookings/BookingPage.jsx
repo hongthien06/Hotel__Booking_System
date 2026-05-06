@@ -636,7 +636,7 @@ const BookingPage = () => {
             <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
           </Box>
           : <CardMedia component="img" height="160"
-            image={room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600'}
+            image={(room.imageUrls && room.imageUrls.length > 0) ? room.imageUrls[0] : (room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600')}
             alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
           />
         }
