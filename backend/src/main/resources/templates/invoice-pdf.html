@@ -345,13 +345,14 @@
                 </tr>
             </thead>
             <tbody>
-                <tr th:each="item, stat : {invoice.items}">
-                    <td th:text="{stat.count}">1</td>
-                    <td><span class="item-type" th:text="{item.itemType}">ROOM</span></td>
-                    <td th:text="{item.description}">Phòng Deluxe</td>
-                    <td th:text="{item.quantity}">2</td>
-                    <td th:text="{#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">500,000 đ</td>
-                    <td th:text="{#numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 0, 'POINT') + ' đ'}">1,000,000 đ
+                <tr th:each="item, stat : ${invoice.items}">
+                    <td th:text="${stat.count}">1</td>
+                    <td><span class="item-type" th:text="${item.itemType}">ROOM</span></td>
+                    <td th:text="${item.description}">Phòng Deluxe</td>
+                    <td th:text="${item.quantity}">2</td>
+                    <td th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">500,000 đ
+                    </td>
+                    <td th:text="${#numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 0, 'POINT') + ' đ'}">1,000,000 đ
                     </td>
                 </tr>
             </tbody>
@@ -362,33 +363,34 @@
             <div class="totals">
                 <div class="totals-row">
                     <span>Tạm tính</span>
-                    <span th:text="{#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}">900,000
+                    <span th:text="${#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 0, 'POINT') + ' đ'}">900,000
                         đ</span>
                 </div>
                 <div class="totals-row tax">
-                    <span>Thuế VAT (<span th:text="{invoice.taxRate}">10</span>%)</span>
-                    <span th:text="'+ ' + {#numbers.formatDecimal(invoice.taxAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}">+
+                    <span>Thuế VAT (<span th:text="${invoice.taxRate}">10</span>%)</span>
+                    <span th:text="'+ ' + ${#numbers.formatDecimal(invoice.taxAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}">+
                         90,000 đ</span>
                 </div>
                 <div class="totals-row discount"
-                    th:if="{invoice.discountAmount != null and invoice.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                    th:if="${invoice.discountAmount != null and invoice.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
                     <span>Giảm giá</span>
                     <span
-                        th:text="'- ' + {#numbers.formatDecimal(invoice.discountAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}">-
+                        th:text="'- ' + ${#numbers.formatDecimal(invoice.discountAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}">-
                         50,000 đ</span>
                 </div>
                 <div class="totals-row grand">
                     <span>TỔNG CỘNG</span>
-                    <span th:text="{#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}">940,000
+                    <span
+                        th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ'}">940,000
                         đ</span>
                 </div>
             </div>
         </div>
 
         <!-- ── Ghi chú ── -->
-        <div class="notes" th:if="{invoice.notes != null and !#strings.isEmpty(invoice.notes)}">
+        <div class="notes" th:if="${invoice.notes != null and !#strings.isEmpty(invoice.notes)}">
             <div class="label">Ghi chú</div>
-            <div class="value" th:text="{invoice.notes}"></div>
+            <div class="value" th:text="${invoice.notes}"></div>
         </div>
 
     </div>

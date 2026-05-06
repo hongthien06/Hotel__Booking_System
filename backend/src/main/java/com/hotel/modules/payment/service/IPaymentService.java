@@ -13,6 +13,8 @@ public interface IPaymentService {
 
   public Payment findByBookingId(Long bookingId);
 
+  public Payment findByTransactionId(String transactionId);
+
   public void updatePaymentResult(Payment payment,
       String gatewayTransactionNo,
       String rawResponse,

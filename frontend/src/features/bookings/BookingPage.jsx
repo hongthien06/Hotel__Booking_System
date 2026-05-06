@@ -279,8 +279,19 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
         numChildren: Number(form.numChildren),
         specialRequest: form.specialRequest,
       });
-      // Navigate to history instead of payment review
-      navigate('/bookings-history');
+      // Chuyển sang trang review → payment với booking data
+      navigate('/payment?step=1', {
+        state: {
+          booking: bookingResult,
+          room: room,
+          form: {
+            checkIn: form.checkIn,
+            checkOut: form.checkOut,
+            numAdults: form.numAdults,
+            numChildren: form.numChildren,
+          }
+        }
+      });
     } catch (err) {
       console.error('Booking error:', err);
       const data = err?.response?.data;

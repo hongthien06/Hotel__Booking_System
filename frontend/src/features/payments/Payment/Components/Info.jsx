@@ -1,24 +1,27 @@
 import {
   Box, Button
 } from '@mui/material'
+import { useState } from 'react'
 import { createPaymentUrl } from '~/shared/api/paymentApi'
+import { useBookingContext } from '../../_id'
 import Discount from './Discount/Discount'
 import Brand from './Info/Brand'
 import PaymentMethod from './Info/PaymentMethod'
-import { useState } from 'react'
-import { useBookingContext } from '../../_id'
 
 const Info = () => {
   const [selectedMethod, setSelectedMethod] = useState('VNPAY')
-  const { booking } = useBookingContext() || {}
+  const { booking, voucherData } = useBookingContext() || {}
 
   const handleNext = async () => {
     const bookingCode = booking?.bookingCode
-    const amount = Number(booking?.grandTotal || booking?.totalAmount || 0)
+    // Nếu đã áp voucher thì dùng finalAmount, không thì dùng grandTotal gốc
+    const amount = voucherData
+      ? Number(voucherData.finalAmount)
+      : Number(booking?.grandTotal || booking?.totalAmount || 0)
 
     const payload = {
-      bookingCode: bookingCode,
-      amount: amount,
+      bookingCode,
+      amount,
       gateway: selectedMethod
     }
     const { paymnent_url } = await createPaymentUrl(payload)
@@ -37,6 +40,5 @@ const Info = () => {
     </Box>
   )
 }
-
 
 export default Info

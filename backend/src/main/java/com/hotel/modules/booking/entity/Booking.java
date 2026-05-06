@@ -2,6 +2,7 @@ package com.hotel.modules.booking.entity;
 
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.rooms.entity.Room;
+import com.hotel.modules.voucher.entity.Voucher;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -84,6 +85,13 @@ public class Booking {
     // updated_at DATETIME2 NOT NULL DEFAULT SYSDATETIME()
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "voucher_id")
+    private Voucher voucher;
+
+    @Column(name = "discount_amount", nullable = false, precision = 18, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @JsonIgnore
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)

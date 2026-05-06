@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import { useBookingContext } from '../../../_id'
 import PromoInput from './PromoInput'
 
-
 const Discount = () => {
-  const [promo, setPromo] = useState(null)
+  const { booking, voucherData, setVoucherData } = useBookingContext() || {}
+  const bookingId = booking?.bookingId
+
   return (
     <PromoInput
-      applied={promo}
-      onApply={setPromo}
-      onRemove={() => setPromo(null)}
+      bookingId={bookingId}
+      applied={voucherData}
+      onApply={setVoucherData}
+      onRemove={() => setVoucherData(null)}
     />
   )
 }

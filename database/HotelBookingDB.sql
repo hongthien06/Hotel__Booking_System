@@ -18,7 +18,9 @@ DROP TABLE IF EXISTS Invoices;
 DROP TABLE IF EXISTS Payments;
 DROP TABLE IF EXISTS BookingServices;
 DROP TABLE IF EXISTS ChatMessages;
+DROP TABLE IF EXISTS voucher_usages;
 DROP TABLE IF EXISTS Bookings;
+DROP TABLE IF EXISTS vouchers;
 DROP TABLE IF EXISTS Conversations;
 DROP TABLE IF EXISTS HotelAmenityMap;
 DROP TABLE IF EXISTS HotelServices;
@@ -123,29 +125,60 @@ CREATE TABLE ExtraServices (
     CONSTRAINT PK_ExtraServices PRIMARY KEY (service_id)
 );
 
+CREATE TABLE vouchers (
+    voucher_id           BIGINT IDENTITY(1,1)  PRIMARY KEY,
+    code                 NVARCHAR(50)           NOT NULL UNIQUE,
+    description          NVARCHAR(500)          NULL,
+    discount_type        NVARCHAR(20)           NOT NULL,   -- PERCENTAGE | FIXED_AMOUNT
+    discount_value       DECIMAL(18, 2)         NOT NULL,
+    min_order_amount     DECIMAL(18, 2)         NOT NULL DEFAULT 0,
+    max_discount_amount  DECIMAL(18, 2)         NULL,
+    usage_limit          INT                    NULL,
+    used_count           INT                    NOT NULL DEFAULT 0,
+    usage_limit_per_user INT                    NOT NULL DEFAULT 1,
+    status               NVARCHAR(20)           NOT NULL DEFAULT 'ACTIVE',
+    start_date           DATETIME2              NULL,
+    end_date             DATETIME2              NULL,
+    created_at           DATETIME2              NOT NULL DEFAULT SYSDATETIME(),
+    updated_at           DATETIME2              NULL
+);
+
 CREATE TABLE Bookings (
-    booking_id BIGINT NOT NULL IDENTITY(1,1),
-    user_id BIGINT NOT NULL,
-    room_id BIGINT NOT NULL,
-    check_in_date DATE NOT NULL,
-    check_out_date DATE NOT NULL,
-    actual_checkin DATETIME2 NULL,
-    actual_checkout DATETIME2 NULL,
-    num_adults TINYINT NOT NULL DEFAULT 1,
-    num_children TINYINT NOT NULL DEFAULT 0,
-    special_request NVARCHAR(500) NULL,
+    booking_id          BIGINT NOT NULL IDENTITY(1,1),
+    user_id             BIGINT NOT NULL,
+    room_id             BIGINT NOT NULL,
+    voucher_id          BIGINT NULL,
+    check_in_date       DATE NOT NULL,
+    check_out_date      DATE NOT NULL,
+    actual_checkin      DATETIME2 NULL,
+    actual_checkout     DATETIME2 NULL,
+    num_adults          TINYINT NOT NULL DEFAULT 1,
+    num_children        TINYINT NOT NULL DEFAULT 0,
+    special_request     NVARCHAR(500) NULL,
     room_price_snapshot DECIMAL(18,2) NOT NULL,
-    total_nights SMALLINT NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
-    expires_at DATETIME2 NULL,
-    booking_code VARCHAR(20) NOT NULL,
-    version INT NOT NULL DEFAULT 0,
-    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-    updated_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-    CONSTRAINT PK_Bookings PRIMARY KEY (booking_id),
-    CONSTRAINT FK_Bookings_User FOREIGN KEY (user_id) REFERENCES Users(user_id),
-    CONSTRAINT FK_Bookings_Room FOREIGN KEY (room_id) REFERENCES Rooms(room_id),
-    CONSTRAINT UQ_Bookings_Code UNIQUE (booking_code)
+    total_nights        SMALLINT NOT NULL,
+    discount_amount     DECIMAL(18,2) NOT NULL DEFAULT 0,
+    status              VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    expires_at          DATETIME2 NULL,
+    booking_code        VARCHAR(20) NOT NULL,
+    version             INT NOT NULL DEFAULT 0,
+    created_at          DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    updated_at          DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_Bookings          PRIMARY KEY (booking_id),
+    CONSTRAINT FK_Bookings_User     FOREIGN KEY (user_id)    REFERENCES Users(user_id),
+    CONSTRAINT FK_Bookings_Room     FOREIGN KEY (room_id)    REFERENCES Rooms(room_id),
+    CONSTRAINT FK_Bookings_Voucher  FOREIGN KEY (voucher_id) REFERENCES vouchers(voucher_id),
+    CONSTRAINT UQ_Bookings_Code     UNIQUE (booking_code)
+);
+
+CREATE TABLE voucher_usages (
+    usage_id        BIGINT IDENTITY(1,1)  PRIMARY KEY,
+    voucher_id      BIGINT                NOT NULL REFERENCES vouchers(voucher_id),
+    booking_id      BIGINT                NOT NULL REFERENCES Bookings(booking_id),
+    user_id         BIGINT                NOT NULL REFERENCES Users(user_id),
+    discount_amount DECIMAL(18, 2)        NOT NULL,
+    used_at         DATETIME2             NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT uq_voucher_booking UNIQUE (voucher_id, booking_id)
 );
 
 CREATE TABLE BookingServices (
@@ -370,3 +403,8 @@ WHERE email IN (
     'nguyenann1204@gmail.com'
 );
 GO
+
+-- Index cho vouchers va voucher_usages
+CREATE INDEX idx_vouchers_code   ON vouchers(code);
+CREATE INDEX idx_vouchers_status ON vouchers(status);
+CREATE INDEX idx_vu_user_voucher ON voucher_usages(user_id, voucher_id);

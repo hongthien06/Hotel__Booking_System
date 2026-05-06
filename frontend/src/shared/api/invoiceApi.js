@@ -5,6 +5,11 @@ export const getInvoiceByBookingIdAPI = async (bookingId) => {
   return response.data
 }
 
+export const getInvoiceByTransactionIdAPI = async (transactionId) => {
+  const response = await axiosInstance.get(`/api/v1/invoices/transaction/${transactionId}`)
+  return response.data
+}
+
 export const downloadInvoicePdfApi = async (invoiceId) => {
   const response = await axiosInstance.get(`/api/v1/invoices/${invoiceId}/pdf`, { responseType: 'blob' })
   const url = window.URL.createObjectURL(new Blob([response.data]))

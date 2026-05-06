@@ -19,12 +19,15 @@ function Payments() {
   // Booking data passed via router state from BookingPage
   const bookingState = location.state || {}
 
+  // voucherData: ApplyVoucherResponse từ API sau khi áp mã giảm giá
+  const [voucherData, setVoucherData] = useState(null)
+
   useEffect(() => {
     setActiveStep(step)
   }, [step])
 
   return (
-    <BookingContext.Provider value={bookingState}>
+    <BookingContext.Provider value={{ ...bookingState, voucherData, setVoucherData }}>
       <Container disableGutters
         maxWidth={false}
         sx={{

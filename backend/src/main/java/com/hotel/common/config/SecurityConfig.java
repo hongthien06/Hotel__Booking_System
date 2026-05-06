@@ -55,6 +55,13 @@ public class SecurityConfig {
                         .requestMatchers("/bookings/occupied-rooms").permitAll()
                         .requestMatchers("/bookings/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/dashboard/**", "/admin/**").hasAnyRole("ADMIN", "MANAGER")
+                        // Voucher: user endpoints (yeu cau dang nhap)
+                        .requestMatchers(HttpMethod.GET, "/vouchers/active").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/vouchers/code/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/vouchers/apply").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/vouchers/booking/**").authenticated()
+                        // Voucher: admin/manager endpoints
+                        .requestMatchers("/vouchers/**").hasAnyRole("ADMIN", "MANAGER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,
