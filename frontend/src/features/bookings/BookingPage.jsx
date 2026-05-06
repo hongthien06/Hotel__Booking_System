@@ -90,6 +90,19 @@ const MOCK_ROOMS = [
   { id: 'm10', name: 'Luxury Penthouse', location: 'Nha Trang', bed: 'King', reviews: 34, rating: 5.0, type: 'President', price: 8000000, bg: '#faf5ff', emoji: '💎' },
 ];
 
+const MOCK_WEEKEND_DEALS = [
+  { id: 'w1', name: 'Riverside Boutique Studio', location: 'Hội An', province: 'Quảng Nam', bed: 'Double', reviews: 214, rating: 8.7, type: 'Superior', pricePerNight: 950000, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400' },
+  { id: 'w2', name: 'Mountain Eco Lodge', location: 'Sa Pa', province: 'Lào Cai', bed: 'Queen', reviews: 189, rating: 9.1, type: 'Deluxe', pricePerNight: 1350000, image: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?w=400' },
+  { id: 'w3', name: 'Beachside Bungalow Retreat', location: 'Mũi Né', province: 'Bình Thuận', bed: 'King', reviews: 301, rating: 8.5, type: 'Deluxe', pricePerNight: 1600000, image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=400' },
+  { id: 'w4', name: 'Heritage Colonial Room', location: 'Hà Nội', province: 'Hà Nội', bed: 'Double', reviews: 425, rating: 8.3, type: 'Standard', pricePerNight: 720000, image: 'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=400' },
+  { id: 'w5', name: 'Rooftop Sky Suite', location: 'TP. Hồ Chí Minh', province: 'TP. Hồ Chí Minh', bed: 'King', reviews: 98, rating: 9.3, type: 'President', pricePerNight: 4200000, image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400' },
+  { id: 'w6', name: 'Pine Forest Cabin', location: 'Đà Lạt', province: 'Lâm Đồng', bed: 'Double', reviews: 176, rating: 9.0, type: 'Superior', pricePerNight: 1100000, image: 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=400' },
+  { id: 'w7', name: 'Island Pearl Villa', location: 'Phú Quốc', province: 'Kiên Giang', bed: 'King', reviews: 263, rating: 9.4, type: 'President', pricePerNight: 3800000, image: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=400' },
+  { id: 'w8', name: 'Old Quarter Cozy Room', location: 'Hội An', province: 'Quảng Nam', bed: 'Single', reviews: 511, rating: 8.6, type: 'Standard', pricePerNight: 650000, image: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400' },
+  { id: 'w9', name: 'Cliffside Ocean View', location: 'Vũng Tàu', province: 'Bà Rịa - Vũng Tàu', bed: 'Queen', reviews: 147, rating: 8.9, type: 'Deluxe', pricePerNight: 1750000, image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400' },
+  { id: 'w10', name: 'Wellness Spa Retreat', location: 'Huế', province: 'Thừa Thiên Huế', bed: 'Queen', reviews: 88, rating: 9.2, type: 'Superior', pricePerNight: 2100000, image: 'https://images.unsplash.com/photo-1601053081350-c1e37a5e7e99?w=400' },
+];
+
 const nightsBetween = (a, b) => {
   const diff = new Date(b) - new Date(a);
   return diff > 0 ? Math.round(diff / 86400000) : 1;
@@ -224,6 +237,65 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
       >
         {loading ? t('booking_page.searching') : t('booking_page.find_room')}
       </Button>
+    </Box>
+  );
+};
+
+
+const OffersSection = () => {
+  const { t } = useTranslation();
+  return (
+    <Box sx={{ mb: 6, px: 6 }}>
+      <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
+        {t('banners.offers_title') === 'banners.offers_title' ? 'Ưu đãi' : t('banners.offers_title')}
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        {t('banners.offers_subtitle') === 'banners.offers_subtitle' ? 'Khuyến mãi, giảm giá và ưu đãi đặc biệt dành riêng cho bạn' : t('banners.offers_subtitle')}
+      </Typography>
+      
+      <Card sx={{ 
+        display: 'flex', 
+        flexDirection: { xs: 'column', md: 'row' },
+        borderRadius: 4, 
+        border: '1px solid #eee', 
+        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+        overflow: 'hidden',
+        bgcolor: '#fff'
+      }}>
+        <Box sx={{ flex: 1, p: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#333' }}>
+            Không điều kiện ràng buộc. An tâm nghỉ dưỡng.
+          </Typography>
+          <Typography variant="h5" sx={{ fontWeight: 900, mb: 1, color: '#1a1a1a' }}>
+            Đặt với Ưu Đãi Mùa Du Lịch
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 450 }}>
+            Giảm ít nhất 15% cho một số chỗ nghỉ khi đặt phòng từ nay đến hết mùa du lịch.
+          </Typography>
+          <Button variant="contained" sx={{ 
+            bgcolor: '#006ce4', 
+            color: '#fff', 
+            textTransform: 'none', 
+            fontWeight: 700,
+            fontSize: 15,
+            borderRadius: 1.5,
+            width: 'fit-content',
+            py: 1.2,
+            px: 4,
+            '&:hover': { bgcolor: '#005bb8', boxShadow: '0 4px 12px rgba(0,108,228,0.3)' }
+          }}>
+            Tiết kiệm cho chuyến đi tới
+          </Button>
+        </Box>
+        <Box sx={{ width: { xs: '100%', md: 320 }, minHeight: 220 }}>
+          <CardMedia
+            component="img"
+            image="https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=600"
+            alt="Offer"
+            sx={{ height: '100%', objectFit: 'cover' }}
+          />
+        </Box>
+      </Card>
     </Box>
   );
 };
@@ -510,6 +582,27 @@ const BookingPage = () => {
       return revB - revA;
     }).slice(0, 10);
   }, [rooms, searched]);
+  
+  const weekendDeals = React.useMemo(() => {
+    // Lấy tối đa 10 phòng thật từ backend, shuffle để khác phần "Phòng nổi bật"
+    const shuffledReal = [...rooms].sort(() => Math.random() - 0.5);
+    const realRooms = shuffledReal.slice(0, 10).map(r => ({
+      ...r,
+      _isMockCard: false,
+      oldPrice: Number(r.pricePerNight || r.priceDay || 0) * (1.2 + Math.random() * 0.15),
+    }));
+
+    // Nếu phòng thật < 10, bổ sung bằng MOCK_WEEKEND_DEALS
+    const needed = Math.max(0, 10 - realRooms.length);
+    const mockFill = MOCK_WEEKEND_DEALS.slice(0, needed).map(r => ({
+      ...r,
+      _isMockCard: true,
+      oldPrice: Number(r.pricePerNight || 0) * (1.2 + Math.random() * 0.15),
+    }));
+
+    return [...realRooms, ...mockFill];
+  }, [rooms]);
+
 
   const recentScrollRef = useRef(null);
   const scrollRecent = (dir) => {
@@ -519,6 +612,17 @@ const BookingPage = () => {
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
       if (dir < 0 && scrollLeft <= 10) return;
       recentScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+    }
+  };
+
+  const weekendScrollRef = useRef(null);
+  const scrollWeekend = (dir) => {
+    if (weekendScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = weekendScrollRef.current;
+      const scrollAmount = clientWidth / 3 + 16;
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
+      if (dir < 0 && scrollLeft <= 10) return;
+      weekendScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
     }
   };
 
@@ -635,7 +739,7 @@ const BookingPage = () => {
   };
 
   /* ── Room Card ─────────────────────────────────────────── */
-  const RoomCard = ({ room, isMock }) => {
+  const RoomCard = ({ room, isMock, oldPrice }) => {
     const { t, i18n } = useTranslation();
     return (
       <Card
@@ -678,6 +782,11 @@ const BookingPage = () => {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
+              {oldPrice && (
+                <Typography component="span" variant="caption" sx={{ textDecoration: 'line-through', color: '#d32f2f', mr: 1, fontWeight: 500, fontSize: '0.75rem' }}>
+                  {formatCurrency(oldPrice, i18n.language)}
+                </Typography>
+              )}
               {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
             </Typography>
             <Button
@@ -873,6 +982,9 @@ const BookingPage = () => {
                     </IconButton>
                   )}
                 </Box>
+
+
+                <OffersSection />
 
 
                 {/* 3. Tìm kiếm theo loại phòng */}
@@ -1117,6 +1229,42 @@ const BookingPage = () => {
                     </Box>
                   </>
                 )}
+
+                {/* 7. Ưu đãi cho cuối tuần */}
+                <Box sx={{ mb: 2, pl: 6 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>Ưu đãi cho cuối tuần</Typography>
+                  <Typography variant="body2" color="text.secondary">Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5</Typography>
+                </Box>
+                <Box sx={{ position: 'relative', mb: 8, px: 6 }}>
+                  <IconButton onClick={() => scrollWeekend(-1)} sx={{
+                    position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
+                    zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                    '&:hover': { bgcolor: PC_LIGHT },
+                  }}>
+                    <ChevronLeft sx={{ color: PC }} />
+                  </IconButton>
+
+                  <Box ref={weekendScrollRef} sx={{
+                    display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
+                    justifyContent: 'flex-start',
+                    scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                    scrollSnapType: 'x mandatory',
+                  }}>
+                    {weekendDeals.map(r => (
+                      <Box key={r.id || r.roomId} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                        <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} />
+                      </Box>
+                    ))}
+                  </Box>
+
+                  <IconButton onClick={() => scrollWeekend(1)} sx={{
+                    position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
+                    zIndex: 2, bgcolor: 'white', boxShadow: 3,
+                    '&:hover': { bgcolor: PC_LIGHT },
+                  }}>
+                    <ChevronRight sx={{ color: PC }} />
+                  </IconButton>
+                </Box>
               </>
             ) : (
               /* Search Results View */
