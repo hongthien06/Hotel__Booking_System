@@ -302,7 +302,12 @@
     "Superior": "Phòng Cao cấp",
     "Family Room": "Phòng Gia đình",
     "Presidential Suite": "Phòng Tổng thống",
-    "fetch_error": "Không thể tải danh sách phòng. Vui lòng thử lại."
+    "fetch_error": "Không thể tải danh sách phòng. Vui lòng thử lại.",
+    "upload": "Tải ảnh lên",
+    "save_to_cloud": "Lưu lên Cloud",
+    "uploading": "Đang tải...",
+    "cloudify_success": "Đã lưu lên Cloud!",
+    "upload_error": "Lỗi khi tải ảnh lên"
   },
   "chatbot": {
     "placeholder": "Nhập tin nhắn...",
