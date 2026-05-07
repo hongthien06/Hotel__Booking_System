@@ -25,8 +25,31 @@ jobs:
           script: |
             echo "Start Deploying EC2..."
             cd /home/ubuntu
-            sudo bash -c "grep -q '^IMAGE_TAG=' .env && sed -i 's/^IMAGE_TAG=.*/IMAGE_TAG=${{ github.event.workflow_run.head_sha }}/' .env || echo 'IMAGE_TAG=${{ github.event.workflow_run.head_sha }}' >> .env"
-            sudo docker compose pull backend frontend
-            sudo docker compose up -d --force-recreate backend frontend
+
+            echo "Cleaning up Docker resources..."
+            sudo docker image prune -af
+
+            TAG=${{ github.event.workflow_run.head_sha }}
+            USERNAME=$(grep '^DOCKERHUB_USERNAME=' .env | cut -d'=' -f2)
+
+            echo "Retry pull image"
+            pull_with_retry() {
+              local image=$1
+              for i in {1..10}; do
+                if sudo docker pull $image; then
+                  return 0
+                fi
+                echo "Image $image chưa có, retry $i/10 sau 8s..."
+                sleep 8
+              done
+              return 1
+            }
+
+            sudo sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$TAG/" .env || echo "IMAGE_TAG=$TAG" >> .env
+
+            pull_with_retry "$USERNAME/booking-backend:$TAG" || exit 1
+            pull_with_retry "$USERNAME/booking-frontend:$TAG" || exit 1 
+
+            sudo docker compose up -d --force-recreate
             sudo docker image prune -f
             echo "Deploy EC2 Successfully!"
