@@ -19,6 +19,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material';
 import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi';
+import { getAmenitiesApi } from '../../shared/api/amenityApi';
 import { createBookingApi } from '../../shared/api/bookingApi';
 import { useAuth } from '../../shared/hooks/useAuth';
 import LoginPromptModal from '../../shared/components/modals/LoginPromptModal';
@@ -109,7 +110,9 @@ const nightsBetween = (a, b) => {
 };
 
 /* ─── Sidebar ─────────────────────────────────────────── */
-const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes, services, setServices, minPrice, setMinPrice, maxPrice, setMaxPrice, onSearch, loading }) => {
+const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes,
+  amenities, selectedAmenities, setSelectedAmenities,
+  minPrice, setMinPrice, maxPrice, setMaxPrice, onSearch, loading }) => {
   const { t } = useTranslation();
   const toggle = (list, setList, v) =>
     setList(list.includes(v) ? list.filter(x => x !== v) : [...list, v]);
@@ -208,10 +211,10 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
       </Box>
       <Divider sx={{ mb: 2 }} />
 
+      {/* Loại phòng */}
       {[
         ['booking_page.room_type', ROOM_TYPES, roomTypes, setRoomTypes],
         ['booking_page.bed_type', BED_TYPES, bedTypes, setBedTypes],
-        ['booking_page.extra_services', SERVICES, services, setServices],
       ].map(([titleKey, items, list, setList]) => (
         <Box key={titleKey}>
           <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>{t(titleKey)}</Typography>
@@ -231,6 +234,32 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         </Box>
       ))}
 
+      {/* Tiện ích khách sạn — dynamic từ API */}
+      {amenities && amenities.length > 0 && (
+        <Box>
+          <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>
+            {t('booking_page.amenities') || 'Tiện ích khách sạn'}
+          </Typography>
+          <FormGroup sx={{ mb: 1 }}>
+            {amenities.map(a => (
+              <FormControlLabel key={a.amenityId}
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={selectedAmenities.includes(a.amenityName)}
+                    onChange={() => toggle(selectedAmenities, setSelectedAmenities, a.amenityName)}
+                    sx={{ color: PC, '&.Mui-checked': { color: PC } }}
+                  />
+                }
+                label={<Typography variant="body2">{a.amenityName}</Typography>}
+                sx={{ mb: 0.1 }}
+              />
+            ))}
+          </FormGroup>
+          <Divider sx={{ mb: 2 }} />
+        </Box>
+      )}
+
       <Button fullWidth variant="contained" color="primary" onClick={onSearch} disabled={loading}
         startIcon={<Search />}
         sx={{ borderRadius: 2, py: 1.2, fontWeight: 700 }}
@@ -240,6 +269,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
     </Box>
   );
 };
+
 
 
 const OffersSection = () => {
@@ -499,7 +529,11 @@ const BookingPage = () => {
   const [destIdx, setDestIdx] = useState(1);
   const [roomTypes, setRoomTypes] = useState([]);
   const [bedTypes, setBedTypes] = useState([]);
-  const [services, setServices] = useState([]);
+  
+  // Amenities state
+  const [amenities, setAmenities] = useState([]);
+  const [selectedAmenities, setSelectedAmenities] = useState([]);
+
   const [minPrice, setMinPrice] = useState(undefined);
   const [maxPrice, setMaxPrice] = useState(undefined);
   const [params, setParams] = useState({
@@ -653,6 +687,11 @@ const BookingPage = () => {
       .then(d => setRooms(Array.isArray(d) ? d : []))
       .catch(() => setRooms([]))
       .finally(() => setLoading(false));
+
+    // Fetch amenities for the sidebar
+    getAmenitiesApi()
+      .then(d => setAmenities(Array.isArray(d) ? d : []))
+      .catch(err => console.error("Failed to load amenities:", err));
   }, []);
 
   const onParam = (k, v) => setParams(p => ({ ...p, [k]: v }));
@@ -680,7 +719,8 @@ const BookingPage = () => {
         minPrice,
         maxPrice,
         roomTypes.length > 0 ? roomTypes : undefined,
-        bedTypes.length > 0 ? bedTypes : undefined
+        bedTypes.length > 0 ? bedTypes : undefined,
+        selectedAmenities.length > 0 ? selectedAmenities : undefined
       );
       setRooms(Array.isArray(d) ? d : []);
     } catch { setRooms([]); }
@@ -732,7 +772,8 @@ const BookingPage = () => {
         minPrice,
         maxPrice,
         [typeKey],
-        bedTypes.length > 0 ? bedTypes : undefined
+        bedTypes.length > 0 ? bedTypes : undefined,
+        selectedAmenities.length > 0 ? selectedAmenities : undefined
       );
       setRooms(Array.isArray(d) ? d : []);
     } catch { setRooms([]); }
@@ -833,7 +874,9 @@ const BookingPage = () => {
         <Sidebar params={params} onParam={onParam}
           roomTypes={roomTypes} setRoomTypes={setRoomTypes}
           bedTypes={bedTypes} setBedTypes={setBedTypes}
-          services={services} setServices={setServices}
+          amenities={amenities}
+          selectedAmenities={selectedAmenities}
+          setSelectedAmenities={setSelectedAmenities}
           minPrice={minPrice} setMinPrice={setMinPrice}
           maxPrice={maxPrice} setMaxPrice={setMaxPrice}
           onSearch={handleSearch} loading={loading}

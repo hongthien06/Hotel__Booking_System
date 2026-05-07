@@ -118,11 +118,39 @@ CREATE TABLE Rooms (
 );
 
 CREATE TABLE ExtraServices (
-    service_id INT NOT NULL IDENTITY(1,1),
-    service_name NVARCHAR(150) NOT NULL,
-    unit_price DECIMAL(18,2) NOT NULL,
-    price_type VARCHAR(20) NOT NULL DEFAULT 'PER_PERSON',
+    service_id   INT            NOT NULL IDENTITY(1,1),
+    service_name NVARCHAR(150)  NOT NULL,
+    description  NVARCHAR(500)  NULL,
+    unit_price   DECIMAL(18,2)  NOT NULL,
+    price_type   VARCHAR(20)    NOT NULL DEFAULT 'PER_BOOKING',
+    is_active    BIT            NOT NULL DEFAULT 1,
     CONSTRAINT PK_ExtraServices PRIMARY KEY (service_id)
+);
+
+CREATE TABLE Amenities (
+    amenity_id   INT            NOT NULL IDENTITY(1,1),
+    amenity_name NVARCHAR(100)  NOT NULL,
+    icon_class   VARCHAR(100)   NULL,
+    description  NVARCHAR(255)  NULL,
+    CONSTRAINT PK_Amenities     PRIMARY KEY (amenity_id),
+    CONSTRAINT UQ_Amenities_Name UNIQUE (amenity_name)
+);
+
+CREATE TABLE HotelAmenityMap (
+    hotel_id   BIGINT NOT NULL,
+    amenity_id INT    NOT NULL,
+    CONSTRAINT PK_HotelAmenityMap  PRIMARY KEY (hotel_id, amenity_id),
+    CONSTRAINT FK_HAM_Hotel        FOREIGN KEY (hotel_id)   REFERENCES Hotels(hotel_id)   ON DELETE CASCADE,
+    CONSTRAINT FK_HAM_Amenity      FOREIGN KEY (amenity_id) REFERENCES Amenities(amenity_id) ON DELETE CASCADE
+);
+
+CREATE TABLE HotelServices (
+    hotel_id     BIGINT         NOT NULL,
+    service_id   INT            NOT NULL,
+    custom_price DECIMAL(18,2)  NULL,
+    CONSTRAINT PK_HotelServices PRIMARY KEY (hotel_id, service_id),
+    CONSTRAINT FK_HS_Hotel      FOREIGN KEY (hotel_id)   REFERENCES Hotels(hotel_id)   ON DELETE CASCADE,
+    CONSTRAINT FK_HS_Service    FOREIGN KEY (service_id) REFERENCES ExtraServices(service_id) ON DELETE CASCADE
 );
 
 CREATE TABLE vouchers (
@@ -384,6 +412,55 @@ INSERT INTO Rooms (hotel_id, type_id, room_number, floor, bed_type, price_per_ni
 (2, 6, 'V-102', 1, 'SINGLE', 2500000, 'AVAILABLE'),
 (3, 11, '8102', 81, 'KING', 6500000, 'AVAILABLE'),
 (4, 16, '403', 4, 'DOUBLE', 3200000, 'AVAILABLE');
+GO
+
+-- Seed data Amenities (10 tiện ích phổ biến)
+INSERT INTO Amenities (amenity_name, icon_class, description) VALUES
+(N'Hồ bơi',           'pool',           N'Hồ bơi ngoài trời hoặc trong nhà'),
+(N'Gym / Fitness',     'fitness_center',  N'Phòng tập thể dục đầy đủ thiết bị'),
+(N'WiFi miễn phí',    'wifi',            N'WiFi tốc độ cao miễn phí toàn khách sạn'),
+(N'Bãi đỗ xe',        'local_parking',   N'Bãi đỗ xe miễn phí hoặc có phí'),
+(N'Nhà hàng',         'restaurant',      N'Nhà hàng phục vụ các bữa ăn trong ngày'),
+(N'Spa & Làm đẹp',    'spa',             N'Trung tâm spa và các dịch vụ thư giãn'),
+(N'Bar / Lounge',     'local_bar',       N'Bar cocktail và khu vực nghỉ ngơi'),
+(N'Phòng họp',        'meeting_room',    N'Phòng họp và hội nghị chuyên nghiệp'),
+(N'Lễ tân 24/7',      'support_agent',   N'Dịch vụ lễ tân phục vụ 24/7'),
+(N'Bể sục / Jacuzzi', 'hot_tub',         N'Bể sục thư giãn');
+GO
+
+-- Seed data HotelAmenityMap — gán tiện ích cho 15 khách sạn
+-- (1=Hồ bơi, 2=Gym, 3=WiFi, 4=Bãi đỗ xe, 5=Nhà hàng, 6=Spa, 7=Bar, 8=Phòng họp, 9=Lễ tân 24/7, 10=Bể sục)
+INSERT INTO HotelAmenityMap (hotel_id, amenity_id) VALUES
+-- KS 1: Mường Thanh Grand Hanoi (5 sao)
+(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),
+-- KS 2: InterContinental Danang (5 sao, resort biển)
+(2,1),(2,2),(2,3),(2,5),(2,6),(2,7),(2,9),(2,10),
+-- KS 3: Vinpearl Landmark 81 (5 sao, cao nhất VN)
+(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,7),(3,8),(3,9),(3,10),
+-- KS 4: Caravelle Saigon (5 sao, trung tâm)
+(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),(4,8),(4,9),
+-- KS 5: Ana Mandara Villas Dalat (5 sao, biệt thự)
+(5,1),(5,3),(5,5),(5,6),(5,9),(5,10),
+-- KS 6: Sheraton Nha Trang (5 sao, view biển)
+(6,1),(6,2),(6,3),(6,5),(6,6),(6,7),(6,9),(6,10),
+-- KS 7: JW Marriott Phu Quoc (5 sao, đảo)
+(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7),(7,8),(7,9),(7,10),
+-- KS 8: Silk Path Grand Resort Sapa (5 sao, núi)
+(8,2),(8,3),(8,5),(8,6),(8,8),(8,9),
+-- KS 9: Azerai La Residence Hue (5 sao, lịch sử)
+(9,1),(9,3),(9,5),(9,6),(9,7),(9,9),(9,10),
+-- KS 10: Flamingo Cat Ba (5 sao, đảo)
+(10,1),(10,3),(10,5),(10,6),(10,9),
+-- KS 11: Pullman Vung Tau (5 sao, biển)
+(11,1),(11,2),(11,3),(11,4),(11,5),(11,6),(11,7),(11,9),
+-- KS 12: Rex Hotel (5 sao, trung tâm SG)
+(12,2),(12,3),(12,4),(12,5),(12,7),(12,8),(12,9),
+-- KS 13: Metropole Hanoi (5 sao, lịch sử)
+(13,1),(13,2),(13,3),(13,4),(13,5),(13,6),(13,7),(13,8),(13,9),(13,10),
+-- KS 14: Novotel Danang (5 sao, bờ sông)
+(14,1),(14,2),(14,3),(14,4),(14,5),(14,8),(14,9),
+-- KS 15: Dalat Palace Heritage (5 sao, cổ điển)
+(15,2),(15,3),(15,5),(15,6),(15,8),(15,9);
 GO
 
 

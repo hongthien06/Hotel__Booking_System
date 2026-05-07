@@ -51,6 +51,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     AND (:typeNames IS NULL OR rt.typeName IN :typeNames)
     AND (:bedTypes IS NULL OR r.bedType IN :bedTypes)
     AND (:occupiedIds IS NULL OR r.roomId NOT IN :occupiedIds)
+    AND (:hotelIds IS NULL OR h.hotelId IN :hotelIds)
 """)
     List<Room> findAvailableRooms(
             @Param("occupiedIds") List<Long> occupiedIds,
@@ -59,6 +60,7 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
             @Param("typeNames") List<String> typeNames,
-            @Param("bedTypes") List<BedType> bedTypes
+            @Param("bedTypes") List<BedType> bedTypes,
+            @Param("hotelIds") List<Long> hotelIds
     );
 }

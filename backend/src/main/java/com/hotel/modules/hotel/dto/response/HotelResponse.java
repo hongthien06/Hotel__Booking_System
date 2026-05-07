@@ -3,6 +3,9 @@ package com.hotel.modules.hotel.dto.response;
 import com.hotel.modules.hotel.entity.Hotel;
 import lombok.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,9 +25,15 @@ public class HotelResponse {
     private String phone;
     private String email;
     private Boolean isActive;
+    private List<String> amenityNames; // Danh sách tên tiện ích của khách sạn
 
     public static HotelResponse from(Hotel hotel) {
         if (hotel == null) return null;
+        List<String> amenities = hotel.getAmenities() == null ? List.of()
+                : hotel.getAmenities().stream()
+                        .map(a -> a.getAmenityName())
+                        .sorted()
+                        .collect(Collectors.toList());
         return HotelResponse.builder()
                 .hotelId(hotel.getHotelId())
                 .hotelCode(hotel.getHotelCode())
@@ -40,6 +49,7 @@ public class HotelResponse {
                 .phone(hotel.getPhone())
                 .email(hotel.getEmail())
                 .isActive(hotel.getIsActive())
+                .amenityNames(amenities)
                 .build();
     }
 }

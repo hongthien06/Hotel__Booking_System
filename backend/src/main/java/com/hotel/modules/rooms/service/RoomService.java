@@ -3,6 +3,7 @@ package com.hotel.modules.rooms.service;
 
 import com.hotel.modules.booking.service.BookingService;
 import com.hotel.modules.hotel.entity.Hotel;
+import com.hotel.modules.hotel.repository.HotelRepository;
 import com.hotel.modules.hotel.service.HotelService;
 import com.hotel.modules.rooms.dto.request.RoomRequest;
 import com.hotel.modules.rooms.dto.response.RoomResponse;
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class RoomService {
     private final RoomTypeService roomTypeService;
     private final BookingService bookingService;
     private final HotelService hotelService;
+    private final HotelRepository hotelRepository;
 
     //Query Operations
     public List<RoomResponse> getAll() {
@@ -123,7 +126,7 @@ public class RoomService {
     public List<RoomResponse> getAvailableRooms(
             LocalDate checkIn, LocalDate checkOut,
             Long hotelId, String province, BigDecimal minPrice, BigDecimal maxPrice,
-            List<String> typeNames, List<String> bedTypes) {
+            List<String> typeNames, List<String> bedTypes, List<String> amenityNames) {
         if (!checkOut.isAfter(checkIn)) throw new RuntimeException("Check out date must be after check in");
         List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
 
@@ -142,6 +145,19 @@ public class RoomService {
                     .toList();
         }
 
+        // Nếu có filter amenity, lấy danh sách hotelId có chứa amenity đó
+        List<Long> amenityHotelIds = null;
+        if (amenityNames != null && !amenityNames.isEmpty()) {
+            amenityHotelIds = hotelRepository.findByAmenityNames(amenityNames)
+                    .stream()
+                    .map(Hotel::getHotelId)
+                    .collect(Collectors.toList());
+            // Nếu không tìm được hotel nào có amenity đó → trả về rỗng ngay
+            if (amenityHotelIds.isEmpty()) {
+                return List.of();
+            }
+        }
+
         // Pass all filters directly to the repository @Query
         List<Room> availableRooms = roomRepository.findAvailableRooms(
                 (busyIds == null || busyIds.isEmpty()) ? null : busyIds,
@@ -150,7 +166,8 @@ public class RoomService {
                 minPrice,
                 maxPrice,
                 (typeNames != null && !typeNames.isEmpty()) ? typeNames : null,
-                (bedTypeEnums == null || bedTypeEnums.isEmpty()) ? null : bedTypeEnums
+                (bedTypeEnums == null || bedTypeEnums.isEmpty()) ? null : bedTypeEnums,
+                amenityHotelIds
         );
         return availableRooms.stream().map(RoomResponse::from).toList();
     }
