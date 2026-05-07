@@ -98,14 +98,14 @@ app:
       tmn-code: ${VNPAY_TMN_CODE}
       hash-secret: ${VNPAY_HASH_SECRET}
       pay-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-      return-url: http://localhost:3000/payment/?step=3
+      return-url: https://static4j.app//payment/?step=3
       timeout: 15
     momo:
       partner-code: ${MOMO_PARTNER_CODE}
       access-key: ${MOMO_ACCESS_KEY}
       secret-key: ${MOMO_SECRET_KEY}
       endpoint-url: https://test-payment.momo.vn/v2/gateway/api/create
-      return-url: http://localhost:3000/payment/?step=3
+      return-url: https://static4j.app//payment/?step=3
       request-type: captureWallet
       ipn-url: https://webhook.site/784642fe-feb2-4b1e-a31f-65e2e9349f6d
 
@@ -151,14 +151,14 @@ app:
       tmn-code: ${APP_VNPAY_TMN_CODE}
       hash-secret: ${APP_VNPAY_HASH_SECRET}
       pay-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-      return-url: http://localhost:3000/payment/?step=3
+      return-url: https://static4j.app//payment/?step=3
       timeout: 15
     momo:
       partner-code: ${APP_MOMO_PARTNER_CODE}
       access-key: ${APP_MOMO_ACCESS_KEY}
       secret-key: ${APP_MOMO_SECRET_KEY}
       endpoint-url: https://test-payment.momo.vn/v2/gateway/api/create
-      return-url: http://localhost:3000/payment/?step=3
+      return-url: https://static4j.app//payment/?step=3
       request-type: captureWallet
       ipn-url: https://webhook.site/784642fe-feb2-4b1e-a31f-65e2e9349f6d
 
