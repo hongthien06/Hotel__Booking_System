@@ -174,14 +174,14 @@ const Header = () => {
               <MenuItem onClick={() => { navigate('/profile'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
                 <Person fontSize="small" color="primary" /> {t("header.profile") || "Trang cá nhân"}
               </MenuItem>
-              
+
               {/* Chỉ hiện Lịch sử đặt phòng cho Customer/Guest */}
               {!hasRole(['ADMIN', 'MANAGER']) && (
                 <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
                   <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
                 </MenuItem>
               )}
-              
+
               <Divider sx={{ my: 1 }} />
               <MenuItem onClick={handleLogout} sx={{ py: 1.2, gap: 1.5, fontWeight: 600, color: 'error.main' }}>
                 <Logout fontSize="small" /> {t("header.logout")}
@@ -204,7 +204,7 @@ const Header = () => {
             {t("header.login")}
           </Button>
         )}
-        
+
         {/* Language Switcher at the very corner */}
         <Box sx={{ ml: 1, pl: 1, borderLeft: '1px solid rgba(154,28,72,0.2)' }}>
           <LanguageSwitcher />

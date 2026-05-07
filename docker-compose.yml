@@ -67,7 +67,6 @@ services:
         echo 'Xong!';
     depends_on:
       - sqlserver
-
   backend:
     build:
       context: ./backend
@@ -114,6 +113,7 @@ services:
   frontend:
     build:
       context: ./frontend
+      target: development
       dockerfile: Dockerfile
       args:
         VITE_API_URL: "/api/v1"
@@ -122,7 +122,10 @@ services:
     networks:
       - hbms-network
     ports:
-      - "3000:80"
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
     restart: unless-stopped

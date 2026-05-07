@@ -34,41 +34,41 @@ RUN rm /etc/nginx/conf.d/default.conf
 # Lưu thẳng vào image, không cần file bên ngoài
 RUN cat > /etc/nginx/conf.d/hbms.conf << 'EOF'
 server {
-    listen 80;
-    root /usr/share/nginx/html;
-    index index.html;
+listen 80;
+root /usr/share/nginx/html;
+index index.html;
 
-    # Gzip
-    gzip on;
-    gzip_types text/plain text/css application/javascript application/json;
+# Gzip
+gzip on;
+gzip_types text/plain text/css application/javascript application/json;
 
-    # Health check
-    location /health {
-        return 200 "OK";
-        add_header Content-Type text/plain;
-    }
+# Health check
+location /health {
+return 200 "OK";
+add_header Content-Type text/plain;
+}
 
-    # Cache static assets (Vite đã hash tên file)
-    location ~* \.(js|css|png|jpg|jpeg|svg|ico|woff2)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
+# Cache static assets (Vite đã hash tên file)
+location ~* \.(js|css|png|jpg|jpeg|svg|ico|woff2)$ {
+expires 1y;
+add_header Cache-Control "public, immutable";
+}
 
-    # Proxy API requests to backend
-    location /api {
-        proxy_pass http://backend:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Origin "";
-    }
+# Proxy API requests to backend
+location /api {
+proxy_pass http://backend:8080;
+proxy_set_header Host $host;
+proxy_set_header X-Real-IP $remote_addr;
+proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+proxy_set_header X-Forwarded-Proto $scheme;
+proxy_set_header Origin "";
+}
 
-    # SPA fallback: Mọi route → index.html (React Router xử lý)
-    location / {
-        try_files $uri $uri/ /index.html;
-        add_header Cache-Control "no-store";
-    }
+# SPA fallback: Mọi route → index.html (React Router xử lý)
+location / {
+try_files $uri $uri/ /index.html;
+add_header Cache-Control "no-store";
+}
 }
 EOF
 
@@ -80,6 +80,17 @@ RUN chown -R nginx:nginx /usr/share/nginx/html
 EXPOSE 80
 
 HEALTHCHECK --interval=15s --timeout=5s --retries=3 \
-  CMD wget -qO- http://127.0.0.1/health || exit 1
+    CMD wget -qO- http://127.0.0.1/health || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
+
+
+
+# ── STAGE 3: DEV ────────────────────────────────
+FROM node:20-alpine AS development
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+EXPOSE 5173 3000 80
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
