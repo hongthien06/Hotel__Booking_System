@@ -30,56 +30,48 @@ services:
   db-init:
     image: mcr.microsoft.com/mssql/server:2022-latest
     container_name: hbms-db-init
-    user: "0"
     networks:
       - hbms-network
     volumes:
-      - ./database/HotelBookingDB.sql:/tmp/HotelBookingDB.sql
+      - ./database/HotelBookingDB.sql:/HotelBookingDB.sql:ro
     env_file:
       - .env
     entrypoint:
       - /bin/bash
       - -c
       - |
-        set -e
-        echo 'Đợi SQL Server...'
-        READY=0
-        for i in $(seq 1 60); do
-          if /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q 'SELECT 1' -C -N -l 5 > /dev/null 2>&1; then
-            READY=1
-            break
-          fi
-          echo "Thử lại sau 2s... ($$i/60)"
-          sleep 2
-        done
-        if [ "$$READY" -ne 1 ]; then
-          echo 'SQL Server không sẵn sàng sau 120s. Thoát!'
-          exit 1
-        fi
+        echo 'Đợi SQL Server...';
+        for i in {1..60}; do
+          /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q 'SELECT 1' -No -C && break;
+          echo 'Thử lại sau 2s...';
+          sleep 2;
+        done;
 
-        echo 'Kiểm tra trạng thái database...'
-        DB_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q "SET NOCOUNT ON; SELECT count(*) FROM master.sys.databases WHERE name = 'HotelBookingDB'" -h -1 -C -N | tr -d '[:space:]')
+        echo 'Kiểm tra trạng thái database...';
+        DB_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q "SET NOCOUNT ON; SELECT count(*) FROM master.sys.databases WHERE name = 'HotelBookingDB'" -h -1 -No -C | tr -d '[:space:]');
 
-        INIT_NEEDED=1
-        if [ "$$DB_EXISTS" = "1" ]; then
-          TABLE_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -d HotelBookingDB -Q "SET NOCOUNT ON; SELECT count(*) FROM sys.tables WHERE name = 'Users'" -h -1 -C -N | tr -d '[:space:]')
-          if [ "$$TABLE_EXISTS" = "1" ]; then
-            INIT_NEEDED=0
-          fi
-        fi
+        INIT_NEEDED="1";
+        if [ "$$DB_EXISTS" == "1" ]; then
+          TABLE_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -d HotelBookingDB -Q "SET NOCOUNT ON; SELECT count(*) FROM sys.tables WHERE name = 'Users'" -h -1 -No -C | tr -d '[:space:]');
+          if [ "$$TABLE_EXISTS" == "1" ]; then
+            INIT_NEEDED="0";
+          fi;
+        fi;
 
-        if [ "$$INIT_NEEDED" -eq 1 ]; then
-          echo 'Đang nạp SQL khởi tạo...'
-          /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -C -N < /tmp/HotelBookingDB.sql
-          echo 'Khởi tạo database xong!'
+        if [ "$$INIT_NEEDED" == "1" ]; then
+          echo 'Đang nạp SQL khởi tạo...';
+          /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -i /HotelBookingDB.sql -No -C;
         else
-          echo 'Dữ liệu đã tồn tại, bỏ qua bước khởi tạo.'
-        fi
+          echo 'Dữ liệu đã tồn tại, bỏ qua bước khởi tạo để bảo toàn dữ liệu.';
+        fi;
+        echo 'Xong!';
     depends_on:
       - sqlserver
 
   backend:
-    image: ${DOCKERHUB_USERNAME}/booking-backend:latest
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: hbms-backend
     hostname: backend
     env_file:
@@ -120,7 +112,11 @@ services:
     restart: unless-stopped
 
   frontend:
-    image: ${DOCKERHUB_USERNAME}/booking-frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: "/api/v1"
     container_name: hbms-frontend
     hostname: frontend
     networks:
