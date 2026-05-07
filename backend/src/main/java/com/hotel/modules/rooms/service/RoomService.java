@@ -148,7 +148,7 @@ public class RoomService {
         // Nếu có filter amenity, lấy danh sách hotelId có chứa amenity đó
         List<Long> amenityHotelIds = null;
         if (amenityNames != null && !amenityNames.isEmpty()) {
-            amenityHotelIds = hotelRepository.findByAmenityNames(amenityNames)
+            amenityHotelIds = hotelRepository.findByAmenityNames(amenityNames, (long) amenityNames.size())
                     .stream()
                     .map(Hotel::getHotelId)
                     .collect(Collectors.toList());
