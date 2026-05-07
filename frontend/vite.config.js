@@ -12,6 +12,11 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: true,
+    allowedHosts: [
+      'static4j.app',
+      'www.static4j.app'
+    ],
     watch: {
       usePolling: true,
       interval: 1000,
