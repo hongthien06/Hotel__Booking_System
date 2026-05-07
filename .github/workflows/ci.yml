@@ -26,12 +26,6 @@ jobs:
           MSSQL_MEMORY_LIMIT_MB: 2048
         ports:
           - 1433:1433
-        options: >-
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -Q 'SELECT 1' -C -No"
-          --health-interval 10s
-          --health-timeout 8s
-          --health-retries 20
-          --health-start-period 60s
 
     steps:
       - uses: actions/checkout@v4
@@ -45,19 +39,27 @@ jobs:
 
       - name: Init database schema
         run: |
-          for i in {1..20}; do
-            /opt/mssql-tools18/bin/sqlcmd \
-              -S localhost,1433 -U sa -P "${{ secrets.MSSQL_SA_PASSWORD }}" \
-              -Q "IF DB_ID('HotelBookingDB') IS NULL CREATE DATABASE HotelBookingDB;" \
-              -C -N && break
-            echo "Waiting for SQL Server... ($i)"
+          # Dùng Docker Exec để chạy sqlcmd có sẵn TRONG container sqlserver
+          # Không cần cài tool lên Runner nữa
+          for i in {1..30}; do
+            docker exec ${{ job.services.sqlserver.id }} /opt/mssql-tools18/bin/sqlcmd \
+              -S localhost -U sa -P "${{ secrets.MSSQL_SA_PASSWORD }}" \
+              -C -N -Q "SELECT 1" && break
+            echo "SQL Server is starting... ($i)"
             sleep 5
           done
-          /opt/mssql-tools18/bin/sqlcmd \
-            -S localhost,1433 -U sa -P "${{ secrets.MSSQL_SA_PASSWORD }}" \
-            -d HotelBookingDB \
-            -i database/HotelBookingDB.sql \
-            -C -N || true
+
+          echo "Creating Database..."
+          docker exec ${{ job.services.sqlserver.id }} /opt/mssql-tools18/bin/sqlcmd \
+            -S localhost -U sa -P "${{ secrets.MSSQL_SA_PASSWORD }}" \
+            -C -N -Q "IF DB_ID('HotelBookingDB') IS NULL CREATE DATABASE HotelBookingDB;"
+
+          echo "Applying SQL Script..."
+          # Đẩy file sql vào container rồi chạy
+          docker cp database/HotelBookingDB.sql ${{ job.services.sqlserver.id }}:/tmp/setup.sql
+          docker exec ${{ job.services.sqlserver.id }} /opt/mssql-tools18/bin/sqlcmd \
+            -S localhost -U sa -P "${{ secrets.MSSQL_SA_PASSWORD }}" \
+            -C -N -d HotelBookingDB -i /tmp/setup.sql
 
       - name: Build
         working-directory: backend
