@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { 
-  Box, Typography, Paper, Table, TableBody, TableCell, 
-  TableContainer, TableHead, TableRow, Chip, Button, 
-  CircularProgress, Alert, Avatar, Tooltip, IconButton 
+import {
+  Box, Typography, Paper, Table, TableBody, TableCell,
+  TableContainer, TableHead, TableRow, Chip, Button,
+  CircularProgress, Alert, Avatar, Tooltip, IconButton
 } from '@mui/material'
 import { AdminPanelSettings, Person, VerifiedUser, Security } from '@mui/icons-material'
 import { getAllUsersApi, updateUserRolesApi } from '../../shared/api/adminUserApi'
@@ -23,7 +23,7 @@ const UserManagementPage = () => {
     try {
       const data = await getAllUsersApi()
       console.log('User data received:', data)
-      
+
       if (Array.isArray(data)) {
         setUsers(data)
       } else if (data && typeof data === 'object' && Array.isArray(data.users)) {
@@ -35,7 +35,7 @@ const UserManagementPage = () => {
         console.error('Dữ liệu trả về không phải là mảng:', data)
       }
     } catch (err) {
-      console.error('Error fetching users:', err)
+      console.error('Error Fetching users:', err)
       setError('Không thể tải danh sách người dùng.')
     } finally {
       setLoading(false)
@@ -53,7 +53,7 @@ const UserManagementPage = () => {
       } else {
         newRoles.add('ADMIN')
       }
-      
+
       const updatedUser = await updateUserRolesApi(userId, Array.from(newRoles))
       setUsers(users.map(u => u.userId === userId ? updatedUser : u))
     } catch (err) {
@@ -102,10 +102,10 @@ const UserManagementPage = () => {
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
                       {u.roles?.map(role => (
-                        <Chip 
-                          key={role} 
-                          label={role.replace('ROLE_', '')} 
-                          size="small" 
+                        <Chip
+                          key={role}
+                          label={role.replace('ROLE_', '')}
+                          size="small"
                           color={role.includes('ADMIN') ? 'secondary' : role.includes('MANAGER') ? 'info' : 'default'}
                           variant="outlined"
                         />
