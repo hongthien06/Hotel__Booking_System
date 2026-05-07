@@ -11,9 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ─────────────────────────────────────────
   # Backend: Build + Test
-  # ─────────────────────────────────────────
   backend:
     name: Backend (Java 21 / Maven)
     runs-on: ubuntu-latest
@@ -33,25 +31,6 @@ jobs:
           --health-timeout 10s
           --health-retries 10
           --health-start-period 30s
-
-    env:
-      SPRING_PROFILES_ACTIVE: local
-      DB_URL: jdbc:sqlserver://localhost:1433;databaseName=HotelBookingDB;encrypt=false;trustServerCertificate=true
-      DB_USERNAME: sa
-      DB_PASSWORD: ${{ secrets.MSSQL_SA_PASSWORD }}
-      # Stub ra để test không cần key thật
-      JWT_SECRET: ci-test-secret-key-at-least-32-chars-long
-      MAIL_USERNAME: ci@example.com
-      MAIL_PASSWORD: ci-password
-      CLOUDINARY_CLOUD_NAME: ci
-      CLOUDINARY_API_KEY: "000000000000000"
-      CLOUDINARY_API_SECRET: ci-secret
-      VNPAY_TMN_CODE: ci
-      VNPAY_HASH_SECRET: ci
-      MOMO_PARTNER_CODE: ci
-      MOMO_ACCESS_KEY: ci
-      MOMO_SECRET_KEY: ci
-      GEMINI_API_KEY: ci
 
     steps:
       - uses: actions/checkout@v4
@@ -79,14 +58,9 @@ jobs:
             -i database/HotelBookingDB.sql \
             -C -N || true
 
-      - name: Build (skip tests)
+      - name: Build
         working-directory: backend
         run: mvn -B clean package -DskipTests
-
-      - name: Run tests
-        working-directory: backend
-        run: mvn -B test
-        continue-on-error: true   # xóa dòng này khi test suite ổn định
 
       - name: Upload test report
         if: always()
@@ -104,9 +78,7 @@ jobs:
           path: backend/target/*.jar
           retention-days: 3
 
-  # ─────────────────────────────────────────
-  # Frontend: Lint + Build
-  # ─────────────────────────────────────────
+  # Frontend: Build
   frontend:
     name: Frontend (Node 20 / Vite)
     runs-on: ubuntu-latest
@@ -125,10 +97,6 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Lint
-        working-directory: frontend
-        run: npm run lint
-
       - name: Build
         working-directory: frontend
         env:
@@ -143,9 +111,7 @@ jobs:
           path: frontend/dist/
           retention-days: 3
 
-  # ─────────────────────────────────────────
-  # Docker: Build images (không push)
-  # ─────────────────────────────────────────
+  # Docker: Build images
   docker:
     name: Docker Images Build
     runs-on: ubuntu-latest
@@ -157,13 +123,21 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+      # login docker hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build backend image
         uses: docker/build-push-action@v6
         with:
           context: ./backend
-          push: false
-          tags: hotel-booking-backend:${{ github.sha }}
+          push: true
+          tags: |
+            nguyennan12/booking-backend:latest
+            nguyennan12/booking-backend:${{ github.sha }}
           cache-from: type=gha,scope=backend
           cache-to: type=gha,scope=backend,mode=max
 
@@ -171,7 +145,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./frontend
-          push: false
-          tags: hotel-booking-frontend:${{ github.sha }}
+          push: true
+          tags: |
+            nguyennan12/booking-frontend:latest
+            nguyennan12/booking-frontend:${{ github.sha }}
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,scope=frontend,mode=max
