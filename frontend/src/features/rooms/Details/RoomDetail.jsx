@@ -70,7 +70,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
     >
       {/* Hero image */}
       <Box sx={{ position: 'relative', height: 210, flexShrink: 0, overflow: 'hidden',
-        background: 'linear-gradient(135deg, #ffc7db 0%, #c02860 100%)' }}>
+        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)` }}>
         {room.imageUrls && room.imageUrls.length > 0 ? (
           <>
             <Box
@@ -139,7 +139,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'right' }}>
-            <Typography variant="h5" fontWeight={900} color="secondary.main" lineHeight={1.1}>
+            <Typography variant="h5" fontWeight={900} color="primary.contrastText" lineHeight={1.1}>
               {price}
             </Typography>
             <Typography variant="caption" color="text.disabled">{t('rooms.per_night')}</Typography>
@@ -190,8 +190,8 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
                   variant="outlined"
                   sx={{
                     borderColor: 'primary.main',
-                    color: 'secondary.main',
-                    bgcolor: '#ffc7db18',
+                    color: 'primary.contrastText',
+                    bgcolor: (theme) => `${theme.palette.primary.main}18`,
                     fontWeight: 600,
                     fontSize: '0.72rem',
                     borderRadius: 2,
@@ -213,11 +213,11 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
             onClick={() => { onClose(); onEdit(room) }}
             sx={{ 
               borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem',
-              boxShadow: '0 8px 25px rgba(216,27,96,0.3)',
+              boxShadow: (theme) => `0 8px 25px ${theme.palette.primary.dark}4d`,
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
-              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
-              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+              '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+              '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
             {t('room_detail.edit_room')}
@@ -232,8 +232,8 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
               boxShadow: '0 8px 25px rgba(216,27,96,0.3)',
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
-              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
-              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+              '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+              '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
             {t('common.book_now')}

@@ -18,29 +18,26 @@ const theme = extendTheme({
     light: {
       palette: {
         primary: {
-          main: '#ffc7dbff',      // Màu nền nút bấm chính
-          dark: '#c02860ff',      // Màu nền nút khi hover
-          contrastText: '#a01b4ccd' // Màu chữ trong nút
-        },
-        secondary: {
-          main: '#9a1c48ff',      // Màu chữ Welcome, Link chính
-          dark: '#c02860ff'       // Màu Link khi hover
+          main: '#ffc7dbff',      // Màu nền button chưa hover
+          dark: '#c02860ff',      // Màu nền button khi hover
+          contrastText: '#a01b4ccd', // Màu chữ trong button lúc chưa hover
+          contrastTextHover: '#fff'   // Màu chữ trong button khi hover
         },
         text: {
           primary: '#000000',     // Màu chữ chính (đen)
           secondary: '#606060'    // Màu chữ phụ (xám)
         },
         background: {
-          paper: 'rgba(255, 255, 255, 0.92)', // Nền trắng mờ (Glassmorphism)
-          default: '#ccebffff'                // Nền xanh nhạt của trang
+          paper: '#fff9fa', // Nền profile
+          default: '#ccebffff'// Nền xanh nhạt của trang
         },
         // Thêm các màu tùy chỉnh cho Input
         action: {
           inputBg: '#e8f6ffff',
-          inputLabel: '#cbbbc2ff',
-          inputLabelFocus: '#ac184ecd',
-          inputBorder: '#c8acb8ff',
-          inputBorderFocus: '#b0305fcd'
+          inputLabel: '#cbbbc2ff', //chữ chưa hover (ô nhập liệu)
+          inputLabelFocus: '#ac184ecd',//chữ đã hover (ô nhập liệu)
+          inputBorder: '#cbbbc2ff', // viền ô chưa hover
+          inputBorderFocus: '#ac184ecd' // viền ô khi hover
         }
       }
     }
@@ -112,11 +109,11 @@ const theme = extendTheme({
     },
     MuiButton: {
       styleOverrides: {
-        root: {
+        root: ({ theme }) => ({
           '&:hover': {
-            color: '#fff'
+            color: theme.vars.palette.primary.contrastTextHover
           }
-        }
+        })
       }
     },
     MuiSelect: {

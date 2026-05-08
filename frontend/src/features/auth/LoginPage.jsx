@@ -22,7 +22,7 @@ const LoginPage = () => {
         const roleStr = typeof r === 'string' ? r : (r.roleName || r.authority || '')
         return ['ADMIN', 'MANAGER', 'ROLE_ADMIN', 'ROLE_MANAGER'].includes(roleStr)
       })
-      
+
       if (isAdminOrManager && userType === 'manager') {
         navigate('/dashboard')
       } else {
@@ -45,11 +45,11 @@ const LoginPage = () => {
 
     try {
       const data = await loginApi(email, password)
-      
+
       // Check if roles match selection
       const roles = data.roles || []
       const isAdminOrManager = roles.some(r => r === 'ADMIN' || r === 'MANAGER' || r === 'ROLE_ADMIN' || r === 'ROLE_MANAGER')
-      
+
       if (userType === 'manager' && !isAdminOrManager) {
         throw new Error('Tài khoản này không có quyền quản lý!')
       }
@@ -82,22 +82,32 @@ const LoginPage = () => {
         maxWidth: 420,
         borderRadius: 4
       }}>
-        <Typography variant="h4" align="center" color="secondary.main" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
+        <Typography variant="h4" align="center" color="primary.contrastText" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
           Welcome Back
         </Typography>
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>
           Đăng nhập vào tài khoản Hotel Booking của bạn
         </Typography>
 
-        <Tabs 
-          value={userType} 
-          onChange={handleUserTypeChange} 
-          variant="fullWidth" 
-          sx={{ 
-            mb: 4, 
-            bgcolor: 'action.hover', 
+        <Tabs
+          value={userType}
+          onChange={handleUserTypeChange}
+          variant="fullWidth"
+          sx={{
+            mb: 4,
+            bgcolor: 'action.hover',
             borderRadius: 2,
-            '& .MuiTabs-indicator': { height: 3, borderRadius: '3px 3px 0 0' }
+            '& .MuiTabs-indicator': { 
+              height: 3, 
+              borderRadius: '3px 3px 0 0',
+              bgcolor: 'primary.contrastText'
+            },
+            '& .MuiTab-root': {
+              color: 'text.secondary',
+              '&.Mui-selected': {
+                color: 'primary.contrastText'
+              }
+            }
           }}
         >
           <Tab icon={<PersonOutline />} label="Khách hàng" value="customer" iconPosition="start" sx={{ minHeight: 64 }} />
@@ -138,15 +148,15 @@ const LoginPage = () => {
           />
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: -3, mb: 3 }}>
-            <Typography 
-              component={Link} 
+            <Typography
+              component={Link}
               to="/forgot-password"
-              variant="body2" 
-              sx={{ 
-                color: 'secondary.main', 
+              variant="body2"
+              sx={{
+                color: 'primary.contrastText',
                 textDecoration: 'none',
                 fontWeight: 600,
-                '&:hover': { textDecoration: 'underline' } 
+                '&:hover': { textDecoration: 'underline' }
               }}
             >
               Quên mật khẩu?
@@ -184,13 +194,13 @@ const LoginPage = () => {
               component={Link}
               to="/register"
               sx={{
-                color: 'secondary.main',
+                color: 'primary.contrastText',
                 textDecoration: 'none',
                 fontWeight: 700,
                 display: 'inline-block',
                 transition: 'all 0.2s ease-in-out',
                 '&:hover': {
-                  color: 'secondary.dark',
+                  color: 'primary.dark',
                   textShadow: '0 2px 10px rgba(154, 28, 72, 0.2)',
                   textDecoration: 'underline'
                 }

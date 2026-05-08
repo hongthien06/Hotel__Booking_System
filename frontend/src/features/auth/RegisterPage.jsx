@@ -66,7 +66,7 @@ const RegisterPage = () => {
         maxWidth: 600,
         borderRadius: 4
       }}>
-        <Typography variant="h4" align="center" color="secondary.main" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
+        <Typography variant="h4" align="center" color="primary.contrastText" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
           Tạo tài khoản mới
         </Typography>
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>
@@ -193,13 +193,13 @@ const RegisterPage = () => {
               component={Link}
               to="/login"
               sx={{
-                color: 'secondary.main',
+                color: 'primary.contrastText',
                 textDecoration: 'none',
                 fontWeight: 700,
                 display: 'inline-block',
                 transition: 'all 0.2s ease-in-out',
                 '&:hover': {
-                  color: 'secondary.dark',
+                  color: 'primary.dark',
                   textShadow: '0 2px 10px rgba(154, 28, 72, 0.2)',
                   textDecoration: 'underline'
                 }

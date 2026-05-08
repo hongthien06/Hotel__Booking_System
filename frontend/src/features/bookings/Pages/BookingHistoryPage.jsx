@@ -18,8 +18,8 @@ import { useTranslation } from 'react-i18next';
 import { getMyBookingsApi, cancelBookingApi } from '../../../shared/api/bookingApi';
 import { useNavigate } from 'react-router-dom';
 
-const PC = '#c0496e';
-const PC_LIGHT = '#fce4ec';
+const PC = '#c0496e'; // Tương ứng với primary.dark hoặc primary.contrastText trong theme (Màu hồng đậm chủ đạo)
+const PC_LIGHT = '#fce4ec'; // Tương ứng với primary.main (Màu hồng nhạt)
 
 const BookingHistoryPage = () => {
   const { t, i18n } = useTranslation();
@@ -111,13 +111,13 @@ const BookingHistoryPage = () => {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#fff', color: '#333', pb: 8 }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: '#fff', color: '#333', pb: 8 }}> {/* bgcolor: '#fff' tương ứng với action.inputBg */}
       {/* Pink Header Banner */}
       <Box sx={{ 
         pt: 8, pb: 6, 
         textAlign: 'center', 
-        bgcolor: '#fdf2f8', 
-        borderBottom: '1px solid #fce4ec'
+        bgcolor: '#fdf2f8', // Màu nền nhẹ của Header Banner, tương tự primary.main với độ mờ cao
+        borderBottom: '1px solid #fce4ec' // Màu viền tương ứng primary.main
       }}>
         <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, letterSpacing: 1, textTransform: 'uppercase', color: PC }}>
           {t('header.bookings_history') || 'LỊCH SỬ ĐẶT PHÒNG'}

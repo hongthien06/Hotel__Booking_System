@@ -47,7 +47,7 @@ const ForgotPasswordPage = () => {
         maxWidth: 420,
         borderRadius: 4
       }}>
-        <Typography variant="h4" align="center" color="secondary.main" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
+        <Typography variant="h4" align="center" color="primary.contrastText" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
           Quên mật khẩu?
         </Typography>
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>
@@ -100,13 +100,13 @@ const ForgotPasswordPage = () => {
               component={Link}
               to="/login"
               sx={{
-                color: 'secondary.main',
+                color: 'primary.contrastText',
                 textDecoration: 'none',
                 fontWeight: 700,
                 display: 'inline-block',
                 transition: 'all 0.2s ease-in-out',
                 '&:hover': {
-                  color: 'secondary.dark',
+                  color: 'primary.dark',
                   textDecoration: 'underline'
                 }
               }}

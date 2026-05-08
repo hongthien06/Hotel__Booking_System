@@ -45,7 +45,7 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
         transition: 'all 0.2s ease',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: '0 12px 40px rgba(154,28,72,0.12)',
+          boxShadow: (theme) => `0 12px 40px ${theme.palette.primary.contrastText}1e`,
           borderColor: 'primary.main',
         }
       }}
@@ -65,7 +65,7 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
         ) : (
           <Box sx={{
             height: '100%',
-            background: 'linear-gradient(135deg, #ffc7db55 0%, #c0286033 100%)',
+            background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main}55 0%, ${theme.palette.primary.dark}33 100%)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center'
           }}>
             <Typography sx={{ fontSize: 48, opacity: 0.25 }}>🏨</Typography>
@@ -142,7 +142,7 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
             <Typography variant="h6" fontWeight={900} lineHeight={1.2} display="block">
               #{room.roomNumber}
             </Typography>
-            <Typography variant="caption" color="secondary.main" fontWeight={700} display="block">
+            <Typography variant="caption" color="primary.contrastText" fontWeight={700} display="block">
               {room.hotelName || ''}
             </Typography>
             <Typography variant="caption" color="text.secondary" fontWeight={500} display="block">
@@ -150,7 +150,7 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
             </Typography>
           </Box>
           <Box sx={{ textAlign: 'right', flexShrink: 0, ml: 1 }}>
-            <Typography variant="subtitle2" fontWeight={900} color="secondary.main" lineHeight={1.2} display="block">
+            <Typography variant="subtitle2" fontWeight={900} color="primary.contrastText" lineHeight={1.2} display="block">
               {price}
             </Typography>
             <Typography variant="caption" color="text.disabled" display="block">{t('rooms.per_night')}</Typography>

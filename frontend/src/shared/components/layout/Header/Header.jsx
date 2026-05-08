@@ -66,9 +66,9 @@ const Header = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      backgroundColor: '#ffc7db',
-      color: '#9a1c48',
-      boxShadow: '0 2px 8px rgba(154, 28, 72, 0.15)',
+      backgroundColor: 'primary.main',
+      color: 'primary.contrastText',
+      boxShadow: (theme) => `0 2px 8px ${theme.palette.primary.contrastText}26`,
       zIndex: (theme) => theme.zIndex.drawer + 1,
       flexShrink: 0,
       boxSizing: 'border-box'
@@ -76,7 +76,7 @@ const Header = () => {
       {/* Logo */}
       <Typography
         variant="h6"
-        sx={{ fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: '#9a1c48' }}
+        sx={{ fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: 'primary.contrastText' }}
         onClick={() => navigate('/home')}
       >
         🏨 Hotel Booking
@@ -91,7 +91,7 @@ const Header = () => {
             startIcon={item.icon}
             onClick={() => navigate(item.path)}
             sx={{
-              color: isActive(item.path) ? '#fff' : '#9a1c48',
+              color: isActive(item.path) ? 'primary.contrastTextHover' : 'primary.contrastText',
               fontWeight: isActive(item.path) ? 800 : 600,
               fontSize: '0.85rem',
               textTransform: 'none',
@@ -99,10 +99,10 @@ const Header = () => {
               px: 2,
               py: 0.8,
               minWidth: 100,
-              backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
+              backgroundColor: isActive(item.path) ? 'primary.contrastText' : 'transparent',
               '&:hover': {
-                color: '#fff',
-                backgroundColor: '#c02860',
+                color: 'primary.contrastTextHover',
+                backgroundColor: 'primary.dark',
               }
             }}
           >
@@ -117,19 +117,19 @@ const Header = () => {
             startIcon={item.icon}
             onClick={() => navigate(item.path)}
             sx={{
-              color: isActive(item.path) ? '#fff' : '#9a1c48',
+              color: isActive(item.path) ? 'primary.contrastTextHover' : 'primary.contrastText',
               fontWeight: isActive(item.path) ? 800 : 600,
               fontSize: '0.85rem',
               textTransform: 'none',
               borderRadius: 2,
               px: 2,
               py: 0.8,
-              backgroundColor: isActive(item.path) ? '#9a1c48' : 'transparent',
-              borderLeft: '1px solid rgba(154,28,72,0.2)',
+              backgroundColor: isActive(item.path) ? 'primary.contrastText' : 'transparent',
+              borderLeft: (theme) => `1px solid ${theme.palette.primary.contrastText}33`,
               ml: 1,
               '&:hover': {
-                color: '#fff',
-                backgroundColor: '#c02860',
+                color: 'primary.contrastTextHover',
+                backgroundColor: 'primary.dark',
               }
             }}
           >
@@ -146,9 +146,9 @@ const Header = () => {
               <IconButton
                 onClick={handleMenuOpen}
                 sx={{
-                  color: '#9a1c48',
-                  backgroundColor: 'rgba(154,28,72,0.05)',
-                  '&:hover': { backgroundColor: 'rgba(154,28,72,0.15)' }
+                  color: 'primary.contrastText',
+                  backgroundColor: (theme) => `${theme.palette.primary.contrastText}0d`,
+                  '&:hover': { backgroundColor: (theme) => `${theme.palette.primary.contrastText}26` }
                 }}
               >
                 <MenuIcon />
@@ -166,8 +166,8 @@ const Header = () => {
                   mt: 1.5,
                   borderRadius: 3,
                   minWidth: 180,
-                  boxShadow: '0 8px 24px rgba(154,28,72,0.15)',
-                  border: '1px solid rgba(154,28,72,0.1)'
+                  boxShadow: (theme) => `0 8px 24px ${theme.palette.primary.contrastText}26`,
+                  border: (theme) => `1px solid ${theme.palette.primary.contrastText}1a`
                 }
               }}
             >
@@ -195,10 +195,10 @@ const Header = () => {
             onClick={() => navigate('/login')}
             sx={{
               fontWeight: 700, textTransform: 'none',
-              bgcolor: '#9a1c48', color: '#fff',
+              bgcolor: 'primary.contrastText', color: 'primary.contrastTextHover',
               borderRadius: 2,
               px: 3,
-              '&:hover': { bgcolor: '#c02860' }
+              '&:hover': { bgcolor: 'primary.dark' }
             }}
           >
             {t("header.login")}

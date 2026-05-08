@@ -87,34 +87,34 @@ const ProfilePage = () => {
     setPwData({ ...pwData, [e.target.name]: e.target.value })
   }
 
-    const handlePwSubmit = async () => {
-      setPwError('')
-      if (pwData.newPassword !== pwData.confirmPassword) {
-        setPwError(t('profile.pw_not_match'))
-        return
-      }
-      if (pwData.newPassword.length < 6) {
-        setPwError(t('profile.pw_too_short'))
-        return
-      }
-  
-      setPwLoading(true)
-      try {
-        await changePasswordApi(pwData.oldPassword, pwData.newPassword)
-        setOpenPwDialog(false)
-        setPwData({ oldPassword: '', newPassword: '', confirmPassword: '' })
-        setMessage({ type: 'success', content: t('profile.pw_success') })
-      } catch (err) {
-        setPwError(err.response?.data?.message || t('profile.pw_old_wrong'))
-      } finally {
-        setPwLoading(false)
-      }
+  const handlePwSubmit = async () => {
+    setPwError('')
+    if (pwData.newPassword !== pwData.confirmPassword) {
+      setPwError(t('profile.pw_not_match'))
+      return
     }
+    if (pwData.newPassword.length < 6) {
+      setPwError(t('profile.pw_too_short'))
+      return
+    }
+
+    setPwLoading(true)
+    try {
+      await changePasswordApi(pwData.oldPassword, pwData.newPassword)
+      setOpenPwDialog(false)
+      setPwData({ oldPassword: '', newPassword: '', confirmPassword: '' })
+      setMessage({ type: 'success', content: t('profile.pw_success') })
+    } catch (err) {
+      setPwError(err.response?.data?.message || t('profile.pw_old_wrong'))
+    } finally {
+      setPwLoading(false)
+    }
+  }
 
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
-        <CircularProgress sx={{ color: '#9a1c48' }} />
+        <CircularProgress color="primary" />
       </Box>
     )
   }
@@ -125,17 +125,17 @@ const ProfilePage = () => {
       mx: 'auto',
       my: 5,
       px: 4,                // GIẢM lề trái phải xuống mức 4 (32px) cho gọn
-      py: 4,                
-      bgcolor: '#fff9fa',
+      py: 4,
+      bgcolor: 'background.paper', // Light version of primary.main
       borderRadius: 10,
-      border: '1px solid #ffdae5',
-      boxShadow: '0 15px 45px rgba(154, 28, 72, 0.03)'
+      border: (theme) => `1px solid ${theme.palette.primary.main}`,
+      boxShadow: (theme) => `0 15px 45px ${theme.palette.primary.contrastText}08`
     }}>
       {/* PHẦN TIÊU ĐỀ TRANG */}
       <Box sx={{ mb: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 2 }}>
-        <VerifiedUser sx={{ color: '#9a1c48', fontSize: 50 }} />
+        <VerifiedUser sx={{ color: 'primary.contrastText', fontSize: 50 }} />
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 900, color: '#9a1c48' }}>
+          <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.contrastText' }}>
             {t('profile.title')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -149,17 +149,17 @@ const ProfilePage = () => {
         <Grid item xs={12} md={4}>
           <Paper elevation={0} sx={{
             p: 4, textAlign: 'center', borderRadius: 10, bgcolor: 'white',
-            border: '1px solid #ffdae5',
+            border: (theme) => `1px solid ${theme.palette.primary.main}`,
             height: '100%',
-            boxShadow: '0 10px 20px rgba(154, 28, 72, 0.05)'
+            boxShadow: (theme) => `0 10px 20px ${theme.palette.primary.contrastText}10`
           }}>
             <Box sx={{ position: 'relative', width: 180, height: 180, mx: 'auto', mb: 3 }}>
               <Avatar
                 sx={{
                   width: 180, height: 180,
-                  bgcolor: '#9a1c48', fontSize: '4rem', fontWeight: 700,
-                  boxShadow: '0 15px 35px rgba(154, 28, 72, 0.2)',
-                  border: '6px solid #fce4ec'
+                  bgcolor: 'primary.contrastText', fontSize: '4rem', fontWeight: 700,
+                  boxShadow: (theme) => `0 15px 35px ${theme.palette.primary.contrastText}33`,
+                  border: (theme) => `6px solid ${theme.palette.primary.main}40`
                 }}
               >
                 {profile?.fullName?.charAt(0)?.toUpperCase() || 'U'}
@@ -172,8 +172,8 @@ const ProfilePage = () => {
                     bottom: 8,
                     right: 8,
                     bgcolor: 'white',
-                    color: '#9a1c48',
-                    '&:hover': { bgcolor: '#fce4ec', transform: 'scale(1.1)' },
+                    color: 'primary.contrastText',
+                    '&:hover': { bgcolor: 'primary.main', transform: 'scale(1.1)' },
                     transition: 'all 0.2s',
                     boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
                     p: 1.5
@@ -191,11 +191,11 @@ const ProfilePage = () => {
             }}>{profile?.fullName}</Typography>
             <Chip
               label={profile?.roles?.[0]?.replace('ROLE_', '') || 'User'}
-              sx={{ fontWeight: 700, bgcolor: 'rgba(154, 28, 72, 0.1)', color: '#9a1c48' }}
+              sx={{ fontWeight: 700, bgcolor: (theme) => `${theme.palette.primary.contrastText}1a`, color: 'primary.contrastText' }}
             />
             <Divider sx={{
               my: 3,
-              borderColor: '#ffdae5'
+              borderColor: 'primary.main'
             }} />
             <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
               {t('profile.member_since')}: {new Date().getFullYear()}
@@ -207,9 +207,9 @@ const ProfilePage = () => {
         <Grid item xs={12} md={8}>
           <Paper elevation={0} sx={{
             p: { xs: 3, md: 5 }, borderRadius: 10, bgcolor: 'white',
-            border: '1px solid #ffdae5',
+            border: (theme) => `1px solid ${theme.palette.primary.main}`,
             height: '100%',
-            boxShadow: '0 10px 20px rgba(154, 28, 72, 0.05)'
+            boxShadow: (theme) => `0 10px 20px ${theme.palette.primary.contrastText}10`
           }}>
             <Box sx={{
               mb: 4,
@@ -217,7 +217,7 @@ const ProfilePage = () => {
               alignItems: 'center',
               gap: 1.5
             }}>
-              <Info sx={{ color: '#9a1c48' }} />
+              <Info sx={{ color: 'primary.contrastText' }} />
               <Typography variant="h6" sx={{ fontWeight: 800, color: '#333' }}>
                 {t('profile.personal_info')}
               </Typography>
@@ -237,18 +237,18 @@ const ProfilePage = () => {
                 <TextField
                   fullWidth label={t('profile.full_name')} name="fullName"
                   value={formData.fullName || ''} onChange={handleChange} required
-                  InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: '#9a1c48' }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: 'primary.contrastText' }} /></InputAdornment> }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
                 <TextField
                   fullWidth label={t('profile.email')} value={profile?.email || ''} disabled
-                  InputProps={{ startAdornment: <InputAdornment position="start"><Email sx={{ color: '#9a1c48' }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><Email sx={{ color: 'primary.contrastText' }} /></InputAdornment> }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
                 <TextField
                   fullWidth label={t('profile.phone')} name="phone"
                   value={formData.phone || ''} onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start"><Phone sx={{ color: '#9a1c48' }} /></InputAdornment> }}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><Phone sx={{ color: 'primary.contrastText' }} /></InputAdornment> }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
               </Box>
@@ -265,8 +265,8 @@ const ProfilePage = () => {
                     py: 1.5, // Độ cao padding dọc của nút
                     borderRadius: 3,
                     fontWeight: 800,
-                    bgcolor: '#fce4ec', color: '#9a1c48',
-                    '&:hover': { bgcolor: '#9a1c48', color: 'white' }
+                    bgcolor: 'primary.main', color: 'primary.contrastText',
+                    '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
                   }}
                 >
                   {saving ? t('profile.saving') : t('profile.save_changes')}
@@ -276,7 +276,7 @@ const ProfilePage = () => {
 
             <Divider sx={{
               my: 5, // Khoảng cách trên và dưới của đường kẻ phân cách (Divider)
-              borderColor: '#ffdae5',
+              borderColor: 'primary.main',
               borderStyle: 'dashed'
             }} />
 
@@ -292,7 +292,7 @@ const ProfilePage = () => {
                 alignItems: 'center',
                 gap: 2 // Khoảng cách giữa Icon Shield và text "Bảo mật tài khoản"
               }}>
-                <Shield sx={{ color: '#9a1c48' }} />
+                <Shield sx={{ color: 'primary.contrastText' }} />
                 <Typography sx={{ fontWeight: 700 }}>{t('profile.security')}</Typography>
               </Box>
               <Button
@@ -301,8 +301,8 @@ const ProfilePage = () => {
                 sx={{
                   borderRadius: 3,
                   fontWeight: 800,
-                  bgcolor: '#fce4ec', color: '#9a1c48',
-                  '&:hover': { bgcolor: '#9a1c48', color: 'white' },
+                  bgcolor: 'primary.main', color: 'primary.contrastText',
+                  '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
                   px: 4 // Padding ngang của nút đổi mật khẩu
                 }}
               >
@@ -313,10 +313,10 @@ const ProfilePage = () => {
         </Grid>
       </Grid>
 
-      <Dialog 
-        open={openPwDialog} 
-        onClose={() => setOpenPwDialog(false)} 
-        fullWidth 
+      <Dialog
+        open={openPwDialog}
+        onClose={() => setOpenPwDialog(false)}
+        fullWidth
         maxWidth="xs"
         PaperProps={{
           sx: { borderRadius: 6, p: 1 } // Bo tròn khung Dialog
@@ -372,16 +372,16 @@ const ProfilePage = () => {
         </DialogContent>
         <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 2 }}>
           <Button onClick={() => setOpenPwDialog(false)} sx={{ borderRadius: 3 }}>{t('profile.cancel')}</Button>
-          <Button 
-            onClick={handlePwSubmit} 
-            variant="contained" 
-            disabled={pwLoading} 
-            sx={{ 
-              bgcolor: '#9a1c48', 
+          <Button
+            onClick={handlePwSubmit}
+            variant="contained"
+            disabled={pwLoading}
+            sx={{
+              bgcolor: 'primary.contrastText',
               color: 'white',
               borderRadius: 3, // Bo tròn nút cập nhật
               px: 4,
-              '&:hover': { bgcolor: '#80163b' }
+              '&:hover': { bgcolor: 'primary.dark' }
             }}
           >
             {pwLoading ? <CircularProgress size={24} color="inherit" /> : t('profile.update_now')}

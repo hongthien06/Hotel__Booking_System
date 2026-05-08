@@ -63,7 +63,7 @@ const ResetPasswordPage = () => {
         maxWidth: 420,
         borderRadius: 4
       }}>
-        <Typography variant="h4" align="center" color="secondary.main" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
+        <Typography variant="h4" align="center" color="primary.contrastText" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
           Đặt lại mật khẩu
         </Typography>
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>

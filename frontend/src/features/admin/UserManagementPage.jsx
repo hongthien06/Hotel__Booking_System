@@ -67,7 +67,7 @@ const UserManagementPage = () => {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Typography variant="h4" sx={{ mb: 4, fontWeight: 800, color: 'secondary.main', display: 'flex', alignItems: 'center', gap: 2 }}>
+      <Typography variant="h4" sx={{ mb: 4, fontWeight: 800, color: 'primary.contrastText', display: 'flex', alignItems: 'center', gap: 2 }}>
         <Security fontSize="large" /> Quản lý người dùng
       </Typography>
 
@@ -92,7 +92,7 @@ const UserManagementPage = () => {
                 <TableRow key={u.userId} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                      <Avatar sx={{ bgcolor: isAdmin ? 'secondary.main' : 'primary.main' }}>
+                      <Avatar sx={{ bgcolor: isAdmin ? 'primary.contrastText' : 'primary.main' }}>
                         {u.fullName?.charAt(0) || '?'}
                       </Avatar>
                       <Typography sx={{ fontWeight: 600 }}>{u.fullName}</Typography>
@@ -106,7 +106,7 @@ const UserManagementPage = () => {
                           key={role}
                           label={role.replace('ROLE_', '')}
                           size="small"
-                          color={role.includes('ADMIN') ? 'secondary' : role.includes('MANAGER') ? 'info' : 'default'}
+                          color={role.includes('ADMIN') ? 'primary' : role.includes('MANAGER') ? 'info' : 'default'}
                           variant="outlined"
                         />
                       ))}
@@ -115,7 +115,7 @@ const UserManagementPage = () => {
                   <TableCell sx={{ textAlign: 'center' }}>
                     <Button
                       variant={isAdmin ? "outlined" : "contained"}
-                      color="secondary"
+                      color="primary"
                       size="small"
                       disabled={actionLoading === u.userId || isSelf}
                       startIcon={actionLoading === u.userId ? <CircularProgress size={16} /> : <AdminPanelSettings />}

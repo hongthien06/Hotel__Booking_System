@@ -105,17 +105,17 @@ const HomePage = () => {
       </Box>
 
       {/* Stats Bar */}
-      <Paper 
-        elevation={8} 
-        sx={{ 
-          mx: 'auto', 
-          maxWidth: 1200, 
+      <Paper
+        elevation={8}
+        sx={{
+          mx: 'auto',
+          maxWidth: 1200,
           width: '95%',
-          mt: -6, 
-          borderRadius: 4, 
-          position: 'relative', 
-          zIndex: 2, 
-          overflow: 'hidden', 
+          mt: -6,
+          borderRadius: 4,
+          position: 'relative',
+          zIndex: 2,
+          overflow: 'hidden',
           background: 'linear-gradient(135deg, #9a1c48 0%, #c02860 100%)',
           boxShadow: '0 10px 40px rgba(154, 28, 72, 0.3)',
           display: 'flex', // Dùng Flexbox để ép giãn đều
@@ -129,12 +129,12 @@ const HomePage = () => {
           { number: '4.8★', labelKey: 'home.stats.rating' },
           { number: '24/7', labelKey: 'home.stats.support' },
         ].map((stat, i) => (
-          <Box 
+          <Box
             key={i}
-            sx={{ 
+            sx={{
               flex: 1, // Mỗi ô chiếm 1 phần bằng nhau (1/4)
-              textAlign: 'center', 
-              py: { xs: 3, md: 5 }, 
+              textAlign: 'center',
+              py: { xs: 3, md: 5 },
               borderRight: i < 3 ? '1px solid rgba(255,255,255,0.15)' : 'none',
               display: 'flex',
               flexDirection: 'column',
@@ -154,7 +154,7 @@ const HomePage = () => {
       {/* Features Section */}
       <Container maxWidth="lg" sx={{ py: 10 }}>
         <Box sx={{ textAlign: 'center', mb: 7 }}>
-          <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
+          <Typography variant="overline" color="primary.contrastText" sx={{ fontWeight: 700, letterSpacing: 3 }}>
             {t("home.features.overline")}
           </Typography>
           <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
@@ -189,7 +189,7 @@ const HomePage = () => {
       <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
         <Container maxWidth="lg">
           <Box sx={{ textAlign: 'center', mb: 5 }}>
-            <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
+            <Typography variant="overline" color="primary.contrastText" sx={{ fontWeight: 700, letterSpacing: 3 }}>
               {t("home.amenities.overline")}
             </Typography>
             <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
@@ -215,7 +215,7 @@ const HomePage = () => {
       {/* Reviews Section */}
       <Container maxWidth="lg" sx={{ py: 10 }}>
         <Box sx={{ textAlign: 'center', mb: 7 }}>
-          <Typography variant="overline" color="secondary.main" sx={{ fontWeight: 700, letterSpacing: 3 }}>
+          <Typography variant="overline" color="primary.contrastText" sx={{ fontWeight: 700, letterSpacing: 3 }}>
             {t("home.reviews.overline")}
           </Typography>
           <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
@@ -233,7 +233,7 @@ const HomePage = () => {
               }}>
                 <CardContent sx={{ p: 0 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Avatar sx={{ bgcolor: 'secondary.main', fontWeight: 700 }}>{r.avatar}</Avatar>
+                    <Avatar sx={{ bgcolor: 'primary.contrastText', fontWeight: 700 }}>{r.avatar}</Avatar>
                     <Box>
                       <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(`home.reviews.${r.key}.name`)}</Typography>
                       <Typography variant="caption" color="text.secondary">{r.date}</Typography>
@@ -252,7 +252,7 @@ const HomePage = () => {
 
       {/* CTA Section */}
       <Box sx={{
-        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.secondary.main} 100%)`,
+        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.contrastText} 100%)`,
         py: 8, textAlign: 'center', color: 'white'
       }}>
         <Container maxWidth="md">

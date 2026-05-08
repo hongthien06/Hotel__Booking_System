@@ -1,27 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Grid, 
-  Card, 
-  CardContent, 
-  Paper, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
+import {
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Chip,
   Skeleton,
   IconButton,
   Tooltip
 } from '@mui/material';
-import { 
-  KingBed, 
-  EventNote, 
-  People, 
-  AccountBalanceWallet, 
+import {
+  KingBed,
+  EventNote,
+  People,
+  AccountBalanceWallet,
   Refresh,
   TrendingUp,
   TrendingDown,
@@ -34,9 +34,9 @@ import { getDashboardStats } from '../../shared/api/dashboardApi';
 import { useTranslation } from 'react-i18next';
 
 const StatCard = ({ title, value, icon, color, loading }) => (
-  <Card sx={{ 
-    height: '100%', 
-    borderRadius: 4, 
+  <Card sx={{
+    height: '100%',
+    borderRadius: 4,
     boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
     background: `linear-gradient(135deg, #fff 0%, ${color}10 100%)`,
     transition: 'transform 0.3s ease',
@@ -56,10 +56,10 @@ const StatCard = ({ title, value, icon, color, loading }) => (
             </Typography>
           )}
         </Box>
-        <Box sx={{ 
-          p: 1.5, 
-          borderRadius: 3, 
-          bgcolor: `${color}20`, 
+        <Box sx={{
+          p: 1.5,
+          borderRadius: 3,
+          bgcolor: `${color}20`,
           color: color,
           display: 'flex'
         }}>
@@ -95,9 +95,9 @@ const DashboardPage = () => {
   }, []);
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
-      style: 'currency', 
-      currency: i18n.language === 'vi' ? 'VND' : 'USD' 
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
+      style: 'currency',
+      currency: i18n.language === 'vi' ? 'VND' : 'USD'
     }).format(i18n.language === 'vi' ? amount : amount / 25000); // Tạm tính tỷ giá
   };
 
@@ -115,7 +115,7 @@ const DashboardPage = () => {
     <Box sx={{ p: { xs: 2, md: 4 } }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Box>
-          <Typography variant="h4" sx={{ fontWeight: 900, color: '#9a1c48', mb: 0.5 }}>
+          <Typography variant="h4" sx={{ fontWeight: 900, color: 'primary.contrastText', mb: 0.5 }}>
             {t('dashboard.title')}
           </Typography>
           <Typography variant="body1" color="text.secondary">
@@ -131,74 +131,74 @@ const DashboardPage = () => {
 
       <Grid container spacing={3} sx={{ mb: 5 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title={t('dashboard.total_rooms')} 
-            value={stats?.totalRooms || 0} 
-            icon={<KingBed fontSize="large" />} 
+          <StatCard
+            title={t('dashboard.total_rooms')}
+            value={stats?.totalRooms || 0}
+            icon={<KingBed fontSize="large" />}
             color="#3f51b5"
             loading={loading}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title={t('dashboard.available')} 
-            value={stats?.availableRooms || 0} 
-            icon={<TrendingUp fontSize="large" />} 
+          <StatCard
+            title={t('dashboard.available')}
+            value={stats?.availableRooms || 0}
+            icon={<TrendingUp fontSize="large" />}
             color="#4caf50"
             loading={loading}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title={t('dashboard.occupied')} 
-            value={stats?.occupiedRooms || 0} 
-            icon={<MeetingRoom fontSize="large" />} 
+          <StatCard
+            title={t('dashboard.occupied')}
+            value={stats?.occupiedRooms || 0}
+            icon={<MeetingRoom fontSize="large" />}
             color="#f44336"
             loading={loading}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title={t('dashboard.maintenance')} 
-            value={stats?.maintenanceRooms || 0} 
-            icon={<Handyman fontSize="large" />} 
+          <StatCard
+            title={t('dashboard.maintenance')}
+            value={stats?.maintenanceRooms || 0}
+            icon={<Handyman fontSize="large" />}
             color="#9e9e9e"
             loading={loading}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title={t('dashboard.inactive')} 
-            value={stats?.inactiveRooms || 0} 
-            icon={<Block fontSize="large" />} 
+          <StatCard
+            title={t('dashboard.inactive')}
+            value={stats?.inactiveRooms || 0}
+            icon={<Block fontSize="large" />}
             color="#000000"
             loading={loading}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title={t('dashboard.total_bookings')} 
-            value={stats?.totalBookings || 0} 
-            icon={<EventNote fontSize="large" />} 
+          <StatCard
+            title={t('dashboard.total_bookings')}
+            value={stats?.totalBookings || 0}
+            icon={<EventNote fontSize="large" />}
             color="#ff9800"
             loading={loading}
           />
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <StatCard 
-            title={t('dashboard.total_revenue')} 
-            value={formatCurrency(stats?.totalRevenue || 0)} 
-            icon={<AccountBalanceWallet fontSize="large" />} 
+          <StatCard
+            title={t('dashboard.total_revenue')}
+            value={formatCurrency(stats?.totalRevenue || 0)}
+            icon={<AccountBalanceWallet fontSize="large" />}
             color="#e91e63"
             loading={loading}
           />
         </Grid>
       </Grid>
 
-      <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, color: '#9a1c48' }}>
+      <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, color: 'primary.contrastText' }}>
         {t('dashboard.recent_bookings')}
       </Typography>
-      
+
       <TableContainer component={Paper} sx={{ borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.05)' }}>
         <Table sx={{ minWidth: 650 }}>
           <TableHead sx={{ bgcolor: 'background.default' }}>
@@ -227,14 +227,14 @@ const DashboardPage = () => {
                   <TableCell sx={{ fontWeight: 600 }}>{booking.customerName}</TableCell>
                   <TableCell>{booking.roomNumber}</TableCell>
                   <TableCell>{new Date(booking.bookingDate).toLocaleString(i18n.language === 'vi' ? 'vi-VN' : 'en-US')}</TableCell>
-                  <TableCell sx={{ fontWeight: 700, color: 'secondary.main' }}>
+                  <TableCell sx={{ fontWeight: 700, color: 'primary.contrastText' }}>
                     {formatCurrency(booking.amount)}
                   </TableCell>
                   <TableCell>
-                    <Chip 
-                      label={booking.status} 
-                      color={getStatusColor(booking.status)} 
-                      size="small" 
+                    <Chip
+                      label={booking.status}
+                      color={getStatusColor(booking.status)}
+                      size="small"
                       sx={{ fontWeight: 600, borderRadius: 1.5 }}
                     />
                   </TableCell>

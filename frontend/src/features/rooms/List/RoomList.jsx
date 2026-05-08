@@ -190,7 +190,7 @@ const RoomList = () => {
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 4 }}>
         <Box>
-          <Typography variant="h4" fontWeight={900} color="secondary.main"
+          <Typography variant="h4" fontWeight={900} color="primary.contrastText"
             sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <KingBed fontSize="large" /> {t('rooms.management')}
           </Typography>
@@ -207,8 +207,8 @@ const RoomList = () => {
               borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25,
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
-              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
-              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+              '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+              '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
             {t('rooms.add_room')}
@@ -227,10 +227,10 @@ const RoomList = () => {
             fontWeight: 700, fontSize: '0.75rem',
             transition: 'all 0.15s',
             ...(filterStatus === 'ALL'
-              ? { bgcolor: 'secondary.main', color: 'white', borderColor: 'secondary.main' }
+              ? { bgcolor: 'primary.contrastText', color: 'white', borderColor: 'primary.contrastText' }
               : {
                 bgcolor: 'background.paper', color: 'text.secondary', borderColor: 'divider',
-                '&:hover': { borderColor: 'secondary.main' }
+                '&:hover': { borderColor: 'primary.contrastText' }
               }
             )
           }}
@@ -308,7 +308,7 @@ const RoomList = () => {
             onClick={fetchRooms}
             sx={{
               border: '1px solid', borderColor: 'divider', borderRadius: 3,
-              '&:hover': { borderColor: 'secondary.main', color: 'secondary.main' }
+              '&:hover': { borderColor: 'primary.contrastText', color: 'primary.contrastText' }
             }}
           >
             <Refresh fontSize="small" />
@@ -391,8 +391,8 @@ const RoomList = () => {
               borderRadius: 3, fontWeight: 700,
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
-              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
-              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+              '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+              '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
             HỦY BỎ
@@ -405,8 +405,8 @@ const RoomList = () => {
               borderRadius: 3, fontWeight: 700,
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
-              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
-              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+              '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+              '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
             XÓA PHÒNG
