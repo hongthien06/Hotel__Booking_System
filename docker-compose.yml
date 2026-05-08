@@ -48,11 +48,11 @@ services:
         done;
 
         echo 'Kiểm tra trạng thái database...';
-        DB_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q "SET NOCOUNT ON; SELECT count(*) FROM master.sys.databases WHERE name = 'HotelBookingDB'" -h -1 -No -C | tr -d '[:space:]');
+        DB_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q "SET NOCOUNT ON; IF DB_ID('HotelBookingDB') IS NOT NULL SELECT 1 ELSE SELECT 0" -h -1 -No -C | tr -d '[:space:]' | grep -o '1' || echo '0');
 
         INIT_NEEDED="1";
         if [ "$$DB_EXISTS" == "1" ]; then
-          TABLE_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -d HotelBookingDB -Q "SET NOCOUNT ON; SELECT count(*) FROM sys.tables WHERE name = 'Users'" -h -1 -No -C | tr -d '[:space:]');
+          TABLE_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q "SET NOCOUNT ON; IF OBJECT_ID('HotelBookingDB.dbo.Users', 'U') IS NOT NULL SELECT 1 ELSE SELECT 0" -h -1 -No -C | tr -d '[:space:]' | grep -o '1' || echo '0');
           if [ "$$TABLE_EXISTS" == "1" ]; then
             INIT_NEEDED="0";
           fi;
