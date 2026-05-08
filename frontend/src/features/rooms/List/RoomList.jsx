@@ -47,9 +47,15 @@ const EmptyState = ({ onAdd, canEdit }) => {
       </Typography>
       {canEdit && (
         <Button
-          variant="contained" color="secondary" startIcon={<Add />}
+          variant="contained" startIcon={<Add />}
           onClick={onAdd}
-          sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 700 }}
+          sx={{ 
+            borderRadius: 3, textTransform: 'none', fontWeight: 700,
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+            '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+          }}
         >
           {t('rooms.add_first_room')}
         </Button>
@@ -194,10 +200,16 @@ const RoomList = () => {
         </Box>
         {canEdit && (
           <Button
-            variant="contained" color="secondary"
+            variant="contained"
             startIcon={<Add />}
             onClick={handleAddClick}
-            sx={{ borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25 }}
+            sx={{ 
+              borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+            }}
           >
             {t('rooms.add_room')}
           </Button>
@@ -307,7 +319,22 @@ const RoomList = () => {
       {/* Error */}
       {error && (
         <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}
-          action={<Button size="small" onClick={fetchRooms} color="error" fontWeight={700}>{t('common.retry')}</Button>}>
+          action={
+            <Button 
+              size="small" 
+              onClick={fetchRooms} 
+              variant="contained"
+              sx={{
+                fontWeight: 700,
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+                '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+              }}
+            >
+              {t('common.retry')}
+            </Button>
+          }>
           {error}
         </Alert>
       )}
@@ -357,16 +384,30 @@ const RoomList = () => {
         </Box>
         <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
           <Button
-            fullWidth variant="outlined"
+            fullWidth
+            variant="contained"
             onClick={() => setDeleteConfirm({ open: false, roomId: null, roomNumber: '' })}
-            sx={{ borderRadius: 3, fontWeight: 700 }}
+            sx={{ 
+              borderRadius: 3, fontWeight: 700,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+            }}
           >
             HỦY BỎ
           </Button>
           <Button
-            fullWidth variant="contained" color="error"
+            fullWidth
+            variant="contained"
             onClick={handleConfirmDelete}
-            sx={{ borderRadius: 3, fontWeight: 700 }}
+            sx={{ 
+              borderRadius: 3, fontWeight: 700,
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+            }}
           >
             XÓA PHÒNG
           </Button>

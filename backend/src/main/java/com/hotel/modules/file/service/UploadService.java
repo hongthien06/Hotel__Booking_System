@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -37,5 +39,13 @@ public class UploadService {
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload URL to Cloudinary", e);
         }
+    }
+
+    public List<String> uploadMultipleFiles(MultipartFile[] files) {
+        List<String> urls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            urls.add(uploadFile(file));
+        }
+        return urls;
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -32,6 +33,14 @@ public class UploadController {
         String url = uploadService.uploadFromUrl(imageUrl);
         Map<String, String> response = new HashMap<>();
         response.put("url", url);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/upload-multiple")
+    public ResponseEntity<Map<String, List<String>>> uploadMultipleFiles(@RequestParam("files") MultipartFile[] files) {
+        List<String> urls = uploadService.uploadMultipleFiles(files);
+        Map<String, List<String>> response = new HashMap<>();
+        response.put("urls", urls);
         return ResponseEntity.ok(response);
     }
 }

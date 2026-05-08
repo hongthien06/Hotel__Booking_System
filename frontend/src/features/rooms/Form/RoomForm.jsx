@@ -362,7 +362,13 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
               size="small"
               disabled={formLoading}
               startIcon={formLoading ? <CircularProgress size={20} color="inherit" /> : <AddPhotoAlternate />}
-              sx={{ borderRadius: 2, textTransform: 'none' }}
+              sx={{ 
+                borderRadius: 2, textTransform: 'none',
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+                '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+              }}
             >
               {formLoading ? t("rooms.uploading") : t("rooms.upload")}
               <input type="file" hidden multiple accept="image/*" onChange={handleFileUpload} />
@@ -466,12 +472,26 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3, pt: 2, gap: 2 }}>
-        <Button onClick={onClose} variant="outlined" fullWidth
-          sx={{ borderRadius: 4, py: 1.5, fontWeight: 800, border: "2px solid", "&:hover": { border: "2px solid" } }}>
+        <Button onClick={onClose} variant="contained" fullWidth
+          sx={{ 
+            borderRadius: 4, py: 1.5, fontWeight: 800,
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+            '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+          }}
+        >
           {t("common.cancel").toUpperCase()}
         </Button>
-        <Button onClick={handleSubmit} variant="contained" color="secondary" fullWidth disabled={loading}
-          sx={{ borderRadius: 4, py: 1.5, fontWeight: 800, boxShadow: "0 8px 25px rgba(216,27,96,0.3)" }}>
+        <Button onClick={handleSubmit} variant="contained" fullWidth disabled={loading}
+          sx={{ 
+            borderRadius: 4, py: 1.5, fontWeight: 800, boxShadow: "0 8px 25px rgba(216,27,96,0.3)",
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+            '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+          }}
+        >
           {isEdit ? t("common.edit").toUpperCase() : t("common.create").toUpperCase()}
         </Button>
       </DialogActions>

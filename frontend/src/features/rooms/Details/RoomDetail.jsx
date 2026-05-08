@@ -209,11 +209,16 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
           <Button
             fullWidth
             variant="contained"
-            color="secondary"
             startIcon={<Edit />}
             onClick={() => { onClose(); onEdit(room) }}
-            sx={{ borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem',
-              boxShadow: '0 8px 25px rgba(216,27,96,0.3)' }}
+            sx={{ 
+              borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem',
+              boxShadow: '0 8px 25px rgba(216,27,96,0.3)',
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+            }}
           >
             {t('room_detail.edit_room')}
           </Button>
@@ -224,18 +229,26 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
             onClick={() => { onClose(); onBook(room) }}
             sx={{ 
               borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem',
-              bgcolor: '#9a1c48', '&:hover': { bgcolor: '#c02860' },
-              boxShadow: '0 8px 25px rgba(216,27,96,0.3)'
+              boxShadow: '0 8px 25px rgba(216,27,96,0.3)',
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
+              '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+              '&:active': { bgcolor: 'primary.dark', color: '#fff' }
             }}
           >
             {t('common.book_now')}
           </Button>
         )}
         <Button
-          variant="outlined"
+          variant="contained"
           onClick={onClose}
-          sx={{ borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem', px: 3,
-            border: '2px solid', '&:hover': { border: '2px solid' } }}
+          sx={{ 
+            borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem', px: 3,
+            bgcolor: 'primary.main',
+            color: 'primary.contrastText',
+            '&:hover': { bgcolor: 'primary.dark', color: '#fff' },
+            '&:active': { bgcolor: 'primary.dark', color: '#fff' }
+          }}
         >
           {t('common.cancel')}
         </Button>
