@@ -23,6 +23,10 @@ const theme = extendTheme({
           contrastText: '#a01b4ccd', // Màu chữ trong button lúc chưa hover
           contrastTextHover: '#fff'   // Màu chữ trong button khi hover
         },
+        secondary: {
+          main: '#a01b4ccd',      // Thay bằng primary.contrastText
+          dark: '#ffc7dbff'       // Thay bằng primary.main
+        },
         text: {
           primary: '#000000',     // Màu chữ chính (đen)
           secondary: '#606060'    // Màu chữ phụ (xám)
@@ -110,8 +114,20 @@ const theme = extendTheme({
     MuiButton: {
       styleOverrides: {
         root: ({ theme }) => ({
+          borderRadius: '12px',
+          textTransform: 'none',
+          fontWeight: 700,
+          transition: 'all 0.2s ease-in-out',
+          color: theme.vars.palette.primary.contrastText, // Sử dụng contrastText mặc định
           '&:hover': {
-            color: theme.vars.palette.primary.contrastTextHover
+            transform: 'translateY(-1px)',
+            backgroundColor: theme.vars.palette.primary.dark,
+            color: theme.vars.palette.primary.contrastTextHover,
+            boxShadow: '0 6px 20px rgba(172, 24, 78, 0.4)'
+          },
+          '&:active': {
+            transform: 'translateY(1px)',
+            boxShadow: 'none'
           }
         })
       }
