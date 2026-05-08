@@ -222,7 +222,7 @@
     "available_rooms": "Available Rooms",
     "featured_rooms": "Featured Rooms",
     "no_rooms_found": "No available rooms found for this period. Please try another date!",
-    "booking_success": "🎉 Booking successful! Check your confirmation email.",
+    "booking_success": "Đặt phòng thành công. Hãy vào lịch sử để thanh toán",
     "booking_confirm": "Confirm Booking",
     "special_request": "Special Request (optional)",
     "special_request_placeholder": "Example: high floor, sea view...",

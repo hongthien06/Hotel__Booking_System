@@ -144,6 +144,7 @@ const Header = () => {
           <>
             <Tooltip title="Menu">
               <IconButton
+                id="nav-menu-button"
                 onClick={handleMenuOpen}
                 sx={{
                   color: 'primary.contrastText',

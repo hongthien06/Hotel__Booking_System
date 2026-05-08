@@ -14,7 +14,7 @@ import {
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
   Divider, InputAdornment, Skeleton, Alert,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Snackbar, CircularProgress, Slider, MenuItem
+  Snackbar, CircularProgress, Slider, MenuItem, Popover
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material';
@@ -381,19 +381,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
         numChildren: Number(form.numChildren),
         specialRequest: form.specialRequest,
       });
-      // Chuyển sang trang review → payment với booking data
-      navigate('/payment?step=1', {
-        state: {
-          booking: bookingResult,
-          room: room,
-          form: {
-            checkIn: form.checkIn,
-            checkOut: form.checkOut,
-            numAdults: form.numAdults,
-            numChildren: form.numChildren,
-          }
-        }
-      });
+      onSuccess();
     } catch (err) {
       console.error('Booking error:', err);
       const data = err?.response?.data;
@@ -1408,18 +1396,69 @@ const BookingPage = () => {
         onClose={() => setLoginPromptOpen(false)}
       />
 
-      {/* Success Snackbar */}
-      <Snackbar
+      {/* Success Popover (Anchored to Nav Menu) */}
+      <Popover
         open={snackbar.open}
-        autoHideDuration={5000}
+        anchorEl={document.getElementById('nav-menu-button')}
         onClose={() => setSnackbar(s => ({ ...s, open: false }))}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'center',
+        }}
+        PaperProps={{
+          sx: {
+            mt: 1.5,
+            p: 2,
+            bgcolor: '#edf7ed',
+            color: '#1e4620',
+            borderRadius: 3,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+            border: '1px solid #c3e6cb',
+            overflow: 'visible',
+            maxWidth: 300,
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: -8,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              borderLeft: '8px solid transparent',
+              borderRight: '8px solid transparent',
+              borderBottom: '8px solid #edf7ed',
+              zIndex: 1
+            },
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: -9.5,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              borderLeft: '9px solid transparent',
+              borderRight: '9px solid transparent',
+              borderBottom: '9px solid #c3e6cb',
+              zIndex: 0
+            }
+          }
+        }}
       >
-        <Alert severity="success" onClose={() => setSnackbar(s => ({ ...s, open: false }))}
-          sx={{ borderRadius: 2, fontWeight: 600 }}>
-          {snackbar.msg}
-        </Alert>
-      </Snackbar>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+
+          <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.4 }}>
+            {snackbar.msg}
+          </Typography>
+          <IconButton 
+            size="small" 
+            onClick={() => setSnackbar(s => ({ ...s, open: false }))}
+            sx={{ ml: 1, color: '#1e4620', opacity: 0.7 }}
+          >
+            <Close fontSize="small" />
+          </IconButton>
+        </Box>
+      </Popover>
 
     </Box>
   );
