@@ -1,34 +1,34 @@
-import React, { useState, useEffect, useRef } from 'react';
-import imgHCM from '../../assets/TP_HCM.png';
-import imgHaNoi from '../../assets/HA NOI.jpg';
-import imgVungTau from '../../assets/VUNG TAU.jpg';
-import imgDaLat from '../../assets/DA_LAT.webp';
-import imgDaNang from '../../assets/DA_NANG.jpg';
-import imgNhaTrang from '../../assets/NHA_TRANG.png';
-import imgPhuQuoc from '../../assets/PHU_QUOC.png';
-import imgSapa from '../../assets/SAPA.png';
-import imgHue from '../../assets/HUE.png';
-import imgCatBa from '../../assets/CAT_BA.png';
+import React, { useState, useEffect, useRef } from 'react'
+import imgHCM from '../../assets/TP_HCM.png'
+import imgHaNoi from '../../assets/HA NOI.jpg'
+import imgVungTau from '../../assets/VUNG TAU.jpg'
+import imgDaLat from '../../assets/DA_LAT.webp'
+import imgDaNang from '../../assets/DA_NANG.jpg'
+import imgNhaTrang from '../../assets/NHA_TRANG.png'
+import imgPhuQuoc from '../../assets/PHU_QUOC.png'
+import imgSapa from '../../assets/SAPA.png'
+import imgHue from '../../assets/HUE.png'
+import imgCatBa from '../../assets/CAT_BA.png'
 import {
   Box, Typography, Grid, TextField, Button, Card, CardContent, CardMedia,
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
   Divider, InputAdornment, Skeleton, Alert,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Snackbar, CircularProgress, Slider, MenuItem, Popover
-} from '@mui/material';
-import { useTranslation } from 'react-i18next';
-import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material';
-import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi';
-import { getAmenitiesApi } from '../../shared/api/amenityApi';
-import { createBookingApi } from '../../shared/api/bookingApi';
-import { useAuth } from '../../shared/hooks/useAuth';
-import LoginPromptModal from '../../shared/components/modals/LoginPromptModal';
-import { useNavigate } from 'react-router-dom';
-import RoomDetail from '../rooms/Details/RoomDetail';
-
-const PC = '#c0496e';
-const PC_LIGHT = '#fce4ec';
-const SIDEBAR_W = 300;
+  CircularProgress, Slider, MenuItem, Popover
+} from '@mui/material'
+import { useTranslation } from 'react-i18next'
+import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material'
+import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi'
+import { getAmenitiesApi } from '../../shared/api/amenityApi'
+import { createBookingApi } from '../../shared/api/bookingApi'
+import { useAuth } from '../../shared/hooks/useAuth'
+import LoginPromptModal from '../../shared/components/modals/LoginPromptModal'
+import { useNavigate } from 'react-router-dom'
+import RoomDetail from '../rooms/Details/RoomDetail'
+import i18n from 'i18next'
+const PC = '#c0496e'
+const PC_LIGHT = '#fce4ec'
+const SIDEBAR_W = 300
 
 const DESTINATIONS = [
   { key: 'hcm', province: 'TP. Hồ Chí Minh', img: imgHCM, bg: '#fff0f3' },
@@ -40,8 +40,8 @@ const DESTINATIONS = [
   { key: 'phuquoc', province: 'Kiên Giang', img: imgPhuQuoc, bg: '#f0fff4' },
   { key: 'sapa', province: 'Lào Cai', img: imgSapa, bg: '#f5f5f5' },
   { key: 'hue', province: 'Thừa Thiên Huế', img: imgHue, bg: '#fff5f0' },
-  { key: 'catba', province: 'Hải Phòng', img: imgCatBa, bg: '#f0fff4' },
-];
+  { key: 'catba', province: 'Hải Phòng', img: imgCatBa, bg: '#f0fff4' }
+]
 
 
 const ROOM_TYPES = [
@@ -50,33 +50,25 @@ const ROOM_TYPES = [
   { key: 'Superior', label: 'room_types.superior', img: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=400' },
   { key: 'Family Room', label: 'room_types.family', img: 'https://images.unsplash.com/photo-1584132915807-fd1f5fbc078f?w=400' },
   { key: 'Presidential Suite', label: 'room_types.president', img: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=400' }
-];
+]
 const BED_TYPES = [
   { key: 'SINGLE', label: 'rooms.bed_single' },
   { key: 'DOUBLE', label: 'rooms.bed_double' },
   { key: 'TRIPLE', label: 'rooms.bed_triple' },
   { key: 'KING', label: 'rooms.bed_king' },
   { key: 'QUEEN', label: 'rooms.bed_queen' }
-];
+]
 const BED_TYPE_LABELS = (t) => ({
   'SINGLE': t('rooms.bed_single') || 'Giường Đơn',
   'DOUBLE': t('rooms.bed_double') || 'Giường Đôi',
   'TRIPLE': t('rooms.bed_triple') || 'Giường Ba',
   'KING': t('rooms.bed_king') || 'Giường King',
   'QUEEN': t('rooms.bed_queen') || 'Giường Queen'
-});
+})
 const formatCurrency = (n, lang) => new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', {
   style: 'currency',
   currency: lang === 'vi' ? 'VND' : 'USD'
-}).format(lang === 'vi' ? n : n / 25000);
-
-const SERVICES = [
-  { key: 'breakfast', label: 'services.breakfast' },
-  { key: 'shuttle', label: 'services.shuttle' },
-  { key: 'bike', label: 'services.bike' },
-  { key: 'spa', label: 'services.spa' },
-  { key: 'pool', label: 'services.pool' }
-];
+}).format(lang === 'vi' ? n : n / 25000)
 
 const MOCK_ROOMS = [
   { id: 'm1', name: 'Phòng Deluxe View Biển', location: 'Vũng Tàu', bed: 'King', reviews: 124, rating: 4.8, type: 'Deluxe', price: 1200000, bg: '#dbeafe', emoji: '🌊' },
@@ -88,8 +80,8 @@ const MOCK_ROOMS = [
   { id: 'm7', name: 'Bungalow Beachfront', location: 'Phú Quốc', bed: 'King', reviews: 167, rating: 4.8, type: 'Superior', price: 2200000, bg: '#ecfeff', emoji: '🏖️' },
   { id: 'm8', name: 'Vintage Studio', location: 'Đà Lạt', bed: 'Single', reviews: 132, rating: 4.6, type: 'Standard', price: 750000, bg: '#fffbeb', emoji: '☕' },
   { id: 'm9', name: 'Modern City Room', location: 'Hải Phòng', bed: 'Double', reviews: 76, rating: 4.3, type: 'Standard', price: 850000, bg: '#f1f5f9', emoji: '🏙️' },
-  { id: 'm10', name: 'Luxury Penthouse', location: 'Nha Trang', bed: 'King', reviews: 34, rating: 5.0, type: 'President', price: 8000000, bg: '#faf5ff', emoji: '💎' },
-];
+  { id: 'm10', name: 'Luxury Penthouse', location: 'Nha Trang', bed: 'King', reviews: 34, rating: 5.0, type: 'President', price: 8000000, bg: '#faf5ff', emoji: '💎' }
+]
 
 const MOCK_WEEKEND_DEALS = [
   { id: 'w1', name: 'Riverside Boutique Studio', location: 'Hội An', province: 'Quảng Nam', bed: 'Double', reviews: 214, rating: 8.7, type: 'Superior', pricePerNight: 950000, image: 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?w=400' },
@@ -101,22 +93,22 @@ const MOCK_WEEKEND_DEALS = [
   { id: 'w7', name: 'Island Pearl Villa', location: 'Phú Quốc', province: 'Kiên Giang', bed: 'King', reviews: 263, rating: 9.4, type: 'President', pricePerNight: 3800000, image: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=400' },
   { id: 'w8', name: 'Old Quarter Cozy Room', location: 'Hội An', province: 'Quảng Nam', bed: 'Single', reviews: 511, rating: 8.6, type: 'Standard', pricePerNight: 650000, image: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400' },
   { id: 'w9', name: 'Cliffside Ocean View', location: 'Vũng Tàu', province: 'Bà Rịa - Vũng Tàu', bed: 'Queen', reviews: 147, rating: 8.9, type: 'Deluxe', pricePerNight: 1750000, image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400' },
-  { id: 'w10', name: 'Wellness Spa Retreat', location: 'Huế', province: 'Thừa Thiên Huế', bed: 'Queen', reviews: 88, rating: 9.2, type: 'Superior', pricePerNight: 2100000, image: 'https://images.unsplash.com/photo-1601053081350-c1e37a5e7e99?w=400' },
-];
+  { id: 'w10', name: 'Wellness Spa Retreat', location: 'Huế', province: 'Thừa Thiên Huế', bed: 'Queen', reviews: 88, rating: 9.2, type: 'Superior', pricePerNight: 2100000, image: 'https://images.unsplash.com/photo-1601053081350-c1e37a5e7e99?w=400' }
+]
 
 const nightsBetween = (a, b) => {
-  const diff = new Date(b) - new Date(a);
-  return diff > 0 ? Math.round(diff / 86400000) : 1;
-};
+  const diff = new Date(b) - new Date(a)
+  return diff > 0 ? Math.round(diff / 86400000) : 1
+}
 
 /* ─── Sidebar ─────────────────────────────────────────── */
 const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes,
   amenities, selectedAmenities, setSelectedAmenities,
   minPrice, setMinPrice, maxPrice, setMaxPrice, onSearch, loading }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   const toggle = (list, setList, v) =>
-    setList(list.includes(v) ? list.filter(x => x !== v) : [...list, v]);
-  const labelSx = { fontWeight: 700, color: '#888', letterSpacing: 1, fontSize: 11, display: 'block', mb: 0.5 };
+    setList(list.includes(v) ? list.filter(x => x !== v) : [...list, v])
+  const labelSx = { fontWeight: 700, color: '#888', letterSpacing: 1, fontSize: 11, display: 'block', mb: 0.5 }
 
   return (
     <Box sx={{ width: SIDEBAR_W, p: 2.5, height: '100%', overflowY: 'auto' }}>
@@ -139,7 +131,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
             <InputAdornment position="start">
               <LocationOn sx={{ color: PC, fontSize: 18 }} />
             </InputAdornment>
-          ),
+          )
         }}
         SelectProps={{
           native: false,
@@ -184,8 +176,8 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         <Slider
           value={[minPrice || 0, maxPrice || 10000000]}
           onChange={(e, newValue) => {
-            setMinPrice(newValue[0]);
-            setMaxPrice(newValue[1]);
+            setMinPrice(newValue[0])
+            setMaxPrice(newValue[1])
           }}
           valueLabelDisplay="auto"
           min={0}
@@ -196,7 +188,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
             '& .MuiSlider-thumb': {
               bgcolor: 'white',
               border: `2px solid ${PC}`,
-              '&:hover, &.Mui-focusVisible': { boxShadow: `0 0 0 8px ${PC}33` },
+              '&:hover, &.Mui-focusVisible': { boxShadow: `0 0 0 8px ${PC}33` }
             }
           }}
         />
@@ -214,7 +206,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
       {/* Loại phòng */}
       {[
         ['booking_page.room_type', ROOM_TYPES, roomTypes, setRoomTypes],
-        ['booking_page.bed_type', BED_TYPES, bedTypes, setBedTypes],
+        ['booking_page.bed_type', BED_TYPES, bedTypes, setBedTypes]
       ].map(([titleKey, items, list, setList]) => (
         <Box key={titleKey}>
           <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>{t(titleKey)}</Typography>
@@ -267,13 +259,12 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         {loading ? t('booking_page.searching') : t('booking_page.find_room')}
       </Button>
     </Box>
-  );
-};
-
+  )
+}
 
 
 const OffersSection = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation()
   return (
     <Box sx={{ mb: 6, px: 6 }}>
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
@@ -282,12 +273,12 @@ const OffersSection = () => {
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
         {t('banners.offers_subtitle') === 'banners.offers_subtitle' ? 'Khuyến mãi, giảm giá và ưu đãi đặc biệt dành riêng cho bạn' : t('banners.offers_subtitle')}
       </Typography>
-      
-      <Card sx={{ 
-        display: 'flex', 
+
+      <Card sx={{
+        display: 'flex',
         flexDirection: { xs: 'column', md: 'row' },
-        borderRadius: 4, 
-        border: '1px solid #eee', 
+        borderRadius: 4,
+        border: '1px solid #eee',
         boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
         overflow: 'hidden',
         bgcolor: '#fff'
@@ -302,10 +293,10 @@ const OffersSection = () => {
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 450 }}>
             Giảm ít nhất 15% cho một số chỗ nghỉ khi đặt phòng từ nay đến hết mùa du lịch.
           </Typography>
-          <Button variant="contained" sx={{ 
-            bgcolor: '#006ce4', 
-            color: '#fff', 
-            textTransform: 'none', 
+          <Button variant="contained" sx={{
+            bgcolor: '#006ce4',
+            color: '#fff',
+            textTransform: 'none',
             fontWeight: 700,
             fontSize: 15,
             borderRadius: 1.5,
@@ -327,21 +318,21 @@ const OffersSection = () => {
         </Box>
       </Card>
     </Box>
-  );
-};
+  )
+}
 
 /* ─── BookingDialog ────────────────────────────────────── */
-const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, navigate }) => {
-  const { t, i18n } = useTranslation();
+const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess }) => {
+  const { t } = useTranslation()
   const [form, setForm] = useState({
     checkIn: searchParams?.checkIn || '',
     checkOut: searchParams?.checkOut || '',
     numAdults: (searchParams?.adults || 2),
     numChildren: (searchParams?.children || 0),
-    specialRequest: '',
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
+    specialRequest: ''
+  })
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (open) {
@@ -350,47 +341,46 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
         checkOut: searchParams?.checkOut || '',
         numAdults: (searchParams?.adults || 2),
         numChildren: (searchParams?.children || 0),
-        specialRequest: '',
-      });
-      setError('');
+        specialRequest: ''
+      })
+      setError('')
     }
-  }, [open, searchParams]);
+  }, [open, searchParams])
 
-  if (!room) return null;
+  if (!room) return null
 
-  const roomName = isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`;
-  const roomType = isMock ? room.type : (room.typeName || 'Standard');
-  const roomPrice = isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0);
-  const nights = nightsBetween(form.checkIn, form.checkOut);
+  const roomName = isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`
+  const roomType = isMock ? room.type : (room.typeName || 'Standard')
+  const roomPrice = isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0)
+  const nights = nightsBetween(form.checkIn, form.checkOut)
 
-  const total = roomPrice * nights;
+  const total = roomPrice * nights
 
   const handleBook = async () => {
-    if (!form.checkIn || !form.checkOut) { setError(t('rooms.validation_required')); return; }
-    if (new Date(form.checkOut) <= new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return; }
-    if (isMock) { setError('Phòng mẫu — vui lòng tìm kiếm phòng thực trên hệ thống.'); return; }
+    if (!form.checkIn || !form.checkOut) { setError(t('rooms.validation_required')); return }
+    if (new Date(form.checkOut) <= new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return }
+    if (isMock) { setError('Phòng mẫu — vui lòng tìm kiếm phòng thực trên hệ thống.'); return }
 
-    setSubmitting(true);
-    setError('');
+    setSubmitting(true)
+    setError('')
     try {
-      const bookingResult = await createBookingApi({
+      await createBookingApi({
         roomId: room.roomId || room.id,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
         numAdults: Number(form.numAdults),
         numChildren: Number(form.numChildren),
-        specialRequest: form.specialRequest,
-      });
-      onSuccess();
+        specialRequest: form.specialRequest
+      })
+      onSuccess()
     } catch (err) {
-      console.error('Booking error:', err);
-      const data = err?.response?.data;
-      const msg = data?.error || data?.message || (typeof data === 'string' ? data : t('common.error'));
-      setError(msg);
+      const data = err?.response?.data
+      const msg = data?.error || data?.message || (typeof data === 'string' ? data : t('common.error'))
+      setError(msg)
     } finally {
-      setSubmitting(false);
+      setSubmitting(false)
     }
-  };
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
@@ -409,7 +399,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
             <Chip label={t(roomType)} size="small" sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, mb: 0.5 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{roomName}</Typography>
             <Typography variant="body2" color="text.secondary">
-              {formatCurrency(roomPrice, i18n.language)} {t('rooms.per_night')}
+              {formatCurrency(roomPrice, 'vi')} {t('rooms.per_night')}
             </Typography>
           </Box>
         </Box>
@@ -461,17 +451,17 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
         {form.checkIn && form.checkOut && nights > 0 && (
           <>
             {(() => {
-              const checkInDateTime = new Date(`${form.checkIn}T14:00:00`);
-              const refundDeadline = new Date(checkInDateTime.getTime() - 24 * 60 * 60 * 1000);
-              const isNonRefundable = new Date() > refundDeadline;
-              
+              const checkInDateTime = new Date(`${form.checkIn}T14:00:00`)
+              const refundDeadline = new Date(checkInDateTime.getTime() - 24 * 60 * 60 * 1000)
+              const isNonRefundable = new Date() > refundDeadline
+
               return isNonRefundable && (
                 <Alert severity="warning" sx={{ mb: 2, borderRadius: 2, fontSize: '0.85rem', '& .MuiAlert-message': { fontWeight: 600 } }}>
-                  {t('booking_page.non_refundable_warning') === 'booking_page.non_refundable_warning' 
-                    ? "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy."
+                  {t('booking_page.non_refundable_warning') === 'booking_page.non_refundable_warning'
+                    ? 'Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy.'
                     : t('booking_page.non_refundable_warning')}
                 </Alert>
-              );
+              )
             })()}
 
             <Box sx={{ p: 2, bgcolor: PC_LIGHT, borderRadius: 2 }}>
@@ -501,202 +491,203 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess, n
         </Button>
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}
 
 /* ─── Main ─────────────────────────────────────────────── */
 const BookingPage = () => {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
+  const { t } = useTranslation()
+  const navigate = useNavigate()
 
-  const { user, isAuthenticated } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [rooms, setRooms] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searched, setSearched] = useState(false);
-  const [destIdx, setDestIdx] = useState(1);
-  const [roomTypes, setRoomTypes] = useState([]);
-  const [bedTypes, setBedTypes] = useState([]);
-  
+  const { isAuthenticated } = useAuth()
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [rooms, setRooms] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searched, setSearched] = useState(false)
+  const [destIdx, setDestIdx] = useState(1)
+  const [roomTypes, setRoomTypes] = useState([])
+  const [bedTypes, setBedTypes] = useState([])
+
   // Amenities state
-  const [amenities, setAmenities] = useState([]);
-  const [selectedAmenities, setSelectedAmenities] = useState([]);
+  const [amenities, setAmenities] = useState([])
+  const [selectedAmenities, setSelectedAmenities] = useState([])
 
-  const [minPrice, setMinPrice] = useState(undefined);
-  const [maxPrice, setMaxPrice] = useState(undefined);
+  const [minPrice, setMinPrice] = useState(undefined)
+  const [maxPrice, setMaxPrice] = useState(undefined)
   const [params, setParams] = useState({
     destination: 'Hà Nội',
     checkIn: new Date().toISOString().split('T')[0],
     checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-    adults: 2, children: 0,
-  });
+    adults: 2, children: 0
+  })
 
   // Dialog state
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [loginPromptOpen, setLoginPromptOpen] = useState(false);
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [selectedIsMock, setSelectedIsMock] = useState(false);
-  const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' });
-  const destScrollRef = useRef(null);
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [selectedRoom, setSelectedRoom] = useState(null)
+  const [selectedIsMock, setSelectedIsMock] = useState(false)
+  const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' })
+  const destScrollRef = useRef(null)
   const scrollDest = (dir) => {
     if (destScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = destScrollRef.current;
-      const scrollAmount = (clientWidth + 20) / 4;
-      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
-      if (dir < 0 && scrollLeft <= 10) return;
-      destScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+      const { scrollLeft, scrollWidth, clientWidth } = destScrollRef.current
+      const scrollAmount = (clientWidth + 20) / 4
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
+      if (dir < 0 && scrollLeft <= 10) return
+      destScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
     }
-  };
+  }
 
-  const roomScrollRef = useRef(null);
+  const roomScrollRef = useRef(null)
   const scrollRooms = (dir) => {
     if (roomScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = roomScrollRef.current;
-      const scrollAmount = (clientWidth + 24) / 3;
-      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
-      if (dir < 0 && scrollLeft <= 10) return;
-      roomScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+      const { scrollLeft, scrollWidth, clientWidth } = roomScrollRef.current
+      const scrollAmount = (clientWidth + 24) / 3
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
+      if (dir < 0 && scrollLeft <= 10) return
+      roomScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
     }
-  };
+  }
 
-  const typeScrollRef = useRef(null);
+  const typeScrollRef = useRef(null)
   const scrollTypes = (dir) => {
     if (typeScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = typeScrollRef.current;
-      const scrollAmount = (clientWidth + 16) / 4;
-      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
-      if (dir < 0 && scrollLeft <= 10) return;
-      typeScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+      const { scrollLeft, scrollWidth, clientWidth } = typeScrollRef.current
+      const scrollAmount = (clientWidth + 16) / 4
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
+      if (dir < 0 && scrollLeft <= 10) return
+      typeScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
     }
-  };
+  }
 
-  const budgetScrollRef = useRef(null);
+  const budgetScrollRef = useRef(null)
   const scrollBudget = (dir) => {
     if (budgetScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = budgetScrollRef.current;
-      const scrollAmount = (clientWidth + 24) / 3;
-      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
-      if (dir < 0 && scrollLeft <= 10) return;
-      budgetScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+      const { scrollLeft, scrollWidth, clientWidth } = budgetScrollRef.current
+      const scrollAmount = (clientWidth + 24) / 3
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
+      if (dir < 0 && scrollLeft <= 10) return
+      budgetScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
     }
-  };
+  }
 
   const [recentSearches, setRecentSearches] = useState(() => {
-    const saved = localStorage.getItem('recent_searches');
-    return saved ? JSON.parse(saved) : [];
-  });
+    const saved = localStorage.getItem('recent_searches')
+    return saved ? JSON.parse(saved) : []
+  })
 
   const budgetRooms = React.useMemo(() => {
-    if (searched && rooms.length === 0) return [];
-    const list = rooms.length > 0 ? rooms : MOCK_ROOMS;
+    if (searched && rooms.length === 0) return []
+    const list = rooms.length > 0 ? rooms : MOCK_ROOMS
     return [...list].sort((a, b) => {
-      const pA = Number(a.pricePerNight || a.priceDay || a.price || 0);
-      const pB = Number(b.pricePerNight || b.priceDay || b.price || 0);
-      return pA - pB;
-    }).slice(0, 10);
-  }, [rooms, searched]);
+      const pA = Number(a.pricePerNight || a.priceDay || a.price || 0)
+      const pB = Number(b.pricePerNight || b.priceDay || b.price || 0)
+      return pA - pB
+    }).slice(0, 10)
+  }, [rooms, searched])
 
   const featuredRooms = React.useMemo(() => {
-    if (searched && rooms.length === 0) return [];
-    const list = rooms.length > 0 ? rooms : MOCK_ROOMS;
-    return list.slice(0, 10);
-  }, [rooms, searched]);
+    if (searched && rooms.length === 0) return []
+    const list = rooms.length > 0 ? rooms : MOCK_ROOMS
+    return list.slice(0, 10)
+  }, [rooms, searched])
 
   const topRatedRooms = React.useMemo(() => {
-    if (searched && rooms.length === 0) return [];
-    const list = rooms.length > 0 ? rooms : MOCK_ROOMS;
+    if (searched && rooms.length === 0) return []
+    const list = rooms.length > 0 ? rooms : MOCK_ROOMS
     return [...list].sort((a, b) => {
-      const rA = Number(a.rating || 0);
-      const rB = Number(b.rating || 0);
-      if (rB !== rA) return rB - rA;
-      const revA = Number(a.reviews || 0);
-      const revB = Number(b.reviews || 0);
-      return revB - revA;
-    }).slice(0, 10);
-  }, [rooms, searched]);
-  
+      const rA = Number(a.rating || 0)
+      const rB = Number(b.rating || 0)
+      if (rB !== rA) return rB - rA
+      const revA = Number(a.reviews || 0)
+      const revB = Number(b.reviews || 0)
+      return revB - revA
+    }).slice(0, 10)
+  }, [rooms, searched])
+
   const weekendDeals = React.useMemo(() => {
     // Lấy tối đa 10 phòng thật từ backend, shuffle để khác phần "Phòng nổi bật"
-    const shuffledReal = [...rooms].sort(() => Math.random() - 0.5);
+    const shuffledReal = [...rooms].sort(() => Math.random() - 0.5)
     const realRooms = shuffledReal.slice(0, 10).map(r => ({
       ...r,
       _isMockCard: false,
-      oldPrice: Number(r.pricePerNight || r.priceDay || 0) * (1.2 + Math.random() * 0.15),
-    }));
+      oldPrice: Number(r.pricePerNight || r.priceDay || 0) * (1.2 + Math.random() * 0.15)
+    }))
 
     // Nếu phòng thật < 10, bổ sung bằng MOCK_WEEKEND_DEALS
-    const needed = Math.max(0, 10 - realRooms.length);
+    const needed = Math.max(0, 10 - realRooms.length)
     const mockFill = MOCK_WEEKEND_DEALS.slice(0, needed).map(r => ({
       ...r,
       _isMockCard: true,
-      oldPrice: Number(r.pricePerNight || 0) * (1.2 + Math.random() * 0.15),
-    }));
+      oldPrice: Number(r.pricePerNight || 0) * (1.2 + Math.random() * 0.15)
+    }))
 
-    return [...realRooms, ...mockFill];
-  }, [rooms]);
+    return [...realRooms, ...mockFill]
+  }, [rooms])
 
 
-  const recentScrollRef = useRef(null);
+  const recentScrollRef = useRef(null)
   const scrollRecent = (dir) => {
     if (recentScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = recentScrollRef.current;
-      const scrollAmount = (clientWidth + 16) / 4;
-      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
-      if (dir < 0 && scrollLeft <= 10) return;
-      recentScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+      const { scrollLeft, scrollWidth, clientWidth } = recentScrollRef.current
+      const scrollAmount = (clientWidth + 16) / 4
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
+      if (dir < 0 && scrollLeft <= 10) return
+      recentScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
     }
-  };
+  }
 
-  const weekendScrollRef = useRef(null);
+  const weekendScrollRef = useRef(null)
   const scrollWeekend = (dir) => {
     if (weekendScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = weekendScrollRef.current;
-      const scrollAmount = clientWidth / 3 + 16;
-      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
-      if (dir < 0 && scrollLeft <= 10) return;
-      weekendScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+      const { scrollLeft, scrollWidth, clientWidth } = weekendScrollRef.current
+      const scrollAmount = clientWidth / 3 + 16
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
+      if (dir < 0 && scrollLeft <= 10) return
+      weekendScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
     }
-  };
+  }
 
-  const topRatedScrollRef = useRef(null);
+  const topRatedScrollRef = useRef(null)
   const scrollTopRated = (dir) => {
     if (topRatedScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = topRatedScrollRef.current;
-      const scrollAmount = (clientWidth + 24) / 3;
-      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return;
-      if (dir < 0 && scrollLeft <= 10) return;
-      topRatedScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' });
+      const { scrollLeft, scrollWidth, clientWidth } = topRatedScrollRef.current
+      const scrollAmount = (clientWidth + 24) / 3
+      if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
+      if (dir < 0 && scrollLeft <= 10) return
+      topRatedScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
     }
-  };
+  }
 
   useEffect(() => {
     getRoomsApi()
       .then(d => setRooms(Array.isArray(d) ? d : []))
       .catch(() => setRooms([]))
-      .finally(() => setLoading(false));
+      .finally(() => setLoading(false))
 
     // Fetch amenities for the sidebar
     getAmenitiesApi()
       .then(d => setAmenities(Array.isArray(d) ? d : []))
-      .catch(err => console.error("Failed to load amenities:", err));
-  }, []);
+      .catch(() => { })
+  }, [])
 
-  const onParam = (k, v) => setParams(p => ({ ...p, [k]: v }));
+  const onParam = (k, v) => setParams(p => ({ ...p, [k]: v }))
 
   const handleSearch = async (overrideParams) => {
     // Distinguish between a search object and a React event
-    const isOverride = overrideParams && typeof overrideParams === 'object' && 'checkIn' in overrideParams;
-    const searchParams = isOverride ? overrideParams : params;
+    const isOverride = overrideParams && typeof overrideParams === 'object' && 'checkIn' in overrideParams
+    const searchParams = isOverride ? overrideParams : params
 
-    if (!searchParams.checkIn || !searchParams.checkOut) return;
-    setLoading(true); setSearched(true);
+    if (!searchParams.checkIn || !searchParams.checkOut) return
+    setLoading(true)
+    setSearched(true)
 
     // Save to history (only for new manual searches)
     if (!isOverride) {
-      const newHistory = [searchParams, ...recentSearches.filter(s => s.destination !== searchParams.destination)].slice(0, 10);
-      setRecentSearches(newHistory);
-      localStorage.setItem('recent_searches', JSON.stringify(newHistory));
+      const newHistory = [searchParams, ...recentSearches.filter(s => s.destination !== searchParams.destination)].slice(0, 10)
+      setRecentSearches(newHistory)
+      localStorage.setItem('recent_searches', JSON.stringify(newHistory))
     }
 
     try {
@@ -709,49 +700,50 @@ const BookingPage = () => {
         roomTypes.length > 0 ? roomTypes : undefined,
         bedTypes.length > 0 ? bedTypes : undefined,
         selectedAmenities.length > 0 ? selectedAmenities : undefined
-      );
-      setRooms(Array.isArray(d) ? d : []);
-    } catch { setRooms([]); }
-    finally { setLoading(false); }
-  };
+      )
+      setRooms(Array.isArray(d) ? d : [])
+    } catch { setRooms([]) }
+    finally { setLoading(false) }
+  }
 
   const handleClearSearch = () => {
-    setSearched(false);
+    setSearched(false)
     // Optionally reset rooms to all rooms, or just let them be
     getRoomsApi()
       .then(d => setRooms(Array.isArray(d) ? d : []))
-      .catch(() => setRooms([]));
-  };
+      .catch(() => setRooms([]))
+  }
 
   const handleRecentSearchClick = (s) => {
-    setParams(s);
-    handleSearch(s);
-  };
+    setParams(s)
+    handleSearch(s)
+  }
 
   const openBooking = (room, isMock) => {
     if (!isAuthenticated) {
-      setLoginPromptOpen(true);
-      return;
+      setLoginPromptOpen(true)
+      return
     }
-    setSelectedRoom(room);
-    setSelectedIsMock(isMock);
-    setDialogOpen(true);
-  };
+    setSelectedRoom(room)
+    setSelectedIsMock(isMock)
+    setDialogOpen(true)
+  }
 
   const openDetail = (room, isMock) => {
-    setSelectedRoom(room);
-    setSelectedIsMock(isMock);
-    setDetailOpen(true);
-  };
+    setSelectedRoom(room)
+    setSelectedIsMock(isMock)
+    setDetailOpen(true)
+  }
 
   const handleBookingSuccess = () => {
-    setDialogOpen(false);
-    setSnackbar({ open: true, msg: t('booking_page.booking_success'), severity: 'success' });
-  };
+    setDialogOpen(false)
+    setSnackbar({ open: true, msg: t('booking_page.booking_success'), severity: 'success' })
+  }
 
   const handleTypeClick = async (typeKey) => {
-    setRoomTypes([typeKey]);
-    setLoading(true); setSearched(true);
+    setRoomTypes([typeKey])
+    setLoading(true)
+    setSearched(true)
     try {
       const d = await getAvailableRoomsApi(
         params.checkIn,
@@ -762,25 +754,25 @@ const BookingPage = () => {
         [typeKey],
         bedTypes.length > 0 ? bedTypes : undefined,
         selectedAmenities.length > 0 ? selectedAmenities : undefined
-      );
-      setRooms(Array.isArray(d) ? d : []);
-    } catch { setRooms([]); }
-    finally { setLoading(false); }
-  };
+      )
+      setRooms(Array.isArray(d) ? d : [])
+    } catch { setRooms([]) }
+    finally { setLoading(false) }
+  }
 
-  const selectDest = (idx) => { 
-    const dest = DESTINATIONS[idx].province || DESTINATIONS[idx].name;
-    setDestIdx(idx); 
+  const selectDest = (idx) => {
+    const dest = DESTINATIONS[idx].province || DESTINATIONS[idx].name
+    setDestIdx(idx)
     setParams(p => {
-      const newParams = { ...p, destination: dest };
-      handleSearch(newParams);
-      return newParams;
-    });
-  };
+      const newParams = { ...p, destination: dest }
+      handleSearch(newParams)
+      return newParams
+    })
+  }
 
   /* ── Room Card ─────────────────────────────────────────── */
   const RoomCard = ({ room, isMock, oldPrice }) => {
-    const { t, i18n } = useTranslation();
+    const { t, i18n } = useTranslation()
     return (
       <Card
         onClick={() => openDetail(room, isMock)}
@@ -831,7 +823,7 @@ const BookingPage = () => {
             </Typography>
             <Button
               size="small" variant="contained" color="primary"
-              onClick={(e) => { e.stopPropagation(); openBooking(room, isMock); }}
+              onClick={(e) => { e.stopPropagation(); openBooking(room, isMock) }}
               sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
             >
               {t('common.book_now')}
@@ -839,8 +831,8 @@ const BookingPage = () => {
           </Box>
         </CardContent>
       </Card>
-    );
-  };
+    )
+  }
 
   return (
     <Box sx={{ display: 'flex', position: 'relative', bgcolor: 'background.default', minHeight: '100vh' }}>
@@ -857,7 +849,7 @@ const BookingPage = () => {
         bgcolor: 'white',
         borderRight: '1px solid #eee',
         zIndex: 100,
-        boxShadow: sidebarOpen ? '2px 0 12px rgba(0,0,0,0.07)' : 'none',
+        boxShadow: sidebarOpen ? '2px 0 12px rgba(0,0,0,0.07)' : 'none'
       }}>
         <Sidebar params={params} onParam={onParam}
           roomTypes={roomTypes} setRoomTypes={setRoomTypes}
@@ -875,7 +867,7 @@ const BookingPage = () => {
       <Box sx={{
         flex: 1, minWidth: 0,
         marginLeft: sidebarOpen ? `${SIDEBAR_W}px` : 0,
-        transition: 'margin-left 0.3s ease',
+        transition: 'margin-left 0.3s ease'
       }}>
         {/* Filter toggle - Sticky */}
         <Box sx={{ position: 'sticky', top: 0, zIndex: 90, pl: 0.5, pt: 0.5, pb: 0, width: 'fit-content' }}>
@@ -902,7 +894,7 @@ const BookingPage = () => {
                         <IconButton onClick={() => scrollRecent(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                          '&:hover': { bgcolor: PC_LIGHT },
+                          '&:hover': { bgcolor: PC_LIGHT }
                         }}>
                           <ChevronLeft sx={{ color: PC }} />
                         </IconButton>
@@ -912,7 +904,7 @@ const BookingPage = () => {
                         display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                        scrollSnapType: 'x mandatory',
+                        scrollSnapType: 'x mandatory'
                       }}>
                         {recentSearches.map((s, i) => (
                           <Card key={i} onClick={() => handleRecentSearchClick(s)} sx={{
@@ -924,9 +916,9 @@ const BookingPage = () => {
                             minHeight: 100, // Cố định chiều cao tối thiểu
                             display: 'flex', flexDirection: 'column', justifyContent: 'center'
                           }}>
-                            <Typography variant="subtitle2" sx={{ 
-                              fontWeight: 800, 
-                              color: PC, 
+                            <Typography variant="subtitle2" sx={{
+                              fontWeight: 800,
+                              color: PC,
                               mb: 0.5,
                               minHeight: '1.2em', // Đảm bảo luôn có khoảng trống cho tiêu đề
                               overflow: 'hidden',
@@ -949,7 +941,7 @@ const BookingPage = () => {
                         <IconButton onClick={() => scrollRecent(1)} sx={{
                           position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                          '&:hover': { bgcolor: PC_LIGHT },
+                          '&:hover': { bgcolor: PC_LIGHT }
                         }}>
                           <ChevronRight sx={{ color: PC }} />
                         </IconButton>
@@ -968,7 +960,7 @@ const BookingPage = () => {
                     <IconButton onClick={() => scrollDest(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
+                      '&:hover': { bgcolor: PC_LIGHT }
                     }}>
                       <ChevronLeft sx={{ color: PC }} />
                     </IconButton>
@@ -979,7 +971,7 @@ const BookingPage = () => {
                     display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory',
+                    scrollSnapType: 'x mandatory'
                   }}>
                     {DESTINATIONS.map((d, i) => (
                       <Card key={d.name} onClick={() => selectDest(i)} sx={{
@@ -990,7 +982,7 @@ const BookingPage = () => {
                         scrollSnapStop: 'always',
                         border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
                         transition: 'all 0.2s',
-                        boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1,
+                        boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1
                       }}>
                         {/* Ảnh tràn kín */}
                         <img
@@ -1001,7 +993,7 @@ const BookingPage = () => {
                         {/* Gradient overlay */}
                         <Box sx={{
                           position: 'absolute', inset: 0,
-                          background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)',
+                          background: 'linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%)'
                         }} />
                         {/* Text */}
                         <Box sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, p: 1.2, textAlign: 'center' }}>
@@ -1018,7 +1010,7 @@ const BookingPage = () => {
                     <IconButton onClick={() => scrollDest(1)} sx={{
                       position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
+                      '&:hover': { bgcolor: PC_LIGHT }
                     }}>
                       <ChevronRight sx={{ color: PC }} />
                     </IconButton>
@@ -1039,7 +1031,7 @@ const BookingPage = () => {
                     <IconButton onClick={() => scrollTypes(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
+                      '&:hover': { bgcolor: PC_LIGHT }
                     }}>
                       <ChevronLeft sx={{ color: PC }} />
                     </IconButton>
@@ -1049,7 +1041,7 @@ const BookingPage = () => {
                     display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory',
+                    scrollSnapType: 'x mandatory'
                   }}>
                     {ROOM_TYPES.map((type) => (
                       <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
@@ -1059,7 +1051,7 @@ const BookingPage = () => {
                         scrollSnapAlign: 'start',
                         boxShadow: 1,
                         border: roomTypes.includes(type.key) ? `3px solid ${PC}` : '3px solid transparent',
-                        transition: 'all 0.2s',
+                        transition: 'all 0.2s'
                       }}>
                         <CardMedia component="img" image={type.img} alt={t(type.label)} sx={{ height: '100%', objectFit: 'cover' }} />
                         <Box sx={{
@@ -1079,7 +1071,7 @@ const BookingPage = () => {
                     <IconButton onClick={() => scrollTypes(1)} sx={{
                       position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
+                      '&:hover': { bgcolor: PC_LIGHT }
                     }}>
                       <ChevronRight sx={{ color: PC }} />
                     </IconButton>
@@ -1097,10 +1089,10 @@ const BookingPage = () => {
                         {t('booking_page.featured_rooms_sub')}
                       </Typography>
                     </Box>
-                    <Button 
-                      endIcon={<ArrowForward />} 
+                    <Button
+                      endIcon={<ArrowForward />}
                       onClick={() => navigate('/rooms')}
-                      sx={{ 
+                      sx={{
                         color: PC, fontWeight: 700, textTransform: 'none',
                         '&:hover': { bgcolor: PC_LIGHT }
                       }}
@@ -1114,7 +1106,7 @@ const BookingPage = () => {
                     <IconButton onClick={() => scrollRooms(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
+                      '&:hover': { bgcolor: PC_LIGHT }
                     }}>
                       <ChevronLeft sx={{ color: PC }} />
                     </IconButton>
@@ -1124,7 +1116,7 @@ const BookingPage = () => {
                     display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory',
+                    scrollSnapType: 'x mandatory'
                   }}>
                     {loading ? (
                       [...Array(3)].map((_, i) => (
@@ -1147,7 +1139,7 @@ const BookingPage = () => {
                     <IconButton onClick={() => scrollRooms(1)} sx={{
                       position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                      '&:hover': { bgcolor: PC_LIGHT },
+                      '&:hover': { bgcolor: PC_LIGHT }
                     }}>
                       <ChevronRight sx={{ color: PC }} />
                     </IconButton>
@@ -1164,10 +1156,10 @@ const BookingPage = () => {
                           <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.top_rated')}</Typography>
                           <Typography variant="body2" color="text.secondary">{t('booking_page.top_rated_sub')}</Typography>
                         </Box>
-                        <Button 
-                          endIcon={<ArrowForward />} 
+                        <Button
+                          endIcon={<ArrowForward />}
                           onClick={() => navigate('/rooms')}
-                          sx={{ 
+                          sx={{
                             color: PC, fontWeight: 700, textTransform: 'none',
                             '&:hover': { bgcolor: PC_LIGHT }
                           }}
@@ -1181,7 +1173,7 @@ const BookingPage = () => {
                         <IconButton onClick={() => scrollTopRated(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                          '&:hover': { bgcolor: PC_LIGHT },
+                          '&:hover': { bgcolor: PC_LIGHT }
                         }}>
                           <ChevronLeft sx={{ color: PC }} />
                         </IconButton>
@@ -1191,7 +1183,7 @@ const BookingPage = () => {
                         display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                        scrollSnapType: 'x mandatory',
+                        scrollSnapType: 'x mandatory'
                       }}>
                         {topRatedRooms.map(r => (
                           <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
@@ -1204,7 +1196,7 @@ const BookingPage = () => {
                         <IconButton onClick={() => scrollTopRated(1)} sx={{
                           position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                          '&:hover': { bgcolor: PC_LIGHT },
+                          '&:hover': { bgcolor: PC_LIGHT }
                         }}>
                           <ChevronRight sx={{ color: PC }} />
                         </IconButton>
@@ -1223,10 +1215,10 @@ const BookingPage = () => {
                           <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.budget_friendly')}</Typography>
                           <Typography variant="body2" color="text.secondary">{t('booking_page.budget_friendly_sub')}</Typography>
                         </Box>
-                        <Button 
-                          endIcon={<ArrowForward />} 
+                        <Button
+                          endIcon={<ArrowForward />}
                           onClick={() => navigate('/rooms')}
-                          sx={{ 
+                          sx={{
                             color: PC, fontWeight: 700, textTransform: 'none',
                             '&:hover': { bgcolor: PC_LIGHT }
                           }}
@@ -1240,7 +1232,7 @@ const BookingPage = () => {
                         <IconButton onClick={() => scrollBudget(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                          '&:hover': { bgcolor: PC_LIGHT },
+                          '&:hover': { bgcolor: PC_LIGHT }
                         }}>
                           <ChevronLeft sx={{ color: PC }} />
                         </IconButton>
@@ -1250,7 +1242,7 @@ const BookingPage = () => {
                         display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                        scrollSnapType: 'x mandatory',
+                        scrollSnapType: 'x mandatory'
                       }}>
                         {budgetRooms.map(r => (
                           <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
@@ -1263,7 +1255,7 @@ const BookingPage = () => {
                         <IconButton onClick={() => scrollBudget(1)} sx={{
                           position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                          '&:hover': { bgcolor: PC_LIGHT },
+                          '&:hover': { bgcolor: PC_LIGHT }
                         }}>
                           <ChevronRight sx={{ color: PC }} />
                         </IconButton>
@@ -1281,7 +1273,7 @@ const BookingPage = () => {
                   <IconButton onClick={() => scrollWeekend(-1)} sx={{
                     position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                     zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                    '&:hover': { bgcolor: PC_LIGHT },
+                    '&:hover': { bgcolor: PC_LIGHT }
                   }}>
                     <ChevronLeft sx={{ color: PC }} />
                   </IconButton>
@@ -1290,7 +1282,7 @@ const BookingPage = () => {
                     display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory',
+                    scrollSnapType: 'x mandatory'
                   }}>
                     {weekendDeals.map(r => (
                       <Box key={r.id || r.roomId} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
@@ -1302,7 +1294,7 @@ const BookingPage = () => {
                   <IconButton onClick={() => scrollWeekend(1)} sx={{
                     position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                     zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                    '&:hover': { bgcolor: PC_LIGHT },
+                    '&:hover': { bgcolor: PC_LIGHT }
                   }}>
                     <ChevronRight sx={{ color: PC }} />
                   </IconButton>
@@ -1320,11 +1312,11 @@ const BookingPage = () => {
                       {rooms.length} {t('booking_page.available_rooms_sub')}
                     </Typography>
                   </Box>
-                  <Button 
-                    variant="outlined" 
+                  <Button
+                    variant="outlined"
                     startIcon={<ChevronLeft />}
                     onClick={handleClearSearch}
-                    sx={{ 
+                    sx={{
                       borderRadius: 2, color: PC, borderColor: PC, fontWeight: 700,
                       '&:hover': { bgcolor: PC_LIGHT, borderColor: PC }
                     }}
@@ -1387,7 +1379,6 @@ const BookingPage = () => {
         searchParams={params}
         onClose={() => setDialogOpen(false)}
         onSuccess={handleBookingSuccess}
-        navigate={navigate}
       />
 
       {/* Login Prompt Modal */}
@@ -1403,11 +1394,11 @@ const BookingPage = () => {
         onClose={() => setSnackbar(s => ({ ...s, open: false }))}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'center'
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center',
+          horizontal: 'center'
         }}
         PaperProps={{
           sx: {
@@ -1450,8 +1441,8 @@ const BookingPage = () => {
           <Typography variant="body2" sx={{ fontWeight: 600, lineHeight: 1.4 }}>
             {snackbar.msg}
           </Typography>
-          <IconButton 
-            size="small" 
+          <IconButton
+            size="small"
             onClick={() => setSnackbar(s => ({ ...s, open: false }))}
             sx={{ ml: 1, color: '#1e4620', opacity: 0.7 }}
           >
@@ -1461,7 +1452,7 @@ const BookingPage = () => {
       </Popover>
 
     </Box>
-  );
-};
+  )
+}
 
-export default BookingPage;
+export default BookingPage

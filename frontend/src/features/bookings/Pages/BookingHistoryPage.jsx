@@ -1,70 +1,74 @@
-import React, { useState, useEffect } from 'react';
+/* eslint-disable indent */
 import {
-  Box, Typography, Grid, TextField, Paper, Skeleton, Alert,
-  Chip, Button, Divider, InputAdornment, Card, CardContent, CardMedia, IconButton
-} from '@mui/material';
-import { 
-  CalendarToday, 
-  History, 
-  Search,
-  MeetingRoom,
-  ConfirmationNumber,
   ChevronRight,
-  CheckCircle,
-  Pending,
-  Cancel as CancelIcon
-} from '@mui/icons-material';
-import { useTranslation } from 'react-i18next';
-import { getMyBookingsApi, cancelBookingApi } from '../../../shared/api/bookingApi';
-import { useNavigate } from 'react-router-dom';
+  ConfirmationNumber,
+  History,
+  Search
+} from '@mui/icons-material'
+import {
+  Alert,
+  Box,
+  Button,
+  Card, CardContent, CardMedia,
+  Divider,
+  Grid,
+  IconButton,
+  Skeleton,
+  TextField,
+  Typography
+} from '@mui/material'
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
+import { cancelBookingApi, getMyBookingsApi } from '../../../shared/api/bookingApi'
 
-const PC = '#c0496e'; // Tương ứng với primary.dark hoặc primary.contrastText trong theme (Màu hồng đậm chủ đạo)
-const PC_LIGHT = '#fce4ec'; // Tương ứng với primary.main (Màu hồng nhạt)
+const PC = '#c0496e' // Tương ứng với primary.dark hoặc primary.contrastText trong theme (Màu hồng đậm chủ đạo)
+const PC_LIGHT = '#fce4ec' // Tương ứng với primary.main (Màu hồng nhạt)
 
 const BookingHistoryPage = () => {
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-  const [bookings, setBookings] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
+  const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const [checkIn, setCheckIn] = useState('')
+  const [checkOut, setCheckOut] = useState('')
 
   const fetchBookings = async () => {
-    setLoading(true);
-    setError('');
+    setLoading(true)
+    setError('')
     try {
-      const data = await getMyBookingsApi(checkIn, checkOut);
-      setBookings(Array.isArray(data) ? data : []);
+      const data = await getMyBookingsApi(checkIn, checkOut)
+      setBookings(Array.isArray(data) ? data : [])
     } catch (err) {
-      setError(t('bookings_history.fetch_error') || 'Lỗi khi tải dữ liệu');
-      console.error(err);
+      setError(t('bookings_history.fetch_error') || 'Lỗi khi tải dữ liệu')
+      console.error(err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleCancel = async (bookingId) => {
-    if (!window.confirm(t('bookings_history.confirm_cancel'))) return;
+    if (!window.confirm(t('bookings_history.confirm_cancel'))) return
     try {
-      await cancelBookingApi(bookingId);
-      fetchBookings();
+      await cancelBookingApi(bookingId)
+      fetchBookings()
     } catch (err) {
-      console.error('Cancel error:', err);
-      const msg = err.response?.data?.message || err.response?.data?.error || t('bookings_history.cancel_error');
-      alert(msg);
+      console.error('Cancel error:', err)
+      const msg = err.response?.data?.message || err.response?.data?.error || t('bookings_history.cancel_error')
+      alert(msg)
     }
-  };
+  }
 
   const nightsBetween = (a, b) => {
-    const diff = new Date(b) - new Date(a);
-    return diff > 0 ? Math.round(diff / 86400000) : 1;
-  };
+    const diff = new Date(b) - new Date(a)
+    return diff > 0 ? Math.round(diff / 86400000) : 1
+  }
 
   const handlePayment = (booking) => {
-    navigate('/payment?step=1', { 
-      state: { 
+    navigate('/payment?step=1', {
+      state: {
         booking,
         room: {
           roomId: booking.roomId,
@@ -78,44 +82,44 @@ const BookingHistoryPage = () => {
           numAdults: booking.numAdults || 2,
           numChildren: booking.numChildren || 0
         }
-      } 
-    });
-  };
+      }
+    })
+  }
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    fetchBookings()
+  }, [])
 
   const handleSearch = () => {
-    fetchBookings();
-  };
+    fetchBookings()
+  }
 
   const formatCurrency = (value) => {
-    if (!value) return '0 ₫';
-    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
-      style: 'currency', 
-      currency: i18n.language === 'vi' ? 'VND' : 'USD' 
-    }).format(i18n.language === 'vi' ? value : value / 25000);
-  };
+    if (!value) return '0 ₫'
+    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
+      style: 'currency',
+      currency: i18n.language === 'vi' ? 'VND' : 'USD'
+    }).format(i18n.language === 'vi' ? value : value / 25000)
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'CONFIRMED': return '#4caf50';
-      case 'PENDING': return '#ff9800';
-      case 'CANCELLED': return '#f44336';
-      case 'REFUNDED': return '#03a9f4'; // Light Blue cho Hoàn tiền
-      case 'CHECKED_IN': return '#c0496e';
-      case 'CHECKED_OUT': return '#607d8b'; // Blue Grey cho Checkout
-      default: return '#757575';
+      case 'CONFIRMED': return '#4caf50'
+      case 'PENDING': return '#ff9800'
+      case 'CANCELLED': return '#f44336'
+      case 'REFUNDED': return '#03a9f4' // Light Blue cho Hoàn tiền
+      case 'CHECKED_IN': return '#c0496e'
+      case 'CHECKED_OUT': return '#607d8b' // Blue Grey cho Checkout
+      default: return '#757575'
     }
-  };
+  }
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#fff', color: '#333', pb: 8 }}> {/* bgcolor: '#fff' tương ứng với action.inputBg */}
       {/* Pink Header Banner */}
-      <Box sx={{ 
-        pt: 8, pb: 6, 
-        textAlign: 'center', 
+      <Box sx={{
+        pt: 8, pb: 6,
+        textAlign: 'center',
         bgcolor: '#fdf2f8', // Màu nền nhẹ của Header Banner, tương tự primary.main với độ mờ cao
         borderBottom: '1px solid #fce4ec' // Màu viền tương ứng primary.main
       }}>
@@ -128,14 +132,14 @@ const BookingHistoryPage = () => {
       </Box>
 
       <Box sx={{ maxWidth: 1320, mx: 'auto', px: 3, mt: -4 }}>
-        
+
         {/* Horizontal Filter Bar - Aligned with Grid Edges */}
         <Box sx={{ px: 1.5, mb: 6 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'stretch', 
-            bgcolor: PC, 
-            borderRadius: 3, 
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'stretch',
+            bgcolor: PC,
+            borderRadius: 3,
             border: `2px solid ${PC}`, // Thinner outer border
             overflow: 'hidden',
             flexWrap: { xs: 'wrap', md: 'nowrap' },
@@ -144,10 +148,10 @@ const BookingHistoryPage = () => {
             boxShadow: '0 8px 25px rgba(0,0,0,0.08)'
           }}>
             {/* Destination Segment - Thinner Border */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              px: 3, py: 1.2, 
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              px: 3, py: 1.2,
               flex: 1.5,
               bgcolor: '#fff',
               borderRadius: 2,
@@ -184,10 +188,10 @@ const BookingHistoryPage = () => {
             </Box>
 
             {/* Combined Date Range Segment - Thinner Border */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              px: 3, py: 1.2, 
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              px: 3, py: 1.2,
               flex: 2,
               bgcolor: '#fff',
               borderRadius: 2,
@@ -201,9 +205,9 @@ const BookingHistoryPage = () => {
                     variant="standard"
                     value={checkIn}
                     onChange={(e) => setCheckIn(e.target.value)}
-                    InputProps={{ 
+                    InputProps={{
                       disableUnderline: true,
-                      sx: { color: '#333', fontSize: 14, fontWeight: 600 } 
+                      sx: { color: '#333', fontSize: 14, fontWeight: 600 }
                     }}
                     fullWidth
                   />
@@ -218,9 +222,9 @@ const BookingHistoryPage = () => {
                     variant="standard"
                     value={checkOut}
                     onChange={(e) => setCheckOut(e.target.value)}
-                    InputProps={{ 
+                    InputProps={{
                       disableUnderline: true,
-                      sx: { color: '#333', fontSize: 14, fontWeight: 600 } 
+                      sx: { color: '#333', fontSize: 14, fontWeight: 600 }
                     }}
                     fullWidth
                   />
@@ -230,14 +234,14 @@ const BookingHistoryPage = () => {
 
             {/* Search Button Segment - Matched with BookingPage Theme */}
             <Box sx={{ flex: 0.8, display: 'flex' }}>
-              <Button 
+              <Button
                 onClick={handleSearch}
                 variant="contained"
                 startIcon={<Search />}
-                sx={{ 
+                sx={{
                   width: '100%',
                   borderRadius: 2,
-                  bgcolor: PC, 
+                  bgcolor: PC,
                   color: '#fff',
                   fontSize: 14,
                   fontWeight: 700,
@@ -277,22 +281,22 @@ const BookingHistoryPage = () => {
           ) : (
             bookings.map((booking, index) => (
               <Grid item xs={12} sm={6} md={3} lg={3} key={booking.bookingId || index}>
-                <Card sx={{ 
+                <Card sx={{
                   height: '100%',
-                  bgcolor: '#fff', 
-                  borderRadius: 3, 
+                  bgcolor: '#fff',
+                  borderRadius: 3,
                   border: '1px solid #eee',
                   transition: 'all 0.3s',
                   position: 'relative',
-                  '&:hover': { 
+                  '&:hover': {
                     transform: 'translateY(-8px)',
                     boxShadow: '0 12px 30px rgba(0,0,0,0.1)'
                   }
                 }}>
                   {/* Status Overlay */}
-                  <Box sx={{ 
-                    position: 'absolute', 
-                    top: 12, right: 12, 
+                  <Box sx={{
+                    position: 'absolute',
+                    top: 12, right: 12,
                     zIndex: 2,
                     bgcolor: getStatusColor(booking.status),
                     color: '#fff',
@@ -308,10 +312,10 @@ const BookingHistoryPage = () => {
                   <CardMedia
                     component="img"
                     height="180"
-                    image={`https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400`}
+                    image={'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=400'}
                     alt="Room"
                   />
-                  
+
                   <CardContent sx={{ p: 2.5 }}>
                     <Typography variant="caption" sx={{ color: PC, fontWeight: 700, mb: 0.5, display: 'block' }}>
                       {booking.roomTypeName || 'Standard'}
@@ -319,7 +323,7 @@ const BookingHistoryPage = () => {
                     <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1, lineHeight: 1.2, color: '#333' }}>
                       {t('booking_page.room') || 'Phòng'} {booking.roomNumber}
                     </Typography>
-                    
+
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, color: '#888' }}>
                       <ConfirmationNumber sx={{ fontSize: 14 }} />
                       <Typography variant="caption" sx={{ fontWeight: 600 }}>{booking.bookingCode}</Typography>
@@ -349,10 +353,10 @@ const BookingHistoryPage = () => {
 
                     {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
                       <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                        <Button 
-                          fullWidth 
-                          variant="outlined" 
-                          color="error" 
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          color="error"
                           size="small"
                           onClick={() => handleCancel(booking.bookingId)}
                           sx={{ borderRadius: 2, fontSize: 11, fontWeight: 700 }}
@@ -360,14 +364,14 @@ const BookingHistoryPage = () => {
                           {t('common.cancel')}
                         </Button>
                         {booking.status === 'PENDING' && (
-                          <Button 
-                            fullWidth 
-                            variant="contained" 
+                          <Button
+                            fullWidth
+                            variant="contained"
                             size="small"
                             onClick={() => handlePayment(booking)}
-                            sx={{ 
-                              borderRadius: 2, 
-                              fontSize: 11, 
+                            sx={{
+                              borderRadius: 2,
+                              fontSize: 11,
                               fontWeight: 700,
                               bgcolor: PC,
                               '&:hover': { bgcolor: '#a0365a' }
@@ -386,7 +390,7 @@ const BookingHistoryPage = () => {
         </Grid>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default BookingHistoryPage;
+export default BookingHistoryPage
