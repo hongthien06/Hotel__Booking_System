@@ -19,7 +19,9 @@
     "booking": "Đặt phòng",
     "details": "Chi tiết",
     "see_all": "Xem tất cả",
-    "pay_now": "Thanh toán"
+    "pay_now": "Thanh toán",
+    "booking_details": "Chi tiết đơn đặt phòng",
+    "close": "Đóng"
   },
   "header": {
     "home": "Trang chủ",
@@ -52,7 +54,13 @@
     "status": "Trạng thái",
     "no_data": "Chưa có dữ liệu đặt phòng nào.",
     "fetch_error": "Không thể tải dữ liệu thống kê.",
-    "refresh": "Làm mới"
+    "refresh": "Làm mới",
+    "checkin_success": "Nhận phòng thành công!",
+    "checkin_error": "Lỗi khi nhận phòng!",
+    "checkout_success": "Trả phòng thành công!",
+    "checkout_error": "Lỗi khi trả phòng!",
+    "check_in": "Nhận phòng",
+    "check_out": "Trả phòng"
   },
   "home": {
     "hero": {

@@ -27,11 +27,33 @@ import {
   TrendingDown,
   MeetingRoom,
   Handyman,
-  Block
+  Block,
+  Close,
+  CalendarToday,
+  Person,
+  Room,
+  AttachMoney,
+  Login,
+  Logout,
+  Visibility
 } from '@mui/icons-material';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { getDashboardStats } from '../../shared/api/dashboardApi';
+import { checkInApi, checkOutApi } from '../../shared/api/bookingApi';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Divider,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText
+} from '@mui/material';
 
 const StatCard = ({ title, value, icon, color, loading }) => (
   <Card sx={{
@@ -76,6 +98,8 @@ const DashboardPage = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -88,6 +112,38 @@ const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleCheckIn = async (id) => {
+    try {
+      await checkInApi(id);
+      toast.success(t('dashboard.checkin_success') || 'Check-in successful!');
+      fetchStats();
+    } catch (err) {
+      console.error('Check-in error:', err);
+      toast.error(t('dashboard.checkin_error') || 'Failed to check-in.');
+    }
+  };
+
+  const handleCheckOut = async (id) => {
+    try {
+      await checkOutApi(id);
+      toast.success(t('dashboard.checkout_success') || 'Check-out successful!');
+      fetchStats();
+    } catch (err) {
+      console.error('Check-out error:', err);
+      toast.error(t('dashboard.checkout_error') || 'Failed to check-out.');
+    }
+  };
+
+  const handleOpenDetails = (booking) => {
+    setSelectedBooking(booking);
+    setDetailsDialogOpen(true);
+  };
+
+  const handleCloseDetails = () => {
+    setDetailsDialogOpen(false);
+    setSelectedBooking(null);
   };
 
   useEffect(() => {
@@ -107,6 +163,8 @@ const DashboardPage = () => {
       case 'PENDING': return 'warning';
       case 'CANCELLED': return 'error';
       case 'CHECKED_IN': return 'info';
+      case 'CHECKED_OUT': return 'secondary';
+      case 'REFUNDED': return 'error';
       default: return 'default';
     }
   };
@@ -209,6 +267,7 @@ const DashboardPage = () => {
               <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.date')}</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.amount')}</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>{t('dashboard.status')}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }} align="center">{t('common.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -238,11 +297,49 @@ const DashboardPage = () => {
                       sx={{ fontWeight: 600, borderRadius: 1.5 }}
                     />
                   </TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
+                      {booking.status === 'CONFIRMED' && (
+                        <Tooltip title={t('dashboard.check_in') || 'Check-in'}>
+                          <IconButton
+                            color="success"
+                            size="small"
+                            onClick={() => handleCheckIn(booking.id)}
+                            sx={{ bgcolor: 'success.lighter', '&:hover': { bgcolor: 'success.light' } }}
+                          >
+                            <Login fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {booking.status === 'CHECKED_IN' && (
+                        <Tooltip title={t('dashboard.check_out') || 'Check-out'}>
+                          <IconButton
+                            color="warning"
+                            size="small"
+                            onClick={() => handleCheckOut(booking.id)}
+                            sx={{ bgcolor: 'warning.lighter', '&:hover': { bgcolor: 'warning.light' } }}
+                          >
+                            <Logout fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      <Tooltip title={t('common.details')}>
+                        <IconButton
+                          color="primary"
+                          size="small"
+                          onClick={() => handleOpenDetails(booking)}
+                          sx={{ bgcolor: 'primary.lighter', '&:hover': { bgcolor: 'primary.light' } }}
+                        >
+                          <Visibility fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                   {t('dashboard.no_data')}
                 </TableCell>
               </TableRow>
@@ -250,6 +347,82 @@ const DashboardPage = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* Booking Details Dialog */}
+      <Dialog
+        open={detailsDialogOpen}
+        onClose={handleCloseDetails}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {t('common.booking_details')} #{selectedBooking?.id}
+          <IconButton onClick={handleCloseDetails} size="small"><Close /></IconButton>
+        </DialogTitle>
+        <Divider />
+        <DialogContent sx={{ p: 0 }}>
+          {selectedBooking && (
+            <List sx={{ py: 1 }}>
+              <ListItem>
+                <ListItemIcon><Person color="primary" /></ListItemIcon>
+                <ListItemText
+                  primary={t('dashboard.customer')}
+                  secondary={selectedBooking.customerName}
+                  primaryTypographyProps={{ fontWeight: 600 }}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><Room color="primary" /></ListItemIcon>
+                <ListItemText
+                  primary={t('dashboard.room_number')}
+                  secondary={selectedBooking.roomNumber}
+                  primaryTypographyProps={{ fontWeight: 600 }}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><CalendarToday color="primary" /></ListItemIcon>
+                <ListItemText
+                  primary={t('dashboard.date')}
+                  secondary={new Date(selectedBooking.bookingDate).toLocaleString()}
+                  primaryTypographyProps={{ fontWeight: 600 }}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon><AttachMoney color="primary" /></ListItemIcon>
+                <ListItemText
+                  primary={t('dashboard.amount')}
+                  secondary={formatCurrency(selectedBooking.amount)}
+                  primaryTypographyProps={{ fontWeight: 600, color: 'primary.main' }}
+                />
+              </ListItem>
+              <ListItem>
+                <ListItemIcon>
+                  <Box sx={{ width: 24, height: 24, borderRadius: '50%', bgcolor: `${getStatusColor(selectedBooking.status)}.main` }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={t('dashboard.status')}
+                  secondary={
+                    <Chip
+                      label={selectedBooking.status}
+                      color={getStatusColor(selectedBooking.status)}
+                      size="small"
+                      sx={{ fontWeight: 600, mt: 0.5 }}
+                    />
+                  }
+                  primaryTypographyProps={{ fontWeight: 600 }}
+                />
+              </ListItem>
+            </List>
+          )}
+        </DialogContent>
+        <Divider />
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCloseDetails} variant="contained" sx={{ borderRadius: 2 }}>
+            {t('common.close') || 'Close'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

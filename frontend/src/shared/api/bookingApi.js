@@ -21,3 +21,13 @@ export const cancelBookingApi = async (bookingId) => {
   const response = await axiosInstance.put(`${API_URL}/${bookingId}/cancel`);
   return response.data;
 };
+
+export const checkInApi = async (bookingId) => {
+  const response = await axiosInstance.put(`${API_URL}/${bookingId}/check-in`);
+  return response.data;
+};
+
+export const checkOutApi = async (bookingId) => {
+  const response = await axiosInstance.put(`${API_URL}/${bookingId}/check-out`);
+  return response.data;
+};

@@ -19,7 +19,9 @@
     "booking": "Booking",
     "details": "Details",
     "see_all": "See all",
-    "pay_now": "Pay Now"
+    "pay_now": "Pay Now",
+    "booking_details": "Booking Details",
+    "close": "Close"
   },
   "header": {
     "home": "Home",
@@ -52,7 +54,13 @@
     "status": "Status",
     "no_data": "No booking data available.",
     "fetch_error": "Unable to load statistics data.",
-    "refresh": "Refresh"
+    "refresh": "Refresh",
+    "checkin_success": "Check-in successful!",
+    "checkin_error": "Failed to check-in.",
+    "checkout_success": "Check-out successful!",
+    "checkout_error": "Failed to check-out.",
+    "check_in": "Check-in",
+    "check_out": "Check-out"
   },
   "home": {
     "hero": {
