@@ -146,7 +146,7 @@ const ProfilePage = () => {
 
       <Grid container spacing={5} justifyContent="center">
         {/* KHUNG TRÁI: AVATAR & INFO CƠ BẢN */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Paper elevation={0} sx={{
             p: 4, textAlign: 'center', borderRadius: 10, bgcolor: 'white',
             border: (theme) => `1px solid ${theme.palette.primary.main}`,
@@ -204,7 +204,7 @@ const ProfilePage = () => {
         </Grid>
 
         {/* KHUNG PHẢI: FORM THÔNG TIN CHI TIẾT */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Paper elevation={0} sx={{
             p: { xs: 3, md: 5 }, borderRadius: 10, bgcolor: 'white',
             border: (theme) => `1px solid ${theme.palette.primary.main}`,

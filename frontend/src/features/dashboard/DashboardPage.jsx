@@ -188,7 +188,7 @@ const DashboardPage = () => {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 5 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title={t('dashboard.total_rooms')}
             value={stats?.totalRooms || 0}
@@ -197,7 +197,7 @@ const DashboardPage = () => {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title={t('dashboard.available')}
             value={stats?.availableRooms || 0}
@@ -206,7 +206,7 @@ const DashboardPage = () => {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title={t('dashboard.occupied')}
             value={stats?.occupiedRooms || 0}
@@ -215,7 +215,7 @@ const DashboardPage = () => {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title={t('dashboard.maintenance')}
             value={stats?.maintenanceRooms || 0}
@@ -224,7 +224,7 @@ const DashboardPage = () => {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title={t('dashboard.inactive')}
             value={stats?.inactiveRooms || 0}
@@ -233,7 +233,7 @@ const DashboardPage = () => {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title={t('dashboard.total_bookings')}
             value={stats?.totalBookings || 0}
@@ -242,7 +242,7 @@ const DashboardPage = () => {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard
             title={t('dashboard.total_revenue')}
             value={formatCurrency(stats?.totalRevenue || 0)}

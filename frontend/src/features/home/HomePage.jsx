@@ -164,7 +164,7 @@ const HomePage = () => {
 
         <Grid container spacing={4}>
           {features.map((f, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
               <Card sx={{
                 p: 3, textAlign: 'center', borderRadius: 4, height: '100%',
                 transition: 'all 0.3s ease',
@@ -198,7 +198,7 @@ const HomePage = () => {
           </Box>
           <Grid container spacing={3} justifyContent="center">
             {amenities.map((a, i) => (
-              <Grid item xs={6} sm={3} key={i}>
+              <Grid size={{ xs: 6, sm: 3 }} key={i}>
                 <Paper elevation={0} sx={{
                   p: 3, textAlign: 'center', borderRadius: 3, border: '2px solid', borderColor: 'divider',
                   transition: 'all 0.3s', '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.light', color: 'primary.contrastText' }
@@ -225,7 +225,7 @@ const HomePage = () => {
 
         <Grid container spacing={4}>
           {reviews.map((r, i) => (
-            <Grid item xs={12} sm={6} md={3} key={i}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
               <Card sx={{
                 p: 3, borderRadius: 4, height: '100%', position: 'relative',
                 transition: 'all 0.3s ease',

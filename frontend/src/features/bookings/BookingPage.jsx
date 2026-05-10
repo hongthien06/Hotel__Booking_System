@@ -147,7 +147,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 
       <Grid container spacing={1.5} sx={{ mb: 2 }}>
         {[['checkIn', 'booking_page.check_in'], ['checkOut', 'booking_page.check_out']].map(([k, lblKey]) => (
-          <Grid item xs={6} key={k}>
+          <Grid size={{ xs: 6 }} key={k}>
             <Typography sx={labelSx}>{t(lblKey)}</Typography>
             <TextField fullWidth size="small" type="date" value={params[k]}
               onChange={e => onParam(k, e.target.value)}
@@ -159,7 +159,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 
       <Grid container spacing={1.5} sx={{ mb: 3 }}>
         {[['adults', 'booking_page.adults', 1], ['children', 'booking_page.children', 0]].map(([k, lblKey, min]) => (
-          <Grid item xs={6} key={k}>
+          <Grid size={{ xs: 6 }} key={k}>
             <Typography sx={labelSx}>{t(lblKey)}</Typography>
             <TextField fullWidth size="small" type="number" value={params[k]}
               onChange={e => onParam(k, Math.max(min, parseInt(e.target.value) || min))}
@@ -406,14 +406,14 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
         {/* Date pickers */}
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField fullWidth label={t('booking_page.check_in')} type="date" size="small"
               value={form.checkIn}
               onChange={e => setForm(f => ({ ...f, checkIn: e.target.value }))}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField fullWidth label={t('booking_page.check_out')} type="date" size="small"
               value={form.checkOut}
               onChange={e => setForm(f => ({ ...f, checkOut: e.target.value }))}
@@ -424,14 +424,14 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
 
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField fullWidth label={t('booking_page.adults')} type="number" size="small"
               value={form.numAdults}
               onChange={e => setForm(f => ({ ...f, numAdults: Math.max(1, parseInt(e.target.value) || 1) }))}
               inputProps={{ min: 1 }}
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid size={{ xs: 6 }}>
             <TextField fullWidth label={t('booking_page.children')} type="number" size="small"
               value={form.numChildren}
               onChange={e => setForm(f => ({ ...f, numChildren: Math.max(0, parseInt(e.target.value) || 0) }))}
@@ -1328,7 +1328,7 @@ const BookingPage = () => {
                 {loading ? (
                   <Grid container spacing={3}>
                     {[...Array(6)].map((_, i) => (
-                      <Grid item xs={12} sm={6} md={4} key={i}>
+                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
                         <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 3, mb: 1 }} />
                         <Skeleton width="70%" height={24} sx={{ mb: 0.5 }} />
                         <Skeleton width="40%" height={20} />
@@ -1338,7 +1338,7 @@ const BookingPage = () => {
                 ) : rooms.length > 0 ? (
                   <Grid container spacing={3}>
                     {rooms.map(r => (
-                      <Grid item xs={12} sm={6} md={4} key={r.id}>
+                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={r.id}>
                         <RoomCard room={r} isMock={false} />
                       </Grid>
                     ))}

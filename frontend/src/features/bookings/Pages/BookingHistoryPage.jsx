@@ -262,12 +262,12 @@ const BookingHistoryPage = () => {
         <Grid container spacing={3} justifyContent="center">
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
-              <Grid item xs={12} sm={6} md={3} lg={3} key={i}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
                 <Skeleton variant="rectangular" height={320} sx={{ borderRadius: 3 }} />
               </Grid>
             ))
           ) : bookings.length === 0 ? (
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Box sx={{ textAlign: 'center', py: 12, bgcolor: '#fafafa', borderRadius: 4, border: '1px dashed #ddd' }}>
                 <History sx={{ fontSize: 64, color: '#ddd', mb: 2 }} />
                 <Typography variant="h6" color="text.secondary">
@@ -280,7 +280,7 @@ const BookingHistoryPage = () => {
             </Grid>
           ) : (
             bookings.map((booking, index) => (
-              <Grid item xs={12} sm={6} md={3} lg={3} key={booking.bookingId || index}>
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={booking.bookingId || index}>
                 <Card sx={{
                   height: '100%',
                   bgcolor: '#fff',
@@ -332,11 +332,11 @@ const BookingHistoryPage = () => {
                     <Divider sx={{ mb: 2 }} />
 
                     <Grid container spacing={1} sx={{ mb: 2 }}>
-                      <Grid item xs={6}>
+                      <Grid size={{ xs: 6 }}>
                         <Typography sx={{ color: '#999', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>In</Typography>
                         <Typography sx={{ fontWeight: 700, fontSize: 13, color: '#444' }}>{booking.checkInDate}</Typography>
                       </Grid>
-                      <Grid item xs={6}>
+                      <Grid size={{ xs: 6 }}>
                         <Typography sx={{ color: '#999', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>Out</Typography>
                         <Typography sx={{ fontWeight: 700, fontSize: 13, color: '#444' }}>{booking.checkOutDate}</Typography>
                       </Grid>
