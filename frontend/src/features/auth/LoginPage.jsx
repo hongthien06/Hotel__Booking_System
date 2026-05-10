@@ -97,15 +97,15 @@ const LoginPage = () => {
             mb: 4,
             bgcolor: 'action.hover',
             borderRadius: 2,
-            '& .MuiTabs-indicator': { 
-              height: 3, 
+            '& .MuiTabs-indicator': {
+              height: 3,
               borderRadius: '3px 3px 0 0',
-              bgcolor: 'primary.contrastText'
+              bgcolor: 'primary.dark'
             },
             '& .MuiTab-root': {
               color: 'text.secondary',
               '&.Mui-selected': {
-                color: 'primary.contrastText'
+                color: 'primary.dark'
               }
             }
           }}
