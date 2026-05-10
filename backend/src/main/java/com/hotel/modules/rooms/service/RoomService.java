@@ -10,6 +10,7 @@ import com.hotel.modules.rooms.dto.response.RoomResponse;
 import com.hotel.modules.rooms.entity.Room;
 import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import com.hotel.modules.rooms.entity.RoomType;
+import com.hotel.modules.rooms.entity.enums.BedType;
 import com.hotel.modules.rooms.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,7 +47,7 @@ public class RoomService {
         return roomRepository.findByRoomType_TypeName(typeName).stream().map(RoomResponse::from).toList();
     }
     public List<RoomResponse> getByPriceRange(BigDecimal min, BigDecimal max) {
-        return  roomRepository.findByPricePerNightBetween(min,max).stream().map(RoomResponse::from).toList();
+        return  roomRepository.findByRoomType_PricePerNightBetween(min,max).stream().map(RoomResponse::from).toList();
     }
     public List<RoomResponse> getByProvince(String province) {
         return  roomRepository.findByHotel_Province(province).stream().map(RoomResponse::from).toList();
@@ -106,8 +107,6 @@ public class RoomService {
        room.setRoomType(type);
        room.setRoomNumber(req.getRoomNumber());
        room.setFloor(req.getFloor());
-       room.setBedType(req.getBedType());
-       room.setPricePerNight(req.getPricePerNight());
        if (req.getImageUrls() != null && !req.getImageUrls().isEmpty()) {
            java.util.List<String> validUrls = req.getImageUrls().stream()
                .filter(url -> url != null && !url.trim().isEmpty())
@@ -118,6 +117,13 @@ public class RoomService {
        }
        room.setDescription(req.getDescription());
        room.setStatus(req.getStatus());
+
+       if (req.getBedrooms() != null) {
+           type.setBedrooms(req.getBedrooms().byteValue());
+       }
+       if (req.getBathrooms() != null) {
+           type.setBathrooms(req.getBathrooms().byteValue());
+       }
     }
     public Room findEntityById(Long id){
         return roomRepository.findById(id).orElseThrow(()->new RuntimeException("Room with id " + id + " does not exist"));
@@ -131,12 +137,12 @@ public class RoomService {
         List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
 
         // Convert List<String> to List<BedType> enum
-        List<com.hotel.modules.rooms.entity.enums.BedType> bedTypeEnums = null;
+        List<BedType> bedTypeEnums = null;
         if (bedTypes != null && !bedTypes.isEmpty()) {
             bedTypeEnums = bedTypes.stream()
                     .map(bt -> {
                         try {
-                            return com.hotel.modules.rooms.entity.enums.BedType.valueOf(bt.toUpperCase());
+                            return BedType.valueOf(bt.toUpperCase());
                         } catch (IllegalArgumentException e) {
                             return null;
                         }

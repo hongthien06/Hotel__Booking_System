@@ -159,14 +159,16 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
 
         {/* Meta */}
         <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: amenities.length ? 1.5 : 0 }}>
-          {(room.maxAdults !== undefined || room.capacity) && (
+          {room.maxGuests && (
             <MetaItem
               icon={<People />}
-              text={room.maxAdults !== undefined ? `${room.maxAdults} ${t('booking_page.adults').toLowerCase()} - ${room.maxChildren} ${t('booking_page.children').toLowerCase()}` : `${room.capacity} ${t('rooms.guests')}`}
+              text={`${room.maxGuests} ${t('rooms.guests') || 'khách'}`}
             />
           )}
-          {room.area && <MetaItem icon={<SquareFoot />} text={`${room.area}m²`} />}
-          {room.bedType && <MetaItem icon={<KingBed />} text={t(room.bedType)} />}
+          {room.areaSqm && <MetaItem icon={<SquareFoot />} text={`${room.areaSqm}m²`} />}
+          {room.beds && room.beds.length > 0 && (
+            <MetaItem icon={<KingBed />} text={room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ')} />
+          )}
         </Box>
 
         {/* Amenities */}

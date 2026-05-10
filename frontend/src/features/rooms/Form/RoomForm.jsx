@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import {
   Close, Hotel, Business, MeetingRoom, Bed,
-  MonetizationOn, Description, AddPhotoAlternate, Layers, CheckCircle, Add, Remove, CloudUpload
+  MonetizationOn, Description, AddPhotoAlternate, Layers, CheckCircle, Add, Remove, CloudUpload, Bathtub
 } from "@mui/icons-material";
 import { STATUS_CONFIG } from "../RoomStatus";
 import { useTranslation } from "react-i18next";
@@ -36,6 +36,7 @@ const emptyForm = {
   roomNumber: "", hotelId: "", typeId: "", floor: "",
   bedType: "DOUBLE", pricePerNight: 1000000,
   status: "AVAILABLE", imageUrls: [""], description: "",
+  bedrooms: 1, bathrooms: 1,
 };
 
 // Chiều cao thống nhất cho tất cả field đơn dòng
@@ -156,7 +157,8 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
   useEffect(() => {
     if (!open) return;
     if (isEdit && editRoom && allHotels.length > 0) {
-      setForm({ ...editRoom, imageUrls: editRoom.imageUrls?.length > 0 ? editRoom.imageUrls : [""] });
+      const bedType = editRoom.beds && editRoom.beds.length > 0 ? editRoom.beds[0].bedType : "";
+      setForm({ ...editRoom, bedType, imageUrls: editRoom.imageUrls?.length > 0 ? editRoom.imageUrls : [""] });
       const hotel = allHotels.find(h => h.hotelId === editRoom.hotelId);
       if (hotel) { setSelectedBrand(hotel.hotelName); setSelectedBranch(hotel); }
     } else {
@@ -172,9 +174,14 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
   const handleBranchChange = (_, v) => { setSelectedBranch(v); setSelectedRoomType(null); setForm(p => ({ ...p, hotelId: v ? v.hotelId : "", typeId: "" })); };
   const handleTypeChange = (_, v) => {
     setSelectedRoomType(v);
+    const bedType = v?.beds && v.beds.length > 0 ? v.beds[0].bedType : "";
     setForm(p => ({
       ...p, typeId: v ? v.typeId : "",
-      pricePerNight: v?.typeName.includes("VIP") ? 2500000 : v?.typeName.includes("Deluxe") ? 1000000 : 500000,
+      pricePerNight: v?.pricePerNight || (v?.typeName.includes("VIP") ? 2500000 : v?.typeName.includes("Deluxe") ? 1000000 : 500000),
+      bedrooms: v?.bedrooms || 1,
+      bathrooms: v?.bathrooms || 1,
+      description: v?.description || "",
+      bedType: bedType,
     }));
   };
 
@@ -190,6 +197,8 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
       typeId: Number(form.typeId),
       floor: form.floor ? Number(form.floor) : null,
       pricePerNight: Number(form.pricePerNight),
+      bedrooms: Number(form.bedrooms),
+      bathrooms: Number(form.bathrooms),
     });
   };
 
@@ -346,6 +355,24 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
               options={PRESET_PRICES.map(p => String(p.value))}
               value={String(form.pricePerNight)}
               onInputChange={(_, v) => setForm(p => ({ ...p, pricePerNight: v }))}
+            />
+          }
+        />
+
+        {/* Hàng 5.5: Số phòng ngủ | Số phòng tắm */}
+        <RowHalf
+          left={
+            <TextField fullWidth label={t("room_detail.bedrooms")} type="number" value={form.bedrooms}
+              onChange={(e) => setForm(p => ({ ...p, bedrooms: e.target.value }))}
+              sx={fieldSx}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Layers color="primary" /></InputAdornment> }}
+            />
+          }
+          right={
+            <TextField fullWidth label={t("room_detail.bathrooms")} type="number" value={form.bathrooms}
+              onChange={(e) => setForm(p => ({ ...p, bathrooms: e.target.value }))}
+              sx={fieldSx}
+              InputProps={{ startAdornment: <InputAdornment position="start"><Bathtub color="primary" /></InputAdornment> }}
             />
           }
         />

@@ -6,7 +6,7 @@ import {
   InputAdornment, Paper, Dialog
 } from '@mui/material'
 import {
-  Add, Search, Refresh, KingBed
+  Add, Search, Refresh, KingBed, Layers, Close
 } from '@mui/icons-material'
 import { getRoomsApi } from '../../../shared/api/roomApi'
 import axiosInstance from '../../../shared/api/axiosInstance'
@@ -89,11 +89,23 @@ const RoomList = () => {
   const [formLoading, setFormLoading] = useState(false)
   const [toast, setToast] = useState({ open: false, msg: '', severity: 'success' })
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, roomId: null, roomNumber: '' })
+  const [openAmenityModal, setOpenAmenityModal] = useState(false)
+  const [amenities, setAmenities] = useState([])
+  const [newAmenity, setNewAmenity] = useState({ amenityName: '', description: '', iconClass: 'star' })
 
   const showToast = (msg, severity = 'success') =>
     setToast({ open: true, msg, severity })
 
   // Fetch
+  const fetchAmenities = async () => {
+    try {
+      const res = await axiosInstance.get(`${BASE_URL}/amenities`)
+      setAmenities(res.data)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const fetchRooms = async () => {
     setLoading(true); setError('')
     try {
@@ -106,6 +118,10 @@ const RoomList = () => {
     }
   }
   useEffect(() => { fetchRooms() }, [])
+  
+  useEffect(() => {
+    if (openAmenityModal) fetchAmenities()
+  }, [openAmenityModal])
 
   // Derived
   const roomTypes = useMemo(() =>
@@ -123,12 +139,21 @@ const RoomList = () => {
   const filtered = useMemo(() => {
     let list = [...rooms]
     if (search.trim()) {
-      const getType = r => r.roomType || (typeof r.type === 'string' ? r.type : (r.type?.typeName || r.type?.name || ''))
+      const getType = r => r.typeName || r.roomType || (typeof r.type === 'string' ? r.type : (r.type?.typeName || r.type?.name || ''))
       const q = search.toLowerCase()
-      list = list.filter(r =>
-        String(r.roomNumber).toLowerCase().includes(q) ||
-        getType(r).toLowerCase().includes(q)
-      )
+      list = list.filter(r => {
+        const bedsStr = r.beds ? r.beds.map(b => `${b.quantity} ${b.bedType} ${b.bedSize || ''}`).join(' ') : '';
+        return String(r.roomNumber).toLowerCase().includes(q) ||
+          getType(r).toLowerCase().includes(q) ||
+          (r.hotelName && r.hotelName.toLowerCase().includes(q)) ||
+          (r.province && r.province.toLowerCase().includes(q)) ||
+          (r.district && r.district.toLowerCase().includes(q)) ||
+          (r.address && r.address.toLowerCase().includes(q)) ||
+          (r.status && r.status.toLowerCase().includes(q)) ||
+          (r.maxGuests && String(r.maxGuests).includes(q)) ||
+          bedsStr.toLowerCase().includes(q) ||
+          (r.pricePerNight && String(r.pricePerNight).includes(q));
+      })
     }
     const getType = r => r.roomType || (typeof r.type === 'string' ? r.type : (r.type?.typeName || r.type?.name || ''))
     if (filterStatus !== 'ALL') list = list.filter(r => r.status === filterStatus)
@@ -199,20 +224,36 @@ const RoomList = () => {
           </Typography>
         </Box>
         {canEdit && (
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={handleAddClick}
-            sx={{ 
-              borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25,
-              bgcolor: 'primary.main',
-              color: 'primary.contrastText',
-              '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
-              '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
-            }}
-          >
-            {t('rooms.add_room')}
-          </Button>
+          <Box sx={{ display: 'flex', gap: 1.5 }}>
+            <Button
+              variant="contained"
+              startIcon={<Layers />}
+              onClick={() => setOpenAmenityModal(true)}
+              sx={{ 
+                borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25,
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+                '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
+              }}
+            >
+              {t('rooms.manage_amenities')}
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handleAddClick}
+              sx={{ 
+                borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25,
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+                '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
+              }}
+            >
+              {t('rooms.add_room')}
+            </Button>
+          </Box>
         )}
       </Box>
 
@@ -411,6 +452,98 @@ const RoomList = () => {
           >
             XÓA PHÒNG
           </Button>
+        </Box>
+      </Dialog>
+
+      {/* Amenity Management Modal */}
+      <Dialog open={openAmenityModal} onClose={() => setOpenAmenityModal(false)} maxWidth="sm" fullWidth>
+        <Box sx={{ p: 3 }}>
+          <Typography variant="h6" fontWeight={800} mb={2}>
+            {t('rooms.amenity_management_title')}
+          </Typography>
+          
+          {/* Form thêm mới */}
+          <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
+            <TextField
+              size="small"
+              label={t('rooms.amenity_name')}
+              value={newAmenity.amenityName}
+              onChange={e => setNewAmenity(p => ({ ...p, amenityName: e.target.value }))}
+              sx={{ flex: 1 }}
+            />
+            <TextField
+              size="small"
+              label={t('rooms.amenity_description')}
+              value={newAmenity.description}
+              onChange={e => setNewAmenity(p => ({ ...p, description: e.target.value }))}
+              sx={{ flex: 2 }}
+            />
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={async () => {
+                if (!newAmenity.amenityName.trim()) return;
+                try {
+                  await axiosInstance.post(`${BASE_URL}/amenities`, newAmenity);
+                  setNewAmenity({ amenityName: '', description: '', iconClass: 'star' });
+                  fetchAmenities();
+                  showToast(t('rooms.amenity_add_success'), 'success');
+                } catch (err) {
+                  showToast(t('rooms.amenity_add_error'), 'error');
+                }
+              }}
+              sx={{ 
+                borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25,
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+                '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
+              }}
+            >
+              {t('rooms.amenity_add')}
+            </Button>
+          </Box>
+
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, maxHeight: 300, overflow: 'auto' }}>
+            {amenities.map(a => (
+              <Box key={a.amenityId} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1.5, border: '1px solid #eee', borderRadius: 2 }}>
+                <Box>
+                  <Typography variant="body1" fontWeight={600}>{a.amenityName}</Typography>
+                  <Typography variant="caption" color="text.secondary" display="block">{a.description}</Typography>
+                </Box>
+                <Box>
+                  <IconButton size="small" color="error" onClick={async () => {
+                    if (window.confirm(t('rooms.amenity_delete_confirm'))) {
+                      try {
+                        await axiosInstance.delete(`${BASE_URL}/amenities/${a.amenityId}`);
+                        fetchAmenities();
+                        showToast(t('rooms.amenity_delete_success'), 'success');
+                      } catch (err) {
+                        showToast(t('rooms.amenity_delete_error'), 'error');
+                      }
+                    }
+                  }}>
+                    <Close fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
+            ))}
+          </Box>
+          <Box sx={{ mt: 3, textAlign: 'right' }}>
+            <Button
+              onClick={() => setOpenAmenityModal(false)}
+              variant="contained"
+              sx={{ 
+                borderRadius: 3, textTransform: 'none', fontWeight: 700, px: 3, py: 1.25,
+                bgcolor: 'primary.main',
+                color: 'primary.contrastText',
+                '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
+                '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
+              }}
+            >
+              {t('common.close')}
+            </Button>
+          </Box>
         </Box>
       </Dialog>
 

@@ -1,7 +1,6 @@
 package com.hotel.modules.rooms.entity;
 
 import com.hotel.modules.hotel.entity.Hotel;
-import com.hotel.modules.rooms.entity.enums.BedType;
 import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -39,13 +37,6 @@ public class Room {
 
     @Column(name = "floor")
     private Short floor;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "bed_type", nullable = false, length = 20)
-    private BedType bedType;
-
-    @Column(name = "price_per_night", nullable = false, precision = 18, scale = 2)
-    private BigDecimal pricePerNight;
 
     @Column(name = "image_urls", columnDefinition = "NVARCHAR(MAX)")
     private String imageUrls;

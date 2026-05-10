@@ -8,13 +8,15 @@ import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub, Business, Lo
 import RoomStatus from '../RoomStatus'
 
 const InfoRow = ({ label, value, icon }) => (
-  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1.25,
+  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', py: 1.25,
     borderBottom: '1px solid', borderColor: 'divider', '&:last-of-type': { border: 0 } }}>
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 110 }}>
       {icon && React.cloneElement(icon, { sx: { fontSize: 16, color: 'text.secondary' } })}
       <Typography variant="body2" color="text.secondary" fontWeight={500}>{label}</Typography>
     </Box>
-    <Typography variant="body2" fontWeight={700} color="text.primary">{value}</Typography>
+    <Typography variant="body2" fontWeight={700} color="text.primary" textAlign="right" sx={{ flex: 1, ml: 2, wordBreak: 'break-word' }}>
+      {value}
+    </Typography>
   </Box>
 )
 
@@ -152,11 +154,11 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
           <InfoRow label={t('room_detail.address')} value={room.address || '—'} icon={<LocationOn />} />
           <InfoRow 
             label={t('room_detail.capacity')} 
-            value={room.maxAdults !== undefined ? `${room.maxAdults} ${t('booking_page.adults').toLowerCase()} - ${room.maxChildren} ${t('booking_page.children').toLowerCase()}` : `${room.capacity || '—'} ${t('rooms.guests')}`} 
+            value={room.maxGuests ? `${room.maxGuests} ${t('rooms.guests') || 'khách'}` : '—'} 
             icon={<People />} 
           />
-          <InfoRow label={t('room_detail.area')} value={room.area ? `${room.area} m²` : '—'} icon={<SquareFoot />} />
-          <InfoRow label={t('room_detail.bed_type')} value={t(room.bedType) || '—'} icon={<KingBed />} />
+          <InfoRow label={t('room_detail.area')} value={room.areaSqm ? `${room.areaSqm} m²` : '—'} icon={<SquareFoot />} />
+          <InfoRow label={t('room_detail.bed_type')} value={room.beds && room.beds.length > 0 ? room.beds.map(b => `${b.quantity} ${b.bedType}${b.bedSize ? ` (${b.bedSize})` : ''}`).join(' + ') : '—'} icon={<KingBed />} />
           <InfoRow label={t('room_detail.bedrooms')} value={room.bedrooms || '1'} icon={<Layers />} />
           <InfoRow label={t('room_detail.bathrooms')} value={room.bathrooms || '1'} icon={<Bathtub />} />
         </Box>

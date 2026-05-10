@@ -1,12 +1,9 @@
 package com.hotel.modules.rooms.dto.request;
 
-import com.hotel.modules.rooms.entity.enums.BedType;
 import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.util.*;
-
-import java.math.BigDecimal;
 
 @Getter @Setter
 @NoArgsConstructor
@@ -24,16 +21,12 @@ public class RoomRequest {
 
     private Short floor;
 
-    @NotNull
-    private BedType bedType;
-
-    @NotNull
-    @DecimalMin(value = "0.0",inclusive = false)
-    private BigDecimal pricePerNight;
-
     private List<String> imageUrls;
     private String description;
 
     @NotNull
     private RoomStatus status;
+
+    private Integer bedrooms;
+    private Integer bathrooms;
 }

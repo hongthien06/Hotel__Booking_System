@@ -253,12 +253,11 @@ public class BookingService {
         // 5. Tính toán
         short totalNights = (short) ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
 
-        // 6. Kiểm tra sức chứa (Capacity Check)
-        if (request.getNumAdults() > room.getBedType().getMaxAdults()) {
-            throw new RuntimeException("Số lượng người lớn vượt quá sức chứa của phòng (" + room.getBedType().getMaxAdults() + ")");
-        }
-        if (request.getNumChildren() > room.getBedType().getMaxChildren()) {
-            throw new RuntimeException("Số lượng trẻ em vượt quá sức chứa của phòng (" + room.getBedType().getMaxChildren() + ")");
+        // 6. Kiểm tra sức chứa (Capacity Check) — maxGuests nằm trên RoomType
+        int maxGuests = room.getRoomType().getMaxGuests() != null ? room.getRoomType().getMaxGuests() : 2;
+        int totalGuests = request.getNumAdults() + request.getNumChildren();
+        if (totalGuests > maxGuests) {
+            throw new RuntimeException("Tổng số khách (" + totalGuests + ") vượt quá sức chứa của phòng (" + maxGuests + ")");
         }
 
         // 7. Tạo booking — lưu trước với temp code để lấy bookingId (auto-increment)
@@ -271,7 +270,7 @@ public class BookingService {
         booking.setNumAdults(request.getNumAdults());
         booking.setNumChildren(request.getNumChildren());
         booking.setSpecialRequest(request.getSpecialRequest());
-        booking.setRoomPriceSnapshot(room.getPricePerNight());
+        booking.setRoomPriceSnapshot(room.getRoomType().getPricePerNight());
         booking.setTotalNights(totalNights);
         booking.setStatus(BookingStatus.PENDING);
         booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));

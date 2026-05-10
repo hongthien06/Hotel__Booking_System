@@ -803,7 +803,7 @@ const BookingPage = () => {
             <LocationOn fontSize="inherit" />
             {isMock
               ? `${room.location} · ${room.bed}`
-              : `${room.province || 'Hà Nội'} · ${BED_TYPE_LABELS(t)[room.bedType] || room.bedType}`}
+              : `${room.province || 'Hà Nội'} · ${room.beds && room.beds.length > 0 ? room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ') : (room.typeName || 'Standard')}`}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
             <Rating value={isMock ? room.rating : 5} precision={0.1} readOnly size="small"

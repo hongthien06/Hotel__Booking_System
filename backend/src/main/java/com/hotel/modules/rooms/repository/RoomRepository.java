@@ -10,46 +10,50 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import com.hotel.modules.rooms.entity.enums.RoomStatus;
 import com.hotel.modules.rooms.entity.enums.BedType;
 
 @Repository
 public interface RoomRepository extends JpaRepository<Room, Long> {
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel")
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel")
     List<Room> findAll();
 
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.roomId = :id")
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel WHERE r.roomId = :id")
     Optional<Room> findById(@Param("id") Long id);
 
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.status = :status")
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel WHERE r.status = :status")
     List<Room> findByStatus(@Param("status") RoomStatus status);
 
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.hotel.hotelId = :hotelId")
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel WHERE r.hotel.hotelId = :hotelId")
     List<Room> findByHotel_HotelId(@Param("hotelId") Long hotelId);
 
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.roomType.typeName = :typeName")
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel WHERE rt.typeName = :typeName")
     List<Room> findByRoomType_TypeName(@Param("typeName") String typeName);
 
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.pricePerNight BETWEEN :min AND :max")
-    List<Room> findByPricePerNightBetween(@Param("min") BigDecimal min, @Param("max") BigDecimal max);
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel WHERE rt.pricePerNight BETWEEN :min AND :max")
+    List<Room> findByRoomType_PricePerNightBetween(@Param("min") BigDecimal min, @Param("max") BigDecimal max);
 
-    @Query("SELECT r FROM Room r JOIN FETCH r.roomType JOIN FETCH r.hotel WHERE r.hotel.province = :province")
+    @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel WHERE r.hotel.province = :province")
     List<Room> findByHotel_Province(@Param("province") String province);
 
     boolean existsByRoomNumberAndHotel_HotelId(String roomNumber, Long hotelId);
     boolean existsByRoomType_TypeId(Integer typeId);
 
     @Query("""
-    SELECT r FROM Room r 
+    SELECT DISTINCT r FROM Room r 
     JOIN FETCH r.roomType rt
+    LEFT JOIN FETCH rt.beds
     JOIN FETCH r.hotel h
-    WHERE r.status = RoomStatus.AVAILABLE
+    WHERE r.status = com.hotel.modules.rooms.entity.enums.RoomStatus.AVAILABLE
     AND (:hotelId IS NULL OR h.hotelId = :hotelId)
     AND (:province IS NULL OR h.province = :province)
-    AND (:minPrice IS NULL OR r.pricePerNight >= :minPrice)
-    AND (:maxPrice IS NULL OR r.pricePerNight <= :maxPrice)
+    AND (:minPrice IS NULL OR rt.pricePerNight >= :minPrice)
+    AND (:maxPrice IS NULL OR rt.pricePerNight <= :maxPrice)
     AND (:typeNames IS NULL OR rt.typeName IN :typeNames)
-    AND (:bedTypes IS NULL OR r.bedType IN :bedTypes)
+    AND (:bedTypes IS NULL OR EXISTS (
+        SELECT 1 FROM RoomTypeBed rtb 
+        WHERE rtb.roomType = rt 
+        AND rtb.bedType IN :bedTypes
+    ))
     AND (:occupiedIds IS NULL OR r.roomId NOT IN :occupiedIds)
     AND (:hotelIds IS NULL OR h.hotelId IN :hotelIds)
 """)

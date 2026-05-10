@@ -25,6 +25,7 @@ DROP TABLE IF EXISTS Conversations;
 DROP TABLE IF EXISTS HotelAmenityMap;
 DROP TABLE IF EXISTS HotelServices;
 DROP TABLE IF EXISTS Rooms;
+DROP TABLE IF EXISTS RoomTypeBeds;
 DROP TABLE IF EXISTS RoomTypes;
 DROP TABLE IF EXISTS Hotels;
 DROP TABLE IF EXISTS Amenities;
@@ -93,10 +94,25 @@ CREATE TABLE RoomTypes (
     type_id INT NOT NULL IDENTITY(1,1),
     hotel_id BIGINT NOT NULL,
     type_name NVARCHAR(100) NOT NULL,
-    base_capacity TINYINT NOT NULL DEFAULT 2,
+    area_sqm SMALLINT NULL,
+    max_guests TINYINT NOT NULL DEFAULT 2,
+    bedrooms TINYINT NOT NULL DEFAULT 1,
+    bathrooms TINYINT NOT NULL DEFAULT 1,
+    price_per_night DECIMAL(18,2) NOT NULL DEFAULT 0,
     description NVARCHAR(MAX) NULL,
     CONSTRAINT PK_RoomTypes PRIMARY KEY (type_id),
     CONSTRAINT FK_RT_Hotel FOREIGN KEY (hotel_id) REFERENCES Hotels(hotel_id) ON DELETE CASCADE
+);
+
+CREATE TABLE RoomTypeBeds (
+    bed_id INT NOT NULL IDENTITY(1,1),
+    type_id INT NOT NULL,
+    bed_type VARCHAR(20) NOT NULL,
+    quantity TINYINT NOT NULL DEFAULT 1,
+    bed_size VARCHAR(30) NULL,
+    CONSTRAINT PK_RoomTypeBeds PRIMARY KEY (bed_id),
+    CONSTRAINT FK_RTB_Type FOREIGN KEY (type_id) REFERENCES RoomTypes(type_id) ON DELETE CASCADE,
+    CONSTRAINT CK_RTB_BedType CHECK (bed_type IN ('KING','QUEEN','SINGLE','DOUBLE'))
 );
 
 CREATE TABLE Rooms (
@@ -105,8 +121,6 @@ CREATE TABLE Rooms (
     type_id INT NOT NULL,
     room_number VARCHAR(30) NOT NULL,
     floor SMALLINT NULL,
-    bed_type VARCHAR(20) NOT NULL,
-    price_per_night DECIMAL(18,2) NOT NULL,
     image_urls NVARCHAR(MAX) NULL,
     description NVARCHAR(MAX) NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE',
@@ -307,111 +321,100 @@ CREATE TABLE InvoiceItems (
     CONSTRAINT CK_InvoiceItems_Type     CHECK (item_type IN ('ROOM','SERVICE','DISCOUNT','TAX'))
 )
 
--- Dữ liệu mẫu mở rộng (15 khách sạn, 5 loại phòng mỗi KS, 50 phòng thực tế)
+-- Dữ liệu mẫu: 10 khách sạn thực tế từ HTML, schema mới
 GO
 INSERT INTO Roles (role_name) VALUES ('ADMIN'), ('MANAGER'), ('CUSTOMER');
 
--- 1. Thêm 15 khách sạn đa dạng vùng miền
+-- Hotels, RoomTypes, RoomTypeBeds, Rooms — xem file seed_hotels.sql
+-- Inline seed data below:
+
 INSERT INTO Hotels (hotel_code, hotel_name, province, province_code, district, address, star_rating) VALUES
-('HNK-001', N'Mường Thanh Grand Hanoi', N'Hà Nội', 'HN', N'Hoàn Kiếm', N'1 Lý Thái Tổ', 5),
-('DNS-001', N'InterContinental Danang', N'Đà Nẵng', 'DN', N'Sơn Trà', N'Bãi Bắc, Sơn Trà', 5),
-('HCM-001', N'Vinpearl Landmark 81', N'TP. Hồ Chí Minh', 'HCM', N'Quận 1', N'720A Điện Biên Phủ', 5),
-('HCM-002', N'Caravelle Saigon', N'TP. Hồ Chí Minh', 'HCM', N'Quận 1', N'19-23 Lam Sơn Square', 5),
-('DLT-001', N'Ana Mandara Villas Dalat', N'Lâm Đồng', 'LD', N'Đà Lạt', N'Lê Lai, Phường 5', 5),
-('NTR-001', N'Sheraton Nha Trang', N'Khánh Hòa', 'KH', N'Nha Trang', N'26-28 Trần Phú', 5),
-('PQU-001', N'JW Marriott Phu Quoc', N'Kiên Giang', 'KG', N'Phú Quốc', N'Bãi Khem, An Thới', 5),
-('SAP-001', N'Silk Path Grand Resort', N'Lào Cai', 'LC', N'Sapa', N'Đồi Quan 6, Tổ 10', 5),
-('HUE-001', N'Azerai La Residence', N'Thừa Thiên Huế', 'TTH', N'Huế', N'5 Lê Lợi, Vĩnh Ninh', 5),
-('HPH-001', N'Flamingo Cat Ba', N'Hải Phòng', 'HP', N'Cát Hải', N'Bãi tắm Cát Cò 1, 2', 5),
-('VTU-001', N'Pullman Vung Tau', N'Bà Rịa - Vũng Tàu', 'VT', N'Vũng Tàu', N'15 Thi Sách, Thắng Tam', 5),
-('HCM-003', N'Rex Hotel', N'TP. Hồ Chí Minh', 'HCM', N'Quận 1', N'141 Nguyễn Huệ', 5),
-('HNK-002', N'Metropole Hanoi', N'Hà Nội', 'HN', N'Hoàn Kiếm', N'15 Ngô Quyền', 5),
-('DNS-002', N'Novotel Danang', N'Đà Nẵng', 'DN', N'Hải Châu', N'36 Bạch Đằng', 5),
-('DLT-002', N'Dalat Palace Heritage', N'Lâm Đồng', 'LD', N'Đà Lạt', N'2 Trần Phú', 5);
+('CB-001', N'Mường Thanh Luxury Cao Bằng', N'Cao Bằng', 'CB', N'TP. Cao Bằng', N'Đường Bế Văn Đàn, phường Hợp Giang', 5),
+('HNM-001', N'Mường Thanh Luxury Hà Nam', N'Hà Nam', 'HNM', N'TP. Phủ Lý', N'Khu đất phía Bắc Cầu Hồng Phú, Phường Quang Trung', 5),
+('HN-001', N'Mường Thanh Grand Hà Nội', N'Hà Nội', 'HN', N'Hoàng Mai', N'Khu đô thị Bắc Linh Đàm, Phường Đại Kim', 4),
+('QN-001', N'Novotel Ha Long Bay', N'Quảng Ninh', 'QN', N'Bãi Cháy', N'Đường Hạ Long, Phường Bãi Cháy, TP. Hạ Long', 4),
+('HT-001', N'Mường Thanh Luxury Xuân Thành', N'Hà Tĩnh', 'HT', N'Nghi Xuân', N'Bãi biển Xuân Thành, Xã Xuân Thành', 5),
+('DN-001', N'Novotel Danang Premier Han River', N'Đà Nẵng', 'DN', N'Hải Châu', N'36 Bạch Đằng, Quận Hải Châu', 5),
+('QNM-001', N'Vinpearl Resort & Spa Hội An', N'Quảng Nam', 'QNM', N'Hội An', N'Bãi biển Cửa Đại, Phường Cẩm An', 5),
+('KH-001', N'Mường Thanh Luxury Khánh Hòa', N'Khánh Hòa', 'KH', N'Nha Trang', N'60 Trần Phú, Phường Lộc Thọ', 5),
+('CT-001', N'Vinpearl Hotel Cần Thơ', N'Cần Thơ', 'CT', N'Ninh Kiều', N'209 Đường 30 Tháng 4, Phường Xuân Khánh', 5),
+('HCM-001', N'Mường Thanh Luxury Sài Gòn', N'TP. Hồ Chí Minh', 'HCM', N'Quận 4', N'132 Bến Vân Đồn, Phường 6', 5);
 
--- 2. Thêm 5 loại phòng cho mỗi khách sạn (Tổng 75 RoomTypes)
-DECLARE @HotelID BIGINT = 1;
-WHILE @HotelID <= 15
+INSERT INTO RoomTypes (hotel_id, type_name, area_sqm, max_guests, price_per_night, bedrooms, bathrooms, description) VALUES
+(1,N'Deluxe King',40,2,1250000,1,1,N'1 giường King (1.8m x 2m)'),
+(1,N'Deluxe Twin',40,2,1250000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(1,N'Superior King',48,2,1400000,1,1,N'1 giường King (1.8m x 2m)'),
+(1,N'Superior Twin',48,2,1400000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(1,N'Suite',96,4,2900000,2,2,N'1 giường King + 2 giường đơn'),
+(2,N'Deluxe King',33,2,900000,1,1,N'1 giường Double cỡ lớn'),
+(2,N'Deluxe Twin',33,2,900000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(2,N'Triple',33,3,1100000,1,1,N'3 giường đơn (1.2m x 2m)'),
+(3,N'Standard King',28,2,850000,1,1,N'1 giường Double cỡ lớn'),
+(3,N'Standard Twin',28,2,850000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(3,N'Superior King',32,2,1050000,1,1,N'1 giường Double (1.8m x 2m)'),
+(3,N'Suite',55,2,2200000,1,1,N'1 giường Double (1.8m x 2m)'),
+(4,N'Standard',32,2,1800000,1,1,N'1 giường Double (1.6m x 2m)'),
+(4,N'Superior',32,2,2100000,1,1,N'1 giường Double (1.6m x 2m)'),
+(4,N'Executive',42,2,2700000,1,1,N'1 giường Double (1.6m x 2m)'),
+(5,N'Deluxe King',35,2,1100000,1,1,N'1 giường Double (1.8m x 2m)'),
+(5,N'Deluxe Twin',35,2,1100000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(5,N'Superior Sea View',40,2,1500000,1,1,N'1 giường Double (1.8m x 2m)'),
+(5,N'Suite',70,2,2500000,1,1,N'1 giường Double (1.8m x 2m)'),
+(5,N'President Suite',120,4,4500000,2,2,N'1 giường Double (1.8m x 2m) + 1 phòng ngủ phụ'),
+(6,N'Superior',28,2,2200000,1,1,N'1 giường Double (1.6m x 2m)'),
+(6,N'Corner Deluxe',28,3,2600000,1,1,N'1 giường Double (1.6m x 2m)'),
+(6,N'Executive',28,2,3000000,1,1,N'1 giường Double (1.6m x 2m)'),
+(6,N'Suite',55,2,5500000,1,1,N'1 giường Double (1.8m x 2m)'),
+(7,N'Deluxe Garden King',39,2,1950000,1,1,N'1 giường Double (1.8m x 2m)'),
+(7,N'Deluxe Garden Twin',39,2,1950000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(7,N'Deluxe Sea View Twin',39,3,2600000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(7,N'Villa 2PN',200,4,8500000,2,2,N'2 giường Double (1.8m x 2m)'),
+(7,N'Villa 4PN',400,8,18000000,4,4,N'4 giường Double (1.8m x 2m)'),
+(8,N'Deluxe',32,2,1600000,1,1,N'1 giường Double (1.6m x 2m)'),
+(8,N'Deluxe Family',40,3,2100000,1,1,N'1 giường Double (1.6m x 2m) + 1 giường đơn'),
+(8,N'Premium Deluxe Sea View',45,2,2500000,1,1,N'1 giường Double (1.8m x 2m)'),
+(8,N'Suite',80,2,4500000,1,1,N'1 giường Double (1.8m x 2m)'),
+(9,N'Deluxe City View King',46,2,2000000,1,1,N'1 giường King (1.8m x 2m)'),
+(9,N'Deluxe City View Twin',46,2,2000000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(9,N'Deluxe River View',46,2,2500000,1,1,N'1 giường King (1.8m x 2m)'),
+(9,N'Suite',90,2,5500000,1,1,N'1 giường King (1.8m x 2m)'),
+(9,N'Presidential Suite',225,2,15000000,2,2,N'1 giường King (1.8m x 2m)'),
+(10,N'Deluxe King',35,2,1500000,1,1,N'1 giường King (1.8m x 2m)'),
+(10,N'Deluxe Twin',35,2,1500000,1,1,N'2 giường đơn (1.2m x 2m)'),
+(10,N'Superior King',42,2,2000000,1,1,N'1 giường King (1.8m x 2m)'),
+(10,N'Junior Suite',60,2,3500000,1,1,N'1 giường King (1.8m x 2m)'),
+(10,N'Suite',85,2,5000000,1,1,N'1 giường King (1.8m x 2m)');
+
+INSERT INTO RoomTypeBeds (type_id, bed_type, quantity, bed_size) VALUES
+(1,'KING',1,'1.8m x 2m'),(2,'SINGLE',2,'1.2m x 2m'),(3,'KING',1,'1.8m x 2m'),(4,'SINGLE',2,'1.2m x 2m'),
+(5,'KING',1,'1.8m x 2m'),(5,'SINGLE',2,'1.2m x 2m'),
+(6,'DOUBLE',1,'1.6m x 2m'),(7,'SINGLE',2,'1.2m x 2m'),(8,'SINGLE',3,'1.2m x 2m'),
+(9,'DOUBLE',1,'1.6m x 2m'),(10,'SINGLE',2,'1.2m x 2m'),(11,'DOUBLE',1,'1.8m x 2m'),(12,'DOUBLE',1,'1.8m x 2m'),
+(13,'DOUBLE',1,'1.6m x 2m'),(14,'DOUBLE',1,'1.6m x 2m'),(15,'DOUBLE',1,'1.6m x 2m'),
+(16,'DOUBLE',1,'1.8m x 2m'),(17,'SINGLE',2,'1.2m x 2m'),(18,'DOUBLE',1,'1.8m x 2m'),(19,'DOUBLE',1,'1.8m x 2m'),(20,'DOUBLE',1,'1.8m x 2m'),
+(21,'DOUBLE',1,'1.6m x 2m'),(22,'DOUBLE',1,'1.6m x 2m'),(23,'DOUBLE',1,'1.6m x 2m'),(24,'DOUBLE',1,'1.8m x 2m'),
+(25,'DOUBLE',1,'1.8m x 2m'),(26,'SINGLE',2,'1.2m x 2m'),(27,'SINGLE',2,'1.2m x 2m'),(28,'DOUBLE',2,'1.8m x 2m'),(29,'DOUBLE',4,'1.8m x 2m'),
+(30,'DOUBLE',1,'1.6m x 2m'),(31,'DOUBLE',1,'1.6m x 2m'),(31,'SINGLE',1,'1.2m x 2m'),(32,'DOUBLE',1,'1.8m x 2m'),(33,'DOUBLE',1,'1.8m x 2m'),
+(34,'KING',1,'1.8m x 2m'),(35,'SINGLE',2,'1.2m x 2m'),(36,'KING',1,'1.8m x 2m'),(37,'KING',1,'1.8m x 2m'),(38,'KING',1,'1.8m x 2m'),
+(39,'KING',1,'1.8m x 2m'),(40,'SINGLE',2,'1.2m x 2m'),(41,'KING',1,'1.8m x 2m'),(42,'KING',1,'1.8m x 2m'),(43,'KING',1,'1.8m x 2m');
+
+-- Rooms: tạo 3 phòng vật lý cho mỗi loại phòng
+DECLARE @TypeID INT = 1;
+DECLARE @MaxType INT = (SELECT MAX(type_id) FROM RoomTypes);
+DECLARE @HID BIGINT;
+DECLARE @RI INT;
+WHILE @TypeID <= @MaxType
 BEGIN
-    INSERT INTO RoomTypes (hotel_id, type_name, base_capacity) VALUES
-    (@HotelID, N'Standard', 2),
-    (@HotelID, N'Deluxe', 2),
-    (@HotelID, N'Superior', 3),
-    (@HotelID, N'Family Room', 4),
-    (@HotelID, N'Presidential Suite', 2);
-    SET @HotelID = @HotelID + 1;
+    SELECT @HID = hotel_id FROM RoomTypes WHERE type_id = @TypeID;
+    SET @RI = 1;
+    WHILE @RI <= 3
+    BEGIN
+        INSERT INTO Rooms (hotel_id, type_id, room_number, floor, status)
+        VALUES (@HID, @TypeID, CAST(@TypeID AS VARCHAR) + RIGHT('0'+CAST(@RI AS VARCHAR),2), @RI, 'AVAILABLE');
+        SET @RI = @RI + 1;
+    END
+    SET @TypeID = @TypeID + 1;
 END
-
--- 3. Thêm 50 phòng đa dạng (Phân bổ trên các khách sạn và loại phòng)
-INSERT INTO Rooms (hotel_id, type_id, room_number, floor, bed_type, price_per_night, status) VALUES
--- Khách sạn 1 (Hà Nội) - Types: 1-5
-(1, 1, '101', 1, 'SINGLE', 850000, 'AVAILABLE'),
-(1, 2, '201', 2, 'DOUBLE', 1350000, 'AVAILABLE'),
-(1, 4, '401', 4, 'TRIPLE', 2800000, 'AVAILABLE'),
-(1, 5, 'P-01', 5, 'KING', 5500000, 'AVAILABLE'),
--- Khách sạn 2 (Đà Nẵng) - Types: 6-10
-(2, 6, 'V-101', 1, 'SINGLE', 2500000, 'AVAILABLE'),
-(2, 7, 'V-201', 2, 'DOUBLE', 3800000, 'AVAILABLE'),
-(2, 8, 'V-301', 3, 'KING', 5200000, 'AVAILABLE'),
-(2, 10, 'ROYAL', 5, 'KING', 12000000, 'AVAILABLE'),
--- Khách sạn 3 (Landmark 81) - Types: 11-15
-(3, 11, '8101', 81, 'KING', 6500000, 'AVAILABLE'),
-(3, 13, '8105', 81, 'KING', 9000000, 'AVAILABLE'),
-(3, 15, 'TOP-81', 81, 'KING', 35000000, 'AVAILABLE'),
--- Khách sạn 4 (Caravelle) - Types: 16-20
-(4, 16, '402', 4, 'DOUBLE', 3200000, 'AVAILABLE'),
-(4, 18, '605', 6, 'KING', 4500000, 'AVAILABLE'),
-(4, 19, '901', 9, 'TRIPLE', 5800000, 'AVAILABLE'),
--- Khách sạn 5 (Ana Mandara) - Types: 21-25
-(5, 21, 'V1-1', 1, 'QUEEN', 2200000, 'AVAILABLE'),
-(5, 22, 'V2-2', 1, 'KING', 3600000, 'AVAILABLE'),
-(5, 24, 'V4-1', 1, 'TRIPLE', 5200000, 'AVAILABLE'),
--- Khách sạn 6 (Sheraton NT) - Types: 26-30
-(6, 26, '1201', 12, 'DOUBLE', 2900000, 'AVAILABLE'),
-(6, 27, '1505', 15, 'KING', 4200000, 'AVAILABLE'),
-(6, 30, 'S-101', 20, 'KING', 15000000, 'AVAILABLE'),
--- Khách sạn 7 (JW Marriott PQ) - Types: 31-35
-(7, 31, 'EM-10', 1, 'KING', 8500000, 'AVAILABLE'),
-(7, 33, 'EM-25', 2, 'KING', 12000000, 'AVAILABLE'),
-(7, 35, 'LAM-01', 1, 'KING', 55000000, 'AVAILABLE'),
--- Khách sạn 8 (Silk Path Sapa) - Types: 36-40
-(8, 36, '102', 1, 'SINGLE', 2400000, 'AVAILABLE'),
-(8, 38, '205', 2, 'DOUBLE', 3800000, 'AVAILABLE'),
-(8, 39, '308', 3, 'TRIPLE', 4800000, 'AVAILABLE'),
--- Khách sạn 9 (Azerai Hue) - Types: 41-45
-(9, 41, '105', 1, 'DOUBLE', 3600000, 'AVAILABLE'),
-(9, 44, '201', 2, 'TRIPLE', 6000000, 'AVAILABLE'),
-(9, 45, 'KING-H', 2, 'KING', 18000000, 'AVAILABLE'),
--- Khách sạn 10 (Flamingo CB) - Types: 46-50
-(10, 46, 'A-101', 1, 'DOUBLE', 2600000, 'AVAILABLE'),
-(10, 48, 'A-301', 3, 'KING', 4200000, 'AVAILABLE'),
-(10, 49, 'A-501', 5, 'TRIPLE', 6500000, 'AVAILABLE'),
--- Khách sạn 11 (Pullman VT) - Types: 51-55
-(11, 51, '505', 5, 'DOUBLE', 2500000, 'AVAILABLE'),
-(11, 53, '701', 7, 'KING', 3800000, 'AVAILABLE'),
-(11, 54, '901', 9, 'TRIPLE', 5200000, 'AVAILABLE'),
--- Khách sạn 12 (Rex) - Types: 56-60
-(12, 56, '210', 2, 'DOUBLE', 3400000, 'AVAILABLE'),
-(12, 59, '405', 4, 'TRIPLE', 6200000, 'AVAILABLE'),
-(12, 60, '501', 5, 'KING', 10000000, 'AVAILABLE'),
--- Khách sạn 13 (Metropole) - Types: 61-65
-(13, 61, '101H', 1, 'KING', 9500000, 'AVAILABLE'),
-(13, 63, '205H', 2, 'KING', 13000000, 'AVAILABLE'),
-(13, 65, 'SOM-01', 3, 'KING', 65000000, 'AVAILABLE'),
--- Khách sạn 14 (Novotel DN) - Types: 66-70
-(14, 66, '1010', 10, 'DOUBLE', 2300000, 'AVAILABLE'),
-(14, 68, '1405', 14, 'KING', 3800000, 'AVAILABLE'),
-(14, 69, '1801', 18, 'TRIPLE', 5500000, 'AVAILABLE'),
--- Khách sạn 15 (Dalat Palace) - Types: 71-75
-(15, 71, '105', 1, 'KING', 4500000, 'AVAILABLE'),
-(15, 74, '201', 2, 'TRIPLE', 7500000, 'AVAILABLE'),
-(15, 75, 'ROYAL-D', 2, 'KING', 25000000, 'AVAILABLE'),
--- Thêm các phòng bổ sung cho đủ 50
-(1, 1, '102', 1, 'SINGLE', 850000, 'AVAILABLE'),
-(1, 2, '202', 2, 'DOUBLE', 1350000, 'AVAILABLE'),
-(2, 6, 'V-102', 1, 'SINGLE', 2500000, 'AVAILABLE'),
-(3, 11, '8102', 81, 'KING', 6500000, 'AVAILABLE'),
-(4, 16, '403', 4, 'DOUBLE', 3200000, 'AVAILABLE');
 GO
 
 -- Seed data Amenities (10 tiện ích phổ biến)
@@ -428,39 +431,19 @@ INSERT INTO Amenities (amenity_name, icon_class, description) VALUES
 (N'Bể sục / Jacuzzi', 'hot_tub',         N'Bể sục thư giãn');
 GO
 
--- Seed data HotelAmenityMap — gán tiện ích cho 15 khách sạn
+-- Seed data HotelAmenityMap — gán tiện ích cho 10 khách sạn
 -- (1=Hồ bơi, 2=Gym, 3=WiFi, 4=Bãi đỗ xe, 5=Nhà hàng, 6=Spa, 7=Bar, 8=Phòng họp, 9=Lễ tân 24/7, 10=Bể sục)
 INSERT INTO HotelAmenityMap (hotel_id, amenity_id) VALUES
--- KS 1: Mường Thanh Grand Hanoi (5 sao)
-(1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),
--- KS 2: InterContinental Danang (5 sao, resort biển)
-(2,1),(2,2),(2,3),(2,5),(2,6),(2,7),(2,9),(2,10),
--- KS 3: Vinpearl Landmark 81 (5 sao, cao nhất VN)
-(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,7),(3,8),(3,9),(3,10),
--- KS 4: Caravelle Saigon (5 sao, trung tâm)
-(4,2),(4,3),(4,4),(4,5),(4,6),(4,7),(4,8),(4,9),
--- KS 5: Ana Mandara Villas Dalat (5 sao, biệt thự)
-(5,1),(5,3),(5,5),(5,6),(5,9),(5,10),
--- KS 6: Sheraton Nha Trang (5 sao, view biển)
-(6,1),(6,2),(6,3),(6,5),(6,6),(6,7),(6,9),(6,10),
--- KS 7: JW Marriott Phu Quoc (5 sao, đảo)
-(7,1),(7,2),(7,3),(7,4),(7,5),(7,6),(7,7),(7,8),(7,9),(7,10),
--- KS 8: Silk Path Grand Resort Sapa (5 sao, núi)
-(8,2),(8,3),(8,5),(8,6),(8,8),(8,9),
--- KS 9: Azerai La Residence Hue (5 sao, lịch sử)
-(9,1),(9,3),(9,5),(9,6),(9,7),(9,9),(9,10),
--- KS 10: Flamingo Cat Ba (5 sao, đảo)
-(10,1),(10,3),(10,5),(10,6),(10,9),
--- KS 11: Pullman Vung Tau (5 sao, biển)
-(11,1),(11,2),(11,3),(11,4),(11,5),(11,6),(11,7),(11,9),
--- KS 12: Rex Hotel (5 sao, trung tâm SG)
-(12,2),(12,3),(12,4),(12,5),(12,7),(12,8),(12,9),
--- KS 13: Metropole Hanoi (5 sao, lịch sử)
-(13,1),(13,2),(13,3),(13,4),(13,5),(13,6),(13,7),(13,8),(13,9),(13,10),
--- KS 14: Novotel Danang (5 sao, bờ sông)
-(14,1),(14,2),(14,3),(14,4),(14,5),(14,8),(14,9),
--- KS 15: Dalat Palace Heritage (5 sao, cổ điển)
-(15,2),(15,3),(15,5),(15,6),(15,8),(15,9);
+(1,1),(1,2),(1,3),(1,5),(1,6),(1,7),(1,8),(1,9),
+(2,1),(2,2),(2,3),(2,5),(2,6),(2,7),(2,8),(2,9),
+(3,1),(3,2),(3,3),(3,5),(3,6),(3,7),(3,8),(3,9),
+(4,1),(4,2),(4,3),(4,5),(4,7),(4,8),(4,9),
+(5,1),(5,2),(5,3),(5,5),(5,6),(5,7),(5,8),(5,9),
+(6,1),(6,2),(6,3),(6,5),(6,6),(6,7),(6,8),(6,9),
+(7,1),(7,2),(7,3),(7,5),(7,6),(7,9),
+(8,1),(8,2),(8,3),(8,5),(8,6),(8,7),(8,9),
+(9,1),(9,2),(9,3),(9,5),(9,6),(9,7),(9,9),
+(10,1),(10,2),(10,3),(10,5),(10,6),(10,7),(10,8),(10,9);
 GO
 
 
@@ -485,3 +468,170 @@ GO
 CREATE INDEX idx_vouchers_code   ON vouchers(code);
 CREATE INDEX idx_vouchers_status ON vouchers(status);
 CREATE INDEX idx_vu_user_voucher ON voucher_usages(user_id, voucher_id);
+GO
+
+-- =====================================================
+-- THÊM 20 khách sạn từ bộ HTML #2 và #5 (Mường Thanh)
+-- =====================================================
+
+-- Bộ 2: 10 KS mới (hotel_id 11-20)
+INSERT INTO Hotels (hotel_code, hotel_name, province, province_code, district, address, star_rating) VALUES
+('HN-002', N'Silk Path Hotel Hà Nội', N'Hà Nội', 'HN', N'Hoàn Kiếm', N'17 Tông Đản, Phường Tràng Tiền, Quận Hoàn Kiếm', 5),
+('TH-001', N'FLC Luxury Hotel Sầm Sơn', N'Thanh Hóa', 'TH', N'Sầm Sơn', N'Đại lộ FLC, Phường Quảng Cư, TP. Sầm Sơn', 5),
+('QN-002', N'Wyndham Legend Hạ Long', N'Quảng Ninh', 'QN', N'Bãi Cháy', N'12 Ha Long Road, Phường Bãi Cháy, TP. Hạ Long', 5),
+('DN-002', N'InterContinental Đà Nẵng Sun Peninsula', N'Đà Nẵng', 'DN', N'Sơn Trà', N'Bán đảo Sơn Trà, Phường Thọ Quang, Quận Sơn Trà', 5),
+('DN-003', N'Hilton Đà Nẵng', N'Đà Nẵng', 'DN', N'Hải Châu', N'50 Bạch Đằng, Phường Hải Châu 1, Quận Hải Châu', 5),
+('QNM-002', N'Mercure Hội An Royal', N'Quảng Nam', 'QNM', N'Hội An', N'9 Trần Hưng Đạo, Phường Minh An, TP. Hội An', 4),
+('KH-002', N'Sheraton Nha Trang Hotel & Spa', N'Khánh Hòa', 'KH', N'Nha Trang', N'26-28 Trần Phú, Phường Lộc Thọ, TP. Nha Trang', 5),
+('LD-001', N'Premier Village Đà Lạt Resort', N'Lâm Đồng', 'LD', N'Đà Lạt', N'Đồi Dinh, Phường 1, TP. Đà Lạt', 5),
+('KG-001', N'Vinpearl Resort & Golf Phú Quốc', N'Kiên Giang', 'KG', N'Phú Quốc', N'Bãi Dài, Xã Gành Dầu, TP. Phú Quốc', 5),
+('KG-002', N'Salinda Resort Phú Quốc', N'Kiên Giang', 'KG', N'Phú Quốc', N'Đường Trần Hưng Đạo, Khu Ông Lang, Phường Dương Đông', 5);
+
+-- RoomTypes cho KS 11-20
+INSERT INTO RoomTypes (hotel_id, type_name, area_sqm, max_guests, price_per_night) VALUES
+-- 11: Silk Path Hà Nội
+(11,N'Deluxe',32,2,2800000),(11,N'Superior Deluxe',38,2,3400000),(11,N'Junior Suite',55,2,5200000),(11,N'Grand Suite',85,2,8500000),
+-- 12: FLC Sầm Sơn
+(12,N'Deluxe City View',36,2,2100000),(12,N'Deluxe Ocean View',36,2,2800000),(12,N'Deluxe Twin',36,2,2100000),(12,N'Suite Ocean View',72,2,5500000),(12,N'Penthouse Suite',150,4,12000000),
+-- 13: Wyndham Hạ Long
+(13,N'Deluxe City View',34,2,1900000),(13,N'Deluxe Bay View',34,2,2500000),(13,N'Suite Bay View',68,2,5200000),
+-- 14: InterContinental Đà Nẵng
+(14,N'Beach View Room',65,2,8500000),(14,N'Ocean View Suite',115,2,14000000),(14,N'Family Suite',145,4,18000000),(14,N'Presidential Suite',400,4,55000000),
+-- 15: Hilton Đà Nẵng
+(15,N'City View King',38,2,3000000),(15,N'River View King',38,2,3800000),(15,N'River View Twin',38,2,3800000),(15,N'Executive Suite',75,2,8000000),(15,N'Presidential Suite',220,4,28000000),
+-- 16: Mercure Hội An
+(16,N'Superior',30,2,1400000),(16,N'Deluxe Pool View',32,2,1800000),(16,N'Suite',60,2,4200000),
+-- 17: Sheraton Nha Trang
+(17,N'Deluxe Sea View',40,2,3200000),(17,N'Club Deluxe Sea View',40,2,4500000),(17,N'Junior Suite',65,3,7500000),(17,N'Grand Suite',100,2,12000000),
+-- 18: Premier Village Đà Lạt
+(18,N'Cozy Room',28,2,2500000),(18,N'Deluxe Room',38,2,3500000),(18,N'Superior Suite',60,2,6000000),(18,N'Premier Suite',90,2,9500000),
+-- 19: Vinpearl Phú Quốc
+(19,N'Deluxe Garden View',42,2,3200000),(19,N'Deluxe Sea View',42,2,4500000),(19,N'Family Suite',90,4,9000000),(19,N'Pool Villa 2PN',280,4,18000000),
+-- 20: Salinda Phú Quốc
+(20,N'Garden Pool Villa',120,2,6500000),(20,N'Beach Front Pool Villa',145,2,10000000),(20,N'Family Pool Villa',200,4,15000000);
+
+-- RoomTypeBeds cho KS 11-20 (type_id tiếp nối từ 44)
+INSERT INTO RoomTypeBeds (type_id, bed_type, quantity, bed_size) VALUES
+-- 11: Silk Path (44-47)
+(44,'QUEEN',1,'1.6m x 2m'),(45,'KING',1,'1.8m x 2m'),(46,'KING',1,'1.8m x 2m'),(47,'KING',1,'1.8m x 2m'),
+-- 12: FLC (48-52)
+(48,'KING',1,'1.8m x 2m'),(49,'KING',1,'1.8m x 2m'),(50,'SINGLE',2,'1.2m x 2m'),(51,'KING',1,'1.8m x 2m'),(52,'KING',1,'1.8m x 2m'),(52,'SINGLE',2,'1.2m x 2m'),
+-- 13: Wyndham (53-55)
+(53,'KING',1,'1.8m x 2m'),(54,'KING',1,'1.8m x 2m'),(55,'KING',1,'1.8m x 2m'),
+-- 14: InterContinental (56-59)
+(56,'KING',1,'1.8m x 2m'),(57,'KING',1,'1.8m x 2m'),(58,'KING',1,'1.8m x 2m'),(58,'SINGLE',2,'1.2m x 2m'),(59,'KING',2,'1.8m x 2m'),
+-- 15: Hilton (60-64)
+(60,'KING',1,'1.8m x 2m'),(61,'KING',1,'1.8m x 2m'),(62,'SINGLE',2,'1.2m x 2m'),(63,'KING',1,'1.8m x 2m'),(64,'KING',2,'1.8m x 2m'),
+-- 16: Mercure (65-67)
+(65,'QUEEN',1,'1.6m x 2m'),(66,'QUEEN',1,'1.6m x 2m'),(67,'KING',1,'1.8m x 2m'),
+-- 17: Sheraton (68-71)
+(68,'KING',1,'1.8m x 2m'),(69,'KING',1,'1.8m x 2m'),(70,'KING',1,'1.8m x 2m'),(71,'KING',1,'1.8m x 2m'),
+-- 18: Premier Village (72-75)
+(72,'QUEEN',1,'1.6m x 2m'),(73,'KING',1,'1.8m x 2m'),(74,'KING',1,'1.8m x 2m'),(75,'KING',1,'1.8m x 2m'),
+-- 19: Vinpearl PQ (76-79)
+(76,'KING',1,'1.8m x 2m'),(77,'KING',1,'1.8m x 2m'),(78,'KING',1,'1.8m x 2m'),(78,'SINGLE',2,'1.2m x 2m'),(79,'KING',2,'1.8m x 2m'),
+-- 20: Salinda PQ (80-82)
+(80,'KING',1,'1.8m x 2m'),(81,'KING',1,'1.8m x 2m'),(82,'KING',1,'1.8m x 2m'),(82,'SINGLE',2,'1.2m x 2m');
+
+-- Bộ 5: 10 KS Mường Thanh (hotel_id 21-30)
+INSERT INTO Hotels (hotel_code, hotel_name, province, province_code, district, address, star_rating) VALUES
+('DB-001', N'Mường Thanh Grand Điện Biên Phủ', N'Điện Biên', 'DB', N'TP. Điện Biên Phủ', N'514 Võ Nguyên Giáp, P. Him Lam', 4),
+('CB-002', N'Mường Thanh Luxury Cao Bằng (CN2)', N'Cao Bằng', 'CB', N'TP. Cao Bằng', N'42 đường Kim Đồng, P. Hợp Giang', 5),
+('SL-001', N'Mường Thanh Holiday Mộc Châu', N'Sơn La', 'SL', N'Mộc Châu', N'Đường Hoàng Quốc Việt, TT. Nông Trường Mộc Châu', 3),
+('LC-001', N'Mường Thanh Sa Pa', N'Lào Cai', 'LC', N'Sa Pa', N'Trung tâm thị trấn Sa Pa', 3),
+('TTH-001', N'Mường Thanh Holiday Huế', N'Thừa Thiên Huế', 'TTH', N'Huế', N'38 Lê Lợi, TP. Huế', 4),
+('QNM-003', N'Mường Thanh Holiday Hội An', N'Quảng Nam', 'QNM', N'Hội An', N'Cách phố cổ Hội An 2,5 km', 4),
+('DN-004', N'Mường Thanh Luxury Đà Nẵng', N'Đà Nẵng', 'DN', N'Ngũ Hành Sơn', N'270 Võ Nguyên Giáp, P. Mỹ An', 5),
+('KH-003', N'Mường Thanh Luxury Khánh Hòa (CN2)', N'Khánh Hòa', 'KH', N'Nha Trang', N'Khu 1, khu dân cư Cồn Tân Lập, P. Xương Huân', 5),
+('BT-001', N'Mường Thanh Holiday Mũi Né', N'Bình Thuận', 'BT', N'Phan Thiết', N'Khu Phố 6, P. Hàm Tiến, TP. Phan Thiết', 4),
+('HCM-002', N'Mường Thanh Luxury Sài Gòn (Phú Nhuận)', N'TP. Hồ Chí Minh', 'HCM', N'Phú Nhuận', N'261 Nguyễn Văn Trỗi, P.10, Q. Phú Nhuận', 5);
+
+-- RoomTypes cho KS 21-30
+INSERT INTO RoomTypes (hotel_id, type_name, area_sqm, max_guests, price_per_night) VALUES
+-- 21: MT Điện Biên
+(21,N'Deluxe Twin',30,2,900000),(21,N'Deluxe King',30,2,900000),(21,N'Deluxe Triple',30,3,1100000),(21,N'Executive Suite',60,2,2000000),(21,N'Royal Suite',120,2,4000000),
+-- 22: MT Cao Bằng CN2
+(22,N'Deluxe',40,2,1300000),(22,N'Premier Deluxe',48,2,1800000),(22,N'Executive Suite',66,2,2900000),(22,N'Căn hộ 2PN',96,4,4500000),
+-- 23: MT Mộc Châu
+(23,N'Deluxe King',32,2,800000),(23,N'Deluxe Twin',32,2,800000),(23,N'Executive Suite',65,2,2200000),
+-- 24: MT Sa Pa
+(24,N'Standard',25,2,600000),(24,N'Superior',30,2,900000),(24,N'Suite',55,2,2000000),
+-- 25: MT Huế
+(25,N'Deluxe City View',32,3,1000000),(25,N'Deluxe River View',32,3,1200000),(25,N'Premium Deluxe',45,3,1800000),
+-- 26: MT Hội An
+(26,N'Standard',28,2,800000),(26,N'Deluxe',30,2,1100000),(26,N'Suite Pool',58,2,3000000),
+-- 27: MT Đà Nẵng
+(27,N'Superior',30,2,900000),(27,N'Deluxe Sea View',33,2,1400000),(27,N'Premier Deluxe',40,2,1900000),(27,N'Executive Suite',75,2,3500000),(27,N'President Suite',405,4,20000000),
+-- 28: MT Khánh Hòa CN2
+(28,N'Deluxe Sea View',38,2,1100000),(28,N'Deluxe Family',45,3,1600000),(28,N'Executive Suite',78,2,3200000),
+-- 29: MT Mũi Né
+(29,N'Deluxe King',30,2,1000000),(29,N'Deluxe Twin',30,2,1000000),(29,N'Deluxe Triple',32,3,1350000),(29,N'Suite Grand',63,2,3000000),
+-- 30: MT Sài Gòn PN
+(30,N'Deluxe Twin',32,2,1600000),(30,N'Deluxe King',32,2,1600000),(30,N'Deluxe Triple',35,3,2000000),(30,N'Executive Suite',60,2,3500000);
+
+-- RoomTypeBeds cho KS 21-30 (type_id tiếp nối từ 83)
+INSERT INTO RoomTypeBeds (type_id, bed_type, quantity, bed_size) VALUES
+-- 21: MT Điện Biên (83-87)
+(83,'SINGLE',2,'1.2m x 2m'),(84,'KING',1,'1.8m x 2m'),(85,'SINGLE',3,'1.2m x 2m'),(86,'KING',1,'1.8m x 2m'),(87,'KING',1,'1.8m x 2m'),
+-- 22: MT Cao Bằng CN2 (88-91)
+(88,'KING',1,'1.8m x 2m'),(89,'KING',1,'1.8m x 2m'),(90,'KING',1,'1.8m x 2m'),(91,'KING',1,'1.8m x 2m'),(91,'SINGLE',2,'1.2m x 2m'),
+-- 23: MT Mộc Châu (92-94)
+(92,'KING',1,'1.8m x 2m'),(93,'SINGLE',2,'1.2m x 2m'),(94,'KING',1,'1.8m x 2m'),
+-- 24: MT Sa Pa (95-97)
+(95,'DOUBLE',1,'1.6m x 2m'),(96,'KING',1,'1.8m x 2m'),(97,'KING',1,'1.8m x 2m'),
+-- 25: MT Huế (98-100)
+(98,'DOUBLE',1,'1.6m x 2m'),(99,'DOUBLE',1,'1.6m x 2m'),(100,'DOUBLE',1,'1.6m x 2m'),
+-- 26: MT Hội An (101-103)
+(101,'DOUBLE',1,'1.6m x 2m'),(102,'DOUBLE',1,'1.6m x 2m'),(103,'KING',1,'1.8m x 2m'),
+-- 27: MT Đà Nẵng (104-108)
+(104,'SINGLE',2,'1.2m x 2m'),(105,'KING',1,'1.8m x 2m'),(106,'KING',1,'1.8m x 2m'),(107,'KING',1,'1.8m x 2m'),(108,'KING',1,'1.8m x 2m'),(108,'SINGLE',2,'1.2m x 2m'),
+-- 28: MT Khánh Hòa CN2 (109-111)
+(109,'KING',1,'1.8m x 2m'),(110,'KING',1,'1.8m x 2m'),(110,'SINGLE',1,'1.2m x 2m'),(111,'KING',1,'1.8m x 2m'),
+-- 29: MT Mũi Né (112-115)
+(112,'KING',1,'1.8m x 2m'),(113,'SINGLE',2,'1.2m x 2m'),(114,'KING',1,'1.8m x 2m'),(114,'SINGLE',1,'1.2m x 2m'),(115,'KING',1,'1.8m x 2m'),
+-- 30: MT Sài Gòn PN (116-119)
+(116,'SINGLE',2,'1.2m x 2m'),(117,'KING',1,'1.8m x 2m'),(118,'SINGLE',3,'1.2m x 2m'),(119,'KING',1,'1.8m x 2m');
+
+-- Amenities cho KS 11-30
+INSERT INTO HotelAmenityMap (hotel_id, amenity_id) VALUES
+(11,1),(11,2),(11,3),(11,5),(11,6),(11,7),(11,8),(11,9),
+(12,1),(12,2),(12,3),(12,5),(12,6),(12,7),(12,8),(12,9),
+(13,1),(13,2),(13,3),(13,5),(13,6),(13,7),(13,8),(13,9),
+(14,1),(14,2),(14,3),(14,5),(14,6),(14,7),(14,8),(14,9),(14,10),
+(15,1),(15,2),(15,3),(15,5),(15,6),(15,7),(15,8),(15,9),
+(16,1),(16,2),(16,3),(16,5),(16,6),(16,7),(16,8),(16,9),
+(17,1),(17,2),(17,3),(17,5),(17,6),(17,7),(17,8),(17,9),
+(18,1),(18,2),(18,3),(18,5),(18,6),(18,9),
+(19,1),(19,2),(19,3),(19,5),(19,6),(19,7),(19,8),(19,9),
+(20,1),(20,2),(20,3),(20,5),(20,6),(20,7),(20,9),
+(21,1),(21,2),(21,3),(21,5),(21,6),(21,8),(21,9),
+(22,1),(22,2),(22,3),(22,5),(22,6),(22,7),(22,8),(22,9),
+(23,3),(23,5),(23,6),(23,9),
+(24,3),(24,5),(24,9),
+(25,1),(25,2),(25,3),(25,5),(25,6),(25,7),(25,8),(25,9),
+(26,1),(26,3),(26,5),(26,6),(26,8),(26,9),
+(27,1),(27,2),(27,3),(27,5),(27,6),(27,7),(27,8),(27,9),
+(28,1),(28,2),(28,3),(28,5),(28,6),(28,9),
+(29,1),(29,3),(29,5),(29,6),(29,8),(29,9),
+(30,1),(30,2),(30,3),(30,5),(30,6),(30,7),(30,8),(30,9);
+
+-- Rooms cho KS 11-30 (3 phòng mỗi loại)
+DECLARE @TID INT = 44;
+DECLARE @MaxT INT = (SELECT MAX(type_id) FROM RoomTypes);
+DECLARE @HID2 BIGINT;
+DECLARE @RI2 INT;
+WHILE @TID <= @MaxT
+BEGIN
+    SELECT @HID2 = hotel_id FROM RoomTypes WHERE type_id = @TID;
+    SET @RI2 = 1;
+    WHILE @RI2 <= 3
+    BEGIN
+        INSERT INTO Rooms (hotel_id, type_id, room_number, floor, status)
+        VALUES (@HID2, @TID,
+                CAST(@TID AS VARCHAR) + RIGHT('0'+CAST(@RI2 AS VARCHAR),2),
+                @RI2, 'AVAILABLE');
+        SET @RI2 = @RI2 + 1;
+    END
+    SET @TID = @TID + 1;
+END
+GO
