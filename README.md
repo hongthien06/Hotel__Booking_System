@@ -374,4 +374,3 @@ npm run lint                    # Kiểm tra code
 
 ---
 
-Nếu bạn muốn, mình có thể viết tiếp cho bạn bản README song ngữ Việt - Anh, hoặc rút gọn lại thành bản chuẩn cho nộp đồ án/kèm ảnh screenshot giao diện.
