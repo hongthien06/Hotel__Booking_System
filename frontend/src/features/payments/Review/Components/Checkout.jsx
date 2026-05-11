@@ -139,7 +139,6 @@ const Checkout = () => {
               bgcolor: 'primary.dark',
               boxShadow: 'none',
               '&:hover': {
-                bgcolor: 'primary.main',
                 boxShadow: '0 2px 16px rgba(0,0,0,0.08)'
               }
             }}

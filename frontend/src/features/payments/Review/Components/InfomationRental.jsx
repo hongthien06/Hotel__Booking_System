@@ -83,7 +83,7 @@ const InfomationRental = () => {
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {amenities.map((a) => (
-            <Chip key={a} label={a} size="small" variant="outlined" color="primary.dark" sx={{ fontWeight: '600', padding: '6px 8px' }} />
+            <Chip key={a} label={a} size="small" variant="outlined" color="#c02860ff" sx={{ fontWeight: '600', padding: '6px 8px' }} />
           ))}
         </Box>
 

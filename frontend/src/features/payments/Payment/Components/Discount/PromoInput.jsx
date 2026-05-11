@@ -122,14 +122,15 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
               minWidth: 80,
               textTransform: 'none',
               fontSize: 13,
-              bgcolor: '#ec4899',
+              bgcolor: '#be185d',
+              color: '#fff',
               boxShadow: 'none',
               flexShrink: 0,
               '&:hover': { bgcolor: '#be185d', boxShadow: 'none' },
               '&.Mui-disabled': { bgcolor: '#fbcfe8', color: 'white' }
             }}
           >
-            {loading ? <CircularProgress size={16} sx={{ bgcolor: 'primary.dark', color: 'white' }} /> : 'Áp dụng'}
+            {loading ? <CircularProgress size={16} sx={{ bgcolor: 'primary.dark', color: '#fff' }} /> : 'Áp dụng'}
           </Button>
         </Stack>
         {error && (

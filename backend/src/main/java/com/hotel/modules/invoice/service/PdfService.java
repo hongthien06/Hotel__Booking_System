@@ -2,25 +2,23 @@ package com.hotel.modules.invoice.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.Normalizer;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.hotel.modules.booking.dto.BookingDTO;
 import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.invoice.dto.response.InvoiceItemResponse;
 import com.hotel.modules.invoice.dto.response.InvoiceResponse;
-import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -61,7 +59,7 @@ public class PdfService implements IPdfService {
 
         var booking = bookingRepo.findById(invoice.getBookingId())
                 .orElseThrow(() -> new EntityNotFoundException(
-                        "Không tìm thấy booking #" + invoice.getBookingId()));
+                        "Khong tim thay booking #" + invoice.getBookingId()));
 
         BookingDTO dto = new BookingDTO();
         dto.setBookingId(booking.getBookingId());
@@ -87,8 +85,8 @@ public class PdfService implements IPdfService {
 
     private byte[] buildPdf(InvoiceResponse invoice, BookingDTO booking) {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            PdfFont regular = loadFont("fonts/Roboto-Regular.ttf");
-            PdfFont bold    = loadFont("fonts/Roboto-Bold.ttf");
+            PdfFont regular = PdfFontFactory.createFont(StandardFonts.HELVETICA);
+            PdfFont bold    = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
 
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdf  = new PdfDocument(writer);
@@ -104,8 +102,8 @@ public class PdfService implements IPdfService {
             doc.close();
             return baos.toByteArray();
         } catch (IOException e) {
-            log.error("Lỗi xuất PDF: {}", e.getMessage());
-            throw new RuntimeException("Không thể tạo file PDF: " + e.getMessage(), e);
+            log.error("Loi xuat PDF: {}", e.getMessage());
+            throw new RuntimeException("Khong the tao file PDF: " + e.getMessage(), e);
         }
     }
 
@@ -113,13 +111,12 @@ public class PdfService implements IPdfService {
 
     private void addHeader(Document doc, InvoiceResponse invoice, BookingDTO booking,
                            PdfFont bold, PdfFont regular) {
-        // Dải màu đầu trang
         Table banner = new Table(new float[]{1}).setWidth(UnitValue.createPercentValue(100));
         Cell bannerCell = new Cell().setBackgroundColor(COLOR_PRIMARY)
                 .setBorder(Border.NO_BORDER).setPadding(20);
-        bannerCell.add(new Paragraph("HÓA ĐƠN THANH TOÁN").setFont(bold).setFontSize(22)
+        bannerCell.add(new Paragraph("HOA DON THANH TOAN").setFont(bold).setFontSize(22)
                 .setFontColor(COLOR_WHITE).setTextAlignment(TextAlignment.CENTER));
-        String hotelName = booking.getHotelName() != null ? booking.getHotelName() : "Khách sạn";
+        String hotelName = booking.getHotelName() != null ? vn(booking.getHotelName()) : "Khach san";
         bannerCell.add(new Paragraph(hotelName).setFont(regular).setFontSize(12)
                 .setFontColor(new DeviceRgb(203, 213, 225)).setTextAlignment(TextAlignment.CENTER));
         banner.addCell(bannerCell);
@@ -127,17 +124,16 @@ public class PdfService implements IPdfService {
 
         doc.add(new Paragraph(" ").setFontSize(8));
 
-        // Số hóa đơn + ngày
         String issueDate = invoice.getIssuedAt() != null ? invoice.getIssuedAt().format(DATE_FMT) : "-";
         Table meta = new Table(new float[]{1, 1}).setWidth(UnitValue.createPercentValue(100));
 
         Cell left = new Cell().setBorder(Border.NO_BORDER);
-        left.add(new Paragraph("Số hóa đơn").setFont(regular).setFontSize(9).setFontColor(COLOR_MUTED));
+        left.add(new Paragraph("So hoa don").setFont(regular).setFontSize(9).setFontColor(COLOR_MUTED));
         left.add(new Paragraph(invoice.getInvoiceNumber()).setFont(bold).setFontSize(13));
         meta.addCell(left);
 
         Cell right = new Cell().setBorder(Border.NO_BORDER).setTextAlignment(TextAlignment.RIGHT);
-        right.add(new Paragraph("Ngày lập").setFont(regular).setFontSize(9).setFontColor(COLOR_MUTED)
+        right.add(new Paragraph("Ngay lap").setFont(regular).setFontSize(9).setFontColor(COLOR_MUTED)
                 .setTextAlignment(TextAlignment.RIGHT));
         right.add(new Paragraph(issueDate).setFont(bold).setFontSize(13).setTextAlignment(TextAlignment.RIGHT));
         meta.addCell(right);
@@ -152,21 +148,19 @@ public class PdfService implements IPdfService {
                             PdfFont bold, PdfFont regular) {
         Table t = new Table(new float[]{1, 1}).setWidth(UnitValue.createPercentValue(100));
 
-        // Bên cung cấp (khách sạn)
-        String hotelName    = booking.getHotelName()    != null ? booking.getHotelName()    : "Khách sạn";
-        String hotelAddress = booking.getHotelAddress() != null ? booking.getHotelAddress() : "";
+        String hotelName    = booking.getHotelName()    != null ? vn(booking.getHotelName())    : "Khach san";
+        String hotelAddress = booking.getHotelAddress() != null ? vn(booking.getHotelAddress()) : "";
         Cell left = new Cell().setBorder(Border.NO_BORDER).setPaddingRight(16);
-        left.add(new Paragraph("Bên cung cấp").setFont(bold).setFontSize(9).setFontColor(COLOR_MUTED));
+        left.add(new Paragraph("Ben cung cap").setFont(bold).setFontSize(9).setFontColor(COLOR_MUTED));
         left.add(new Paragraph(hotelName).setFont(bold).setFontSize(11).setMarginTop(2));
         left.add(new Paragraph(hotelAddress).setFont(regular).setFontSize(10).setFontColor(COLOR_MUTED));
         t.addCell(left);
 
-        // Khách hàng
-        String name  = booking.getUserName()  != null ? booking.getUserName()  : "Khách hàng";
-        String email = booking.getUserEmail() != null ? booking.getUserEmail() : "";
-        String phone = booking.getUserPhone() != null ? booking.getUserPhone() : "";
+        String name  = booking.getUserName()  != null ? vn(booking.getUserName())  : "Khach hang";
+        String email = booking.getUserEmail() != null ? booking.getUserEmail()      : "";
+        String phone = booking.getUserPhone() != null ? booking.getUserPhone()      : "";
         Cell right = new Cell().setBorder(Border.NO_BORDER);
-        right.add(new Paragraph("Khách hàng").setFont(bold).setFontSize(9).setFontColor(COLOR_MUTED));
+        right.add(new Paragraph("Khach hang").setFont(bold).setFontSize(9).setFontColor(COLOR_MUTED));
         right.add(new Paragraph(name).setFont(bold).setFontSize(11).setMarginTop(2));
         right.add(new Paragraph(email).setFont(regular).setFontSize(10).setFontColor(COLOR_MUTED));
         if (!phone.isBlank())
@@ -175,15 +169,14 @@ public class PdfService implements IPdfService {
 
         doc.add(t);
 
-        // Thông tin phòng / ngày
         doc.add(new Paragraph(" ").setFontSize(6));
         Table booking_info = new Table(new float[]{1, 1, 1, 1}).setWidth(UnitValue.createPercentValue(100));
-        String[] labels = {"Mã đặt phòng", "Ngày nhận phòng", "Ngày trả phòng", "Số đêm"};
+        String[] labels = {"Ma dat phong", "Ngay nhan phong", "Ngay tra phong", "So dem"};
         String[] values = {
             invoice.getBookingCode() != null ? invoice.getBookingCode() : "-",
             invoice.getCheckInDate()  != null ? invoice.getCheckInDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "-",
             invoice.getCheckOutDate() != null ? invoice.getCheckOutDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "-",
-            invoice.getTotalNight()   != null ? invoice.getTotalNight() + " đêm" : "-"
+            invoice.getTotalNight()   != null ? invoice.getTotalNight() + " dem" : "-"
         };
         for (int i = 0; i < labels.length; i++) {
             Cell c = new Cell().setBackgroundColor(new DeviceRgb(248, 250, 252))
@@ -205,7 +198,7 @@ public class PdfService implements IPdfService {
         float[] widths = {240f, 40f, 90f, 50f, 90f};
         Table table = new Table(widths).setWidth(UnitValue.createPercentValue(100));
 
-        String[] headers = {"Mô tả", "SL", "Đơn giá (đ)", "Thuế", "Thành tiền (đ)"};
+        String[] headers = {"Mo ta", "SL", "Don gia (VND)", "Thue", "Thanh tien (VND)"};
         TextAlignment[] aligns = {
             TextAlignment.LEFT, TextAlignment.CENTER,
             TextAlignment.RIGHT, TextAlignment.CENTER, TextAlignment.RIGHT
@@ -224,7 +217,7 @@ public class PdfService implements IPdfService {
         for (InvoiceItemResponse item : invoice.getItems()) {
             DeviceRgb rowBg = odd ? new DeviceRgb(248, 250, 252) : COLOR_WHITE;
             odd = !odd;
-            table.addCell(dataCell(item.getDescription(), regular, TextAlignment.LEFT, rowBg, true));
+            table.addCell(dataCell(vn(item.getDescription()), regular, TextAlignment.LEFT, rowBg, true));
             table.addCell(dataCell(String.valueOf(item.getQuantity()), regular, TextAlignment.CENTER, rowBg, false));
             table.addCell(dataCell(fmtVnd(item.getUnitPrice()), regular, TextAlignment.RIGHT, rowBg, false));
             table.addCell(dataCell(invoice.getTaxRate().stripTrailingZeros().toPlainString() + "%",
@@ -244,17 +237,16 @@ public class PdfService implements IPdfService {
                 .setHorizontalAlignment(HorizontalAlignment.RIGHT)
                 .setMarginTop(4);
 
-        addSumRow(t, "Tạm tính", fmtVnd(invoice.getSubtotal()) + " đ", regular, regular, false);
+        addSumRow(t, "Tam tinh", fmtVnd(invoice.getSubtotal()) + " VND", regular, regular, false);
         addSumRow(t,
-            "Thuế VAT (" + invoice.getTaxRate().stripTrailingZeros().toPlainString() + "%)",
-            fmtVnd(invoice.getTaxAmount()) + " đ", regular, regular, false);
+            "Thue VAT (" + invoice.getTaxRate().stripTrailingZeros().toPlainString() + "%)",
+            fmtVnd(invoice.getTaxAmount()) + " VND", regular, regular, false);
 
         if (invoice.getDiscountAmount() != null
                 && invoice.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
             String discLabel = invoice.getVoucherCode() != null
-                    ? "Giảm giá (" + invoice.getVoucherCode() + ")"
-                    : "Giảm giá";
-            // dòng giảm giá màu xanh
+                    ? "Giam gia (" + invoice.getVoucherCode() + ")"
+                    : "Giam gia";
             Cell lCell = new Cell().setBorder(Border.NO_BORDER)
                     .setBorderBottom(new SolidBorder(COLOR_DIVIDER, 0.5f))
                     .setPaddingTop(6).setPaddingBottom(6);
@@ -264,22 +256,21 @@ public class PdfService implements IPdfService {
             Cell vCell = new Cell().setBorder(Border.NO_BORDER)
                     .setBorderBottom(new SolidBorder(COLOR_DIVIDER, 0.5f))
                     .setPaddingTop(6).setPaddingBottom(6);
-            vCell.add(new Paragraph("-" + fmtVnd(invoice.getDiscountAmount()) + " đ")
+            vCell.add(new Paragraph("-" + fmtVnd(invoice.getDiscountAmount()) + " VND")
                     .setFont(bold).setFontSize(10)
                     .setFontColor(COLOR_SUCCESS).setTextAlignment(TextAlignment.RIGHT));
             t.addCell(vCell);
         }
 
-        // Dòng tổng cuối (nền đậm)
         Cell totalLabel = new Cell().setBackgroundColor(COLOR_PRIMARY).setBorder(Border.NO_BORDER)
                 .setPaddingTop(10).setPaddingBottom(10).setPaddingLeft(12);
-        totalLabel.add(new Paragraph("TỔNG THANH TOÁN").setFont(bold).setFontSize(11)
+        totalLabel.add(new Paragraph("TONG THANH TOAN").setFont(bold).setFontSize(11)
                 .setFontColor(COLOR_WHITE));
         t.addCell(totalLabel);
 
         Cell totalValue = new Cell().setBackgroundColor(COLOR_PRIMARY).setBorder(Border.NO_BORDER)
                 .setPaddingTop(10).setPaddingBottom(10).setPaddingRight(12);
-        totalValue.add(new Paragraph(fmtVnd(invoice.getTotalAmount()) + " đ")
+        totalValue.add(new Paragraph(fmtVnd(invoice.getTotalAmount()) + " VND")
                 .setFont(bold).setFontSize(14)
                 .setFontColor(COLOR_PINK)
                 .setTextAlignment(TextAlignment.RIGHT));
@@ -294,20 +285,22 @@ public class PdfService implements IPdfService {
         doc.add(new Paragraph(" ").setFontSize(10));
         doc.add(dividerLine());
         doc.add(new Paragraph(
-                "Cảm ơn quý khách đã sử dụng dịch vụ. " +
-                "Vui lòng mang theo CCCD/Hộ chiếu khi nhận phòng. " +
-                "Mọi thắc mắc xin liên hệ hotline: 1800 6868.")
+                "Cam on quy khach da su dung dich vu. " +
+                "Vui long mang theo CCCD/Ho chieu khi nhan phong. " +
+                "Moi thac mac xin lien he hotline: 1800 6868.")
                 .setFont(regular).setFontSize(9).setFontColor(COLOR_MUTED)
                 .setTextAlignment(TextAlignment.CENTER));
     }
 
     // ─── HELPERS ─────────────────────────────────────────────────────────────
 
-    private PdfFont loadFont(String classpathPath) throws IOException {
-        try (InputStream is = new ClassPathResource(classpathPath).getInputStream()) {
-            byte[] bytes = is.readAllBytes();
-            return PdfFontFactory.createFont(bytes, PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_EMBEDDED);
-        }
+    /** Removes Vietnamese diacritics so text renders correctly with standard PDF fonts. */
+    private String vn(String text) {
+        if (text == null) return "";
+        // 'đ'/'Đ' do not decompose via NFD, handle them explicitly
+        text = text.replace("đ", "d").replace("Đ", "D");
+        String normalized = Normalizer.normalize(text, Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}", "");
     }
 
     private Paragraph dividerLine() {
