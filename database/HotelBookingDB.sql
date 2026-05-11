@@ -615,6 +615,17 @@ INSERT INTO HotelAmenityMap (hotel_id, amenity_id) VALUES
 (29,1),(29,3),(29,5),(29,6),(29,8),(29,9),
 (30,1),(30,2),(30,3),(30,5),(30,6),(30,7),(30,8),(30,9);
 
+INSERT INTO vouchers (code, description, discount_type, discount_value, min_order_amount, max_discount_amount, usage_limit, usage_limit_per_user, status, start_date, end_date) VALUES
+('WELCOME10', N'Giảm 10% cho lần đặt đầu tiên', 'PERCENTAGE', 10, 500000, 200000, 100, 1, 'ACTIVE', '2025-01-01', '2026-12-31'),
+('SUMMER20', N'Giảm 20% mùa hè', 'PERCENTAGE', 20, 1000000, 500000, 50, 1, 'ACTIVE', '2025-06-01', '2026-08-31'),
+('FLAT100K', N'Giảm 100.000đ cho đơn từ 500K', 'FIXED_AMOUNT', 100000, 500000, NULL, 200, 1, 'ACTIVE', '2025-01-01', '2026-12-31'),
+('FLAT200K', N'Giảm 200.000đ cho đơn từ 1 triệu', 'FIXED_AMOUNT', 200000, 1000000, NULL, 100, 1, 'ACTIVE', '2025-01-01', '2026-12-31'),
+('VIP30', N'Giảm 30% cho khách VIP', 'PERCENTAGE', 30, 2000000, 1000000, 20, 1, 'ACTIVE', '2025-01-01', '2026-12-31'),
+('WEEKEND15', N'Giảm 15% cuối tuần', 'PERCENTAGE', 15, 800000, 300000, 150, 1, 'ACTIVE', '2025-01-01', '2026-12-31'),
+('NEWUSER50K', N'Giảm 50.000đ cho user mới', 'FIXED_AMOUNT', 50000, 200000, NULL, 500, 1, 'ACTIVE', '2025-01-01', '2026-12-31'),
+('LUXURY25', N'Giảm 25% khách sạn 5 sao', 'PERCENTAGE', 25, 3000000, 1500000, 30, 1, 'ACTIVE', '2025-01-01', '2026-12-31');
+"
+
 -- Rooms cho KS 11-30 (3 phòng mỗi loại)
 DECLARE @TID INT = 44;
 DECLARE @MaxT INT = (SELECT MAX(type_id) FROM RoomTypes);

@@ -213,18 +213,20 @@ public class InvoiceService implements IInvoiceService {
         }
 
         private InvoiceResponse toResponse(Invoice invoice, List<InvoiceItem> items) {
+                com.hotel.modules.booking.entity.Booking booking = invoice.getBooking();
+                String voucherCode = (booking.getVoucher() != null) ? booking.getVoucher().getCode() : null;
                 return InvoiceResponse.builder()
                                 .id(invoice.getId())
-                                .bookingId(invoice.getBooking().getBookingId())
+                                .bookingId(booking.getBookingId())
                                 .paymentId(invoice.getPayment().getPaymentId())
                                 .invoiceNumber(invoice.getInvoiceNumber())
-                                .bookingCode(invoice.getBooking().getBookingCode())
-                                .checkInDate(invoice.getBooking().getCheckInDate())
-                                .checkOutDate(invoice.getBooking().getCheckOutDate())
-                                .totalNight(invoice.getBooking().getTotalNights())
-                                .numGuests((byte) (invoice.getBooking().getNumAdults()
-                                                + invoice.getBooking().getNumChildren()))
-                                .address(invoice.getBooking().getRoom().getHotel().getAddress())
+                                .bookingCode(booking.getBookingCode())
+                                .checkInDate(booking.getCheckInDate())
+                                .checkOutDate(booking.getCheckOutDate())
+                                .totalNight(booking.getTotalNights())
+                                .numGuests((byte) (booking.getNumAdults() + booking.getNumChildren()))
+                                .address(booking.getRoom().getHotel().getAddress())
+                                .voucherCode(voucherCode)
                                 .subtotal(invoice.getSubtotal())
                                 .taxRate(invoice.getTaxRate())
                                 .taxAmount(invoice.getTaxAmount())

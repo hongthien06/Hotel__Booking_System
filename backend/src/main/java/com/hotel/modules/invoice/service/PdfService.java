@@ -1,5 +1,15 @@
 package com.hotel.modules.invoice.service;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+import org.springframework.stereotype.Service;
+
 import com.hotel.modules.booking.dto.BookingDTO;
 import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.invoice.dto.response.InvoiceItemResponse;
@@ -7,7 +17,6 @@ import com.hotel.modules.invoice.dto.response.InvoiceResponse;
 import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
-import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.PageSize;
@@ -22,20 +31,11 @@ import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.layout.properties.VerticalAlignment;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Locale;
 
 @Slf4j
 @Service
@@ -218,7 +218,10 @@ public class PdfService implements IPdfService {
                 + fmtVnd(invoice.getSubtotal()) + ")", fmtVnd(invoice.getTaxAmount()), regular, regular);
 
         if (invoice.getDiscountAmount() != null && invoice.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0) {
-            addTotalRow(t, "Discount", "-" + fmtVnd(invoice.getDiscountAmount()), regular, regular);
+            String discountLabel = invoice.getVoucherCode() != null
+                    ? "Giảm giá (" + invoice.getVoucherCode() + ")"
+                    : "Giảm giá";
+            addTotalRow(t, discountLabel, "-" + fmtVnd(invoice.getDiscountAmount()), regular, regular);
         }
 
         addTotalRow(t, "Total", fmtVnd(invoice.getTotalAmount()), regular, regular);

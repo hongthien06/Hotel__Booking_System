@@ -24,6 +24,8 @@ public class InvoiceResponse {
     private Byte numGuests;
     private String address;
 
+    private String voucherCode;
+
     private BigDecimal subtotal;
     private BigDecimal taxRate;
     private BigDecimal taxAmount;

@@ -197,25 +197,41 @@ public class PaymentService implements IPaymentService {
                 return;
             }
 
-            // lấy thông tin cần thiết cho req
-            InvoiceItemRequest roomItem = new InvoiceItemRequest();
+            // line item: phòng
             Room room = booking.getRoom();
+            InvoiceItemRequest roomItem = new InvoiceItemRequest();
             roomItem.setItemType("ROOM");
             roomItem.setDescription("Phòng " + room.getRoomNumber()
                     + " x " + booking.getTotalNights() + " đêm");
             roomItem.setQuantity(booking.getTotalNights());
             roomItem.setUnitPrice(booking.getRoomPriceSnapshot());
 
+            List<InvoiceItemRequest> items = new java.util.ArrayList<>(List.of(roomItem));
+
+            // line items: dịch vụ thêm
+            for (com.hotel.modules.booking_services.entity.BookingService bs : booking.getBookingServices()) {
+                InvoiceItemRequest svcItem = new InvoiceItemRequest();
+                svcItem.setItemType("SERVICE");
+                String svcName = (bs.getExtraService() != null) ? bs.getExtraService().getServiceName() : "Dịch vụ";
+                svcItem.setDescription(svcName);
+                svcItem.setQuantity(bs.getQuantity() != null ? bs.getQuantity() : (short) 1);
+                svcItem.setUnitPrice(bs.getUnitPriceSnap() != null ? bs.getUnitPriceSnap() : BigDecimal.ZERO);
+                items.add(svcItem);
+            }
+
             // thông tin cần thiết cho req để tạo invoice
             InvoiceCreateRequest invoiceRequest = new InvoiceCreateRequest();
             invoiceRequest.setBookingId(booking.getBookingId());
             invoiceRequest.setPaymentId(payment.getPaymentId());
-            invoiceRequest.setDiscountAmount(BigDecimal.ZERO);
+            // dùng discountAmount từ voucher đã áp dụng (ZERO nếu không có voucher)
+            invoiceRequest.setDiscountAmount(booking.getDiscountAmount());
             invoiceRequest.setNotes("Tự động tạo sau khi thanh toán qua " + payment.getGateway());
-            invoiceRequest.setItems(List.of(roomItem));
+            invoiceRequest.setItems(items);
+
             // tạo invoice
             invoiceService.createInvoice(invoiceRequest);
-            log.info("Đã tự động tạo invoice cho bookingId={}", booking.getBookingId());
+            log.info("Đã tự động tạo invoice cho bookingId={}, discount={}",
+                    booking.getBookingId(), booking.getDiscountAmount());
 
         } catch (Exception e) {
             log.error("Lỗi khi tự động tạo invoice cho bookingId={}: {}",
