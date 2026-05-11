@@ -56,8 +56,10 @@ public class EmailService {
                 return;
             }
             Long priceBooking = booking.getRoomPriceSnapshot().longValue() * booking.getTotalNights();
-            Long tax = (long) (priceBooking * 0.1);// tax o involve;
-            long totalPrice = priceBooking + tax;
+            Long discount = booking.getDiscountAmount() != null ? booking.getDiscountAmount().longValue() : 0L;
+            String voucherCode = booking.getVoucher() != null ? booking.getVoucher().getCode() : null;
+            Long tax = (long) (priceBooking * 0.1);
+            long totalPrice = priceBooking + tax - discount;
 
             EmailRequest request = EmailRequest.builder()
                     .toEmail(user.getEmail())
@@ -76,6 +78,8 @@ public class EmailService {
                     .priceBooking(priceBooking)
                     .priceBreakfast(0L)
                     .feeService(0L)
+                    .discount(discount)
+                    .voucherCode(voucherCode)
                     .tax(tax)
                     .totalPrice(totalPrice)
                     .build();

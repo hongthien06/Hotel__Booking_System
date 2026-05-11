@@ -26,6 +26,8 @@ public class EmailRequest {
     private Long priceBooking;
     private Long priceBreakfast;
     private Long feeService;
+    private Long discount;
+    private String voucherCode;
     private Long tax;
     private Long totalPrice;
 

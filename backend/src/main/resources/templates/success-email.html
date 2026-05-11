@@ -225,6 +225,14 @@
           <span style="float: right; color: #0f172a;">[[${#numbers.formatDecimal(booking.tax, 0, 'COMMA', 0,
               'POINT')}]]đ</span>
         </div>
+        <div class="total-row" th:if="${booking.discount != null and booking.discount > 0}">
+          <span style="float: left; color: #16a34a;">
+            Giảm giá<th:block th:if="${booking.voucherCode != null}"> ([[${booking.voucherCode}]])</th:block>
+          </span>
+          <span style="float: right; color: #16a34a; font-weight: 500;">
+            -[[${#numbers.formatDecimal(booking.discount, 0, 'COMMA', 0, 'POINT')}]]đ
+          </span>
+        </div>
         <hr class="divider">
         <div class="total-final">
           <span style="float: left; font-weight: 500; font-size: 15px; color: #fff;">Tổng thanh toán</span>
