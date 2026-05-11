@@ -18,7 +18,10 @@ import com.hotel.modules.chatbot.service.gemini.GeminiService;
 import com.hotel.modules.hotel.entity.Hotel;
 import com.hotel.modules.hotel.repository.HotelRepository;
 import com.hotel.modules.rooms.entity.Room;
+import com.hotel.modules.rooms.entity.RoomType;
+import com.hotel.modules.rooms.entity.RoomTypeBed;
 import com.hotel.modules.rooms.repository.RoomRepository;
+import com.hotel.modules.rooms.repository.RoomTypeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -41,6 +44,7 @@ public class ChatbotService {
     private final RoomRepository roomRepository;
     private final BookingRepository bookingRepository;
     private final HotelRepository hotelRepository;
+    private final RoomTypeRepository roomTypeRepository;
 
     @Transactional
     public ConversationResponse createConversation(ConversationRequest request) {
@@ -153,14 +157,71 @@ public class ChatbotService {
         }
 
         StringBuilder context = new StringBuilder();
+
+        // ── Hotel information ──
         for (Hotel h : hotels) {
-            context.append("- Khách sạn: ").append(h.getHotelName())
-                    .append(" | Mã: ").append(h.getHotelCode())
-                    .append(" | Địa chỉ: ").append(h.getAddress())
+            context.append("HOTEL: ").append(h.getHotelName())
+                    .append(" | Code: ").append(h.getHotelCode())
+                    .append(" | Address: ").append(h.getAddress())
                     .append(", ").append(h.getDistrict())
                     .append(", ").append(h.getProvince())
-                    .append(" | Hạng sao: ").append(h.getStarRating()).append(" sao\n");
+                    .append(" | Stars: ").append(h.getStarRating())
+                    .append(" | Phone: ").append(h.getPhone() != null ? h.getPhone() : "N/A")
+                    .append(" | Email: ").append(h.getEmail() != null ? h.getEmail() : "N/A")
+                    .append("\n");
         }
+
+        // ── Room type information ──
+        List<RoomType> roomTypes = roomTypeRepository.findAllWithBeds();
+        if (!roomTypes.isEmpty()) {
+            context.append("\nROOM TYPES:\n");
+            for (RoomType rt : roomTypes) {
+                context.append("- Room Type: ").append(rt.getTypeName())
+                        .append(" | Hotel: ").append(rt.getHotel() != null ? rt.getHotel().getHotelName() : "N/A")
+                        .append(" | Price/Night: ").append(rt.getPricePerNight()).append(" VND")
+                        .append(" | Area: ").append(rt.getAreaSqm() != null ? rt.getAreaSqm() + " m²" : "N/A")
+                        .append(" | Max Guests: ").append(rt.getMaxGuests())
+                        .append(" | Bedrooms: ").append(rt.getBedrooms())
+                        .append(" | Bathrooms: ").append(rt.getBathrooms());
+
+                // Bed details
+                if (rt.getBeds() != null && !rt.getBeds().isEmpty()) {
+                    context.append(" | Beds: ");
+                    List<String> bedDescriptions = rt.getBeds().stream()
+                            .map(bed -> bed.getQuantity() + "x " + bed.getBedType().name()
+                                    + (bed.getBedSize() != null ? " (" + bed.getBedSize() + ")" : ""))
+                            .collect(Collectors.toList());
+                    context.append(String.join(", ", bedDescriptions));
+                }
+
+                if (rt.getDescription() != null && !rt.getDescription().isBlank()) {
+                    context.append(" | Description: ").append(rt.getDescription());
+                }
+
+                context.append("\n");
+            }
+        }
+
+        // ── Room availability summary ──
+        List<Room> rooms = roomRepository.findAll();
+        if (!rooms.isEmpty()) {
+            long available = rooms.stream()
+                    .filter(r -> r.getStatus() != null && "AVAILABLE".equalsIgnoreCase(r.getStatus().name()))
+                    .count();
+            long occupied = rooms.stream()
+                    .filter(r -> r.getStatus() != null && "OCCUPIED".equalsIgnoreCase(r.getStatus().name()))
+                    .count();
+            long maintenance = rooms.stream()
+                    .filter(r -> r.getStatus() != null && "MAINTENANCE".equalsIgnoreCase(r.getStatus().name()))
+                    .count();
+
+            context.append("\nROOM AVAILABILITY: Total=").append(rooms.size())
+                    .append(" | Available=").append(available)
+                    .append(" | Occupied=").append(occupied)
+                    .append(" | Maintenance=").append(maintenance)
+                    .append("\n");
+        }
+
         return context.toString();
     }
 }

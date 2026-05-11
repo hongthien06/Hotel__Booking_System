@@ -13,8 +13,9 @@ const navItems = [
 ]
 
 const adminNavItems = [
-  { label: 'header.dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
+  { label: 'header.bookings', path: '/bookings', icon: <EventNote fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.rooms', path: '/rooms', icon: <KingBed fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
+  { label: 'header.dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.users', path: '/admin/users', icon: <Person fontSize="small" />, roles: ['MANAGER'] },
 ]
 
@@ -84,8 +85,10 @@ const Header = () => {
 
       {/* Navigation Links */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        {/* Chỉ hiện Home/Booking cho Customer hoặc Guest */}
-        {!hasRole(['ADMIN', 'MANAGER']) && navItems.map((item) => (
+        {/* Home / Bookings — Bookings hidden for Admin (shown in admin section) */}
+        {navItems
+          .filter((item) => !(item.path === '/bookings' && hasRole(['ADMIN', 'MANAGER'])))
+          .map((item) => (
           <Button
             key={item.path}
             startIcon={item.icon}
@@ -176,12 +179,10 @@ const Header = () => {
                 <Person fontSize="small" color="primary" /> {t("header.profile") || "Trang cá nhân"}
               </MenuItem>
 
-              {/* Chỉ hiện Lịch sử đặt phòng cho Customer/Guest */}
-              {!hasRole(['ADMIN', 'MANAGER']) && (
-                <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
-                  <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
-                </MenuItem>
-              )}
+              {/* Lịch sử đặt phòng — hiện cho tất cả user */}
+              <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
+                <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
+              </MenuItem>
 
               <Divider sx={{ my: 1 }} />
               <MenuItem onClick={handleLogout} sx={{ py: 1.2, gap: 1.5, fontWeight: 600, color: 'error.main' }}>

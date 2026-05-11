@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Fab, Badge, Zoom, Slide } from '@mui/material';
 import { SmartToy, Close } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 import ChatWindow from './components/ChatWindow';
 import useChatbot from './hooks/useChatbot';
 
@@ -8,6 +9,7 @@ const PC = '#c0496e';
 
 const Chatbot = () => {
   const [open, setOpen] = useState(false);
+  const { i18n } = useTranslation();
 
   const {
     conversations,
@@ -38,7 +40,7 @@ const Chatbot = () => {
   };
 
   const handleSendMessage = async (content) => {
-    await sendMessage(content);
+    await sendMessage(content, { lang: i18n.language || 'vi' });
   };
 
   return (

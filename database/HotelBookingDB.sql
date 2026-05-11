@@ -624,7 +624,7 @@ INSERT INTO vouchers (code, description, discount_type, discount_value, min_orde
 ('WEEKEND15', N'Giảm 15% cuối tuần', 'PERCENTAGE', 15, 800000, 300000, 150, 1, 'ACTIVE', '2025-01-01', '2026-12-31'),
 ('NEWUSER50K', N'Giảm 50.000đ cho user mới', 'FIXED_AMOUNT', 50000, 200000, NULL, 500, 1, 'ACTIVE', '2025-01-01', '2026-12-31'),
 ('LUXURY25', N'Giảm 25% khách sạn 5 sao', 'PERCENTAGE', 25, 3000000, 1500000, 30, 1, 'ACTIVE', '2025-01-01', '2026-12-31');
-"
+
 
 -- Rooms cho KS 11-30 (3 phòng mỗi loại)
 DECLARE @TID INT = 44;
