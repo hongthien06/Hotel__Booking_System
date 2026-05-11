@@ -374,6 +374,7 @@ const BookingHistoryPage = () => {
                               fontSize: 11,
                               fontWeight: 700,
                               bgcolor: PC,
+                              color: '#fff',
                               '&:hover': { bgcolor: '#a0365a' }
                             }}
                           >

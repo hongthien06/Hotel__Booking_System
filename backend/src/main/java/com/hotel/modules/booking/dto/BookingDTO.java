@@ -40,9 +40,12 @@ public class BookingDTO {
     private Long userId;
     private String userName;
     private String userEmail;
+    private String userPhone;
 
-    // ── Thông tin Room (lấy từ booking.getRoom()) ─────
+    // ── Thông tin Room / Hotel ────────────────────────
     private Long roomId;
     private String roomNumber;
-    private String roomTypeName;  // ← Đây là field gây lỗi lazy trước đó
+    private String roomTypeName;
+    private String hotelName;
+    private String hotelAddress;
 }
