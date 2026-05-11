@@ -32,7 +32,13 @@
     "logout": "Đăng xuất",
     "login": "Đăng nhập",
     "profile": "Trang cá nhân",
-    "bookings_history": "Lịch sử đặt phòng"
+    "bookings_history": "Lịch sử đặt phòng",
+    "logo_text": "Hệ thống Đặt phòng",
+    "users": "Người dùng"
+  },
+  "auth": {
+    "login_required_title": "Yêu cầu đăng nhập",
+    "login_to_book_desc": "Đăng nhập để tiến hành đặt phòng và hưởng các ưu đãi tốt nhất từ chúng tôi."
   },
   "dashboard": {
     "title": "Tổng quan Dashboard",
@@ -65,6 +71,7 @@
   "home": {
     "hero": {
       "welcome": "CHÀO MỪNG ĐẾN VỚI",
+      "title": "Hệ thống Đặt phòng Khách sạn",
       "subtitle": "Hệ thống đặt phòng khách sạn trực tuyến hàng đầu — nhanh chóng, tiện lợi và đáng tin cậy",
       "cta": "Đặt phòng ngay"
     },
@@ -127,7 +134,7 @@
       "subtitle": "Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt!"
     },
     "footer": {
-      "text": "© 2026 Hotel Booking Management System — Đồ án môn học"
+      "text": "© 2026 Hệ thống Quản lý Đặt phòng khách sạn — Đồ án môn học"
     }
   },
   "profile": {
@@ -250,6 +257,39 @@
     "back_to_home": "Quay lại trang chủ",
     "clear_search": "Xóa tìm kiếm",
     "search_results": "Kết quả tìm kiếm"
+  },
+  "login_page": {
+    "welcome": "Chào mừng trở lại",
+    "subtitle": "Đăng nhập vào tài khoản của bạn để tiếp tục",
+    "customer": "Khách hàng",
+    "manager": "Quản lý",
+    "forgot_password": "Quên mật khẩu?",
+    "login_button": "Đăng nhập",
+    "logging_in": "Đang đăng nhập...",
+    "no_account": "Chưa có tài khoản?",
+    "register_now": "Đăng ký ngay"
+  },
+  "forgot_password": {
+    "title": "Quên mật khẩu?",
+    "subtitle": "Nhập email của bạn để nhận link khôi phục mật khẩu",
+    "email_label": "Email",
+    "submit_button": "Gửi yêu cầu",
+    "sending": "Đang gửi...",
+    "back_to_login": "Quay lại Đăng nhập",
+    "success_msg": "Link khôi phục mật khẩu đã được gửi vào email của bạn.",
+    "error_msg": "Có lỗi xảy ra. Xin vui lòng thử lại sau."
+  },
+  "reset_password": {
+    "title": "Đặt lại mật khẩu",
+    "subtitle": "Tạo mật khẩu mới cho tài khoản của bạn",
+    "new_password": "Mật khẩu mới",
+    "confirm_new_password": "Xác nhận mật khẩu mới",
+    "update_button": "Cập nhật mật khẩu",
+    "updating": "Đang cập nhật...",
+    "success_msg": "Mật khẩu đã được thay đổi! Đang chuyển hướng về trang đăng nhập...",
+    "token_error": "Token khôi phục không hợp lệ hoặc đã hết hạn.",
+    "match_error": "Mật khẩu xác nhận không khớp.",
+    "generic_error": "Có lỗi xảy ra. Token có thể đã hết hạn."
   },
   "room_detail": {
     "hotel": "Khách sạn",

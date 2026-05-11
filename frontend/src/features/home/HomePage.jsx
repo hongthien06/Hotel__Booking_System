@@ -76,7 +76,7 @@ const HomePage = () => {
             {t("home.hero.welcome")}
           </Typography>
           <Typography variant="h2" sx={{ fontWeight: 900, mb: 2, textShadow: '2px 4px 20px rgba(0,0,0,0.4)' }}>
-            Hotel Booking System
+            {t("home.hero.title")}
           </Typography>
           <Typography variant="h6" sx={{ mb: 5, fontWeight: 300, opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
             {t("home.hero.subtitle")}

@@ -1,9 +1,11 @@
 import React, { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Alert } from '@mui/material'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { forgotPasswordApi } from '../../shared/api/authApi'
 
 const ForgotPasswordPage = () => {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -17,10 +19,10 @@ const ForgotPasswordPage = () => {
 
     try {
       const response = await forgotPasswordApi(email)
-      setMessage(typeof response === 'string' ? response : 'Link khôi phục mật khẩu đã được gửi vào email của bạn.')
+      setMessage(typeof response === 'string' ? response : t('forgot_password.success_msg'))
     } catch (err) {
       const data = err.response?.data;
-      let errMsg = 'Có lỗi xảy ra. Xin vui lòng thử lại sau.';
+      let errMsg = t('forgot_password.error_msg');
       if (data) {
         if (data.message) errMsg = data.message;
         else if (data.error) errMsg = data.error;
@@ -48,10 +50,10 @@ const ForgotPasswordPage = () => {
         borderRadius: 4
       }}>
         <Typography variant="h4" align="center" color="primary.contrastText" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
-          Quên mật khẩu?
+          {t('forgot_password.title')}
         </Typography>
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>
-          Nhập email của bạn để nhận link khôi phục mật khẩu
+          {t('forgot_password.subtitle')}
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
@@ -60,7 +62,7 @@ const ForgotPasswordPage = () => {
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
-            label="Email"
+            label={t('forgot_password.email_label')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -82,20 +84,22 @@ const ForgotPasswordPage = () => {
               textTransform: 'none',
               fontSize: '1.1rem',
               transition: 'all 0.2s ease-in-out',
+              bgcolor: 'primary.main',
+              color: 'primary.contrastText',
               '&:hover': {
                 transform: 'translateY(-1px)',
                 bgcolor: 'primary.dark',
+                color: 'primary.contrastTextHover',
                 boxShadow: '0 6px 20px rgba(231, 78, 134, 0.4)'
               }
             }}
           >
-            {isLoading ? 'Đang gửi...' : 'Gửi yêu cầu'}
+            {isLoading ? t('forgot_password.sending') : t('forgot_password.submit_button')}
           </Button>
         </form>
 
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            Quay lại{' '}
             <Box
               component={Link}
               to="/login"
@@ -111,7 +115,7 @@ const ForgotPasswordPage = () => {
                 }
               }}
             >
-              Đăng nhập
+              {t('forgot_password.back_to_login')}
             </Box>
           </Typography>
         </Box>

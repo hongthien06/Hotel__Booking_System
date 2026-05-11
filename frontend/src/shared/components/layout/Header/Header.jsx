@@ -80,7 +80,7 @@ const Header = () => {
         sx={{ fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: 'primary.contrastText' }}
         onClick={() => navigate('/home')}
       >
-        🏨 Hotel Booking
+        🏨 {t('header.logo_text')}
       </Typography>
 
       {/* Navigation Links */}

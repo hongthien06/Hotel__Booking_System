@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react'
 import { Box, Button, TextField, Typography, Paper, Alert, IconButton, Tabs, Tab, InputAdornment } from '@mui/material'
 import { Visibility, VisibilityOff, PersonOutline, AdminPanelSettings } from '@mui/icons-material'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { loginApi } from '../../shared/api/authApi'
 
 const LoginPage = () => {
+  const { t } = useTranslation()
   const [userType, setUserType] = useState('customer') // 'customer' or 'manager'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -83,10 +85,10 @@ const LoginPage = () => {
         borderRadius: 4
       }}>
         <Typography variant="h4" align="center" color="primary.contrastText" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
-          Welcome Back
+          {t('login_page.welcome')}
         </Typography>
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>
-          Đăng nhập vào tài khoản Hotel Booking của bạn
+          {t('login_page.subtitle')}
         </Typography>
 
         <Tabs
@@ -110,8 +112,8 @@ const LoginPage = () => {
             }
           }}
         >
-          <Tab icon={<PersonOutline />} label="Khách hàng" value="customer" iconPosition="start" sx={{ minHeight: 64 }} />
-          <Tab icon={<AdminPanelSettings />} label="Quản lý" value="manager" iconPosition="start" sx={{ minHeight: 64 }} />
+          <Tab icon={<PersonOutline />} label={t('login_page.customer')} value="customer" iconPosition="start" sx={{ minHeight: 64 }} />
+          <Tab icon={<AdminPanelSettings />} label={t('login_page.manager')} value="manager" iconPosition="start" sx={{ minHeight: 64 }} />
         </Tabs>
 
         {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
@@ -159,7 +161,7 @@ const LoginPage = () => {
                 '&:hover': { textDecoration: 'underline' }
               }}
             >
-              Quên mật khẩu?
+              {t('login_page.forgot_password')}
             </Typography>
           </Box>
 
@@ -183,13 +185,13 @@ const LoginPage = () => {
               }
             }}
           >
-            {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+            {isLoading ? t('login_page.logging_in') : t('login_page.login_button')}
           </Button>
         </form>
 
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            Chưa có tài khoản?{'  '}
+            {t('login_page.no_account')}{'  '}
             <Box
               component={Link}
               to="/register"
@@ -206,7 +208,7 @@ const LoginPage = () => {
                 }
               }}
             >
-              Đăng ký ngay
+              {t('login_page.register_now')}
             </Box>
           </Typography>
         </Box>

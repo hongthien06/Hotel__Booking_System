@@ -73,8 +73,12 @@ const LoginPromptModal = ({ open, onClose }) => {
           variant="contained" 
           onClick={handleLogin}
           sx={{ 
-            bgcolor: '#9a1c48', 
-            '&:hover': { bgcolor: '#c02860' },
+            bgcolor: 'primary.main', 
+            color: 'primary.contrastText',
+            '&:hover': { 
+              bgcolor: 'primary.dark',
+              color: 'primary.contrastTextHover'
+            },
             borderRadius: 3,
             py: 1.5,
             fontWeight: 700,
@@ -91,7 +95,14 @@ const LoginPromptModal = ({ open, onClose }) => {
           sx={{ 
             color: 'text.secondary',
             fontWeight: 600,
-            textTransform: 'none'
+            textTransform: 'none',
+            borderRadius: 3,
+            py: 1.5,
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              bgcolor: 'primary.dark',
+              color: 'primary.contrastTextHover',
+            }
           }}
         >
           {t('common.cancel') || 'Để sau'}

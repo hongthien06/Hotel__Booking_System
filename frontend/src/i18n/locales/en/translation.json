@@ -32,7 +32,13 @@
     "logout": "Logout",
     "login": "Login",
     "profile": "Profile",
-    "bookings_history": "Booking History"
+    "bookings_history": "Booking History",
+    "logo_text": "Hotel Booking",
+    "users": "Users"
+  },
+  "auth": {
+    "login_required_title": "Login Required",
+    "login_to_book_desc": "Please login to proceed with your booking and enjoy our best offers."
   },
   "dashboard": {
     "title": "Dashboard Overview",
@@ -65,6 +71,7 @@
   "home": {
     "hero": {
       "welcome": "WELCOME TO",
+      "title": "Hotel Booking System",
       "subtitle": "Leading online hotel booking system — fast, convenient, and reliable",
       "cta": "Book Now"
     },
@@ -254,6 +261,39 @@
     "featured_rooms_sub": "Top-tier selections with beautiful locations and excellent amenities.",
     "available_rooms": "Available Rooms",
     "available_rooms_sub": "List of rooms matching your search requirements."
+  },
+  "login_page": {
+    "welcome": "Welcome Back",
+    "subtitle": "Login to your Hotel Booking account",
+    "customer": "Customer",
+    "manager": "Manager",
+    "forgot_password": "Forgot password?",
+    "login_button": "Login",
+    "logging_in": "Logging in...",
+    "no_account": "Don't have an account?",
+    "register_now": "Register Now"
+  },
+  "forgot_password": {
+    "title": "Forgot Password?",
+    "subtitle": "Enter your email to receive a reset link",
+    "email_label": "Email",
+    "submit_button": "Send Request",
+    "sending": "Sending...",
+    "back_to_login": "Back to Login",
+    "success_msg": "A password reset link has been sent to your email.",
+    "error_msg": "An error occurred. Please try again later."
+  },
+  "reset_password": {
+    "title": "Reset Password",
+    "subtitle": "Create a new password for your account",
+    "new_password": "New Password",
+    "confirm_new_password": "Confirm New Password",
+    "update_button": "Update Password",
+    "updating": "Updating...",
+    "success_msg": "Password changed successfully! Redirecting to login...",
+    "token_error": "Invalid or expired reset token.",
+    "match_error": "Passwords do not match.",
+    "generic_error": "An error occurred. The token might be expired."
   },
   "room_detail": {
     "hotel": "Hotel",

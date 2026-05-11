@@ -106,15 +106,18 @@ public class AuthService {
                 // Tạo token ngẫu nhiên (UUID)
                 String token = java.util.UUID.randomUUID().toString();
                 user.setResetToken(token);
-                user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // Hết hạn sau 1 giờ
+                user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(3)); // Hết hạn sau 3 phút
                 userRepository.save(user);
 
+                System.out.println(">>> RESET TOKEN for " + user.getEmail() + ": " + token);
+                System.out.println(">>> RESET LINK: http://localhost:3000/reset-password?token=" + token);
+
                 // Gửi email (link này sẽ trỏ về Frontend)
-                String resetLink = "https://static4j.app/reset-password?token=" + token;
+                String resetLink = "http://localhost:3000/reset-password?token=" + token;
                 String emailContent = "Chào " + user.getFullName() + ",\n\n" +
                                 "Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau để thực hiện:\n" +
                                 resetLink + "\n\n" +
-                                "Link này sẽ hết hạn sau 1 giờ. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.";
+                                "Link này sẽ hết hạn sau 3 phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.";
 
                 emailService.sendMail(user.getEmail(), "Khôi phục mật khẩu - Hotel Booking", emailContent);
         }
