@@ -55,7 +55,7 @@ const InfomationRental = () => {
           {hasData ? (
             <>
               <Stack direction="row" alignItems="center" spacing={1} mb={0.5}>
-                <Chip label={roomType} size="small" color="primary" variant="outlined" sx={{ fontWeight: 700 }} />
+                <Chip label={roomType} size="small" color="primary.dark" variant="outlined" sx={{ fontWeight: 700 }} />
                 {bedType && <Chip label={bedType} size="small" variant="outlined" sx={{ fontWeight: 600 }} />}
               </Stack>
               <Typography variant="h6" fontWeight={700}>Phòng {roomNumber}</Typography>
@@ -83,7 +83,7 @@ const InfomationRental = () => {
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {amenities.map((a) => (
-            <Chip key={a} label={a} size="small" variant="outlined" color="primary" sx={{ fontWeight: '600', padding: '6px 8px' }} />
+            <Chip key={a} label={a} size="small" variant="outlined" color="primary.dark" sx={{ fontWeight: '600', padding: '6px 8px' }} />
           ))}
         </Box>
 

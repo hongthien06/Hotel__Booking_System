@@ -9,6 +9,7 @@ import java.text.DecimalFormatSymbols;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.hotel.modules.booking.dto.BookingDTO;
@@ -303,9 +304,7 @@ public class PdfService implements IPdfService {
     // ─── HELPERS ─────────────────────────────────────────────────────────────
 
     private PdfFont loadFont(String classpathPath) throws IOException {
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(classpathPath)) {
-            if (is == null)
-                throw new IOException("Không tìm thấy font: " + classpathPath);
+        try (InputStream is = new ClassPathResource(classpathPath).getInputStream()) {
             byte[] bytes = is.readAllBytes();
             return PdfFontFactory.createFont(bytes, PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_EMBEDDED);
         }

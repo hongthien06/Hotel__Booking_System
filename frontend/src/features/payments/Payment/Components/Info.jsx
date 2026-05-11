@@ -34,7 +34,7 @@ const Info = () => {
       <PaymentMethod selectedMethod={selectedMethod} setSelectedMethod={setSelectedMethod} />
       <Discount />
       <Button fullWidth variant='contained' size='large' onClick={handleNext}
-        sx={{ borderRadius: '12px', py: 1.5, fontWeight: 600, fontSize: 15, textTransform: 'none', background: 'linear-gradient(90deg,#f472b6,#ec4899)', boxShadow: 'none', '&:hover': { boxShadow: 'none', opacity: 0.9 } }}>
+        sx={{ borderRadius: '12px', py: 1.5, fontWeight: 600, fontSize: 15, background: '#c02860ff', color: '#fff', boxShadow: 'none', '&:hover': { boxShadow: 'none' } }}>
         Thanh toán ngay
       </Button>
     </Box>

@@ -26,7 +26,7 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
   useEffect(() => {
     getActiveVouchersApi()
       .then(list => setHints((list || []).slice(0, 5)))
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   const handleApply = async () => {
@@ -129,7 +129,7 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
               '&.Mui-disabled': { bgcolor: '#fbcfe8', color: 'white' }
             }}
           >
-            {loading ? <CircularProgress size={16} sx={{ color: 'white' }} /> : 'Áp dụng'}
+            {loading ? <CircularProgress size={16} sx={{ bgcolor: 'primary.dark', color: 'white' }} /> : 'Áp dụng'}
           </Button>
         </Stack>
         {error && (

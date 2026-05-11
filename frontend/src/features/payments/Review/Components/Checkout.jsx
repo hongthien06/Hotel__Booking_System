@@ -136,7 +136,7 @@ const Checkout = () => {
               fontSize: 16,
               color: 'white',
               textTransform: 'none',
-              bgcolor: 'primary.light',
+              bgcolor: 'primary.dark',
               boxShadow: 'none',
               '&:hover': {
                 bgcolor: 'primary.main',
