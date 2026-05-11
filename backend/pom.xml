@@ -92,16 +92,11 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
-        <!-- PDF: iText 7 -->
+        <!-- PDF: iText html2pdf (includes kernel + layout) -->
         <dependency>
             <groupId>com.itextpdf</groupId>
-            <artifactId>kernel</artifactId>
-            <version>7.2.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.itextpdf</groupId>
-            <artifactId>layout</artifactId>
-            <version>7.2.5</version>
+            <artifactId>html2pdf</artifactId>
+            <version>4.0.5</version>
         </dependency>
 
         <!-- Swagger / OpenAPI -->
