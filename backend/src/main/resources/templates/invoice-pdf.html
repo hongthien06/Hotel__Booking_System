@@ -1,407 +1,236 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
+    <meta charset="UTF-8"/>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: Arial, sans-serif;
             font-size: 12px;
-            color: #1a1a2e;
+            color: #333;
             background: #fff;
         }
 
-        /* Header */
-        .header {
-            background-color: #1a1a2e;
-            color: #fff;
-            padding: 30px 40px;
-        }
+        .page { padding: 48px 56px; }
 
-        .header-top {
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .header-left {
+        /* ── Title row ── */
+        .title-row { overflow: hidden; padding-bottom: 24px; margin-bottom: 28px; }
+        .title-text {
             float: left;
+            font-size: 38px;
+            font-weight: bold;
+            color: #111;
         }
-
-        .header-right {
+        .title-logo {
             float: right;
-            text-align: right;
+            font-size: 38px;
+            font-weight: bold;
+            color: #111;
+            font-style: italic;
         }
 
-        .brand {
+        /* ── Metadata ── */
+        .meta-table { border-collapse: collapse; margin-bottom: 32px; }
+        .meta-table td {
+            padding: 3px 0;
+            font-size: 12px;
+            vertical-align: top;
+        }
+        .meta-label {
+            color: #666;
+            min-width: 140px;
+            padding-right: 20px;
+        }
+        .meta-value { color: #111; font-weight: 600; }
+
+        /* ── Parties ── */
+        .parties-table { width: 100%; border-collapse: collapse; margin-bottom: 36px; }
+        .parties-table td { padding: 0; vertical-align: top; width: 50%; }
+        .party-label { font-size: 12px; font-weight: bold; color: #111; margin-bottom: 6px; }
+        .party-name  { font-size: 13px; font-weight: bold; color: #111; margin-bottom: 4px; }
+        .party-detail { font-size: 11px; color: #555; line-height: 1.8; }
+
+        /* ── Amount heading ── */
+        .amount-heading {
             font-size: 22px;
             font-weight: bold;
-            letter-spacing: 2px;
-            color: #e2b96f;
-        }
-
-        .brand-sub {
-            font-size: 10px;
-            color: #a0aec0;
-            margin-top: 2px;
-            letter-spacing: 1px;
-        }
-
-        .invoice-title h1 {
-            font-size: 28px;
-            color: #e2b96f;
-            letter-spacing: 3px;
-        }
-
-        .inv-number {
-            font-size: 11px;
-            color: #a0aec0;
-            margin-top: 4px;
-        }
-
-        .header-divider {
-            border-top: 1px solid #e2b96f55;
-            margin-top: 20px;
+            color: #111;
+            border-top: 2px solid #111;
             padding-top: 16px;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .header-meta {
-            float: left;
-            margin-right: 40px;
-        }
-
-        .header-meta span {
-            font-size: 10px;
-            color: #a0aec0;
-            display: block;
-        }
-
-        .header-meta strong {
-            font-size: 12px;
-            color: #e2b96f;
-        }
-
-        /* Body */
-        .body {
-            padding: 30px 40px;
-        }
-
-        /* Info grid using table */
-        .info-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 10px 0;
             margin-bottom: 28px;
         }
 
-        .info-table td {
-            background: #f8f9ff;
-            border-left: 3px solid #e2b96f;
-            padding: 14px 16px;
-            vertical-align: top;
-            width: 33%;
-        }
-
-        .info-table .label {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #718096;
-            margin-bottom: 6px;
-        }
-
-        .info-table .value {
-            font-size: 12px;
-            color: #1a1a2e;
-            font-weight: 600;
-            line-height: 1.6;
-        }
-
-        /* Items table */
-        .section-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #4a5568;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        table.items {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 24px;
-        }
-
-        table.items thead tr {
-            background: #1a1a2e;
-            color: #e2b96f;
-        }
-
-        table.items thead th {
-            padding: 10px 12px;
+        /* ── Items table ── */
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 0; }
+        .items-table thead tr { border-bottom: 1.5px solid #333; }
+        .items-table thead th {
+            padding: 8px 10px;
             text-align: left;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        table.items thead th:last-child {
-            text-align: right;
-        }
-
-        table.items tbody tr:nth-child(even) {
-            background: #f8f9ff;
-        }
-
-        table.items tbody tr:nth-child(odd) {
-            background: #ffffff;
-        }
-
-        table.items tbody td {
-            padding: 10px 12px;
             font-size: 11px;
-            border-bottom: 1px solid #e8ecf0;
-        }
-
-        table.items tbody td:last-child {
-            text-align: right;
+            color: #555;
             font-weight: 600;
         }
-
-        .item-type {
-            background: #e2b96f22;
-            color: #b7791f;
-            font-size: 9px;
-            padding: 2px 6px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-
-        /* Totals */
-        .totals-wrapper {
-            text-align: right;
-            margin-bottom: 28px;
-        }
-
-        .totals {
-            display: inline-block;
-            width: 280px;
-            text-align: left;
-        }
-
-        .totals-row {
-            overflow: hidden;
-            padding: 7px 0;
-            border-bottom: 1px solid #e8ecf0;
+        .items-table thead th.right { text-align: right; }
+        .items-table tbody td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #e8e8e8;
             font-size: 12px;
+            color: #333;
         }
+        .items-table tbody td.right { text-align: right; }
 
-        .totals-row .t-label { float: left; }
-        .totals-row .t-value { float: right; }
+        /* ── Totals ── */
+        .totals-wrapper { overflow: hidden; margin-top: 0; }
+        .totals-spacer { float: left; width: 55%; }
+        .totals-box { float: right; width: 45%; }
 
-        .totals-row.tax { color: #718096; }
-        .totals-row.discount { color: #e53e3e; }
-
-        .totals-row.grand {
-            background: #1a1a2e;
-            color: #e2b96f;
-            margin-top: 4px;
-            padding: 10px 12px;
-            font-size: 14px;
+        .totals-table { width: 100%; border-collapse: collapse; }
+        .totals-table td {
+            padding: 7px 10px;
+            font-size: 12px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .totals-table td.t-label { color: #666; }
+        .totals-table td.t-value { text-align: right; color: #333; }
+        .totals-table tr.t-grand td {
+            border-top: 1.5px solid #111;
+            border-bottom: none;
             font-weight: bold;
-            border: none;
-        }
-
-        /* Notes */
-        .notes {
-            background: #fffbf0;
-            border: 1px solid #e2b96f44;
-            padding: 14px 16px;
-            margin-bottom: 28px;
-        }
-
-        .notes .label {
-            font-size: 9px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #718096;
-            margin-bottom: 6px;
-        }
-
-        .notes .value {
-            font-size: 11px;
-            color: #4a5568;
-        }
-
-        /* Footer */
-        .footer {
-            background: #f8f9ff;
-            padding: 16px 40px;
-            text-align: center;
-            border-top: 1px solid #e8ecf0;
-            margin-top: 20px;
-        }
-
-        .footer p {
-            font-size: 10px;
-            color: #a0aec0;
-            line-height: 1.8;
-        }
-
-        .footer .thank-you {
             font-size: 13px;
-            color: #1a1a2e;
-            font-weight: 600;
-            margin-bottom: 4px;
+            color: #111;
+            padding-top: 12px;
         }
 
-        .stamp {
-            display: inline-block;
-            border: 2px solid #38a169;
-            color: #38a169;
-            font-size: 12px;
-            font-weight: bold;
-            padding: 4px 14px;
-            letter-spacing: 2px;
-            margin-bottom: 8px;
-        }
-
-        .clearfix::after {
-            content: "";
-            display: table;
-            clear: both;
+        /* ── Footer ── */
+        .footer {
+            margin-top: 48px;
+            border-top: 1px solid #e8e8e8;
+            padding-top: 12px;
+            font-size: 10px;
+            color: #aaa;
+            text-align: center;
+            line-height: 1.8;
         }
     </style>
 </head>
-
 <body>
+<div class="page">
 
-    <!-- HEADER -->
-    <div class="header">
-        <div class="header-top clearfix">
-            <div class="header-left">
-                <div class="brand">&#9733; LUXURY HOTEL</div>
-                <div class="brand-sub">Where Every Stay Becomes a Memory</div>
-            </div>
-            <div class="header-right">
-                <div class="invoice-title">
-                    <h1>HOA DON</h1>
-                    <div class="inv-number" th:text="${invoice.invoiceNumber}">INV-20250424-001</div>
-                </div>
-            </div>
-        </div>
-        <div class="header-divider clearfix">
-            <div class="header-meta">
-                <span>Ngay xuat hoa don</span>
-                <strong th:text="${#temporals.format(invoice.issuedAt, 'dd/MM/yyyy HH:mm')}">24/04/2025 14:00</strong>
-            </div>
-            <div class="header-meta">
-                <span>Ma dat phong</span>
-                <strong th:text="${invoice.bookingCode}">BK-001</strong>
-            </div>
-            <div class="header-meta">
-                <span>Ma thanh toan</span>
-                <strong th:text="${invoice.paymentId}">001</strong>
-            </div>
-        </div>
+    <!-- Title -->
+    <div class="title-row">
+        <div class="title-text">Invoice</div>
+        <div class="title-logo" th:text="${booking.hotelName != null ? booking.hotelName : 'HOTEL'}">HOTEL</div>
     </div>
 
-    <!-- BODY -->
-    <div class="body">
+    <!-- Metadata -->
+    <table class="meta-table">
+        <tr>
+            <td class="meta-label">Invoice number</td>
+            <td class="meta-value" th:text="${invoice.invoiceNumber}">INV-001</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Date of issue</td>
+            <td class="meta-value" th:text="${#temporals.format(invoice.issuedAt, 'MMM dd, yyyy')}">Jan 01, 2025</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Date due</td>
+            <td class="meta-value" th:text="${#temporals.format(invoice.issuedAt, 'MMM dd, yyyy')}">Jan 01, 2025</td>
+        </tr>
+        <tr>
+            <td class="meta-label">Booking code</td>
+            <td class="meta-value" th:text="${invoice.bookingCode}">BK-001</td>
+        </tr>
+    </table>
 
-        <!-- Info cards -->
-        <table class="info-table">
+    <!-- From / Bill to -->
+    <table class="parties-table">
+        <tr>
+            <td style="padding-right: 30px;">
+                <div class="party-label" th:text="${booking.hotelName != null ? booking.hotelName : 'HOTEL'}">HOTEL</div>
+                <div class="party-detail" th:text="${booking.hotelAddress}">123 Hotel Street</div>
+                <div class="party-detail">info@luxuryhotel.vn</div>
+            </td>
+            <td>
+                <div class="party-label">Bill to</div>
+                <div class="party-name" th:text="${booking.userName}">Nguyen Van A</div>
+                <div class="party-detail" th:text="${booking.userEmail}">guest@email.com</div>
+                <div class="party-detail" th:if="${booking.userPhone != null and !#strings.isEmpty(booking.userPhone)}"
+                     th:text="${booking.userPhone}">0123456789</div>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Amount due heading -->
+    <div class="amount-heading"
+         th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 2, 'POINT') + ' VND due ' + #temporals.format(invoice.issuedAt, 'MMM dd, yyyy')}">
+        1,375,000.00 VND due Jan 01, 2025
+    </div>
+
+    <!-- Items table -->
+    <table class="items-table">
+        <thead>
             <tr>
-                <td>
-                    <div class="label">Khach hang</div>
-                    <div class="value" th:text="${booking.userName != null ? booking.userName : 'Khach le'}">Nguyen Van A</div>
-                    <div class="value" style="color:#718096; font-size:11px;" th:text="${booking.userEmail}">guest@email.com</div>
-                </td>
-                <td>
-                    <div class="label">Phong</div>
-                    <div class="value" th:text="${booking.roomNumber + ' - ' + (booking.roomTypeName != null ? booking.roomTypeName : '')}">101 - Deluxe</div>
-                    <div class="value" style="color:#718096; font-size:11px;" th:text="${booking.hotelName}">Luxury Hotel</div>
-                </td>
-                <td>
-                    <div class="label">Thoi gian luu tru</div>
-                    <div class="value" th:text="|${#temporals.format(booking.checkInDate, 'dd/MM/yyyy')} > ${#temporals.format(booking.checkOutDate, 'dd/MM/yyyy')}|">24/04 > 26/04</div>
-                    <div class="value" style="color:#e2b96f" th:text="|${booking.totalNights} dem|">2 dem</div>
-                </td>
+                <th>Description</th>
+                <th>Qty</th>
+                <th class="right">Unit price</th>
+                <th class="right">Tax</th>
+                <th class="right">Amount</th>
             </tr>
-        </table>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${invoice.items}">
+                <td th:text="${item.description}">Phong Deluxe</td>
+                <td th:text="${item.quantity}">1</td>
+                <td class="right" th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 2, 'POINT')}">1,250,000.00</td>
+                <td class="right" th:text="${#numbers.formatDecimal(invoice.taxRate, 0, 'COMMA', 0, 'POINT') + '%'}">10%</td>
+                <td class="right" th:text="${#numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 2, 'POINT')}">1,250,000.00</td>
+            </tr>
+        </tbody>
+    </table>
 
-        <!-- Items table -->
-        <div class="section-title">Chi tiet hoa don</div>
-        <table class="items">
-            <thead>
+    <!-- Totals -->
+    <div class="totals-wrapper">
+        <div class="totals-spacer"></div>
+        <div class="totals-box">
+            <table class="totals-table">
                 <tr>
-                    <th>#</th>
-                    <th>Loai</th>
-                    <th>Mo ta</th>
-                    <th>SL</th>
-                    <th>Don gia</th>
-                    <th>Thanh tien</th>
+                    <td class="t-label">Subtotal</td>
+                    <td class="t-value" th:text="${#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 2, 'POINT')}">1,250,000.00</td>
                 </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item, stat : ${invoice.items}">
-                    <td th:text="${stat.count}">1</td>
-                    <td><span class="item-type" th:text="${item.itemType}">ROOM</span></td>
-                    <td th:text="${item.description}">Phong Deluxe</td>
-                    <td th:text="${item.quantity}">1</td>
-                    <td th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT') + ' VND'}">500,000 VND</td>
-                    <td th:text="${#numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 0, 'POINT') + ' VND'}">500,000 VND</td>
+                <tr>
+                    <td class="t-label">Total excluding tax</td>
+                    <td class="t-value" th:text="${#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 2, 'POINT')}">1,250,000.00</td>
                 </tr>
-            </tbody>
-        </table>
-
-        <!-- Totals -->
-        <div class="totals-wrapper">
-            <div class="totals">
-                <div class="totals-row clearfix">
-                    <span class="t-label">Tam tinh</span>
-                    <span class="t-value" th:text="${#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 0, 'POINT') + ' VND'}">900,000 VND</span>
-                </div>
-                <div class="totals-row tax clearfix">
-                    <span class="t-label">Thue VAT (<span th:text="${invoice.taxRate}">10</span>%)</span>
-                    <span class="t-value" th:text="'+ ' + ${#numbers.formatDecimal(invoice.taxAmount, 0, 'COMMA', 0, 'POINT')} + ' VND'">+ 90,000 VND</span>
-                </div>
-                <div class="totals-row discount clearfix"
-                    th:if="${invoice.discountAmount != null and invoice.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
-                    <span class="t-label">Giam gia</span>
-                    <span class="t-value" th:text="'- ' + ${#numbers.formatDecimal(invoice.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' VND'">- 50,000 VND</span>
-                </div>
-                <div class="totals-row grand clearfix">
-                    <span class="t-label">TONG CONG</span>
-                    <span class="t-value" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT') + ' VND'}">940,000 VND</span>
-                </div>
-            </div>
+                <tr>
+                    <td class="t-label"
+                        th:text="|VAT - Vietnam (${#numbers.formatDecimal(invoice.taxRate, 0, 'COMMA', 0, 'POINT')}% on ${#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 2, 'POINT')})|">
+                        VAT - Vietnam (10% on 1,250,000.00)
+                    </td>
+                    <td class="t-value" th:text="${#numbers.formatDecimal(invoice.taxAmount, 0, 'COMMA', 2, 'POINT')}">125,000.00</td>
+                </tr>
+                <tr th:if="${invoice.discountAmount != null and invoice.discountAmount.compareTo(T(java.math.BigDecimal).ZERO) > 0}">
+                    <td class="t-label">Discount</td>
+                    <td class="t-value" th:text="'-' + ${#numbers.formatDecimal(invoice.discountAmount, 0, 'COMMA', 2, 'POINT')}">-50,000.00</td>
+                </tr>
+                <tr>
+                    <td class="t-label">Total</td>
+                    <td class="t-value" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 2, 'POINT')}">1,375,000.00</td>
+                </tr>
+                <tr class="t-grand">
+                    <td class="t-label">Amount due</td>
+                    <td class="t-value" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 2, 'POINT') + ' VND'}">1,375,000.00 VND</td>
+                </tr>
+            </table>
         </div>
-
-        <!-- Notes -->
-        <div class="notes" th:if="${invoice.notes != null and !#strings.isEmpty(invoice.notes)}">
-            <div class="label">Ghi chu</div>
-            <div class="value" th:text="${invoice.notes}"></div>
-        </div>
-
     </div>
 
-    <!-- FOOTER -->
+    <!-- Footer -->
     <div class="footer">
-        <div class="stamp">DA THANH TOAN</div>
-        <div class="thank-you">Cam on quy khach da su dung dich vu!</div>
-        <p>123 Duong Khach San, Quan 1, TP. Ho Chi Minh &nbsp;|&nbsp; Tel: (028) 1234-5678 &nbsp;|&nbsp; Email: info@luxuryhotel.vn</p>
-        <p style="margin-top:6px;">Hoa don duoc xuat tu dong. Vui long lien he le tan neu co thac mac.</p>
+        <p>Cam on quy khach da su dung dich vu. Vui long lien he le tan neu co thac mac.</p>
+        <p>info@luxuryhotel.vn &nbsp;|&nbsp; Tel: (028) 1234-5678</p>
     </div>
 
+</div>
 </body>
-
 </html>
