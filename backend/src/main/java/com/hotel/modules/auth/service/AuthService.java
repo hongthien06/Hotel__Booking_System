@@ -8,6 +8,7 @@ import com.hotel.modules.auth.repository.RoleRepository;
 import com.hotel.modules.auth.repository.UserRepository;
 import com.hotel.modules.email.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +29,9 @@ public class AuthService {
         private final JwtService jwtService;
         private final AuthenticationManager authenticationManager;
         private final EmailService emailService;
+
+        @Value("${app.frontend-url}")
+        private String frontendUrl;
 
         // ── Đăng ký ───────────────────────────────────────────
         public AuthResponse register(RegisterRequest request) {
@@ -110,10 +114,10 @@ public class AuthService {
                 userRepository.save(user);
 
                 System.out.println(">>> RESET TOKEN for " + user.getEmail() + ": " + token);
-                System.out.println(">>> RESET LINK: http://localhost:3000/reset-password?token=" + token);
+                System.out.println(">>> RESET LINK: " + frontendUrl + "/reset-password?token=" + token);
 
                 // Gửi email (link này sẽ trỏ về Frontend)
-                String resetLink = "http://localhost:3000/reset-password?token=" + token;
+                String resetLink = frontendUrl + "/reset-password?token=" + token;
                 String emailContent = "Chào " + user.getFullName() + ",\n\n" +
                                 "Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau để thực hiện:\n" +
                                 resetLink + "\n\n" +
