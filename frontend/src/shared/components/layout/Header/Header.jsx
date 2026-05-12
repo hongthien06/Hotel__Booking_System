@@ -219,7 +219,7 @@ const Header = () => {
         )}
 
         {/* Language Switcher at the very corner */}
-        <Box sx={{ ml: 1, pl: 1, borderLeft: '1px solid rgba(154,28,72,0.2)', display: { xs: 'none', sm: 'block' } }}>
+        <Box sx={{ ml: { xs: 0.5, sm: 1 }, pl: { xs: 0.5, sm: 1 }, borderLeft: '1px solid rgba(255,255,255,0.2)', display: 'block' }}>
           <LanguageSwitcher />
         </Box>
       </Box>

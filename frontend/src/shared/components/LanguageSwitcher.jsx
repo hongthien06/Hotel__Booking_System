@@ -31,15 +31,17 @@ const LanguageSwitcher = () => {
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
-        startIcon={<Translate />}
-        endIcon={<ExpandMore />}
+        startIcon={<Translate sx={{ fontSize: { xs: 18, sm: 20 } }} />}
+        endIcon={<ExpandMore sx={{ fontSize: { xs: 14, sm: 18 }, display: { xs: 'none', sm: 'inline-flex' } }} />}
         sx={{
-          color: "text.primary",
+          color: "inherit",
           fontWeight: 700,
           borderRadius: 2,
-          px: 2,
+          px: { xs: 1, sm: 2 },
+          minWidth: { xs: 'auto', sm: 80 },
           textTransform: "none",
-          "&:hover": { bgcolor: "action.hover" }
+          fontSize: { xs: '0.75rem', sm: '0.875rem' },
+          "&:hover": { bgcolor: "rgba(255,255,255,0.1)" }
         }}
       >
         {currentLanguage}
