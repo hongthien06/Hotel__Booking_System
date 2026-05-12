@@ -60,7 +60,8 @@ const HomePage = () => {
       {/* Hero Section */}
       <Box
         sx={{
-          height: '70vh',
+          minHeight: { xs: '80vh', md: '70vh' },
+          py: { xs: 8, md: 0 },
           position: 'relative',
           display: 'flex',
           alignItems: 'center',
@@ -72,13 +73,26 @@ const HomePage = () => {
         }}
       >
         <Container maxWidth="md" sx={{ textAlign: 'center', zIndex: 1 }}>
-          <Typography variant="overline" sx={{ letterSpacing: 4, fontSize: '0.9rem', opacity: 0.9, mb: 2, display: 'block' }}>
+          <Typography variant="overline" sx={{ letterSpacing: 4, fontSize: { xs: '0.7rem', sm: '0.9rem' }, opacity: 0.9, mb: 2, display: 'block' }}>
             {t("home.hero.welcome")}
           </Typography>
-          <Typography variant="h2" sx={{ fontWeight: 900, mb: 2, textShadow: '2px 4px 20px rgba(0,0,0,0.4)' }}>
+          <Typography variant="h2" sx={{ 
+            fontWeight: 900, 
+            mb: 2, 
+            textShadow: '2px 4px 20px rgba(0,0,0,0.4)',
+            fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' }
+          }}>
             {t("home.hero.title")}
           </Typography>
-          <Typography variant="h6" sx={{ mb: 5, fontWeight: 300, opacity: 0.9, maxWidth: 600, mx: 'auto' }}>
+          <Typography variant="h6" sx={{ 
+            mb: 4, 
+            fontWeight: 300, 
+            opacity: 0.9, 
+            maxWidth: 600, 
+            mx: 'auto',
+            fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.25rem' },
+            px: 2
+          }}>
             {t("home.hero.subtitle")}
           </Typography>
           <Button
@@ -87,7 +101,11 @@ const HomePage = () => {
             startIcon={<EventNote />}
             onClick={() => navigate('/bookings')}
             sx={{
-              py: 1.8, px: 5, borderRadius: 3, fontWeight: 800, fontSize: '1.1rem',
+              py: { xs: 1.5, md: 1.8 }, 
+              px: { xs: 4, md: 5 }, 
+              borderRadius: 3, 
+              fontWeight: 800, 
+              fontSize: { xs: '0.9rem', md: '1.1rem' },
               bgcolor: 'white', color: '#9a1c48',
               boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
               '&:hover': {
@@ -110,16 +128,16 @@ const HomePage = () => {
         sx={{
           mx: 'auto',
           maxWidth: 1200,
-          width: '95%',
-          mt: -6,
+          width: '90%',
+          mt: { xs: -4, md: -6 },
           borderRadius: 4,
           position: 'relative',
           zIndex: 2,
           overflow: 'hidden',
           background: 'linear-gradient(135deg, #9a1c48 0%, #c02860 100%)',
           boxShadow: '0 10px 40px rgba(154, 28, 72, 0.3)',
-          display: 'flex', // Dùng Flexbox để ép giãn đều
-          width: '100%',
+          display: 'flex',
+          flexWrap: 'wrap',
           boxSizing: 'border-box'
         }}
       >
@@ -132,10 +150,17 @@ const HomePage = () => {
           <Box
             key={i}
             sx={{
-              flex: 1, // Mỗi ô chiếm 1 phần bằng nhau (1/4)
+              flex: { xs: '0 0 50%', md: 1 },
               textAlign: 'center',
-              py: { xs: 3, md: 5 },
-              borderRight: i < 3 ? '1px solid rgba(255,255,255,0.15)' : 'none',
+              py: { xs: 2.5, md: 5 },
+              borderRight: { 
+                xs: (i % 2 === 0 ? '1px solid rgba(255,255,255,0.15)' : 'none'), 
+                md: (i < 3 ? '1px solid rgba(255,255,255,0.15)' : 'none') 
+              },
+              borderBottom: {
+                xs: (i < 2 ? '1px solid rgba(255,255,255,0.15)' : 'none'),
+                md: 'none'
+              },
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center'

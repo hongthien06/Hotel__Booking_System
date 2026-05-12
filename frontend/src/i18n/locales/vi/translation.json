@@ -440,5 +440,17 @@
     "travel_offer_title": "Đặt với Ưu Đãi Mùa Du Lịch",
     "travel_offer_desc": "Giảm ít nhất 15% cho một số chỗ nghỉ khi đặt phòng từ nay đến hết mùa du lịch.",
     "save_for_next_trip": "Tiết kiệm cho chuyến đi tới"
+  },
+  "hotel_amenities": {
+    "Bãi đỗ xe": "Bãi đỗ xe",
+    "Bar / Lounge": "Bar / Lounge",
+    "Bể sục / Jacuzzi": "Bể sục / Jacuzzi",
+    "Gym / Fitness": "Gym / Fitness",
+    "Hồ bơi": "Hồ bơi",
+    "Lễ tân 24/7": "Lễ tân 24/7",
+    "Nhà hàng": "Nhà hàng",
+    "Phòng họp": "Phòng họp",
+    "Spa & Làm đẹp": "Spa & Làm đẹp",
+    "WiFi miễn phí": "WiFi miễn phí"
   }
 }

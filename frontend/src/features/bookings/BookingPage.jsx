@@ -270,7 +270,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
                     sx={{ color: PC, '&.Mui-checked': { color: PC } }}
                   />
                 }
-                label={<Typography variant="body2">{a.amenityName}</Typography>}
+                label={<Typography variant="body2">{t(`hotel_amenities.${a.amenityName}`, a.amenityName)}</Typography>}
                 sx={{ mb: 0.1 }}
               />
             ))}

@@ -190,7 +190,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
               {amenities.map((item, i) => (
                 <Chip
                   key={i}
-                  label={item}
+                  label={t(`hotel_amenities.${item}`, item)}
                   size="small"
                   variant="outlined"
                   sx={{

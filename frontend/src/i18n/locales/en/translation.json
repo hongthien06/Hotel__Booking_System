@@ -444,5 +444,17 @@
     "travel_offer_title": "Book with Getaway Deals",
     "travel_offer_desc": "Save at least 15% on select stays when booking from now until the end of the travel season.",
     "save_for_next_trip": "Save on your next trip"
+  },
+  "hotel_amenities": {
+    "Bãi đỗ xe": "Parking",
+    "Bar / Lounge": "Bar / Lounge",
+    "Bể sục / Jacuzzi": "Jacuzzi / Hot Tub",
+    "Gym / Fitness": "Gym / Fitness",
+    "Hồ bơi": "Swimming Pool",
+    "Lễ tân 24/7": "24/7 Reception",
+    "Nhà hàng": "Restaurant",
+    "Phòng họp": "Meeting Room",
+    "Spa & Làm đẹp": "Spa & Beauty",
+    "WiFi miễn phí": "Free WiFi"
   }
 }
