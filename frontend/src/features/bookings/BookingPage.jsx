@@ -1008,13 +1008,13 @@ const BookingPage = () => {
                         display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                        scrollSnapType: 'x mandatory'
+                        scrollSnapType: { xs: 'none', md: 'x mandatory' }
                       }}>
                         {recentSearches.map((s, i) => (
                           <Card key={i} onClick={() => handleRecentSearchClick(s)} sx={{
                             cursor: 'pointer', borderRadius: 3, flexShrink: 0,
                             width: { xs: '58vw', sm: 'calc((100% - 48px) / 4)' }, p: 2,
-                            scrollSnapAlign: 'start', boxShadow: 1,
+                            scrollSnapAlign: { xs: 'none', md: 'start' }, boxShadow: 1,
                             border: '1px solid #eee',
                             transition: 'all 0.2s',
                             minHeight: 100, // Cố định chiều cao tối thiểu
@@ -1075,15 +1075,15 @@ const BookingPage = () => {
                     display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory'
+                    scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
                     {DESTINATIONS.map((d, i) => (
                       <Card key={d.key} onClick={() => selectDest(i)} sx={{
                         cursor: 'pointer', borderRadius: 3, flexShrink: 0,
                         width: { xs: '44vw', sm: 'calc((100% - 60px) / 4)' }, height: { xs: 160, sm: 216 },
                         position: 'relative', overflow: 'hidden',
-                        scrollSnapAlign: 'start',
-                        scrollSnapStop: 'always',
+                        scrollSnapAlign: { xs: 'none', md: 'start' },
+                        scrollSnapStop: { xs: 'none', md: 'always' },
                         border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
                         transition: 'all 0.2s',
                         boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1
@@ -1145,14 +1145,14 @@ const BookingPage = () => {
                     display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory'
+                    scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
                     {ROOM_TYPES.map((type) => (
                       <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
                         cursor: 'pointer', borderRadius: 4, flexShrink: 0,
                         width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, height: { xs: 140, sm: 180 },
                         position: 'relative', overflow: 'hidden',
-                        scrollSnapAlign: 'start',
+                        scrollSnapAlign: { xs: 'none', md: 'start' },
                         boxShadow: 1,
                         border: roomTypes.includes(type.key) ? `3px solid ${PC}` : '3px solid transparent',
                         transition: 'all 0.2s'
@@ -1220,7 +1220,7 @@ const BookingPage = () => {
                     display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory'
+                    scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
                     {loading ? (
                       [...Array(3)].map((_, i) => (
@@ -1232,7 +1232,7 @@ const BookingPage = () => {
                       ))
                     ) : (
                       featuredRooms.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
+                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
                           <RoomCard room={r} isMock={rooms.length === 0} />
                         </Box>
                       ))
@@ -1287,10 +1287,10 @@ const BookingPage = () => {
                         display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                        scrollSnapType: 'x mandatory'
+                        scrollSnapType: { xs: 'none', md: 'x mandatory' }
                       }}>
                         {topRatedRooms.map(r => (
-                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
+                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
                             <RoomCard room={r} isMock={rooms.length === 0} />
                           </Box>
                         ))}
@@ -1346,10 +1346,10 @@ const BookingPage = () => {
                         display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                        scrollSnapType: 'x mandatory'
+                        scrollSnapType: { xs: 'none', md: 'x mandatory' }
                       }}>
                         {budgetRooms.map(r => (
-                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
+                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
                             <RoomCard room={r} isMock={rooms.length === 0} />
                           </Box>
                         ))}
@@ -1386,10 +1386,10 @@ const BookingPage = () => {
                     display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: 'x mandatory'
+                    scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
                     {weekendDeals.map(r => (
-                      <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
+                      <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
                         <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} />
                       </Box>
                     ))}
