@@ -295,10 +295,10 @@ const OffersSection = () => {
   return (
     <Box sx={{ mb: 6, px: { xs: 2, md: 6 } }}>
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
-        {t('banners.offers_title') === 'banners.offers_title' ? 'Ưu đãi' : t('banners.offers_title')}
+        {t('banners.offers_title')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {t('banners.offers_subtitle') === 'banners.offers_subtitle' ? 'Khuyến mãi, giảm giá và ưu đãi đặc biệt dành riêng cho bạn' : t('banners.offers_subtitle')}
+        {t('banners.offers_subtitle')}
       </Typography>
 
       <Card sx={{
@@ -312,13 +312,13 @@ const OffersSection = () => {
       }}>
         <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#333' }}>
-            Không điều kiện ràng buộc. An tâm nghỉ dưỡng.
+            {t('banners.no_strings_attached')}
           </Typography>
           <Typography variant="h5" sx={{ fontWeight: 900, mb: 1, color: '#1a1a1a' }}>
-            Đặt với Ưu Đãi Mùa Du Lịch
+            {t('banners.travel_offer_title')}
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 450 }}>
-            Giảm ít nhất 15% cho một số chỗ nghỉ khi đặt phòng từ nay đến hết mùa du lịch.
+            {t('banners.travel_offer_desc')}
           </Typography>
           <Button variant="contained" sx={{
             bgcolor: '#006ce4',
@@ -332,7 +332,7 @@ const OffersSection = () => {
             px: 4,
             '&:hover': { bgcolor: '#005bb8', boxShadow: '0 4px 12px rgba(0,108,228,0.3)' }
           }}>
-            Tiết kiệm cho chuyến đi tới
+            {t('banners.save_for_next_trip')}
           </Button>
         </Box>
         <Box sx={{ width: { xs: '100%', md: 320 }, minHeight: 220 }}>
@@ -1370,8 +1370,8 @@ const BookingPage = () => {
 
                 {/* 7. Ưu đãi cho cuối tuần */}
                 <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>Ưu đãi cho cuối tuần</Typography>
-                  <Typography variant="body2" color="text.secondary">Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.weekend_deals_title')}</Typography>
+                  <Typography variant="body2" color="text.secondary">{t('booking_page.weekend_deals_subtitle')}</Typography>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 8, px: { xs: 3, sm: 6 } }}>
                   <IconButton onClick={() => scrollWeekend(-1)} sx={{

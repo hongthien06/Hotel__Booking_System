@@ -300,7 +300,9 @@
     "featured_rooms": "Featured Rooms",
     "featured_rooms_sub": "Top-tier selections with beautiful locations and excellent amenities.",
     "available_rooms": "Available Rooms",
-    "available_rooms_sub": "List of rooms matching your search requirements."
+    "available_rooms_sub": "List of rooms matching your search requirements.",
+    "weekend_deals_title": "Weekend Deals",
+    "weekend_deals_subtitle": "Save on stays from May 8 - May 10"
   },
   "login_page": {
     "welcome": "Welcome Back",
@@ -430,5 +432,13 @@
     "bike": "Bike Rental",
     "spa": "Spa & Massage",
     "pool": "Swimming Pool"
+  },
+  "banners": {
+    "offers_title": "Deals",
+    "offers_subtitle": "Promotions, discounts, and special offers just for you",
+    "no_strings_attached": "No strings attached. Peace of mind stays.",
+    "travel_offer_title": "Book with Getaway Deals",
+    "travel_offer_desc": "Save at least 15% on select stays when booking from now until the end of the travel season.",
+    "save_for_next_trip": "Save on your next trip"
   }
 }

@@ -296,7 +296,9 @@
     "anywhere": "Địa điểm bất kỳ",
     "back_to_home": "Quay lại trang chủ",
     "clear_search": "Xóa tìm kiếm",
-    "search_results": "Kết quả tìm kiếm"
+    "search_results": "Kết quả tìm kiếm",
+    "weekend_deals_title": "Ưu đãi cho cuối tuần",
+    "weekend_deals_subtitle": "Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5"
   },
   "login_page": {
     "welcome": "Chào mừng trở lại",
@@ -426,5 +428,13 @@
     "bike": "Thuê xe máy",
     "spa": "Spa & Massage",
     "pool": "Hồ bơi"
+  },
+  "banners": {
+    "offers_title": "Ưu đãi",
+    "offers_subtitle": "Khuyến mãi, giảm giá và ưu đãi đặc biệt dành riêng cho bạn",
+    "no_strings_attached": "Không điều kiện ràng buộc. An tâm nghỉ dưỡng.",
+    "travel_offer_title": "Đặt với Ưu Đãi Mùa Du Lịch",
+    "travel_offer_desc": "Giảm ít nhất 15% cho một số chỗ nghỉ khi đặt phòng từ nay đến hết mùa du lịch.",
+    "save_for_next_trip": "Tiết kiệm cho chuyến đi tới"
   }
 }
