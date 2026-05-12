@@ -346,9 +346,7 @@ const BookingHistoryPage = () => {
                       <Typography variant="subtitle1" sx={{ fontWeight: 900, color: PC }}>
                         {formatCurrency(booking.grandTotal)}
                       </Typography>
-                      <IconButton size="small" sx={{ bgcolor: '#fdf2f8', color: PC, '&:hover': { bgcolor: PC_LIGHT } }}>
-                        <ChevronRight fontSize="small" />
-                      </IconButton>
+
                     </Box>
 
                     {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
