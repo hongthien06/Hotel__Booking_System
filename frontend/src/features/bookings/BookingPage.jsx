@@ -1,14 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react'
 import imgHCM from '../../assets/TP_HCM.png'
-import imgHaNoi from '../../assets/HA NOI.jpg'
-import imgVungTau from '../../assets/VUNG TAU.jpg'
+import imgHaNoi from '../../assets/HA_NOI.jpg'
 import imgDaLat from '../../assets/DA_LAT.webp'
 import imgDaNang from '../../assets/DA_NANG.jpg'
 import imgNhaTrang from '../../assets/NHA_TRANG.png'
 import imgPhuQuoc from '../../assets/PHU_QUOC.png'
 import imgSapa from '../../assets/SAPA.png'
 import imgHue from '../../assets/HUE.png'
-import imgCatBa from '../../assets/CAT_BA.png'
+import imgQuangNinh from '../../assets/QUANG_NINH.jpg'
+import imgCaoBang from '../../assets/CAO_BANG.jpg'
+import imgHaNam from '../../assets/HA_NAM.webp'
+import imgHaTinh from '../../assets/HA_TINH.png'
+import imgQuangNam from '../../assets/QUANG_NAM.jpeg'
+import imgCanTho from '../../assets/CAN_THO.jpg'
+import imgThanhHoa from '../../assets/THANH_HOA.jpg'
+import imgDienBien from '../../assets/DIEN_BIEN.jpg'
+import imgSonLa from '../../assets/SON_LA.jpg'
+import imgBinhThuan from '../../assets/BINH_THUAN.jpg'
 import {
   Box, Typography, Grid, TextField, Button, Card, CardContent, CardMedia,
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
@@ -31,16 +39,24 @@ const PC_LIGHT = '#fce4ec'
 const SIDEBAR_W = 300
 
 const DESTINATIONS = [
-  { key: 'hcm', province: 'TP. Hồ Chí Minh', img: imgHCM, bg: '#fff0f3' },
+  { key: 'caobang', province: 'Cao Bằng', img: imgCaoBang, bg: '#f0f8ff' },
+  { key: 'hanam', province: 'Hà Nam', img: imgHaNam, bg: '#fff9f0' },
   { key: 'hanoi', province: 'Hà Nội', img: imgHaNoi, bg: '#f0f4ff' },
-  { key: 'vungtau', province: 'Bà Rịa - Vũng Tàu', img: imgVungTau, bg: '#f0fff4' },
-  { key: 'dalat', province: 'Lâm Đồng', img: imgDaLat, bg: '#fff8f0' },
+  { key: 'quangninh', province: 'Quảng Ninh', img: imgQuangNinh, bg: '#f0fff9' },
+  { key: 'hatinh', province: 'Hà Tĩnh', img: imgHaTinh, bg: '#fff0f8' },
   { key: 'danang', province: 'Đà Nẵng', img: imgDaNang, bg: '#f5f0ff' },
+  { key: 'quangnam', province: 'Quảng Nam', img: imgQuangNam, bg: '#fffef0' },
   { key: 'nhatrang', province: 'Khánh Hòa', img: imgNhaTrang, bg: '#f0f9ff' },
+  { key: 'cantho', province: 'Cần Thơ', img: imgCanTho, bg: '#f0fff0' },
+  { key: 'hcm', province: 'TP. Hồ Chí Minh', img: imgHCM, bg: '#fff0f3' },
+  { key: 'thanhhoa', province: 'Thanh Hóa', img: imgThanhHoa, bg: '#f8f0ff' },
+  { key: 'dalat', province: 'Lâm Đồng', img: imgDaLat, bg: '#fff8f0' },
   { key: 'phuquoc', province: 'Kiên Giang', img: imgPhuQuoc, bg: '#f0fff4' },
+  { key: 'dienbien', province: 'Điện Biên', img: imgDienBien, bg: '#fff0f0' },
+  { key: 'sonla', province: 'Sơn La', img: imgSonLa, bg: '#f0f0ff' },
   { key: 'sapa', province: 'Lào Cai', img: imgSapa, bg: '#f5f5f5' },
   { key: 'hue', province: 'Thừa Thiên Huế', img: imgHue, bg: '#fff5f0' },
-  { key: 'catba', province: 'Hải Phòng', img: imgCatBa, bg: '#f0fff4' }
+  { key: 'binhtuan', province: 'Bình Thuận', img: imgBinhThuan, bg: '#fff4f0' }
 ]
 
 
@@ -138,6 +154,9 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
           MenuProps: { PaperProps: { sx: { maxHeight: 300, borderRadius: 2 } } }
         }}
       >
+        <MenuItem value="" sx={{ fontSize: 13, fontWeight: 700, color: PC }}>
+          {t('booking_page.anywhere')}
+        </MenuItem>
         {DESTINATIONS.map((d) => (
           <MenuItem key={d.key} value={d.province || d.name} sx={{ fontSize: 13 }}>
             {t(`destinations.${d.key}.name`)}
@@ -502,9 +521,10 @@ const BookingPage = () => {
   const { isAuthenticated } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [rooms, setRooms] = useState([])
+  const [allTypeNames, setAllTypeNames] = useState([])
   const [loading, setLoading] = useState(true)
   const [searched, setSearched] = useState(false)
-  const [destIdx, setDestIdx] = useState(1)
+  const [destIdx, setDestIdx] = useState(-1)
   const [roomTypes, setRoomTypes] = useState([])
   const [bedTypes, setBedTypes] = useState([])
 
@@ -515,7 +535,7 @@ const BookingPage = () => {
   const [minPrice, setMinPrice] = useState(undefined)
   const [maxPrice, setMaxPrice] = useState(undefined)
   const [params, setParams] = useState({
-    destination: 'Hà Nội',
+    destination: '',
     checkIn: new Date().toISOString().split('T')[0],
     checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     adults: 2, children: 0
@@ -662,7 +682,13 @@ const BookingPage = () => {
 
   useEffect(() => {
     getRoomsApi()
-      .then(d => setRooms(Array.isArray(d) ? d : []))
+      .then(d => {
+        const list = Array.isArray(d) ? d : []
+        setRooms(list)
+        // Lấy danh sách các loại phòng duy nhất từ server để hỗ trợ lọc thông minh
+        const types = [...new Set(list.map(r => r.typeName).filter(Boolean))]
+        setAllTypeNames(types)
+      })
       .catch(() => setRooms([]))
       .finally(() => setLoading(false))
 
@@ -672,7 +698,34 @@ const BookingPage = () => {
       .catch(() => { })
   }, [])
 
-  const onParam = (k, v) => setParams(p => ({ ...p, [k]: v }))
+  // Hàm bổ trợ để mở rộng loại phòng được chọn (ví dụ: "Deluxe" -> ["Deluxe King", "Deluxe Twin", ...])
+  const expandRoomTypes = (selectedTypes) => {
+    if (!selectedTypes || selectedTypes.length === 0) return undefined
+    const expanded = []
+    selectedTypes.forEach(st => {
+      let searchStr = st
+      if (st === 'Family Room') searchStr = 'Family'
+      if (st === 'Presidential Suite') searchStr = 'President'
+      
+      const matches = allTypeNames.filter(name => 
+        name.toLowerCase().includes(searchStr.toLowerCase())
+      )
+      if (matches.length > 0) {
+        expanded.push(...matches)
+      } else {
+        expanded.push(st)
+      }
+    })
+    return [...new Set(expanded)]
+  }
+
+  const onParam = (k, v) => {
+    setParams(p => ({ ...p, [k]: v }))
+    if (k === 'destination') {
+      const idx = DESTINATIONS.findIndex(d => (d.province || d.name) === v)
+      setDestIdx(idx)
+    }
+  }
 
   const handleSearch = async (overrideParams) => {
     // Distinguish between a search object and a React event
@@ -697,7 +750,7 @@ const BookingPage = () => {
         searchParams.destination || undefined,
         minPrice,
         maxPrice,
-        roomTypes.length > 0 ? roomTypes : undefined,
+        expandRoomTypes(roomTypes),
         bedTypes.length > 0 ? bedTypes : undefined,
         selectedAmenities.length > 0 ? selectedAmenities : undefined
       )
@@ -751,7 +804,7 @@ const BookingPage = () => {
         params.destination || undefined,
         minPrice,
         maxPrice,
-        [typeKey],
+        expandRoomTypes([typeKey]),
         bedTypes.length > 0 ? bedTypes : undefined,
         selectedAmenities.length > 0 ? selectedAmenities : undefined
       )
@@ -981,7 +1034,7 @@ const BookingPage = () => {
                     scrollSnapType: 'x mandatory'
                   }}>
                     {DESTINATIONS.map((d, i) => (
-                      <Card key={d.name} onClick={() => selectDest(i)} sx={{
+                      <Card key={d.key} onClick={() => selectDest(i)} sx={{
                         cursor: 'pointer', borderRadius: 3, flexShrink: 0,
                         width: 'calc((100% - 60px) / 4)', height: 216,
                         position: 'relative', overflow: 'hidden',
@@ -994,7 +1047,7 @@ const BookingPage = () => {
                         {/* Ảnh tràn kín */}
                         <img
                           src={d.img}
-                          alt={d.name}
+                          alt={d.province}
                           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                         {/* Gradient overlay */}
