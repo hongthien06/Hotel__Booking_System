@@ -22,6 +22,11 @@ export const cancelBookingApi = async (bookingId) => {
   return response.data;
 };
 
+export const cancelBookingByAdminApi = async (bookingId) => {
+  const response = await axiosInstance.put(`${API_URL}/${bookingId}/cancel/admin`);
+  return response.data;
+};
+
 export const checkInApi = async (bookingId) => {
   const response = await axiosInstance.put(`${API_URL}/${bookingId}/check-in`);
   return response.data;

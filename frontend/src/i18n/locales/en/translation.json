@@ -66,7 +66,11 @@
     "checkout_success": "Check-out successful!",
     "checkout_error": "Failed to check-out.",
     "check_in": "Check-in",
-    "check_out": "Check-out"
+    "check_out": "Check-out",
+    "cancel": "Cancel Booking",
+    "confirm_cancel": "Are you sure you want to cancel this booking?",
+    "cancel_success": "Booking cancelled successfully!",
+    "cancel_error": "Error cancelling booking!"
   },
   "home": {
     "hero": {
