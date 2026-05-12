@@ -789,6 +789,13 @@ const BookingPage = () => {
   /* ── Room Card ─────────────────────────────────────────── */
   const RoomCard = ({ room, isMock, oldPrice }) => {
     const { t, i18n } = useTranslation()
+    
+    // Tạo data đánh giá từ MOCK_ROOMS để tránh bị trùng nhau nếu không phải isMock
+    const numericId = parseInt(String(room.id || room.roomId || 0).replace(/\D/g, '') || 0)
+    const mockData = MOCK_ROOMS[numericId % MOCK_ROOMS.length] || MOCK_ROOMS[0]
+    const ratingValue = isMock ? room.rating : mockData.rating
+    const reviewCount = isMock ? room.reviews : mockData.reviews
+
     return (
       <Card
         onClick={() => openDetail(room, isMock)}
@@ -822,10 +829,10 @@ const BookingPage = () => {
               : `${room.province || 'Hà Nội'} · ${room.beds && room.beds.length > 0 ? room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ') : (room.typeName || 'Standard')}`}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
-            <Rating value={isMock ? room.rating : 5} precision={0.1} readOnly size="small"
+            <Rating value={ratingValue} precision={0.1} readOnly size="small"
               sx={{ '& .MuiRating-iconFilled': { color: PC } }} />
             <Typography variant="caption" color="text.secondary">
-              ({isMock ? room.reviews : 48} {t('room_detail.reviews')})
+              ({reviewCount} {t('room_detail.reviews')})
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
