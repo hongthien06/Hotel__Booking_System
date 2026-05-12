@@ -1,14 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react'
 import imgHCM from '../../assets/TP_HCM.png'
-import imgHaNoi from '../../assets/HA NOI.jpg'
-import imgVungTau from '../../assets/VUNG TAU.jpg'
+import imgHaNoi from '../../assets/HA_NOI.jpg'
 import imgDaLat from '../../assets/DA_LAT.webp'
 import imgDaNang from '../../assets/DA_NANG.jpg'
 import imgNhaTrang from '../../assets/NHA_TRANG.png'
 import imgPhuQuoc from '../../assets/PHU_QUOC.png'
 import imgSapa from '../../assets/SAPA.png'
 import imgHue from '../../assets/HUE.png'
-import imgCatBa from '../../assets/CAT_BA.png'
+import imgQuangNinh from '../../assets/QUANG_NINH.jpg'
+import imgCaoBang from '../../assets/CAO_BANG.jpg'
+import imgHaNam from '../../assets/HA_NAM.webp'
+import imgHaTinh from '../../assets/HA_TINH.png'
+import imgQuangNam from '../../assets/QUANG_NAM.jpeg'
+import imgCanTho from '../../assets/CAN_THO.jpg'
+import imgThanhHoa from '../../assets/THANH_HOA.jpg'
+import imgDienBien from '../../assets/DIEN_BIEN.jpg'
+import imgSonLa from '../../assets/SON_LA.jpg'
+import imgBinhThuan from '../../assets/BINH_THUAN.jpg'
 import {
   Box, Typography, Grid, TextField, Button, Card, CardContent, CardMedia,
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
@@ -31,16 +39,24 @@ const PC_LIGHT = '#fce4ec'
 const SIDEBAR_W = 300
 
 const DESTINATIONS = [
-  { key: 'hcm', province: 'TP. Hồ Chí Minh', img: imgHCM, bg: '#fff0f3' },
+  { key: 'caobang', province: 'Cao Bằng', img: imgCaoBang, bg: '#f0f8ff' },
+  { key: 'hanam', province: 'Hà Nam', img: imgHaNam, bg: '#fff9f0' },
   { key: 'hanoi', province: 'Hà Nội', img: imgHaNoi, bg: '#f0f4ff' },
-  { key: 'vungtau', province: 'Bà Rịa - Vũng Tàu', img: imgVungTau, bg: '#f0fff4' },
-  { key: 'dalat', province: 'Lâm Đồng', img: imgDaLat, bg: '#fff8f0' },
+  { key: 'quangninh', province: 'Quảng Ninh', img: imgQuangNinh, bg: '#f0fff9' },
+  { key: 'hatinh', province: 'Hà Tĩnh', img: imgHaTinh, bg: '#fff0f8' },
   { key: 'danang', province: 'Đà Nẵng', img: imgDaNang, bg: '#f5f0ff' },
+  { key: 'quangnam', province: 'Quảng Nam', img: imgQuangNam, bg: '#fffef0' },
   { key: 'nhatrang', province: 'Khánh Hòa', img: imgNhaTrang, bg: '#f0f9ff' },
+  { key: 'cantho', province: 'Cần Thơ', img: imgCanTho, bg: '#f0fff0' },
+  { key: 'hcm', province: 'TP. Hồ Chí Minh', img: imgHCM, bg: '#fff0f3' },
+  { key: 'thanhhoa', province: 'Thanh Hóa', img: imgThanhHoa, bg: '#f8f0ff' },
+  { key: 'dalat', province: 'Lâm Đồng', img: imgDaLat, bg: '#fff8f0' },
   { key: 'phuquoc', province: 'Kiên Giang', img: imgPhuQuoc, bg: '#f0fff4' },
+  { key: 'dienbien', province: 'Điện Biên', img: imgDienBien, bg: '#fff0f0' },
+  { key: 'sonla', province: 'Sơn La', img: imgSonLa, bg: '#f0f0ff' },
   { key: 'sapa', province: 'Lào Cai', img: imgSapa, bg: '#f5f5f5' },
   { key: 'hue', province: 'Thừa Thiên Huế', img: imgHue, bg: '#fff5f0' },
-  { key: 'catba', province: 'Hải Phòng', img: imgCatBa, bg: '#f0fff4' }
+  { key: 'binhtuan', province: 'Bình Thuận', img: imgBinhThuan, bg: '#fff4f0' }
 ]
 
 
@@ -974,7 +990,7 @@ const BookingPage = () => {
                     scrollSnapType: 'x mandatory'
                   }}>
                     {DESTINATIONS.map((d, i) => (
-                      <Card key={d.name} onClick={() => selectDest(i)} sx={{
+                      <Card key={d.key} onClick={() => selectDest(i)} sx={{
                         cursor: 'pointer', borderRadius: 3, flexShrink: 0,
                         width: 'calc((100% - 60px) / 4)', height: 216,
                         position: 'relative', overflow: 'hidden',
@@ -987,7 +1003,7 @@ const BookingPage = () => {
                         {/* Ảnh tràn kín */}
                         <img
                           src={d.img}
-                          alt={d.name}
+                          alt={d.province}
                           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                         />
                         {/* Gradient overlay */}

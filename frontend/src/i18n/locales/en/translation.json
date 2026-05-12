@@ -215,6 +215,46 @@
     "catba": {
       "name": "Cat Ba",
       "desc": "The majestic bay island"
+    },
+    "caobang": {
+      "name": "Cao Bang",
+      "desc": "Majestic Ban Gioc Waterfall"
+    },
+    "hanam": {
+      "name": "Ha Nam",
+      "desc": "Beautiful Tam Chuc Pagoda"
+    },
+    "quangninh": {
+      "name": "Quang Ninh",
+      "desc": "Ha Long Bay wonder"
+    },
+    "hatinh": {
+      "name": "Ha Tinh",
+      "desc": "Poetic Thien Cam Beach"
+    },
+    "quangnam": {
+      "name": "Quang Nam",
+      "desc": "Hoi An Ancient Town"
+    },
+    "cantho": {
+      "name": "Can Tho",
+      "desc": "River region culture"
+    },
+    "thanhhoa": {
+      "name": "Thanh Hoa",
+      "desc": "Sam Son Beach"
+    },
+    "dienbien": {
+      "name": "Dien Bien",
+      "desc": "Heroic historical sites"
+    },
+    "sonla": {
+      "name": "Son La",
+      "desc": "Moc Chau Plateau"
+    },
+    "binhtuan": {
+      "name": "Binh Thuan",
+      "desc": "Phan Thiet, Mui Ne"
     }
   },
   "booking_page": {

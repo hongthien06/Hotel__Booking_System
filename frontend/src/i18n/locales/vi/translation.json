@@ -214,6 +214,46 @@
     "catba": {
       "name": "Cát Bà",
       "desc": "Vịnh đảo kỳ vĩ"
+    },
+    "caobang": {
+      "name": "Cao Bằng",
+      "desc": "Thác Bản Giốc hùng vĩ"
+    },
+    "hanam": {
+      "name": "Hà Nam",
+      "desc": "Chùa Tam Chúc tuyệt đẹp"
+    },
+    "quangninh": {
+      "name": "Quảng Ninh",
+      "desc": "Vịnh Hạ Long kỳ quan"
+    },
+    "hatinh": {
+      "name": "Hà Tĩnh",
+      "desc": "Biển Thiên Cầm thơ mộng"
+    },
+    "quangnam": {
+      "name": "Quảng Nam",
+      "desc": "Phố cổ Hội An"
+    },
+    "cantho": {
+      "name": "Cần Thơ",
+      "desc": "Miền Tây sông nước"
+    },
+    "thanhhoa": {
+      "name": "Thanh Hóa",
+      "desc": "Biển Sầm Sơn"
+    },
+    "dienbien": {
+      "name": "Điện Biên",
+      "desc": "Di tích hào hùng"
+    },
+    "sonla": {
+      "name": "Sơn La",
+      "desc": "Cao nguyên Mộc Châu"
+    },
+    "binhtuan": {
+      "name": "Bình Thuận",
+      "desc": "Phan Thiết, Mũi Né"
     }
   },
   "booking_page": {
