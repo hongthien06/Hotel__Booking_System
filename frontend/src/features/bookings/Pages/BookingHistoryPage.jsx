@@ -127,7 +127,7 @@ const BookingHistoryPage = () => {
           {t('header.bookings_history') || 'LỊCH SỬ ĐẶT PHÒNG'}
         </Typography>
         <Typography variant="body2" sx={{ color: '#666' }}>
-          {t('bookings_history.subtitle') === 'bookings_history.subtitle' ? 'Quản lý các chuyến đi và lịch sử đặt phòng của bạn' : (t('bookings_history.subtitle') || 'Quản lý các chuyến đi và lịch sử đặt phòng của bạn')}
+          {t('bookings_history.subtitle')}
         </Typography>
       </Box>
 
@@ -159,7 +159,7 @@ const BookingHistoryPage = () => {
             }}>
               <Box sx={{ width: '100%' }}>
                 <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>
-                  {t('booking_page.destination') || 'Nơi đến'}
+                  {t('booking_page.destination')}
                 </Typography>
                 <TextField
                   select
@@ -172,17 +172,17 @@ const BookingHistoryPage = () => {
                     sx: { color: '#333', fontSize: 14, fontWeight: 600, py: 0 }
                   }}
                 >
-                  <option value="">{t('booking_page.anywhere') || 'Địa điểm bất kỳ'}</option>
-                  <option value="HCM">TP. Hồ Chí Minh</option>
-                  <option value="HANOI">Hà Nội</option>
-                  <option value="VUNG_TAU">Vũng Tàu</option>
-                  <option value="DA_LAT">Đà Lạt</option>
-                  <option value="DA_NANG">Đà Nẵng</option>
-                  <option value="NHA_TRANG">Nha Trang</option>
-                  <option value="PHU_QUOC">Phú Quốc</option>
-                  <option value="SAPA">Sapa</option>
-                  <option value="HUE">Huế</option>
-                  <option value="CAT_BA">Cát Bà</option>
+                  <option value="">{t('booking_page.anywhere')}</option>
+                  <option value="HCM">{t('destinations.hcm.name')}</option>
+                  <option value="HANOI">{t('destinations.hanoi.name')}</option>
+                  <option value="VUNG_TAU">{t('destinations.vungtau.name')}</option>
+                  <option value="DA_LAT">{t('destinations.dalat.name')}</option>
+                  <option value="DA_NANG">{t('destinations.danang.name')}</option>
+                  <option value="NHA_TRANG">{t('destinations.nhatrang.name')}</option>
+                  <option value="PHU_QUOC">{t('destinations.phuquoc.name')}</option>
+                  <option value="SAPA">{t('destinations.sapa.name')}</option>
+                  <option value="HUE">{t('destinations.hue.name')}</option>
+                  <option value="CAT_BA">{t('destinations.catba.name')}</option>
                 </TextField>
               </Box>
             </Box>
@@ -199,7 +199,9 @@ const BookingHistoryPage = () => {
             }}>
               <Box sx={{ display: 'flex', width: '100%', gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>Nhận phòng</Typography>
+                  <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>
+                    {t('booking_page.check_in')}
+                  </Typography>
                   <TextField
                     type="date"
                     variant="standard"
@@ -216,7 +218,9 @@ const BookingHistoryPage = () => {
                   <Typography sx={{ fontWeight: 300 }}>—</Typography>
                 </Box>
                 <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>Trả phòng</Typography>
+                  <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>
+                    {t('booking_page.check_out')}
+                  </Typography>
                   <TextField
                     type="date"
                     variant="standard"
