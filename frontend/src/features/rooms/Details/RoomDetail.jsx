@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog, Box, Typography, Button,
-  IconButton, Chip
+  IconButton, Chip, useTheme, useMediaQuery
 } from '@mui/material'
 import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub, Business, LocationOn, ChevronLeft, ChevronRight } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
@@ -22,6 +22,8 @@ const InfoRow = ({ label, value, icon }) => (
 
 const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
   const { t, i18n } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   useEffect(() => {
@@ -58,15 +60,16 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
       open={open}
       onClose={onClose}
       fullWidth
+      fullScreen={isMobile}
       maxWidth="sm"
       PaperProps={{
         sx: {
-          borderRadius: 5,
+          borderRadius: isMobile ? 0 : 5,
           boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: '90vh',
+          maxHeight: isMobile ? '100vh' : '90vh',
         }
       }}
     >

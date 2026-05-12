@@ -19,7 +19,7 @@ const InfomationRental = () => {
   const roomType = booking?.roomTypeName || room?.roomTypeName || 'Standard'
   const province = room?.province || 'Việt Nam'
   const bedType = room?.bedType || ''
-  const image = room?.image || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=900'
+  const image = room?.image || 'https://th.bing.com/th/id/R.c408cfc76663c46d63280d6a54759ed8?rik=rQg9LEDEfRjGDw&riu=http%3a%2f%2fafrodistributors.co.zw%2fimg%2froom-1.jpg&ehk=sO%2bOAUr6Mx4DY%2feIMHXeTjrY%2fr4t3UXN3%2b70RHgv3%2fE%3d&risl=&pid=ImgRaw&r=0'
 
   const hasData = !!(room || booking)
 
