@@ -16,7 +16,6 @@ import java.util.List;
 public class RoomTypeController {
     private final RoomTypeService roomTypeService;
 
-    // HTTP Response
     @GetMapping
     public ResponseEntity<List<RoomTypeResponse>> getAll() {
         return ResponseEntity.ok(roomTypeService.getAll());

@@ -158,7 +158,6 @@ public class ChatbotService {
 
         StringBuilder context = new StringBuilder();
 
-        // ── Hotel information ──
         for (Hotel h : hotels) {
             context.append("HOTEL: ").append(h.getHotelName())
                     .append(" | Code: ").append(h.getHotelCode())
@@ -171,7 +170,6 @@ public class ChatbotService {
                     .append("\n");
         }
 
-        // ── Room type information ──
         List<RoomType> roomTypes = roomTypeRepository.findAllWithBeds();
         if (!roomTypes.isEmpty()) {
             context.append("\nROOM TYPES:\n");
@@ -184,7 +182,6 @@ public class ChatbotService {
                         .append(" | Bedrooms: ").append(rt.getBedrooms())
                         .append(" | Bathrooms: ").append(rt.getBathrooms());
 
-                // Bed details
                 if (rt.getBeds() != null && !rt.getBeds().isEmpty()) {
                     context.append(" | Beds: ");
                     List<String> bedDescriptions = rt.getBeds().stream()
@@ -202,7 +199,6 @@ public class ChatbotService {
             }
         }
 
-        // ── Room availability summary ──
         List<Room> rooms = roomRepository.findAll();
         if (!rooms.isEmpty()) {
             long available = rooms.stream()

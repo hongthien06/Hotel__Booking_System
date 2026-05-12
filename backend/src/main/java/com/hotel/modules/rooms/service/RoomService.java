@@ -101,6 +101,53 @@ public class RoomService {
         return RoomResponse.from(room);
     }
 
+    @Transactional
+    public List<RoomResponse> getAvailableRooms(
+            LocalDate checkIn, LocalDate checkOut,
+            Long hotelId, String province, BigDecimal minPrice, BigDecimal maxPrice,
+            List<String> typeNames, List<String> bedTypes, List<String> amenityNames) {
+        if (!checkOut.isAfter(checkIn)) throw new RuntimeException("Check out date must be after check in");
+        List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
+
+        List<BedType> bedTypeEnums = null;
+        if (bedTypes != null && !bedTypes.isEmpty()) {
+            bedTypeEnums = bedTypes.stream()
+                    .map(bt -> {
+                        try {
+                            return BedType.valueOf(bt.toUpperCase());
+                        } catch (IllegalArgumentException e) {
+                            return null;
+                        }
+                    })
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+        }
+
+        List<Long> amenityHotelIds = null;
+        if (amenityNames != null && !amenityNames.isEmpty()) {
+            amenityHotelIds = hotelRepository.findByAmenityNames(amenityNames, (long) amenityNames.size())
+                    .stream()
+                    .map(Hotel::getHotelId)
+                    .collect(Collectors.toList());
+            if (amenityHotelIds.isEmpty()) {
+                return List.of();
+            }
+        }
+
+        // Pass all filters directly to the repository @Query
+        List<Room> availableRooms = roomRepository.findAvailableRooms(
+                (busyIds == null || busyIds.isEmpty()) ? null : busyIds,
+                hotelId,
+                (province != null && !province.isBlank()) ? province : null,
+                minPrice,
+                maxPrice,
+                (typeNames != null && !typeNames.isEmpty()) ? typeNames : null,
+                (bedTypeEnums == null || bedTypeEnums.isEmpty()) ? null : bedTypeEnums,
+                amenityHotelIds
+        );
+        return availableRooms.stream().map(RoomResponse::from).toList();
+    }
+    
     //Internal Helper Methods
     private void mapRequestToEntity(RoomRequest req, Room room, RoomType type, Hotel hotel) {
        room.setHotel(hotel);
@@ -127,55 +174,6 @@ public class RoomService {
     }
     public Room findEntityById(Long id){
         return roomRepository.findById(id).orElseThrow(()->new RuntimeException("Room with id " + id + " does not exist"));
-    }
-    @Transactional
-    public List<RoomResponse> getAvailableRooms(
-            LocalDate checkIn, LocalDate checkOut,
-            Long hotelId, String province, BigDecimal minPrice, BigDecimal maxPrice,
-            List<String> typeNames, List<String> bedTypes, List<String> amenityNames) {
-        if (!checkOut.isAfter(checkIn)) throw new RuntimeException("Check out date must be after check in");
-        List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
-
-        // Convert List<String> to List<BedType> enum
-        List<BedType> bedTypeEnums = null;
-        if (bedTypes != null && !bedTypes.isEmpty()) {
-            bedTypeEnums = bedTypes.stream()
-                    .map(bt -> {
-                        try {
-                            return BedType.valueOf(bt.toUpperCase());
-                        } catch (IllegalArgumentException e) {
-                            return null;
-                        }
-                    })
-                    .filter(java.util.Objects::nonNull)
-                    .toList();
-        }
-
-        // Nếu có filter amenity, lấy danh sách hotelId có chứa amenity đó
-        List<Long> amenityHotelIds = null;
-        if (amenityNames != null && !amenityNames.isEmpty()) {
-            amenityHotelIds = hotelRepository.findByAmenityNames(amenityNames, (long) amenityNames.size())
-                    .stream()
-                    .map(Hotel::getHotelId)
-                    .collect(Collectors.toList());
-            // Nếu không tìm được hotel nào có amenity đó → trả về rỗng ngay
-            if (amenityHotelIds.isEmpty()) {
-                return List.of();
-            }
-        }
-
-        // Pass all filters directly to the repository @Query
-        List<Room> availableRooms = roomRepository.findAvailableRooms(
-                (busyIds == null || busyIds.isEmpty()) ? null : busyIds,
-                hotelId,
-                (province != null && !province.isBlank()) ? province : null,
-                minPrice,
-                maxPrice,
-                (typeNames != null && !typeNames.isEmpty()) ? typeNames : null,
-                (bedTypeEnums == null || bedTypeEnums.isEmpty()) ? null : bedTypeEnums,
-                amenityHotelIds
-        );
-        return availableRooms.stream().map(RoomResponse::from).toList();
     }
 
 

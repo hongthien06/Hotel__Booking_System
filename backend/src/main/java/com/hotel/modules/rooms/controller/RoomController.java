@@ -58,7 +58,6 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getByPriceRange(min, max));
     }
 
-    // Available room
     @GetMapping("/available")
     public ResponseEntity<List<RoomResponse>> getAvailableRooms(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate checkIn,
