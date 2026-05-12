@@ -66,7 +66,11 @@
     "checkout_success": "Trả phòng thành công!",
     "checkout_error": "Lỗi khi trả phòng!",
     "check_in": "Nhận phòng",
-    "check_out": "Trả phòng"
+    "check_out": "Trả phòng",
+    "cancel": "Hủy đặt phòng",
+    "confirm_cancel": "Bạn có chắc chắn muốn hủy đặt phòng này?",
+    "cancel_success": "Hủy đặt phòng thành công!",
+    "cancel_error": "Lỗi khi hủy đặt phòng!"
   },
   "home": {
     "hero": {

@@ -39,7 +39,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { getDashboardStats } from '../../shared/api/dashboardApi';
-import { checkInApi, checkOutApi } from '../../shared/api/bookingApi';
+import { checkInApi, checkOutApi, cancelBookingByAdminApi } from '../../shared/api/bookingApi';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import {
@@ -133,6 +133,18 @@ const DashboardPage = () => {
     } catch (err) {
       console.error('Check-out error:', err);
       toast.error(t('dashboard.checkout_error') || 'Failed to check-out.');
+    }
+  };
+
+  const handleCancel = async (id) => {
+    if (!window.confirm(t('dashboard.confirm_cancel') || 'Are you sure you want to cancel this booking?')) return;
+    try {
+      await cancelBookingByAdminApi(id);
+      toast.success(t('dashboard.cancel_success') || 'Booking cancelled successfully!');
+      fetchStats();
+    } catch (err) {
+      console.error('Cancel error:', err);
+      toast.error(t('dashboard.cancel_error') || 'Failed to cancel booking.');
     }
   };
 
@@ -323,6 +335,18 @@ const DashboardPage = () => {
                           </IconButton>
                         </Tooltip>
                       )}
+                      {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
+                        <Tooltip title={t('dashboard.cancel') || 'Cancel Booking'}>
+                          <IconButton
+                            color="error"
+                            size="small"
+                            onClick={() => handleCancel(booking.id)}
+                            sx={{ bgcolor: 'error.lighter', '&:hover': { bgcolor: 'error.light' } }}
+                          >
+                            <Block fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                       <Tooltip title={t('common.details')}>
                         <IconButton
                           color="primary"
@@ -417,7 +441,19 @@ const DashboardPage = () => {
           )}
         </DialogContent>
         <Divider />
-        <DialogActions sx={{ p: 2 }}>
+        <DialogActions sx={{ p: 2, justifyContent: 'space-between' }}>
+          <Box>
+            {(selectedBooking?.status === 'PENDING' || selectedBooking?.status === 'CONFIRMED') && (
+              <Button
+                onClick={() => { handleCancel(selectedBooking.id); handleCloseDetails(); }}
+                color="error"
+                variant="outlined"
+                sx={{ borderRadius: 2 }}
+              >
+                {t('dashboard.cancel') || 'Cancel Booking'}
+              </Button>
+            )}
+          </Box>
           <Button onClick={handleCloseDetails} variant="contained" sx={{ borderRadius: 2 }}>
             {t('common.close') || 'Close'}
           </Button>
