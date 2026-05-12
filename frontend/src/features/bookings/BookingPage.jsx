@@ -22,7 +22,8 @@ import {
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
   Divider, InputAdornment, Skeleton, Alert,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  CircularProgress, Slider, MenuItem, Popover
+  CircularProgress, Slider, MenuItem, Popover,
+  useTheme, useMediaQuery
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material'
@@ -285,7 +286,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 const OffersSection = () => {
   const { t } = useTranslation()
   return (
-    <Box sx={{ mb: 6, px: 6 }}>
+    <Box sx={{ mb: 6, px: { xs: 2, md: 6 } }}>
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
         {t('banners.offers_title') === 'banners.offers_title' ? 'Ưu đãi' : t('banners.offers_title')}
       </Typography>
@@ -302,7 +303,7 @@ const OffersSection = () => {
         overflow: 'hidden',
         bgcolor: '#fff'
       }}>
-        <Box sx={{ flex: 1, p: 4, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#333' }}>
             Không điều kiện ràng buộc. An tâm nghỉ dưỡng.
           </Typography>
@@ -343,6 +344,8 @@ const OffersSection = () => {
 /* ─── BookingDialog ────────────────────────────────────── */
 const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess }) => {
   const { t } = useTranslation()
+  const theme = useTheme()
+  const isMobileDialog = useMediaQuery(theme.breakpoints.down('sm'))
   const [form, setForm] = useState({
     checkIn: searchParams?.checkIn || '',
     checkOut: searchParams?.checkOut || '',
@@ -402,7 +405,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isMobileDialog} PaperProps={{ sx: { borderRadius: isMobileDialog ? 0 : 3 } }}>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
         <Box>
           <Typography variant="h6" sx={{ fontWeight: 800, color: PC }}>{t('booking_page.booking_confirm')}</Typography>
@@ -517,9 +520,16 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 const BookingPage = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { isAuthenticated } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(true)
+
+  useEffect(() => {
+    setSidebarOpen(!isMobile)
+  }, [isMobile])
+
   const [rooms, setRooms] = useState([])
   const [allTypeNames, setAllTypeNames] = useState([])
   const [loading, setLoading] = useState(true)
@@ -897,6 +907,14 @@ const BookingPage = () => {
   return (
     <Box sx={{ display: 'flex', position: 'relative', bgcolor: 'background.default', minHeight: '100vh' }}>
 
+      {/* Backdrop for mobile sidebar */}
+      {isMobile && sidebarOpen && (
+        <Box
+          onClick={() => setSidebarOpen(false)}
+          sx={{ position: 'fixed', inset: 0, bgcolor: 'rgba(0,0,0,0.5)', zIndex: 1199 }}
+        />
+      )}
+
       {/* Sidebar — fixed, độc lập với scroll trang chính */}
       <Box sx={{
         position: 'fixed',
@@ -908,7 +926,7 @@ const BookingPage = () => {
         transition: 'width 0.3s ease',
         bgcolor: 'white',
         borderRight: '1px solid #eee',
-        zIndex: 100,
+        zIndex: isMobile ? 1200 : 100,
         boxShadow: sidebarOpen ? '2px 0 12px rgba(0,0,0,0.07)' : 'none'
       }}>
         <Sidebar params={params} onParam={onParam}
@@ -923,10 +941,10 @@ const BookingPage = () => {
         />
       </Box>
 
-      {/* Main — đẩy sang phải theo chiều rộng sidebar */}
+      {/* Main — đẩy sang phải theo chiều rộng sidebar (chỉ trên desktop) */}
       <Box sx={{
         flex: 1, minWidth: 0,
-        marginLeft: sidebarOpen ? `${SIDEBAR_W}px` : 0,
+        marginLeft: isMobile ? 0 : (sidebarOpen ? `${SIDEBAR_W}px` : 0),
         transition: 'margin-left 0.3s ease'
       }}>
         {/* Filter toggle - Sticky */}
@@ -937,7 +955,7 @@ const BookingPage = () => {
           </IconButton>
         </Box>
 
-        <Box sx={{ px: 3, py: 2, pb: 8 }}>
+        <Box sx={{ px: { xs: 1.5, sm: 3 }, py: 2, pb: 8 }}>
           <Box sx={{ maxWidth: 1080, mx: 'auto' }}>
 
             {!searched ? (
@@ -945,11 +963,11 @@ const BookingPage = () => {
                 {/* 1. Tìm kiếm gần đây */}
                 {recentSearches.length > 0 && (
                   <>
-                    <Box sx={{ mb: 2, pl: 6 }}>
+                    <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
                       <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.recent_searches')}</Typography>
                       <Typography variant="body2" color="text.secondary">{t('booking_page.recent_searches_sub')}</Typography>
                     </Box>
-                    <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                    <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
                       {recentSearches.length > 4 && (
                         <IconButton onClick={() => scrollRecent(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -969,7 +987,7 @@ const BookingPage = () => {
                         {recentSearches.map((s, i) => (
                           <Card key={i} onClick={() => handleRecentSearchClick(s)} sx={{
                             cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                            width: 'calc((100% - 48px) / 4)', p: 2,
+                            width: { xs: '58vw', sm: 'calc((100% - 48px) / 4)' }, p: 2,
                             scrollSnapAlign: 'start', boxShadow: 1,
                             border: '1px solid #eee',
                             transition: 'all 0.2s',
@@ -1011,11 +1029,11 @@ const BookingPage = () => {
                 )}
 
                 {/* 2. Điểm đến phổ biến */}
-                <Box sx={{ mb: 2, pl: 6 }}>
+                <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('destinations.title')}</Typography>
                   <Typography variant="body2" color="text.secondary">{t('destinations.subtitle')}</Typography>
                 </Box>
-                <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
                   {DESTINATIONS.length > 5 && (
                     <IconButton onClick={() => scrollDest(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1036,7 +1054,7 @@ const BookingPage = () => {
                     {DESTINATIONS.map((d, i) => (
                       <Card key={d.key} onClick={() => selectDest(i)} sx={{
                         cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                        width: 'calc((100% - 60px) / 4)', height: 216,
+                        width: { xs: '44vw', sm: 'calc((100% - 60px) / 4)' }, height: { xs: 160, sm: 216 },
                         position: 'relative', overflow: 'hidden',
                         scrollSnapAlign: 'start',
                         scrollSnapStop: 'always',
@@ -1082,11 +1100,11 @@ const BookingPage = () => {
 
 
                 {/* 3. Tìm kiếm theo loại phòng */}
-                <Box sx={{ mb: 2, pl: 6 }}>
+                <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.room_type')}</Typography>
                   <Typography variant="body2" color="text.secondary">{t('booking_page.room_type_sub')}</Typography>
                 </Box>
-                <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
                   {ROOM_TYPES.length > 4 && (
                     <IconButton onClick={() => scrollTypes(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1106,7 +1124,7 @@ const BookingPage = () => {
                     {ROOM_TYPES.map((type) => (
                       <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
                         cursor: 'pointer', borderRadius: 4, flexShrink: 0,
-                        width: 'calc((100% - 48px) / 4)', height: 180,
+                        width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, height: { xs: 140, sm: 180 },
                         position: 'relative', overflow: 'hidden',
                         scrollSnapAlign: 'start',
                         boxShadow: 1,
@@ -1139,7 +1157,7 @@ const BookingPage = () => {
                 </Box>
 
                 {/* 4. Phòng nổi bật */}
-                <Box sx={{ mb: 2, pl: 6 }}>
+                <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
                       <Typography variant="h6" sx={{ fontWeight: 800 }}>
@@ -1161,7 +1179,7 @@ const BookingPage = () => {
                     </Button>
                   </Box>
                 </Box>
-                <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
+                <Box sx={{ position: 'relative', mb: 4, px: { xs: 3, sm: 6 } }}>
                   {MOCK_ROOMS.length > 3 && (
                     <IconButton onClick={() => scrollRooms(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1180,7 +1198,7 @@ const BookingPage = () => {
                   }}>
                     {loading ? (
                       [...Array(3)].map((_, i) => (
-                        <Box key={i} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0 }}>
+                        <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0 }}>
                           <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
                           <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
                           <Skeleton width="50%" height={18} />
@@ -1188,7 +1206,7 @@ const BookingPage = () => {
                       ))
                     ) : (
                       featuredRooms.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
                           <RoomCard room={r} isMock={rooms.length === 0} />
                         </Box>
                       ))
@@ -1210,7 +1228,7 @@ const BookingPage = () => {
                 {/* 5. Phòng được đánh giá cao nhất */}
                 {topRatedRooms.length > 0 && (
                   <>
-                    <Box sx={{ mb: 2, pl: 6 }}>
+                    <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box>
                           <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.top_rated')}</Typography>
@@ -1228,7 +1246,7 @@ const BookingPage = () => {
                         </Button>
                       </Box>
                     </Box>
-                    <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                    <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
                       {topRatedRooms.length > 3 && (
                         <IconButton onClick={() => scrollTopRated(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1246,7 +1264,7 @@ const BookingPage = () => {
                         scrollSnapType: 'x mandatory'
                       }}>
                         {topRatedRooms.map(r => (
-                          <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
                             <RoomCard room={r} isMock={rooms.length === 0} />
                           </Box>
                         ))}
@@ -1269,7 +1287,7 @@ const BookingPage = () => {
                 {/* 6. Phòng có giá ưu đãi nhất */}
                 {budgetRooms.length > 0 && (
                   <>
-                    <Box sx={{ mb: 2, pl: 6 }}>
+                    <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box>
                           <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.budget_friendly')}</Typography>
@@ -1287,7 +1305,7 @@ const BookingPage = () => {
                         </Button>
                       </Box>
                     </Box>
-                    <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                    <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
                       {budgetRooms.length > 3 && (
                         <IconButton onClick={() => scrollBudget(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1305,7 +1323,7 @@ const BookingPage = () => {
                         scrollSnapType: 'x mandatory'
                       }}>
                         {budgetRooms.map(r => (
-                          <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
                             <RoomCard room={r} isMock={rooms.length === 0} />
                           </Box>
                         ))}
@@ -1325,11 +1343,11 @@ const BookingPage = () => {
                 )}
 
                 {/* 7. Ưu đãi cho cuối tuần */}
-                <Box sx={{ mb: 2, pl: 6 }}>
+                <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 800 }}>Ưu đãi cho cuối tuần</Typography>
                   <Typography variant="body2" color="text.secondary">Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5</Typography>
                 </Box>
-                <Box sx={{ position: 'relative', mb: 8, px: 6 }}>
+                <Box sx={{ position: 'relative', mb: 8, px: { xs: 3, sm: 6 } }}>
                   <IconButton onClick={() => scrollWeekend(-1)} sx={{
                     position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                     zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1345,7 +1363,7 @@ const BookingPage = () => {
                     scrollSnapType: 'x mandatory'
                   }}>
                     {weekendDeals.map(r => (
-                      <Box key={r.id || r.roomId} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                      <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
                         <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} />
                       </Box>
                     ))}
@@ -1362,10 +1380,10 @@ const BookingPage = () => {
               </>
             ) : (
               /* Search Results View */
-              <Box sx={{ px: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+              <Box sx={{ px: { xs: 1, sm: 4 } }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4, flexWrap: 'wrap', gap: 1 }}>
                   <Box>
-                    <Typography variant="h5" sx={{ fontWeight: 800, color: PC }}>
+                    <Typography variant="h5" sx={{ fontWeight: 800, color: PC, fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
                       {t('booking_page.search_results')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
@@ -1378,6 +1396,7 @@ const BookingPage = () => {
                     onClick={handleClearSearch}
                     sx={{
                       borderRadius: 2, color: PC, borderColor: PC, fontWeight: 700,
+                      fontSize: { xs: '0.8rem', sm: '0.875rem' },
                       '&:hover': { bgcolor: PC_LIGHT, borderColor: PC }
                     }}
                   >

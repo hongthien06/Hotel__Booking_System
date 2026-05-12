@@ -77,10 +77,16 @@ const Header = () => {
       {/* Logo */}
       <Typography
         variant="h6"
-        sx={{ fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: 'primary.contrastText' }}
+        noWrap
+        sx={{
+          fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: 'primary.contrastText',
+          fontSize: { xs: '1rem', sm: '1.25rem' },
+          flexShrink: 0,
+          maxWidth: { xs: 120, sm: 'none' }
+        }}
         onClick={() => navigate('/home')}
       >
-        🏨 {t('header.logo_text')}
+        🏨 <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{t('header.logo_text')}</Box>
       </Typography>
 
       {/* Navigation Links */}
@@ -99,9 +105,9 @@ const Header = () => {
               fontSize: '0.85rem',
               textTransform: 'none',
               borderRadius: 2,
-              px: 2,
+              px: { xs: 1, sm: 2 },
               py: 0.8,
-              minWidth: 100,
+              minWidth: { xs: 'auto', sm: 100 },
               backgroundColor: isActive(item.path) ? 'primary.contrastText' : 'transparent',
               '&:hover': {
                 color: 'primary.contrastTextHover',
@@ -109,7 +115,9 @@ const Header = () => {
               }
             }}
           >
-            {t(item.label)}
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+              {t(item.label)}
+            </Box>
           </Button>
         ))}
 
@@ -125,8 +133,9 @@ const Header = () => {
               fontSize: '0.85rem',
               textTransform: 'none',
               borderRadius: 2,
-              px: 2,
+              px: { xs: 1, sm: 2 },
               py: 0.8,
+              minWidth: { xs: 'auto', sm: 100 },
               backgroundColor: isActive(item.path) ? 'primary.contrastText' : 'transparent',
               borderLeft: (theme) => `1px solid ${theme.palette.primary.contrastText}33`,
               ml: 1,
@@ -136,7 +145,9 @@ const Header = () => {
               }
             }}
           >
-            {t(item.label)}
+            <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+              {t(item.label)}
+            </Box>
           </Button>
         ))}
       </Box>
@@ -208,7 +219,7 @@ const Header = () => {
         )}
 
         {/* Language Switcher at the very corner */}
-        <Box sx={{ ml: 1, pl: 1, borderLeft: '1px solid rgba(154,28,72,0.2)' }}>
+        <Box sx={{ ml: 1, pl: 1, borderLeft: '1px solid rgba(154,28,72,0.2)', display: { xs: 'none', sm: 'block' } }}>
           <LanguageSwitcher />
         </Box>
       </Box>
