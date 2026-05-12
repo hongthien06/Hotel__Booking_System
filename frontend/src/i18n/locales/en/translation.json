@@ -172,6 +172,8 @@
     "subtitle": "Review your previous booking requests and status.",
     "check_in": "CHECK IN",
     "check_out": "CHECK OUT",
+    "check_in_short": "In",
+    "check_out_short": "Out",
     "no_data": "No booking data available.",
     "fetch_error": "Error fetching booking history",
     "confirm_cancel": "Are you sure you want to cancel this booking?",

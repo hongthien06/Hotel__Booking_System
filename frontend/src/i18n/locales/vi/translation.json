@@ -171,6 +171,8 @@
     "title": "Tìm theo ngày nhận, trả",
     "check_in": "NHẬN PHÒNG",
     "check_out": "TRẢ PHÒNG",
+    "check_in_short": "Nhận",
+    "check_out_short": "Trả",
     "no_data": "Không có dữ liệu đặt phòng nào.",
     "fetch_error": "Lỗi khi lấy lịch sử đặt phòng",
     "confirm_cancel": "Bạn có chắc chắn muốn hủy đặt phòng này?",
