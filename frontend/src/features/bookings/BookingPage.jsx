@@ -22,7 +22,8 @@ import {
   Rating, Chip, Checkbox, FormControlLabel, FormGroup, IconButton,
   Divider, InputAdornment, Skeleton, Alert,
   Dialog, DialogTitle, DialogContent, DialogActions,
-  CircularProgress, Slider, MenuItem, Popover
+  CircularProgress, Slider, MenuItem, Popover,
+  useMediaQuery, useTheme, Drawer
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material'
@@ -120,7 +121,7 @@ const nightsBetween = (a, b) => {
 /* ─── Sidebar ─────────────────────────────────────────── */
 const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes,
   amenities, selectedAmenities, setSelectedAmenities,
-  minPrice, setMinPrice, maxPrice, setMaxPrice, onSearch, loading }) => {
+  minPrice, setMinPrice, maxPrice, setMaxPrice, onSearch, loading, onClose }) => {
   const { t } = useTranslation()
   const toggle = (list, setList, v) =>
     setList(list.includes(v) ? list.filter(x => x !== v) : [...list, v])
@@ -128,9 +129,16 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 
   return (
     <Box sx={{ width: SIDEBAR_W, p: 2.5, height: '100%', overflowY: 'auto' }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
-        <Search sx={{ color: PC }} />
-        <Typography variant="h6" sx={{ fontWeight: 700, color: PC }}>{t('booking_page.search_title')}</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Search sx={{ color: PC }} />
+          <Typography variant="h6" sx={{ fontWeight: 700, color: PC }}>{t('booking_page.search_title')}</Typography>
+        </Box>
+        {onClose && (
+          <IconButton onClick={onClose} size="small" sx={{ color: '#999' }}>
+            <Close fontSize="small" />
+          </IconButton>
+        )}
       </Box>
       <Divider sx={{ mb: 2 }} />
 
@@ -166,7 +174,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 
       <Grid container spacing={1.5} sx={{ mb: 2 }}>
         {[['checkIn', 'booking_page.check_in'], ['checkOut', 'booking_page.check_out']].map(([k, lblKey]) => (
-          <Grid size={{ xs: 6 }} key={k}>
+          <Grid item xs={6} key={k}>
             <Typography sx={labelSx}>{t(lblKey)}</Typography>
             <TextField fullWidth size="small" type="date" value={params[k]}
               onChange={e => onParam(k, e.target.value)}
@@ -178,7 +186,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 
       <Grid container spacing={1.5} sx={{ mb: 3 }}>
         {[['adults', 'booking_page.adults', 1], ['children', 'booking_page.children', 0]].map(([k, lblKey, min]) => (
-          <Grid size={{ xs: 6 }} key={k}>
+          <Grid item xs={6} key={k}>
             <Typography sx={labelSx}>{t(lblKey)}</Typography>
             <TextField fullWidth size="small" type="number" value={params[k]}
               onChange={e => onParam(k, Math.max(min, parseInt(e.target.value) || min))}
@@ -285,7 +293,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 const OffersSection = () => {
   const { t } = useTranslation()
   return (
-    <Box sx={{ mb: 6, px: 6 }}>
+    <Box sx={{ mb: 6, px: { xs: 2, md: 6 } }}>
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
         {t('banners.offers_title') === 'banners.offers_title' ? 'Ưu đãi' : t('banners.offers_title')}
       </Typography>
@@ -425,14 +433,14 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
         {/* Date pickers */}
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid size={{ xs: 6 }}>
+          <Grid item xs={6}>
             <TextField fullWidth label={t('booking_page.check_in')} type="date" size="small"
               value={form.checkIn}
               onChange={e => setForm(f => ({ ...f, checkIn: e.target.value }))}
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
-          <Grid size={{ xs: 6 }}>
+          <Grid item xs={6}>
             <TextField fullWidth label={t('booking_page.check_out')} type="date" size="small"
               value={form.checkOut}
               onChange={e => setForm(f => ({ ...f, checkOut: e.target.value }))}
@@ -515,11 +523,17 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
 /* ─── Main ─────────────────────────────────────────────── */
 const BookingPage = () => {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme?.breakpoints?.down('md') || '(max-width:900px)')
 
+  const { t } = useTranslation()
   const { isAuthenticated } = useAuth()
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false) // Mặc định đóng, useEffect sẽ mở nếu là Desktop
+
+  useEffect(() => {
+    if (!isMobile) setSidebarOpen(true)
+    else setSidebarOpen(false)
+  }, [isMobile])
   const [rooms, setRooms] = useState([])
   const [allTypeNames, setAllTypeNames] = useState([])
   const [loading, setLoading] = useState(true)
@@ -552,7 +566,8 @@ const BookingPage = () => {
   const scrollDest = (dir) => {
     if (destScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = destScrollRef.current
-      const scrollAmount = (clientWidth + 20) / 4
+      const itemsPerView = isMobile ? 1.5 : 4
+      const scrollAmount = (clientWidth + 20) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
       destScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
@@ -563,7 +578,8 @@ const BookingPage = () => {
   const scrollRooms = (dir) => {
     if (roomScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = roomScrollRef.current
-      const scrollAmount = (clientWidth + 24) / 3
+      const itemsPerView = isMobile ? 1.2 : 3
+      const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
       roomScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
@@ -574,7 +590,8 @@ const BookingPage = () => {
   const scrollTypes = (dir) => {
     if (typeScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = typeScrollRef.current
-      const scrollAmount = (clientWidth + 16) / 4
+      const itemsPerView = isMobile ? 2.5 : 4
+      const scrollAmount = (clientWidth + 16) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
       typeScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
@@ -585,7 +602,8 @@ const BookingPage = () => {
   const scrollBudget = (dir) => {
     if (budgetScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = budgetScrollRef.current
-      const scrollAmount = (clientWidth + 24) / 3
+      const itemsPerView = isMobile ? 1.2 : 3
+      const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
       budgetScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
@@ -651,7 +669,8 @@ const BookingPage = () => {
   const scrollRecent = (dir) => {
     if (recentScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = recentScrollRef.current
-      const scrollAmount = (clientWidth + 16) / 4
+      const itemsPerView = isMobile ? 1.5 : 4
+      const scrollAmount = (clientWidth + 16) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
       recentScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
@@ -662,7 +681,8 @@ const BookingPage = () => {
   const scrollWeekend = (dir) => {
     if (weekendScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = weekendScrollRef.current
-      const scrollAmount = clientWidth / 3 + 16
+      const itemsPerView = isMobile ? 1.2 : 3
+      const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
       weekendScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
@@ -673,7 +693,8 @@ const BookingPage = () => {
   const scrollTopRated = (dir) => {
     if (topRatedScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = topRatedScrollRef.current
-      const scrollAmount = (clientWidth + 24) / 3
+      const itemsPerView = isMobile ? 1.2 : 3
+      const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
       topRatedScrollRef.current.scrollBy({ left: dir * scrollAmount, behavior: 'smooth' })
@@ -897,36 +918,57 @@ const BookingPage = () => {
   return (
     <Box sx={{ display: 'flex', position: 'relative', bgcolor: 'background.default', minHeight: '100vh' }}>
 
-      {/* Sidebar — fixed, độc lập với scroll trang chính */}
-      <Box sx={{
-        position: 'fixed',
-        top: 0, left: 0,
-        width: sidebarOpen ? SIDEBAR_W : 0,
-        height: '100vh',
-        overflowY: sidebarOpen ? 'auto' : 'hidden',
-        overflowX: 'hidden',
-        transition: 'width 0.3s ease',
-        bgcolor: 'white',
-        borderRight: '1px solid #eee',
-        zIndex: 100,
-        boxShadow: sidebarOpen ? '2px 0 12px rgba(0,0,0,0.07)' : 'none'
-      }}>
-        <Sidebar params={params} onParam={onParam}
-          roomTypes={roomTypes} setRoomTypes={setRoomTypes}
-          bedTypes={bedTypes} setBedTypes={setBedTypes}
-          amenities={amenities}
-          selectedAmenities={selectedAmenities}
-          setSelectedAmenities={setSelectedAmenities}
-          minPrice={minPrice} setMinPrice={setMinPrice}
-          maxPrice={maxPrice} setMaxPrice={setMaxPrice}
-          onSearch={handleSearch} loading={loading}
-        />
-      </Box>
+      {/* Sidebar — Desktop cố định, Mobile dùng Drawer */}
+      {isMobile ? (
+        <Drawer
+          anchor="left"
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          PaperProps={{ sx: { width: SIDEBAR_W, border: 'none' } }}
+        >
+          <Sidebar params={params} onParam={onParam}
+            roomTypes={roomTypes} setRoomTypes={setRoomTypes}
+            bedTypes={bedTypes} setBedTypes={setBedTypes}
+            amenities={amenities}
+            selectedAmenities={selectedAmenities}
+            setSelectedAmenities={setSelectedAmenities}
+            minPrice={minPrice} setMinPrice={setMinPrice}
+            maxPrice={maxPrice} setMaxPrice={setMaxPrice}
+            onSearch={handleSearch} loading={loading}
+            onClose={() => setSidebarOpen(false)}
+          />
+        </Drawer>
+      ) : (
+        <Box sx={{
+          position: 'fixed',
+          top: 0, left: 0,
+          width: sidebarOpen ? SIDEBAR_W : 0,
+          height: '100vh',
+          overflowY: sidebarOpen ? 'auto' : 'hidden',
+          overflowX: 'hidden',
+          transition: 'width 0.3s ease',
+          bgcolor: 'white',
+          borderRight: '1px solid #eee',
+          zIndex: 100,
+          boxShadow: sidebarOpen ? '2px 0 12px rgba(0,0,0,0.07)' : 'none'
+        }}>
+          <Sidebar params={params} onParam={onParam}
+            roomTypes={roomTypes} setRoomTypes={setRoomTypes}
+            bedTypes={bedTypes} setBedTypes={setBedTypes}
+            amenities={amenities}
+            selectedAmenities={selectedAmenities}
+            setSelectedAmenities={setSelectedAmenities}
+            minPrice={minPrice} setMinPrice={setMinPrice}
+            maxPrice={maxPrice} setMaxPrice={setMaxPrice}
+            onSearch={handleSearch} loading={loading}
+          />
+        </Box>
+      )}
 
       {/* Main — đẩy sang phải theo chiều rộng sidebar */}
       <Box sx={{
         flex: 1, minWidth: 0,
-        marginLeft: sidebarOpen ? `${SIDEBAR_W}px` : 0,
+        marginLeft: (!isMobile && sidebarOpen) ? `${SIDEBAR_W}px` : 0,
         transition: 'margin-left 0.3s ease'
       }}>
         {/* Filter toggle - Sticky */}
@@ -937,7 +979,7 @@ const BookingPage = () => {
           </IconButton>
         </Box>
 
-        <Box sx={{ px: 3, py: 2, pb: 8 }}>
+        <Box sx={{ px: { xs: 1, md: 3 }, py: 2, pb: 8 }}>
           <Box sx={{ maxWidth: 1080, mx: 'auto' }}>
 
             {!searched ? (
@@ -945,11 +987,11 @@ const BookingPage = () => {
                 {/* 1. Tìm kiếm gần đây */}
                 {recentSearches.length > 0 && (
                   <>
-                    <Box sx={{ mb: 2, pl: 6 }}>
+                    <Box sx={{ mb: 2, pl: { xs: 2, md: 6 } }}>
                       <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.recent_searches')}</Typography>
                       <Typography variant="body2" color="text.secondary">{t('booking_page.recent_searches_sub')}</Typography>
                     </Box>
-                    <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                    <Box sx={{ position: 'relative', mb: 5, px: { xs: 2, md: 6 } }}>
                       {recentSearches.length > 4 && (
                         <IconButton onClick={() => scrollRecent(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -969,7 +1011,7 @@ const BookingPage = () => {
                         {recentSearches.map((s, i) => (
                           <Card key={i} onClick={() => handleRecentSearchClick(s)} sx={{
                             cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                            width: 'calc((100% - 48px) / 4)', p: 2,
+                            width: { xs: 'calc((100% - 16px) / 1.5)', md: 'calc((100% - 48px) / 4)' }, p: 2,
                             scrollSnapAlign: 'start', boxShadow: 1,
                             border: '1px solid #eee',
                             transition: 'all 0.2s',
@@ -1011,11 +1053,11 @@ const BookingPage = () => {
                 )}
 
                 {/* 2. Điểm đến phổ biến */}
-                <Box sx={{ mb: 2, pl: 6 }}>
+                <Box sx={{ mb: 2, pl: { xs: 2, md: 6 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('destinations.title')}</Typography>
                   <Typography variant="body2" color="text.secondary">{t('destinations.subtitle')}</Typography>
                 </Box>
-                <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                <Box sx={{ position: 'relative', mb: 5, px: { xs: 2, md: 6 } }}>
                   {DESTINATIONS.length > 5 && (
                     <IconButton onClick={() => scrollDest(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1036,7 +1078,7 @@ const BookingPage = () => {
                     {DESTINATIONS.map((d, i) => (
                       <Card key={d.key} onClick={() => selectDest(i)} sx={{
                         cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                        width: 'calc((100% - 60px) / 4)', height: 216,
+                        width: { xs: 'calc((100% - 16px) / 1.5)', md: 'calc((100% - 60px) / 4)' }, height: 216,
                         position: 'relative', overflow: 'hidden',
                         scrollSnapAlign: 'start',
                         scrollSnapStop: 'always',
@@ -1082,11 +1124,11 @@ const BookingPage = () => {
 
 
                 {/* 3. Tìm kiếm theo loại phòng */}
-                <Box sx={{ mb: 2, pl: 6 }}>
+                <Box sx={{ mb: 2, pl: { xs: 2, md: 6 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.room_type')}</Typography>
                   <Typography variant="body2" color="text.secondary">{t('booking_page.room_type_sub')}</Typography>
                 </Box>
-                <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                <Box sx={{ position: 'relative', mb: 5, px: { xs: 2, md: 6 } }}>
                   {ROOM_TYPES.length > 4 && (
                     <IconButton onClick={() => scrollTypes(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1106,7 +1148,7 @@ const BookingPage = () => {
                     {ROOM_TYPES.map((type) => (
                       <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
                         cursor: 'pointer', borderRadius: 4, flexShrink: 0,
-                        width: 'calc((100% - 48px) / 4)', height: 180,
+                        width: { xs: 'calc((100% - 16px) / 2.5)', md: 'calc((100% - 48px) / 4)' }, height: 180,
                         position: 'relative', overflow: 'hidden',
                         scrollSnapAlign: 'start',
                         boxShadow: 1,
@@ -1139,7 +1181,7 @@ const BookingPage = () => {
                 </Box>
 
                 {/* 4. Phòng nổi bật */}
-                <Box sx={{ mb: 2, pl: 6 }}>
+                <Box sx={{ mb: 2, pl: { xs: 2, md: 6 } }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box>
                       <Typography variant="h6" sx={{ fontWeight: 800 }}>
@@ -1161,7 +1203,7 @@ const BookingPage = () => {
                     </Button>
                   </Box>
                 </Box>
-                <Box sx={{ position: 'relative', mb: 4, px: 6 }}>
+                <Box sx={{ position: 'relative', mb: 4, px: { xs: 2, md: 6 } }}>
                   {MOCK_ROOMS.length > 3 && (
                     <IconButton onClick={() => scrollRooms(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1180,7 +1222,7 @@ const BookingPage = () => {
                   }}>
                     {loading ? (
                       [...Array(3)].map((_, i) => (
-                        <Box key={i} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0 }}>
+                        <Box key={i} sx={{ width: { xs: 'calc((100% - 16px) / 1.2)', md: 'calc((100% - 48px) / 3)' }, flexShrink: 0 }}>
                           <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
                           <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
                           <Skeleton width="50%" height={18} />
@@ -1188,7 +1230,7 @@ const BookingPage = () => {
                       ))
                     ) : (
                       featuredRooms.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                        <Box key={r.id || r.roomId} sx={{ width: { xs: 'calc((100% - 16px) / 1.2)', md: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
                           <RoomCard room={r} isMock={rooms.length === 0} />
                         </Box>
                       ))
@@ -1210,7 +1252,7 @@ const BookingPage = () => {
                 {/* 5. Phòng được đánh giá cao nhất */}
                 {topRatedRooms.length > 0 && (
                   <>
-                    <Box sx={{ mb: 2, pl: 6 }}>
+                    <Box sx={{ mb: 2, pl: { xs: 2, md: 6 } }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box>
                           <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.top_rated')}</Typography>
@@ -1228,7 +1270,7 @@ const BookingPage = () => {
                         </Button>
                       </Box>
                     </Box>
-                    <Box sx={{ position: 'relative', mb: 5, px: 6 }}>
+                    <Box sx={{ position: 'relative', mb: 5, px: { xs: 2, md: 6 } }}>
                       {topRatedRooms.length > 3 && (
                         <IconButton onClick={() => scrollTopRated(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
@@ -1246,7 +1288,7 @@ const BookingPage = () => {
                         scrollSnapType: 'x mandatory'
                       }}>
                         {topRatedRooms.map(r => (
-                          <Box key={r.id} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                          <Box key={r.id} sx={{ width: { xs: 'calc((100% - 16px) / 1.2)', md: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
                             <RoomCard room={r} isMock={rooms.length === 0} />
                           </Box>
                         ))}
@@ -1269,7 +1311,7 @@ const BookingPage = () => {
                 {/* 6. Phòng có giá ưu đãi nhất */}
                 {budgetRooms.length > 0 && (
                   <>
-                    <Box sx={{ mb: 2, pl: 6 }}>
+                    <Box sx={{ mb: 2, pl: { xs: 2, md: 6 } }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box>
                           <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.budget_friendly')}</Typography>
@@ -1325,11 +1367,11 @@ const BookingPage = () => {
                 )}
 
                 {/* 7. Ưu đãi cho cuối tuần */}
-                <Box sx={{ mb: 2, pl: 6 }}>
+                <Box sx={{ mb: 2, pl: { xs: 2, md: 6 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 800 }}>Ưu đãi cho cuối tuần</Typography>
                   <Typography variant="body2" color="text.secondary">Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5</Typography>
                 </Box>
-                <Box sx={{ position: 'relative', mb: 8, px: 6 }}>
+                <Box sx={{ position: 'relative', mb: 8, px: { xs: 2, md: 6 } }}>
                   <IconButton onClick={() => scrollWeekend(-1)} sx={{
                     position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                     zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1345,7 +1387,7 @@ const BookingPage = () => {
                     scrollSnapType: 'x mandatory'
                   }}>
                     {weekendDeals.map(r => (
-                      <Box key={r.id || r.roomId} sx={{ width: 'calc((100% - 48px) / 3)', flexShrink: 0, scrollSnapAlign: 'start' }}>
+                      <Box key={r.id || r.roomId} sx={{ width: { xs: 'calc((100% - 16px) / 1.2)', md: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: 'start' }}>
                         <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} />
                       </Box>
                     ))}
@@ -1388,7 +1430,7 @@ const BookingPage = () => {
                 {loading ? (
                   <Grid container spacing={3}>
                     {[...Array(6)].map((_, i) => (
-                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
+                      <Grid item xs={12} sm={6} md={4} key={i}>
                         <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 3, mb: 1 }} />
                         <Skeleton width="70%" height={24} sx={{ mb: 0.5 }} />
                         <Skeleton width="40%" height={20} />
@@ -1398,7 +1440,7 @@ const BookingPage = () => {
                 ) : rooms.length > 0 ? (
                   <Grid container spacing={3}>
                     {rooms.map(r => (
-                      <Grid size={{ xs: 12, sm: 6, md: 4 }} key={r.id}>
+                      <Grid item xs={12} sm={6} md={4} key={r.id}>
                         <RoomCard room={r} isMock={false} />
                       </Grid>
                     ))}
