@@ -1,6 +1,6 @@
 /* eslint-disable indent */
 import {
-  ChevronRight,
+
   ConfirmationNumber,
   History,
   Search
