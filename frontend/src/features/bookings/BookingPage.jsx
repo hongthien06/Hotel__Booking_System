@@ -154,6 +154,9 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
           MenuProps: { PaperProps: { sx: { maxHeight: 300, borderRadius: 2 } } }
         }}
       >
+        <MenuItem value="" sx={{ fontSize: 13, fontWeight: 700, color: PC }}>
+          {t('booking_page.anywhere')}
+        </MenuItem>
         {DESTINATIONS.map((d) => (
           <MenuItem key={d.key} value={d.province || d.name} sx={{ fontSize: 13 }}>
             {t(`destinations.${d.key}.name`)}
@@ -518,9 +521,10 @@ const BookingPage = () => {
   const { isAuthenticated } = useAuth()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [rooms, setRooms] = useState([])
+  const [allTypeNames, setAllTypeNames] = useState([])
   const [loading, setLoading] = useState(true)
   const [searched, setSearched] = useState(false)
-  const [destIdx, setDestIdx] = useState(1)
+  const [destIdx, setDestIdx] = useState(-1)
   const [roomTypes, setRoomTypes] = useState([])
   const [bedTypes, setBedTypes] = useState([])
 
@@ -531,7 +535,7 @@ const BookingPage = () => {
   const [minPrice, setMinPrice] = useState(undefined)
   const [maxPrice, setMaxPrice] = useState(undefined)
   const [params, setParams] = useState({
-    destination: 'Hà Nội',
+    destination: '',
     checkIn: new Date().toISOString().split('T')[0],
     checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     adults: 2, children: 0
@@ -678,7 +682,13 @@ const BookingPage = () => {
 
   useEffect(() => {
     getRoomsApi()
-      .then(d => setRooms(Array.isArray(d) ? d : []))
+      .then(d => {
+        const list = Array.isArray(d) ? d : []
+        setRooms(list)
+        // Lấy danh sách các loại phòng duy nhất từ server để hỗ trợ lọc thông minh
+        const types = [...new Set(list.map(r => r.typeName).filter(Boolean))]
+        setAllTypeNames(types)
+      })
       .catch(() => setRooms([]))
       .finally(() => setLoading(false))
 
@@ -688,7 +698,34 @@ const BookingPage = () => {
       .catch(() => { })
   }, [])
 
-  const onParam = (k, v) => setParams(p => ({ ...p, [k]: v }))
+  // Hàm bổ trợ để mở rộng loại phòng được chọn (ví dụ: "Deluxe" -> ["Deluxe King", "Deluxe Twin", ...])
+  const expandRoomTypes = (selectedTypes) => {
+    if (!selectedTypes || selectedTypes.length === 0) return undefined
+    const expanded = []
+    selectedTypes.forEach(st => {
+      let searchStr = st
+      if (st === 'Family Room') searchStr = 'Family'
+      if (st === 'Presidential Suite') searchStr = 'President'
+      
+      const matches = allTypeNames.filter(name => 
+        name.toLowerCase().includes(searchStr.toLowerCase())
+      )
+      if (matches.length > 0) {
+        expanded.push(...matches)
+      } else {
+        expanded.push(st)
+      }
+    })
+    return [...new Set(expanded)]
+  }
+
+  const onParam = (k, v) => {
+    setParams(p => ({ ...p, [k]: v }))
+    if (k === 'destination') {
+      const idx = DESTINATIONS.findIndex(d => (d.province || d.name) === v)
+      setDestIdx(idx)
+    }
+  }
 
   const handleSearch = async (overrideParams) => {
     // Distinguish between a search object and a React event
@@ -713,7 +750,7 @@ const BookingPage = () => {
         searchParams.destination || undefined,
         minPrice,
         maxPrice,
-        roomTypes.length > 0 ? roomTypes : undefined,
+        expandRoomTypes(roomTypes),
         bedTypes.length > 0 ? bedTypes : undefined,
         selectedAmenities.length > 0 ? selectedAmenities : undefined
       )
@@ -767,7 +804,7 @@ const BookingPage = () => {
         params.destination || undefined,
         minPrice,
         maxPrice,
-        [typeKey],
+        expandRoomTypes([typeKey]),
         bedTypes.length > 0 ? bedTypes : undefined,
         selectedAmenities.length > 0 ? selectedAmenities : undefined
       )
