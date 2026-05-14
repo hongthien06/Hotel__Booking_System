@@ -306,6 +306,28 @@ CREATE TABLE Invoices (
     CONSTRAINT CK_Invoices_Total        CHECK (total_amount >= 0)
 );
 
+CREATE TABLE Reviews (
+    review_id       BIGINT          NOT NULL IDENTITY(1,1),
+    booking_id      BIGINT          NOT NULL,
+    user_id         BIGINT          NOT NULL,
+    room_id         BIGINT          NOT NULL,
+    rating_overall  TINYINT         NOT NULL,
+    rating_clean    TINYINT         NULL,
+    rating_service  TINYINT         NULL,
+    rating_location TINYINT         NULL,
+    rating_value    TINYINT         NULL,
+    comment         NVARCHAR(MAX)   NULL,
+    is_approved     BIT             NOT NULL DEFAULT 0,
+    admin_reply     NVARCHAR(MAX)   NULL,
+    created_at      DATETIME2       NOT NULL DEFAULT SYSDATETIME(),
+
+    CONSTRAINT PK_Reviews              PRIMARY KEY (review_id),
+    CONSTRAINT FK_Reviews_Booking      FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id),
+    CONSTRAINT FK_Reviews_User         FOREIGN KEY (user_id)    REFERENCES Users(user_id),
+    CONSTRAINT FK_Reviews_Room         FOREIGN KEY (room_id)    REFERENCES Rooms(room_id),
+    CONSTRAINT UQ_Reviews_Booking      UNIQUE (booking_id)
+);
+
 
 CREATE TABLE InvoiceItems (
     item_id         BIGINT          NOT NULL IDENTITY(1,1),

@@ -1,6 +1,7 @@
 package com.hotel.modules.auth.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +16,6 @@ public class UpdateProfileRequest {
     private String fullName;
 
     @Size(max = 20, message = "Số điện thoại không được vượt quá 20 ký tự")
+    @Pattern(regexp = "^(0[35789])\\d{8}$", message = "Số điện thoại không hợp lệ (VD: 0901234567)")
     private String phone;
 }
