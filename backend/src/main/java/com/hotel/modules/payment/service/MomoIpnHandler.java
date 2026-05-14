@@ -44,7 +44,7 @@ public class MomoIpnHandler implements IpnHandler {
             boolean isSuccess = "00".equals(resultCode);
             paymentService.updatePaymentResult(payment, transId, params.toString(), isSuccess);
             if (isSuccess) {
-                emailService.sendConfirmationEmail(payment.getBooking());
+                emailService.sendConfirmationEmail(payment.getBooking(), payment.getLanguage());
             }
             return MomoIpnResponseConst.SUCCESS;
 

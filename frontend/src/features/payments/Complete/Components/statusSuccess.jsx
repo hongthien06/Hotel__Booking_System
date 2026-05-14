@@ -1,17 +1,19 @@
-
 import CheckIcon from '@mui/icons-material/Check'
 import DownloadIcon from '@mui/icons-material/Download'
 import { Box, Button, Stack, Typography } from '@mui/material'
 import { toast } from 'react-toastify'
+import { useTranslation } from 'react-i18next'
 import { downloadInvoicePdfApi } from '~/shared/api/invoiceApi'
 import { useNavigate } from 'react-router-dom'
 
 const StatusSuccess = ({ invoiceData }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+
   const handledownLoad = async () => {
     toast.promise(downloadInvoicePdfApi(invoiceData.id), {
       pending: 'Processing...',
-      success: 'Download invoice successfully!',
+      success: t('payment.download_pdf') + ' ✓',
       error: 'Failed to download invoice'
     })
   }
@@ -37,14 +39,14 @@ const StatusSuccess = ({ invoiceData }) => {
       </Box>
 
       <Box sx={{ textAlign: 'center' }}>
-        <Typography fontWeight={500} fontSize={16} lineHeight={1.4}>Đặt phòng thành công!</Typography>
+        <Typography fontWeight={500} fontSize={16} lineHeight={1.4}>{t('payment.success_title')}</Typography>
         <Typography variant="caption" color="text.secondary" display="block" mt={0.75} lineHeight={1.6}>
-          Hóa đơn đã được gửi về email của bạn. Chủ nhà sẽ xác nhận trong vòng 24 giờ.
+          {t('payment.success_sub')}
         </Typography>
       </Box>
 
       <Box sx={{ width: '100%', bgcolor: '#57ff5760', borderRadius: '8px', p: 1.5, textAlign: 'center' }}>
-        <Typography sx={{ fontSize: 12, fontWeight: '500', color: '#124c09', mb: 0.25 }}>Mã đặt phòng</Typography>
+        <Typography sx={{ fontSize: 12, fontWeight: '500', color: '#124c09', mb: 0.25 }}>{t('payment.booking_code_label')}</Typography>
         <Typography sx={{ fontSize: 15, fontWeight: '600', color: '#124c09', letterSpacing: 1 }}>{invoiceData.bookingCode}</Typography>
       </Box>
 
@@ -56,7 +58,7 @@ const StatusSuccess = ({ invoiceData }) => {
           onClick={handledownLoad}
           sx={{ bgcolor: '#e41030ff', color: 'white', '&:hover': { boxShadow: 'none' }, borderRadius: '10px', textTransform: 'none', fontWeight: 500, boxShadow: 'none' }}
         >
-          Tải hóa đơn PDF
+          {t('payment.download_pdf')}
         </Button>
         <Button
           variant="outlined"
@@ -64,7 +66,7 @@ const StatusSuccess = ({ invoiceData }) => {
           onClick={() => navigate('/booking-history')}
           sx={{ borderRadius: '10px', textTransform: 'none', color: 'text.secondary', borderColor: 'divider', '&:hover': { bgcolor: 'grey.50', color: 'black' } }}
         >
-          Xem phòng của tôi
+          {t('payment.view_my_rooms')}
         </Button>
       </Stack>
     </Box>

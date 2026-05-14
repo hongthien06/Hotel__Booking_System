@@ -1,17 +1,18 @@
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import { Alert, Box, FormControlLabel, Paper, Radio, RadioGroup, Typography, Chip } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import momoLogo from '~/assets/momologo.png'
 import vnpayLogo from '~/assets/vnpaylogo.png'
 
 const PaymentMethod = ({ selectedMethod, setSelectedMethod }) => {
-
+  const { t } = useTranslation()
 
   const PAYMENT_METHODS = [
     {
       id: 'VNPAY',
       name: 'VNPay',
-      description: 'Thanh toán qua cổng VNPay (ATM, QR, Visa/Master)',
+      description: t('payment.vnpay_desc'),
       logo: (
         <Box
           component='img'
@@ -27,7 +28,7 @@ const PaymentMethod = ({ selectedMethod, setSelectedMethod }) => {
     {
       id: 'MOMO',
       name: 'MoMo',
-      description: 'Ví điện tử MoMo – nhanh chóng & bảo mật',
+      description: t('payment.momo_desc'),
       logo: (
         <Box
           component='img'
@@ -36,7 +37,7 @@ const PaymentMethod = ({ selectedMethod, setSelectedMethod }) => {
           sx={{ width: 30, height: 30, objectFit: 'contain' }}
         />
       ),
-      tags: ['Ví MoMo', 'QR Code'],
+      tags: [t('payment.momo_tag_wallet'), 'QR Code'],
       color: '#D42A87',
       bg: '#fce4ec'
     }
@@ -45,10 +46,10 @@ const PaymentMethod = ({ selectedMethod, setSelectedMethod }) => {
   return (
     <Box>
       <Typography sx={{ fontWeight: 700, mb: 0.5, fontSize: 15 }}>
-        Phương thức thanh toán
+        {t('payment.payment_method')}
       </Typography>
       <Typography sx={{ color: '#9e9e9e', fontSize: 13, mb: 2 }}>
-        Chọn cổng thanh toán bạn muốn sử dụng
+        {t('payment.payment_method_sub')}
       </Typography>
       <RadioGroup
         value={selectedMethod}
@@ -90,9 +91,6 @@ const PaymentMethod = ({ selectedMethod, setSelectedMethod }) => {
                     <Typography sx={{ color: '#757575', fontSize: 12 }}>
                       {m.description}
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: 0.5, mt: 0.75, flexWrap: 'wrap' }}>
-
-                    </Box>
                   </Box>
                   {selectedMethod === m.id && (
                     <CheckCircleIcon sx={{ color: m.color, fontSize: 22 }} />
@@ -135,9 +133,7 @@ const PaymentMethod = ({ selectedMethod, setSelectedMethod }) => {
             '& .MuiAlert-icon': { color: method?.color }
           }}
         >
-          {selectedMethod === 'vnpay'
-            ? 'Bạn sẽ được chuyển đến cổng VNPay để hoàn tất thanh toán. Hỗ trợ ATM nội địa, Visa, Mastercard.'
-            : 'Bạn sẽ được chuyển đến ứng dụng MoMo hoặc quét mã QR để hoàn tất thanh toán.'}
+          {selectedMethod === 'VNPAY' ? t('payment.vnpay_info') : t('payment.momo_info')}
         </Alert>
       )}
     </Box>

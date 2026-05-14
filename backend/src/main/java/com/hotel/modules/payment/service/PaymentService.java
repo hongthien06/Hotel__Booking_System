@@ -66,6 +66,7 @@ public class PaymentService implements IPaymentService {
             payment.setAmount(request.getAmount());
             payment.setStatus(PaymentStatus.PENDING);
             payment.setIpAddress(ipAddress);
+            payment.setLanguage(request.getLanguage() != null ? request.getLanguage() : "vi");
             log.info("Retry payment: bookingId={}, newTxnId={}", booking.getBookingId(), payment.getTransactionId());
         } else {
             payment = Payment.builder()
@@ -76,6 +77,7 @@ public class PaymentService implements IPaymentService {
                     .status(PaymentStatus.PENDING)
                     .ipAddress(ipAddress)
                     .currency("VND")
+                    .language(request.getLanguage() != null ? request.getLanguage() : "vi")
                     .build();
         }
         payment = paymentRepository.save(payment);

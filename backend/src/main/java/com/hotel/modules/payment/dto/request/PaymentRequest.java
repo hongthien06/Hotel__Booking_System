@@ -17,4 +17,5 @@ public class PaymentRequest {
   private String bookingCode;
   private BigDecimal amount;
   private PaymentGateway gateway;
+  private String language;
 }

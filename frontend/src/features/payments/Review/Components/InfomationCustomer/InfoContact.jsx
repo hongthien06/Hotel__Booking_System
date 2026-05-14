@@ -4,13 +4,14 @@ import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import FormGroup from '@mui/material/FormGroup'
 import TextField from '@mui/material/TextField'
+import { useTranslation } from 'react-i18next'
 import CountryCode from './CountryCode'
 import { useBookingContext } from '../../../_id'
 
 const InfoContact = () => {
+  const { t } = useTranslation()
   const { booking } = useBookingContext() || {}
 
-  // BookingDTO exposes: userName, userEmail
   const defaultName = booking?.userName || ''
   const defaultEmail = booking?.userEmail || ''
 
@@ -18,9 +19,9 @@ const InfoContact = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Box>
         <Typography variant='h6' sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: '550' }}>
-          <CallOutlinedIcon />Thông tin liên hệ
+          <CallOutlinedIcon />{t('payment.contact_info')}
         </Typography>
-        <Typography variant='b4' sx={{ color: '#606060' }}>Thêm thông tin để xác nhận đặt chỗ</Typography>
+        <Typography variant='b4' sx={{ color: '#606060' }}>{t('payment.contact_info_sub')}</Typography>
       </Box>
       <FormGroup sx={{
         padding: '0 2em 1em 2em',
@@ -31,7 +32,7 @@ const InfoContact = () => {
         gap: 2
       }}>
         <Box sx={{ marginTop: '1em', display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-          <Typography sx={{ color: '#501157', fontWeight: '600', fontSize: '0.875rem' }}>Họ tên</Typography>
+          <Typography sx={{ color: '#501157', fontWeight: '600', fontSize: '0.875rem' }}>{t('payment.full_name')}</Typography>
           <TextField
             fullWidth
             type="text"
@@ -56,7 +57,7 @@ const InfoContact = () => {
           }}
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <Typography sx={{ color: '#501157', fontWeight: '600', fontSize: '0.875rem' }}>Số điện thoại</Typography>
+            <Typography sx={{ color: '#501157', fontWeight: '600', fontSize: '0.875rem' }}>{t('payment.phone')}</Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <CountryCode />
               <TextField
@@ -95,7 +96,7 @@ const InfoContact = () => {
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', borderTop: '1px dashed  #f19fb9', marginTop: 2 }}>
           <FormControlLabel control={<Checkbox sx={{ color: 'white', '&.Mui-checked': { color: 'primary.main' } }} />}
-            label={<Typography sx={{ color: '#501157', fontWeight: '600', fontSize: '0.875rem' }}>Tôi đặt phòng cho chính mình</Typography>}
+            label={<Typography sx={{ color: '#501157', fontWeight: '600', fontSize: '0.875rem' }}>{t('payment.booking_for_myself')}</Typography>}
           />
         </Box>
       </FormGroup>

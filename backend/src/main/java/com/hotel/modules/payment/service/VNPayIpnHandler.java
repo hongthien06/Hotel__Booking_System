@@ -58,7 +58,7 @@ public class VNPayIpnHandler implements IpnHandler {
 
             paymentService.updatePaymentResult(payment, transactionNo, params.toString(), isSuccess);
             if (isSuccess) {
-                emailService.sendConfirmationEmail(payment.getBooking());
+                emailService.sendConfirmationEmail(payment.getBooking(), payment.getLanguage());
             }
             return VnpIpnResponseConst.SUCCESS;
         } catch (Exception e) {

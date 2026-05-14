@@ -3,12 +3,14 @@ import {
   Stack,
   Typography
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { useBookingContext } from '../../../_id'
 
 const formatVND = (n) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
 
 const OrderSummary = () => {
+  const { t } = useTranslation()
   const { booking, room, form, voucherData } = useBookingContext() || {}
 
   const bookingCode = booking?.bookingCode || '—'
@@ -24,21 +26,26 @@ const OrderSummary = () => {
   const roomTypeName = booking?.roomTypeName || room?.roomTypeName || 'Standard'
   const roomNumber = booking?.roomNumber || room?.roomNumber || ''
 
-  // Nếu đã áp voucher thì dùng finalAmount từ API, không thì dùng grandTotal
   const originalTotal = Number(booking?.grandTotal || roomTotal)
   const discountAmount = voucherData ? Number(voucherData.discountAmount) : 0
   const finalTotal = voucherData ? Number(voucherData.finalAmount) : originalTotal
 
+  const nightUnit = t('payment.night_unit')
+  const guestUnit = t('payment.guest_unit')
+
   const rows = [
-    { label: 'Mã đặt phòng', value: bookingCode },
+    { label: t('payment.booking_code'), value: bookingCode },
     {
-      label: `Tiền phòng (${nights} đêm)`,
+      label: `${t('payment.room_fee')} (${nights} ${nightUnit})`,
       value: formatVND(roomTotal),
-      sub: `${roomTypeName}${roomNumber ? ' – Phòng ' + roomNumber : ''} · ${formatVND(pricePerNight)}/đêm`
+      sub: `${roomTypeName}${roomNumber ? ` – ${t('payment.room')} ` + roomNumber : ''} · ${formatVND(pricePerNight)}/${nightUnit}`
     },
-    { label: 'Khách', value: `${numAdults} người lớn${numChildren > 0 ? `, ${numChildren} trẻ em` : ''}` },
-    ...(serviceTotal > 0 ? [{ label: 'Dịch vụ thêm', value: formatVND(serviceTotal) }] : []),
-    ...(taxFee > 0 ? [{ label: 'Thuế & phí', value: formatVND(taxFee) }] : []),
+    {
+      label: t('payment.guests_label'),
+      value: `${numAdults} ${t('payment.adults_label')}${numChildren > 0 ? `, ${numChildren} ${t('payment.children_label')}` : ''}`
+    },
+    ...(serviceTotal > 0 ? [{ label: t('payment.extra_services'), value: formatVND(serviceTotal) }] : []),
+    ...(taxFee > 0 ? [{ label: t('payment.tax_and_fees'), value: formatVND(taxFee) }] : []),
   ]
 
   return (
@@ -54,12 +61,11 @@ const OrderSummary = () => {
         </Stack>
       ))}
 
-      {/* Dòng giảm giá — chỉ hiển thị khi có voucher */}
       {discountAmount > 0 && (
         <Stack direction="row" justifyContent="space-between" alignItems="center"
           sx={{ px: 2, py: 1.25, borderBottom: '0.5px solid', borderColor: 'divider', bgcolor: '#fdf2f8' }}>
           <Typography variant="caption" color="#be185d" fontWeight={500}>
-            Giảm giá ({voucherData?.voucherCode})
+            {t('payment.discount')} ({voucherData?.voucherCode})
           </Typography>
           <Typography variant="caption" fontWeight={700} color="#be185d">
             − {formatVND(discountAmount)}
@@ -69,8 +75,8 @@ const OrderSummary = () => {
 
       <Box sx={{ bgcolor: 'grey.50', px: 2, py: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <Box>
-          <Typography variant="caption" color="text.secondary" display="block">Tổng thanh toán</Typography>
-          <Typography variant="caption" color="text.secondary">{nights} đêm · {Number(numAdults) + Number(numChildren)} khách</Typography>
+          <Typography variant="caption" color="text.secondary" display="block">{t('payment.total_payment')}</Typography>
+          <Typography variant="caption" color="text.secondary">{nights} {nightUnit} · {Number(numAdults) + Number(numChildren)} {guestUnit}</Typography>
         </Box>
         <Box sx={{ textAlign: 'right' }}>
           {discountAmount > 0 && (

@@ -54,6 +54,10 @@ public class Payment {
     @Column(name = "ip_address", length = 50)
     private String ipAddress;
 
+    @Column(name = "language", length = 5)
+    @Builder.Default
+    private String language = "vi";
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Confirmed</title>
+  <style>
+    .email-wrap {
+      max-width: 620px;
+      margin: 0 auto;
+      font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+    }
+
+    .email-header {
+      background: #1a1a2e;
+      border-radius: 12px 12px 0 0;
+      padding: 32px 40px;
+      text-align: center;
+    }
+
+    .email-body {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      padding: 32px 40px;
+    }
+
+    .email-footer {
+      background: #f5f7fb;
+      border: 1px solid #e2e8f0;
+      border-top: none;
+      border-radius: 0 0 12px 12px;
+      padding: 20px 40px;
+      text-align: center;
+    }
+
+    .badge-success {
+      display: inline-block;
+      background: #EAF3DE;
+      color: #3B6D11;
+      font-size: 12px;
+      padding: 4px 14px;
+      border-radius: 99px;
+      font-weight: 500;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 500;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin: 0 0 12px;
+    }
+
+    .info-card {
+      background: #f5f7fb;
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+
+    .info-row {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      padding: 7px 0;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: 14px;
+    }
+
+    .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      float: left;
+      color: #64748b;
+    }
+
+    .info-value {
+      float: right;
+      font-weight: 500;
+      color: #0f172a;
+      text-align: right;
+    }
+
+    .total-row {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      padding: 8px 0;
+      font-size: 14px;
+    }
+
+    .total-final {
+      display: block;
+      width: 100%;
+      overflow: hidden;
+      padding: 14px 20px;
+      background: #1a1a2e;
+      border-radius: 10px;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin: 20px 0;
+    }
+
+
+    .note-box {
+      background: #FAEEDA;
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: #633806;
+      margin-top: 16px;
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #E6F1FB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      font-size: 14px;
+      color: #185FA5;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="email-wrap">
+  <div class="email-header">
+    <div style="font-size: 22px; font-weight: 500; color: #fff; margin-bottom: 4px;"
+         th:text="${booking.buildingName}">Hotel Name</div>
+    <div style="font-size: 13px; color: rgba(255,255,255,0.55);" th:text="${booking.buildingAdress}">Hotel Address
+    </div>
+  </div>
+
+  <div class="email-body">
+    <div style="text-align: center; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+      <div class="badge-success">Booking Confirmed</div>
+      <div style="font-size: 22px; font-weight: 500; color: #0f172a; margin-bottom: 6px;">Thank you for your booking!
+      </div>
+      <div style="font-size: 14px; color: #64748b;">
+        Confirmation sent to <strong>[[${booking.toEmail}]]</strong>
+      </div>
+    </div>
+
+    <div style="margin-top: 24px;">
+      <p class="section-title">Customer Information</p>
+      <div class="info-card">
+        <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 14px;">
+          <div class="avatar"></div>
+          <div>
+            <div style="font-weight: 500; font-size: 15px; color: #0f172a;" th:text="${booking.customerName}">Customer Name</div>
+            <div style="font-size: 13px; color: #64748b;">
+              [[${booking.toEmail}]] · [[${booking.customerPhone}]]
+            </div>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Booking Code</span>
+          <span class="info-value" style="font-family: 'JetBrains Mono', monospace; color: #185FA5;"
+                th:text="${booking.codeBooking}">CODE</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Booking Date</span>
+          <span class="info-value" th:text="${booking.dateBooking}">Date</span>
+        </div>
+      </div>
+
+      <p class="section-title">Booking Details</p>
+      <div class="info-card">
+        <div class="info-row">
+          <span class="info-label">Check-in</span>
+          <span class="info-value">[[${booking.dateCheckin}]] · [[${booking.timeCheckin}]]</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Check-out</span>
+          <span class="info-value">[[${booking.dateCheckout}]] · [[${booking.timeCheckout}]]</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Night(s)</span>
+          <span class="info-value" th:text="${booking.night} + ' night(s)'">0</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Guest(s)</span>
+          <span class="info-value" th:text="${booking.people} + ' guest(s)'">0</span>
+        </div>
+      </div>
+
+      <p class="section-title">Invoice</p>
+      <div class="info-card">
+        <div class="total-row">
+          <span style="float: left; color: #64748b;">[[${booking.buildingName}]] × [[${booking.night}]] night(s)</span>
+          <span style="float: right; color: #0f172a;">[[${#numbers.formatDecimal(booking.priceBooking, 0, 'COMMA', 0,
+              'POINT')}]]đ</span>
+        </div>
+        <div class="total-row">
+            <span style="float: left; color: #64748b;">Breakfast × [[${booking.people}]] guest(s) × [[${booking.night}]]
+              day(s)</span>
+          <span style="float: right; color: #0f172a;">[[${#numbers.formatDecimal(booking.priceBreakfast, 0, 'COMMA',
+              0, 'POINT')}]]đ</span>
+        </div>
+        <div class="total-row">
+          <span style="float: left; color: #64748b;">Service Fee</span>
+          <span style="float: right; color: #0f172a;">[[${#numbers.formatDecimal(booking.feeService, 0, 'COMMA', 0,
+              'POINT')}]]đ</span>
+        </div>
+        <div class="total-row">
+          <span style="float: left; color: #64748b;">VAT</span>
+          <span style="float: right; color: #0f172a;">[[${#numbers.formatDecimal(booking.tax, 0, 'COMMA', 0,
+              'POINT')}]]đ</span>
+        </div>
+        <div class="total-row" th:if="${booking.discount != null and booking.discount > 0}">
+          <span style="float: left; color: #16a34a;">
+            Discount<th:block th:if="${booking.voucherCode != null}"> ([[${booking.voucherCode}]])</th:block>
+          </span>
+          <span style="float: right; color: #16a34a; font-weight: 500;">
+            -[[${#numbers.formatDecimal(booking.discount, 0, 'COMMA', 0, 'POINT')}]]đ
+          </span>
+        </div>
+        <hr class="divider">
+        <div class="total-final">
+          <span style="float: left; font-weight: 500; font-size: 15px; color: #fff;">Total Amount</span>
+          <span
+                  style="float: right; font-weight: 500; font-size: 18px; color: #fff;">[[${#numbers.formatDecimal(booking.totalPrice,
+              0, 'COMMA', 0, 'POINT')}]]₫</span>
+        </div>
+
+        <div style="display: block; width: 100%; overflow: hidden; font-size: 13px; margin-top: 16px;">
+          <span style="float: left; color: #64748b;">Status</span>
+          <span style="float: right; color: #3B6D11; font-weight: 500;">Paid</span>
+        </div>
+      </div>
+
+      <div class="note-box">
+        <strong>Note:</strong> Please bring your ID/Passport when checking in. Check-in from 14:00, check-out before
+        12:00. Contact hotline <strong>1800 6868</strong> for assistance.
+      </div>
+
+    </div>
+  </div>
+
+  <div class="email-footer">
+    <div style="margin-top: 12px; font-size: 12px; color: #94a3b8;">
+      This email was sent automatically, please do not reply directly.
+    </div>
+  </div>
+</div>
+</body>
+
+</html>

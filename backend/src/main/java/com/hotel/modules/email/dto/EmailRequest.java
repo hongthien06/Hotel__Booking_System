@@ -30,5 +30,6 @@ public class EmailRequest {
     private String voucherCode;
     private Long tax;
     private Long totalPrice;
+    private String language;
 
 }

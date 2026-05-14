@@ -7,14 +7,20 @@ import {
   Stack,
   Typography
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { useBookingContext } from '../../_id'
 
-const amenities = ['Điều hòa', 'Nội thất đầy đủ', 'Wifi miễn phí', 'Bảo vệ 24/7']
-
 const InfomationRental = () => {
+  const { t } = useTranslation()
   const { room, booking } = useBookingContext() || {}
 
-  // booking = BookingDTO from backend, room = room object from BookingPage
+  const amenities = [
+    t('payment.amenity_ac'),
+    t('payment.amenity_furniture'),
+    t('payment.amenity_wifi'),
+    t('payment.amenity_security')
+  ]
+
   const roomNumber = booking?.roomNumber || room?.roomNumber || '—'
   const roomType = booking?.roomTypeName || room?.roomTypeName || 'Standard'
   const province = room?.province || 'Việt Nam'
@@ -34,13 +40,12 @@ const InfomationRental = () => {
       overflow: 'hidden'
     }}>
 
-      {/* ── Ảnh phòng ── */}
       <Box sx={{ position: 'relative', height: 260, bgcolor: 'grey.200' }}>
         {hasData ? (
           <Box
             component="img"
             src={image}
-            alt="Ảnh phòng"
+            alt="room"
             sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
           />
         ) : (
@@ -50,7 +55,6 @@ const InfomationRental = () => {
 
       <Box sx={{ p: 3, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
 
-        {/* Tên + Địa chỉ */}
         <Box>
           {hasData ? (
             <>
@@ -58,7 +62,7 @@ const InfomationRental = () => {
                 <Chip label={roomType} size="small" color="primary.dark" variant="outlined" sx={{ fontWeight: 700 }} />
                 {bedType && <Chip label={bedType} size="small" variant="outlined" sx={{ fontWeight: 600 }} />}
               </Stack>
-              <Typography variant="h6" fontWeight={700}>Phòng {roomNumber}</Typography>
+              <Typography variant="h6" fontWeight={700}>{t('payment.room')} {roomNumber}</Typography>
 
               <Stack direction="row" alignItems="center" justifyContent="space-between" mt={0.5}>
                 <Stack direction="row" alignItems="center" spacing={0.5} color="text.secondary">
@@ -69,7 +73,7 @@ const InfomationRental = () => {
                 <Stack direction="row" alignItems="center" spacing={0.5}>
                   <StarIcon sx={{ fontSize: 16, color: '#f59e0b' }} />
                   <Typography variant="body2" fontWeight={600}>5.0</Typography>
-                  <Typography variant="body2" color="text.secondary">· Khách sạn</Typography>
+                  <Typography variant="body2" color="text.secondary">· {t('payment.hotel')}</Typography>
                 </Stack>
               </Stack>
             </>

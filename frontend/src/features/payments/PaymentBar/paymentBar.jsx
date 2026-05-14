@@ -4,8 +4,8 @@ import StepConnector, { stepConnectorClasses } from '@mui/material/StepConnector
 import StepLabel from '@mui/material/StepLabel'
 import Stepper from '@mui/material/Stepper'
 import { styled } from '@mui/material/styles'
+import { useTranslation } from 'react-i18next'
 
-const steps = ['Review Booking', 'Guest & Payment Detail', 'Booking Successfully']
 const ColorlibConnector = styled(StepConnector)(({ theme }) => ({
   [`&.${stepConnectorClasses.alternativeLabel}`]: {
     top: 12
@@ -62,6 +62,8 @@ const CustomStepIcon = (props) => {
 }
 
 const PaymentBar = ({ activeStep }) => {
+  const { t } = useTranslation()
+  const steps = [t('payment.step1'), t('payment.step2'), t('payment.step3')]
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'center', padding: 1 }}>

@@ -34,7 +34,8 @@ public class EmailService {
     public void sendMailWithThymeleaf(String toEmail, String subject, EmailRequest request) {
         Context context = new Context();
         context.setVariable("booking", request);
-        String htmlContent = templateEngine.process("success-email", context);
+        String templateName = "en".equals(request.getLanguage()) ? "success-email-en" : "success-email";
+        String htmlContent = templateEngine.process(templateName, context);
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message, "utf-8");
         try {
@@ -47,7 +48,7 @@ public class EmailService {
         }
     }
 
-    public void sendConfirmationEmail(Booking booking) {
+    public void sendConfirmationEmail(Booking booking, String language) {
         try {
             User user = booking.getUser();
             Room room = booking.getRoom();
@@ -82,8 +83,11 @@ public class EmailService {
                     .voucherCode(voucherCode)
                     .tax(tax)
                     .totalPrice(totalPrice)
+                    .language(language != null ? language : "vi")
                     .build();
-            String subject = "Xác nhận đặt phòng thành công - " + booking.getBookingCode();
+            String subject = "en".equals(language)
+                    ? "Booking Confirmation - " + booking.getBookingCode()
+                    : "Xác nhận đặt phòng thành công - " + booking.getBookingCode();
             sendMailWithThymeleaf(request.getToEmail(), subject, request);
         } catch (Exception e) {
             log.error("Lỗi gửi email xác nhận cho booking {}: {}", booking.getBookingId(), e.getMessage());

@@ -6,19 +6,21 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import DarkModeOutlinedIcon from '@mui/icons-material/DarkModeOutlined'
 import { Box } from '@mui/system'
 import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined'
+import { useTranslation } from 'react-i18next'
 import { useBookingContext } from '../../../_id'
 
-const formatDate = (dateStr) => {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr)
-  if (isNaN(d)) return String(dateStr)
-  return d.toLocaleDateString('vi-VN', { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' })
-}
-
 const InfoBooking = () => {
-  // booking = BookingDTO: checkInDate, checkOutDate, totalNights, numAdults, numChildren, specialRequest
-  // form = raw form data passed alongside booking
+  const { t, i18n } = useTranslation()
   const { form, booking } = useBookingContext() || {}
+
+  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN'
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '—'
+    const d = new Date(dateStr)
+    if (isNaN(d)) return String(dateStr)
+    return d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' })
+  }
 
   const checkIn = booking?.checkInDate || form?.checkIn || ''
   const checkOut = booking?.checkOutDate || form?.checkOut || ''
@@ -29,21 +31,21 @@ const InfoBooking = () => {
   const totalPeople = Number(numAdults) + Number(numChildren)
 
   const roomOptions = [
-    'Phòng liên thông',
-    'Tầng lầu',
-    'Ban công',
-    'Máy chiếu',
-    'Bàn bida',
-    'Loại giường'
+    t('payment.room_option_connecting'),
+    t('payment.room_option_upper'),
+    t('payment.room_option_balcony'),
+    t('payment.room_option_projector'),
+    t('payment.room_option_pool_table'),
+    t('payment.room_option_bed_type')
   ]
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <Box>
         <Typography variant='h6' sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: '550' }}>
-          <KingBedOutlinedIcon />Thông tin đặt phòng
+          <KingBedOutlinedIcon />{t('payment.booking_info')}
         </Typography>
-        <Typography variant='b4' sx={{ color: '#606060' }}>Thêm thông tin đặt phòng để xác nhận phòng</Typography>
+        <Typography variant='b4' sx={{ color: '#606060' }}>{t('payment.booking_info_sub')}</Typography>
       </Box>
       <Box sx={{
         padding: 3,
@@ -69,7 +71,7 @@ const InfoBooking = () => {
                 {formatDate(checkIn)}
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#5e5e5e', fontWeight: '500', fontSize: '0.8rem' }}>
-                Từ 14:00
+                {t('payment.checkin_from')}
               </Typography>
             </Box>
 
@@ -81,7 +83,7 @@ const InfoBooking = () => {
                 {formatDate(checkOut)}
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#5e5e5e', fontWeight: '500', fontSize: '0.8rem' }}>
-                Trước 12:00
+                {t('payment.checkout_before')}
               </Typography>
             </Box>
           </Stack>
@@ -89,7 +91,7 @@ const InfoBooking = () => {
           <Stack direction="row" spacing={4}>
             <Box>
               <Typography sx={{ textAlign: 'center', color: 'primary.main', fontWeight: '600', fontSize: '0.9rem', borderBottom: '2px solid #f19fb9', pb: 0.5 }}>
-                Nights
+                {t('payment.nights_label')}
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#3f3f3f', fontWeight: '700', fontSize: '1.25rem', mt: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                 {nights}<DarkModeOutlinedIcon />
@@ -98,7 +100,7 @@ const InfoBooking = () => {
 
             <Box>
               <Typography sx={{ textAlign: 'center', color: 'primary.main', fontWeight: '600', fontSize: '0.9rem', borderBottom: '2px solid #f19fb9', pb: 0.5 }}>
-                People
+                {t('payment.people_label')}
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#3f3f3f', fontWeight: '700', fontSize: '1.25rem', mt: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                 {totalPeople}<PeopleOutlineOutlinedIcon />
@@ -110,16 +112,16 @@ const InfoBooking = () => {
 
       {specialRequest && (
         <Box sx={{ p: 2, bgcolor: '#f9f9f9', borderRadius: 2, border: '1px dashed #f19fb9' }}>
-          <Typography variant="body2" color="text.secondary" fontWeight={600}>Yêu cầu đặc biệt:</Typography>
+          <Typography variant="body2" color="text.secondary" fontWeight={600}>{t('payment.special_request_label')}</Typography>
           <Typography variant="body2" sx={{ mt: 0.5 }}>{specialRequest}</Typography>
         </Box>
       )}
 
       <Box sx={{ marginTop: 1 }}>
         <Typography variant='h6' sx={{ display: 'flex', alignItems: 'center', gap: 1, fontWeight: '550' }}>
-          <VerifiedOutlinedIcon />Yêu cầu đặt biệt
+          <VerifiedOutlinedIcon />{t('payment.special_requests_title')}
         </Typography>
-        <Typography variant='b4' sx={{ color: '#606060' }}>Tất cả các yêu cầu đặc biệt tùy thuộc vào tình trạng sẵn có và không được đảm bảo. Nhận phòng sớm hoặc đưa đón sân bay có thể phát sinh thêm phí</Typography>
+        <Typography variant='b4' sx={{ color: '#606060' }}>{t('payment.special_requests_sub')}</Typography>
       </Box>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', mt: 1 }}>
         {roomOptions.map((option, index) => (

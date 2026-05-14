@@ -12,12 +12,14 @@ import {
   Typography
 } from '@mui/material'
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { applyVoucherApi, getActiveVouchersApi, removeVoucherApi } from '~/shared/api/voucherApi'
 
 const formatVND = (n) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
 
 const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
+  const { t } = useTranslation()
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -31,8 +33,8 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
 
   const handleApply = async () => {
     const trimmed = code.trim().toUpperCase()
-    if (!trimmed) { setError('Vui lòng nhập mã khuyến mãi'); return }
-    if (!bookingId) { setError('Không tìm thấy thông tin booking'); return }
+    if (!trimmed) { setError(t('payment.promo_error_empty')); return }
+    if (!bookingId) { setError(t('payment.promo_error_no_booking')); return }
     setLoading(true)
     setError('')
     try {
@@ -41,7 +43,7 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
       setCode('')
     } catch (err) {
       const msg = err?.response?.data?.message || err?.response?.data?.error
-        || 'Mã không hợp lệ hoặc đã hết lượt sử dụng'
+        || t('payment.promo_error_invalid')
       setError(msg)
     } finally {
       setLoading(false)
@@ -52,7 +54,7 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
     if (!bookingId) return
     try {
       await removeVoucherApi(bookingId)
-    } catch { /* bỏ qua lỗi network khi remove */ }
+    } catch { /* ignore network error on remove */ }
     onRemove()
   }
 
@@ -60,10 +62,9 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
     <Box>
       <Stack direction="row" alignItems="center" spacing={0.75} mb={1}>
         <LocalOfferIcon sx={{ fontSize: 14, color: '#ec4899' }} />
-        <Typography variant="body2" fontWeight={500}>Mã khuyến mãi</Typography>
+        <Typography variant="body2" fontWeight={500}>{t('payment.promo_code')}</Typography>
       </Stack>
 
-      {/* Badge khi đã áp dụng voucher */}
       <Collapse in={!!applied}>
         <Box sx={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -82,7 +83,7 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
                 {applied?.voucherCode}
               </Typography>
               <Typography sx={{ fontSize: 11, color: '#ec4899' }}>
-                Giảm {formatVND(applied?.discountAmount)}
+                {t('payment.discount_saved')} {formatVND(applied?.discountAmount)}
               </Typography>
             </Box>
           </Stack>
@@ -92,13 +93,12 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
         </Box>
       </Collapse>
 
-      {/* Form nhập mã khi chưa áp dụng */}
       <Collapse in={!applied}>
         <Stack direction="row" gap={1}>
           <TextField
             size="small"
             fullWidth
-            placeholder="Nhập mã khuyến mãi..."
+            placeholder={t('payment.promo_placeholder')}
             value={code}
             onChange={e => { setCode(e.target.value.toUpperCase()); setError('') }}
             error={!!error}
@@ -130,14 +130,13 @@ const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
               '&.Mui-disabled': { bgcolor: '#fbcfe8', color: 'white' }
             }}
           >
-            {loading ? <CircularProgress size={16} sx={{ bgcolor: 'primary.dark', color: '#fff' }} /> : 'Áp dụng'}
+            {loading ? <CircularProgress size={16} sx={{ bgcolor: 'primary.dark', color: '#fff' }} /> : t('payment.apply')}
           </Button>
         </Stack>
         {error && (
           <Typography sx={{ fontSize: 11, color: 'error.main', mt: 0.75, pl: 0.5 }}>{error}</Typography>
         )}
 
-        {/* Gợi ý voucher đang hoạt động */}
         {hints.length > 0 && (
           <Stack direction="row" spacing={0.75} mt={1} flexWrap="wrap" useFlexGap>
             {hints.map(v => (
