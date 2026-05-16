@@ -25,9 +25,8 @@ import {
   CircularProgress, Slider, MenuItem, Popover,
   useMediaQuery, useTheme, Drawer
 } from '@mui/material'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { LocalizationProvider, DatePicker } from '@mui/x-date-pickers'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import { useTranslation } from 'react-i18next'
