@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Copy lock file TRƯỚC → cache node_modules layer
 COPY package.json package-lock.json ./
-RUN npm install --prefer-offline
+RUN npm ci
 
 # Nhận API URL từ docker-compose args (override frontend/.env lúc build)
 ARG VITE_API_URL=/api/v1
