@@ -383,21 +383,28 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
   useEffect(() => {
     if (open && room && !isMock) {
+      // Đảm bảo lấy đúng ID (backend dùng roomId trong RoomResponse)
       const rid = room.roomId || room.id;
-      console.log('Fetching booked dates for room:', rid);
-      setLoadingDates(true)
+      if (!rid) return;
+
+      console.log('Fetching booked dates for room ID:', rid);
+      setLoadingDates(true);
+      setError('');
+      
       getBookedDatesApi(rid)
         .then(dates => {
-          console.log('Booked dates received:', dates);
-          setBookedDates(dates || []);
+          console.log('Booked dates for Room ' + rid + ':', dates);
+          setBookedDates(Array.isArray(dates) ? dates : []);
         })
         .catch(err => {
-          console.error('Error fetching booked dates:', err);
+          console.error('Failed to fetch booked dates:', err);
           setBookedDates([]);
         })
-        .finally(() => setLoadingDates(false))
+        .finally(() => setLoadingDates(false));
+    } else {
+      setBookedDates([]);
     }
-  }, [open, room, isMock])
+  }, [open, room?.roomId, room?.id, isMock])
 
   useEffect(() => {
     if (open) {
@@ -480,7 +487,9 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
                 minDate={dayjs()}
                 shouldDisableDate={(date) => {
                   const dateStr = date.format('YYYY-MM-DD');
-                  return bookedDates.includes(dateStr);
+                  const isDisabled = bookedDates.includes(dateStr);
+                  if (isDisabled) console.log('Disabling date:', dateStr);
+                  return isDisabled;
                 }}
                 loading={loadingDates}
                 slotProps={{ 
@@ -500,10 +509,9 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
                 onChange={newValue => setForm(f => ({ ...f, checkOut: newValue ? newValue.format('YYYY-MM-DD') : '' }))}
                 minDate={form.checkIn ? dayjs(form.checkIn).add(1, 'day') : dayjs().add(1, 'day')}
                 shouldDisableDate={(date) => {
-                  // Với Checkout, chúng ta cho phép chọn ngày mà người khác Check-in (vì mình trả phòng buổi sáng)
-                  // Nhưng KHÔNG được chọn ngày mà phòng đang bị chiếm ở giữa dải bận.
                   const dateStr = date.format('YYYY-MM-DD');
-                  return bookedDates.includes(dateStr);
+                  const isDisabled = bookedDates.includes(dateStr);
+                  return isDisabled;
                 }}
                 loading={loadingDates}
                 slotProps={{ 

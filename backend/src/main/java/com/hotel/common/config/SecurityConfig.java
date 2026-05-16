@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/bookings").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/bookings/*/cancel").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
                         .requestMatchers("/bookings/occupied-rooms").permitAll()
+                        .requestMatchers(GET, "/bookings/room/*/booked-dates").permitAll()
                         .requestMatchers("/bookings/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/dashboard/**", "/admin/**").hasAnyRole("ADMIN", "MANAGER")
                         // Voucher: user endpoints (yeu cau dang nhap)
