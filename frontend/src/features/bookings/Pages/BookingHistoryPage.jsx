@@ -127,11 +127,7 @@ const BookingHistoryPage = () => {
           {t('header.bookings_history') || 'LỊCH SỬ ĐẶT PHÒNG'}
         </Typography>
         <Typography variant="body2" sx={{ color: '#666' }}>
-<<<<<<< HEAD
-          {t('bookings_history.subtitle')}
-=======
           {t('bookings_history.subtitle') || 'Quản lý các chuyến đi và lịch sử đặt phòng của bạn'}
->>>>>>> 22e40d3 (....)
         </Typography>
       </Box>
 
@@ -176,11 +172,7 @@ const BookingHistoryPage = () => {
                     sx: { color: '#333', fontSize: 14, fontWeight: 600, py: 0 }
                   }}
                 >
-<<<<<<< HEAD
-                  <option value="">{t('booking_page.anywhere')}</option>
-=======
                   <option value="">{t('booking_page.anywhere') || 'Địa điểm bất kỳ'}</option>
->>>>>>> 22e40d3 (....)
                   <option value="HCM">{t('destinations.hcm.name')}</option>
                   <option value="HANOI">{t('destinations.hanoi.name')}</option>
                   <option value="VUNG_TAU">{t('destinations.vungtau.name')}</option>
@@ -207,13 +199,7 @@ const BookingHistoryPage = () => {
             }}>
               <Box sx={{ display: 'flex', width: '100%', gap: 2 }}>
                 <Box sx={{ flex: 1 }}>
-<<<<<<< HEAD
-                  <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>
-                    {t('booking_page.check_in')}
-                  </Typography>
-=======
                   <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>{t('bookings_history.check_in') || 'Nhận phòng'}</Typography>
->>>>>>> 22e40d3 (....)
                   <TextField
                     type="date"
                     variant="standard"
@@ -230,13 +216,7 @@ const BookingHistoryPage = () => {
                   <Typography sx={{ fontWeight: 300 }}>—</Typography>
                 </Box>
                 <Box sx={{ flex: 1 }}>
-<<<<<<< HEAD
-                  <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>
-                    {t('booking_page.check_out')}
-                  </Typography>
-=======
                   <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>{t('bookings_history.check_out') || 'Trả phòng'}</Typography>
->>>>>>> 22e40d3 (....)
                   <TextField
                     type="date"
                     variant="standard"
