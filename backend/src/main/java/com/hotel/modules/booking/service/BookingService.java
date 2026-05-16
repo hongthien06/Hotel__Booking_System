@@ -369,4 +369,13 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy booking với mã: " + bookingCode));
     }
 
+    @Transactional(readOnly = true)
+    public List<String> getBookedDatesByRoomId(Long roomId) {
+        List<Booking> activeBookings = bookingRepository.findActiveBookingsByRoomId(roomId);
+        return activeBookings.stream()
+                .flatMap(b -> b.getCheckInDate().datesUntil(b.getCheckOutDate()).map(LocalDate::toString))
+                .distinct()
+                .toList();
+    }
+
 }

@@ -25,11 +25,16 @@ import {
   CircularProgress, Slider, MenuItem, Popover,
   useMediaQuery, useTheme, Drawer
 } from '@mui/material'
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
+import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import dayjs from 'dayjs'
+import 'dayjs/locale/vi'
 import { useTranslation } from 'react-i18next'
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material'
 import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi'
 import { getAmenitiesApi } from '../../shared/api/amenityApi'
-import { createBookingApi } from '../../shared/api/bookingApi'
+import { createBookingApi, getBookedDatesApi } from '../../shared/api/bookingApi'
 import { useAuth } from '../../shared/hooks/useAuth'
 import LoginPromptModal from '../../shared/components/modals/LoginPromptModal'
 import { useNavigate } from 'react-router-dom'
@@ -176,10 +181,21 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         {[['checkIn', 'booking_page.check_in'], ['checkOut', 'booking_page.check_out']].map(([k, lblKey]) => (
           <Grid item xs={6} key={k}>
             <Typography sx={labelSx}>{t(lblKey)}</Typography>
-            <TextField fullWidth size="small" type="date" value={params[k]}
-              onChange={e => onParam(k, e.target.value)}
-              InputLabelProps={{ shrink: true }} inputProps={{ style: { fontSize: 12 } }}
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={i18n.language}>
+              <DatePicker
+                value={params[k] ? dayjs(params[k]) : null}
+                onChange={(newValue) => onParam(k, newValue ? newValue.format('YYYY-MM-DD') : '')}
+                minDate={dayjs()}
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    size: 'small',
+                    variant: 'outlined',
+                    inputProps: { style: { fontSize: 12 } }
+                  }
+                }}
+              />
+            </LocalizationProvider>
           </Grid>
         ))}
       </Grid>
@@ -362,6 +378,26 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
   })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [bookedDates, setBookedDates] = useState([])
+  const [loadingDates, setLoadingDates] = useState(false)
+
+  useEffect(() => {
+    if (open && room && !isMock) {
+      const rid = room.roomId || room.id;
+      console.log('Fetching booked dates for room:', rid);
+      setLoadingDates(true)
+      getBookedDatesApi(rid)
+        .then(dates => {
+          console.log('Booked dates received:', dates);
+          setBookedDates(dates || []);
+        })
+        .catch(err => {
+          console.error('Error fetching booked dates:', err);
+          setBookedDates([]);
+        })
+        .finally(() => setLoadingDates(false))
+    }
+  }, [open, room, isMock])
 
   useEffect(() => {
     if (open) {
@@ -434,22 +470,54 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         </Box>
 
         {/* Date pickers */}
-        <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={6}>
-            <TextField fullWidth label={t('booking_page.check_in')} type="date" size="small"
-              value={form.checkIn}
-              onChange={e => setForm(f => ({ ...f, checkIn: e.target.value }))}
-              InputLabelProps={{ shrink: true }}
-            />
+        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={i18n.language}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
+            <Grid item xs={6}>
+              <DatePicker
+                label={t('booking_page.check_in')}
+                value={form.checkIn ? dayjs(form.checkIn) : null}
+                onChange={newValue => setForm(f => ({ ...f, checkIn: newValue ? newValue.format('YYYY-MM-DD') : '' }))}
+                minDate={dayjs()}
+                shouldDisableDate={(date) => {
+                  const dateStr = date.format('YYYY-MM-DD');
+                  return bookedDates.includes(dateStr);
+                }}
+                loading={loadingDates}
+                slotProps={{ 
+                  textField: { size: 'small', fullWidth: true },
+                  day: {
+                    sx: {
+                      '&.Mui-disabled': { color: 'rgba(0, 0, 0, 0.26) !important' }
+                    }
+                  }
+                }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <DatePicker
+                label={t('booking_page.check_out')}
+                value={form.checkOut ? dayjs(form.checkOut) : null}
+                onChange={newValue => setForm(f => ({ ...f, checkOut: newValue ? newValue.format('YYYY-MM-DD') : '' }))}
+                minDate={form.checkIn ? dayjs(form.checkIn).add(1, 'day') : dayjs().add(1, 'day')}
+                shouldDisableDate={(date) => {
+                  // Với Checkout, chúng ta cho phép chọn ngày mà người khác Check-in (vì mình trả phòng buổi sáng)
+                  // Nhưng KHÔNG được chọn ngày mà phòng đang bị chiếm ở giữa dải bận.
+                  const dateStr = date.format('YYYY-MM-DD');
+                  return bookedDates.includes(dateStr);
+                }}
+                loading={loadingDates}
+                slotProps={{ 
+                  textField: { size: 'small', fullWidth: true },
+                  day: {
+                    sx: {
+                      '&.Mui-disabled': { color: 'rgba(0, 0, 0, 0.26) !important' }
+                    }
+                  }
+                }}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <TextField fullWidth label={t('booking_page.check_out')} type="date" size="small"
-              value={form.checkOut}
-              onChange={e => setForm(f => ({ ...f, checkOut: e.target.value }))}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-        </Grid>
+        </LocalizationProvider>
 
 
         <Grid container spacing={2} sx={{ mb: 2 }}>

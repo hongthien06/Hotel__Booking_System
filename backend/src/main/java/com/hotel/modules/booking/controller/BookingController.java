@@ -93,4 +93,9 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.cancelBooking(id, null, ADMIN));
     }
 
+    @GetMapping("/room/{roomId}/booked-dates")
+    public ResponseEntity<List<String>> getBookedDates(@PathVariable Long roomId) {
+        return ResponseEntity.ok(bookingService.getBookedDatesByRoomId(roomId));
+    }
+
 }

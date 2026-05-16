@@ -36,3 +36,8 @@ export const checkOutApi = async (bookingId) => {
   const response = await axiosInstance.put(`${API_URL}/${bookingId}/check-out`);
   return response.data;
 };
+
+export const getBookedDatesApi = async (roomId) => {
+  const response = await axiosInstance.get(`${API_URL}/room/${roomId}/booked-dates`);
+  return response.data;
+};

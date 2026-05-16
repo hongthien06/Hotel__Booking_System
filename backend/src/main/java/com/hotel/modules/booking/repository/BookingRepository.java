@@ -32,9 +32,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByStatus(BookingStatus status);
 
-    @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId")
-    List<Booking> findByRoomId(@Param("roomId") Long roomId);
-
+    @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId AND b.status IN ('PENDING', 'CONFIRMED', 'CHECKED_IN')")
+    List<Booking> findActiveBookingsByRoomId(@Param("roomId") Long roomId);
 
     // Kiểm tra trùng lịch
     @Query("""
