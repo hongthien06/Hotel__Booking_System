@@ -283,7 +283,7 @@
     "available_rooms": "Available Rooms",
     "featured_rooms": "Featured Rooms",
     "no_rooms_found": "No available rooms found for this period. Please try another date!",
-    "booking_success": "Đặt phòng thành công. Hãy vào lịch sử để thanh toán",
+    "booking_success": "Booking successful. Please go to history to make payment.",
     "booking_confirm": "Confirm Booking",
     "special_request": "Special Request (optional)",
     "special_request_placeholder": "Example: high floor, sea view...",
@@ -308,7 +308,8 @@
     "available_rooms": "Available Rooms",
     "available_rooms_sub": "List of rooms matching your search requirements.",
     "weekend_deals_title": "Weekend Deals",
-    "weekend_deals_subtitle": "Save on stays from May 8 - May 10"
+    "weekend_deals_subtitle": "Save on stays from May 8 - May 10",
+    "non_refundable_warning": "Because the booking time is within 24 hours prior to check-in, this booking will be non-refundable if canceled."
   },
   "login_page": {
     "welcome": "Welcome Back",

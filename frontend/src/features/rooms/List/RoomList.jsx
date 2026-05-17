@@ -15,6 +15,9 @@ import RoomCard from './RoomCard'
 import RoomDetail from '../Details/RoomDetail'
 import RoomForm from '../Form/RoomForm'
 import RoomStatus, { STATUS_CONFIG } from '../RoomStatus'
+import BookingDialog from '../../bookings/components/BookingDialog'
+import LoginPromptModal from '../../../shared/components/modals/LoginPromptModal'
+import { useNavigate } from 'react-router-dom'
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const createRoomApi = (data) => axiosInstance.post(`${BASE_URL}/rooms`, data).then(r => r.data)
@@ -65,9 +68,17 @@ const EmptyState = ({ onAdd, canEdit }) => {
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
+const defaultSearchParams = {
+  checkIn: new Date().toISOString().split('T')[0],
+  checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+  adults: 2,
+  children: 0
+}
+
 const RoomList = () => {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuth()
   const canEdit = user?.roles?.some(r =>
     ['ADMIN', 'ROLE_ADMIN', 'MANAGER', 'ROLE_MANAGER'].includes(
       typeof r === 'string' ? r : (r?.roleName || r?.authority || '')
@@ -84,6 +95,8 @@ const RoomList = () => {
 
   const [selectedRoom, setSelectedRoom] = useState(null)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false)
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
   const [editRoom, setEditRoom] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
@@ -170,6 +183,16 @@ const RoomList = () => {
   const handleCardClick = (room) => { setSelectedRoom(room); setDetailOpen(true) }
   const handleEditClick = (room) => { setEditRoom(room); setFormOpen(true); setDetailOpen(false) }
   const handleAddClick = () => { setEditRoom(null); setFormOpen(true) }
+
+  const handleBookClick = (room) => {
+    if (!isAuthenticated) {
+      setLoginPromptOpen(true)
+      return
+    }
+    setSelectedRoom(room)
+    setBookingDialogOpen(true)
+    setDetailOpen(false)
+  }
 
   const handleFormSubmit = async (payload) => {
     setFormLoading(true)
@@ -553,6 +576,7 @@ const RoomList = () => {
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
         onEdit={handleEditClick}
+        onBook={handleBookClick}
         canEdit={canEdit}
       />
 
@@ -563,6 +587,29 @@ const RoomList = () => {
         onSubmit={handleFormSubmit}
         editRoom={editRoom}
         loading={formLoading}
+      />
+
+      {/* Booking Dialog */}
+      <BookingDialog
+        open={bookingDialogOpen}
+        room={selectedRoom}
+        isMock={false}
+        searchParams={defaultSearchParams}
+        onClose={() => setBookingDialogOpen(false)}
+        onSuccess={() => {
+          setBookingDialogOpen(false)
+          showToast(t('booking_page.booking_success', 'Đặt phòng thành công!'), 'success')
+        }}
+      />
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        open={loginPromptOpen}
+        onClose={() => setLoginPromptOpen(false)}
+        onLogin={() => {
+          setLoginPromptOpen(false)
+          navigate('/login')
+        }}
       />
 
       {/* Toast */}

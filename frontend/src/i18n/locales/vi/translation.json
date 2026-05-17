@@ -304,7 +304,8 @@
     "clear_search": "Xóa tìm kiếm",
     "search_results": "Kết quả tìm kiếm",
     "weekend_deals_title": "Ưu đãi cho cuối tuần",
-    "weekend_deals_subtitle": "Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5"
+    "weekend_deals_subtitle": "Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5",
+    "non_refundable_warning": "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy."
   },
   "login_page": {
     "welcome": "Chào mừng trở lại",
