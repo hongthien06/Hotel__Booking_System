@@ -15,6 +15,9 @@ import RoomCard from './RoomCard'
 import RoomDetail from '../Details/RoomDetail'
 import RoomForm from '../Form/RoomForm'
 import RoomStatus, { STATUS_CONFIG } from '../RoomStatus'
+import BookingDialog from '../../bookings/components/BookingDialog'
+import LoginPromptModal from '../../../shared/components/modals/LoginPromptModal'
+import { useNavigate } from 'react-router-dom'
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const createRoomApi = (data) => axiosInstance.post(`${BASE_URL}/rooms`, data).then(r => r.data)
@@ -65,9 +68,17 @@ const EmptyState = ({ onAdd, canEdit }) => {
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
+const defaultSearchParams = {
+  checkIn: new Date().toISOString().split('T')[0],
+  checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+  adults: 2,
+  children: 0
+}
+
 const RoomList = () => {
   const { t } = useTranslation()
-  const { user } = useAuth()
+  const navigate = useNavigate()
+  const { user, isAuthenticated } = useAuth()
   const canEdit = user?.roles?.some(r =>
     ['ADMIN', 'ROLE_ADMIN', 'MANAGER', 'ROLE_MANAGER'].includes(
       typeof r === 'string' ? r : (r?.roleName || r?.authority || '')
@@ -84,6 +95,8 @@ const RoomList = () => {
 
   const [selectedRoom, setSelectedRoom] = useState(null)
   const [detailOpen, setDetailOpen] = useState(false)
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false)
+  const [loginPromptOpen, setLoginPromptOpen] = useState(false)
   const [formOpen, setFormOpen] = useState(false)
   const [editRoom, setEditRoom] = useState(null)
   const [formLoading, setFormLoading] = useState(false)
@@ -171,6 +184,16 @@ const RoomList = () => {
   const handleEditClick = (room) => { setEditRoom(room); setFormOpen(true); setDetailOpen(false) }
   const handleAddClick = () => { setEditRoom(null); setFormOpen(true) }
 
+  const handleBookClick = (room) => {
+    if (!isAuthenticated) {
+      setLoginPromptOpen(true)
+      return
+    }
+    setSelectedRoom(room)
+    setBookingDialogOpen(true)
+    setDetailOpen(false)
+  }
+
   const handleFormSubmit = async (payload) => {
     setFormLoading(true)
     try {
@@ -179,15 +202,15 @@ const RoomList = () => {
         setRooms(prev => prev.map(r =>
           (r.roomId || r.id) === (editRoom.roomId || editRoom.id) ? updated : r
         ))
-        showToast(`Đã cập nhật phòng #${updated.roomNumber}`)
+        showToast(t('rooms.update_success', 'Đã cập nhật phòng #{{roomNumber}}', { roomNumber: updated.roomNumber }))
       } else {
         const created = await createRoomApi(payload)
         setRooms(prev => [...prev, created])
-        showToast(`Đã tạo phòng #${created.roomNumber}`)
+        showToast(t('rooms.create_success', 'Đã tạo phòng #{{roomNumber}}', { roomNumber: created.roomNumber }))
       }
       setFormOpen(false)
     } catch (err) {
-      showToast(err?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.', 'error')
+      showToast(err?.response?.data?.message || t('rooms.generic_error', 'Có lỗi xảy ra, vui lòng thử lại.'), 'error')
     } finally {
       setFormLoading(false)
     }
@@ -201,9 +224,9 @@ const RoomList = () => {
     try {
       await deleteRoomApi(deleteConfirm.roomId)
       setRooms(prev => prev.filter(r => (r.roomId || r.id) !== deleteConfirm.roomId))
-      showToast(`Đã xóa phòng #${deleteConfirm.roomNumber}`)
+      showToast(t('rooms.delete_success', 'Đã xóa phòng #{{roomNumber}}', { roomNumber: deleteConfirm.roomNumber }))
     } catch (err) {
-      showToast(err?.response?.data?.message || 'Không thể xóa phòng này.', 'error')
+      showToast(err?.response?.data?.message || t('rooms.delete_error', 'Không thể xóa phòng này.'), 'error')
     } finally {
       setDeleteConfirm({ open: false, roomId: null, roomNumber: '' })
     }
@@ -416,11 +439,11 @@ const RoomList = () => {
       >
         <Box sx={{ p: 2, textAlign: 'center' }}>
           <Typography variant="h6" fontWeight={800} color="error.main" mb={1}>
-            Xác nhận xóa phòng
+            {t('rooms.delete_confirm_title', 'Xác nhận xóa phòng')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Bạn có chắc chắn muốn xóa phòng <strong>#{deleteConfirm.roomNumber}</strong>?
-            Thao tác này sẽ chuyển trạng thái phòng thành INACTIVE.
+            {t('rooms.delete_confirm_desc', 'Bạn có chắc chắn muốn xóa phòng')} <strong>#{deleteConfirm.roomNumber}</strong>?
+            {" "}{t('rooms.delete_confirm_warning', 'Thao tác này sẽ chuyển trạng thái phòng thành INACTIVE.')}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
@@ -436,7 +459,7 @@ const RoomList = () => {
               '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
-            HỦY BỎ
+            {t('rooms.cancel', 'HỦY BỎ')}
           </Button>
           <Button
             fullWidth
@@ -450,7 +473,7 @@ const RoomList = () => {
               '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
-            XÓA PHÒNG
+            {t('rooms.delete_room_btn', 'XÓA PHÒNG')}
           </Button>
         </Box>
       </Dialog>
@@ -553,6 +576,7 @@ const RoomList = () => {
         open={detailOpen}
         onClose={() => setDetailOpen(false)}
         onEdit={handleEditClick}
+        onBook={handleBookClick}
         canEdit={canEdit}
       />
 
@@ -563,6 +587,29 @@ const RoomList = () => {
         onSubmit={handleFormSubmit}
         editRoom={editRoom}
         loading={formLoading}
+      />
+
+      {/* Booking Dialog */}
+      <BookingDialog
+        open={bookingDialogOpen}
+        room={selectedRoom}
+        isMock={false}
+        searchParams={defaultSearchParams}
+        onClose={() => setBookingDialogOpen(false)}
+        onSuccess={() => {
+          setBookingDialogOpen(false)
+          showToast(t('booking_page.booking_success', 'Đặt phòng thành công!'), 'success')
+        }}
+      />
+
+      {/* Login Prompt Modal */}
+      <LoginPromptModal
+        open={loginPromptOpen}
+        onClose={() => setLoginPromptOpen(false)}
+        onLogin={() => {
+          setLoginPromptOpen(false)
+          navigate('/login')
+        }}
       />
 
       {/* Toast */}

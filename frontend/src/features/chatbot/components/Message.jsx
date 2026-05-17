@@ -2,19 +2,21 @@ import React, { memo } from 'react';
 import { Box, Typography, Avatar, CircularProgress } from '@mui/material';
 import { SmartToy, Person } from '@mui/icons-material';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from 'react-i18next';
 
 const PC = '#c0496e';
 
-const formatTime = (dateStr) => {
+const formatTime = (dateStr, lang) => {
   if (!dateStr) return '';
   // Ensure the date string is treated as UTC if no timezone is provided
   const normalizedDateStr =
     dateStr.endsWith('Z') || dateStr.includes('+') ? dateStr : `${dateStr}Z`;
   const d = new Date(normalizedDateStr);
-  return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString(lang === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
 };
 
 const Message = memo(({ message, isTyping = false }) => {
+  const { t, i18n } = useTranslation();
   const isUser = message.role === 'USER';
 
   return (
@@ -87,7 +89,7 @@ const Message = memo(({ message, isTyping = false }) => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.3 }}>
               <CircularProgress size={14} sx={{ color: PC }} />
               <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#888' }}>
-                Đang trả lời...
+                {t('chatbot.typing', 'Đang trả lời...')}
               </Typography>
             </Box>
           ) : isUser ? (
@@ -114,7 +116,7 @@ const Message = memo(({ message, isTyping = false }) => {
               px: 0.5,
             }}
           >
-            {formatTime(message.createdAt)}
+            {formatTime(message.createdAt, i18n.language)}
           </Typography>
         )}
       </Box>

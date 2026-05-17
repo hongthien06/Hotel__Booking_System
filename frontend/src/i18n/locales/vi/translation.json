@@ -304,7 +304,8 @@
     "clear_search": "Xóa tìm kiếm",
     "search_results": "Kết quả tìm kiếm",
     "weekend_deals_title": "Ưu đãi cho cuối tuần",
-    "weekend_deals_subtitle": "Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5"
+    "weekend_deals_subtitle": "Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5",
+    "non_refundable_warning": "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy."
   },
   "login_page": {
     "welcome": "Chào mừng trở lại",
@@ -414,12 +415,37 @@
     "save_to_cloud": "Lưu lên Cloud",
     "uploading": "Đang tải...",
     "cloudify_success": "Đã lưu lên Cloud!",
-    "upload_error": "Lỗi khi tải ảnh lên"
+    "upload_error": "Lỗi khi tải ảnh lên",
+    "update_success": "Đã cập nhật phòng #{{roomNumber}}",
+    "create_success": "Đã tạo phòng #{{roomNumber}}",
+    "delete_success": "Đã xóa phòng #{{roomNumber}}",
+    "generic_error": "Có lỗi xảy ra, vui lòng thử lại.",
+    "delete_error": "Không thể xóa phòng này.",
+    "delete_confirm_title": "Xác nhận xóa phòng",
+    "delete_confirm_desc": "Bạn có chắc chắn muốn xóa phòng",
+    "delete_confirm_warning": "Thao tác này sẽ chuyển trạng thái phòng thành INACTIVE.",
+    "cancel": "HỦY BỎ",
+    "delete_room_btn": "XÓA PHÒNG"
   },
   "chatbot": {
     "placeholder": "Nhập tin nhắn...",
     "title": "Trợ lý HotelBot",
-    "welcome": "Xin chào! Tôi có thể giúp gì cho bạn?"
+    "welcome": "Xin chào! Tôi có thể giúp gì cho bạn?",
+    "conversation": "Cuộc trò chuyện",
+    "assistant_title": "🏨 Trợ lý Khách sạn",
+    "close_conversation": "Đóng cuộc trò chuyện",
+    "new_conversation": "Cuộc trò chuyện mới",
+    "no_conversations": "Chưa có cuộc trò chuyện nào.",
+    "start_new_to_support": "Bắt đầu cuộc trò chuyện mới để được hỗ trợ!",
+    "status_closed": "Đã đóng",
+    "status_open": "Đang mở",
+    "hello": "Xin chào!",
+    "assistant_desc": "Tôi là trợ lý ảo của hệ thống khách sạn. Hãy hỏi tôi về phòng, giá cả, dịch vụ, hoặc bất cứ điều gì bạn cần!",
+    "conversation_closed": "Cuộc trò chuyện này đã đóng.",
+    "typing": "Đang trả lời...",
+    "error_load": "Không thể tải tin nhắn.",
+    "error_create": "Không thể tạo cuộc trò chuyện.",
+    "error_send": "Gửi tin nhắn thất bại. Vui lòng thử lại."
   },
   "room_types": {
     "standard": "Standard",

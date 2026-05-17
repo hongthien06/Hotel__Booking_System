@@ -283,7 +283,7 @@
     "available_rooms": "Available Rooms",
     "featured_rooms": "Featured Rooms",
     "no_rooms_found": "No available rooms found for this period. Please try another date!",
-    "booking_success": "Đặt phòng thành công. Hãy vào lịch sử để thanh toán",
+    "booking_success": "Booking successful. Please go to history to make payment.",
     "booking_confirm": "Confirm Booking",
     "special_request": "Special Request (optional)",
     "special_request_placeholder": "Example: high floor, sea view...",
@@ -308,7 +308,8 @@
     "available_rooms": "Available Rooms",
     "available_rooms_sub": "List of rooms matching your search requirements.",
     "weekend_deals_title": "Weekend Deals",
-    "weekend_deals_subtitle": "Save on stays from May 8 - May 10"
+    "weekend_deals_subtitle": "Save on stays from May 8 - May 10",
+    "non_refundable_warning": "Because the booking time is within 24 hours prior to check-in, this booking will be non-refundable if canceled."
   },
   "login_page": {
     "welcome": "Welcome Back",
@@ -418,12 +419,37 @@
     "save_to_cloud": "Save to Cloud",
     "uploading": "Uploading...",
     "cloudify_success": "Saved to Cloud!",
-    "upload_error": "Error uploading image"
+    "upload_error": "Error uploading image",
+    "update_success": "Room #{{roomNumber}} updated successfully",
+    "create_success": "Room #{{roomNumber}} created successfully",
+    "delete_success": "Room #{{roomNumber}} deleted successfully",
+    "generic_error": "An error occurred, please try again.",
+    "delete_error": "Cannot delete this room.",
+    "delete_confirm_title": "Confirm Room Deletion",
+    "delete_confirm_desc": "Are you sure you want to delete room",
+    "delete_confirm_warning": "This action will change the room status to INACTIVE.",
+    "cancel": "CANCEL",
+    "delete_room_btn": "DELETE ROOM"
   },
   "chatbot": {
     "placeholder": "Type a message...",
     "title": "HotelBot Assistant",
-    "welcome": "Hello! How can I help you today?"
+    "welcome": "Hello! How can I help you today?",
+    "conversation": "Conversation",
+    "assistant_title": "🏨 Hotel Assistant",
+    "close_conversation": "Close conversation",
+    "new_conversation": "New conversation",
+    "no_conversations": "No conversations yet.",
+    "start_new_to_support": "Start a new conversation to get support!",
+    "status_closed": "Closed",
+    "status_open": "Open",
+    "hello": "Hello!",
+    "assistant_desc": "I am the hotel virtual assistant. Ask me about rooms, prices, services, or anything you need!",
+    "conversation_closed": "This conversation is closed.",
+    "typing": "Replying...",
+    "error_load": "Failed to load messages.",
+    "error_create": "Failed to create conversation.",
+    "error_send": "Failed to send message. Please try again."
   },
   "room_types": {
     "standard": "Standard",

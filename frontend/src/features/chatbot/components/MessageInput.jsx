@@ -2,9 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Box, IconButton, InputBase } from '@mui/material';
 import { Send } from '@mui/icons-material';
 
+import { useTranslation } from 'react-i18next';
+
 const PC = '#c0496e';
 
 const MessageInput = ({ onSend, disabled = false }) => {
+  const { t } = useTranslation();
   const [text, setText] = useState('');
   const inputRef = useRef(null);
 
@@ -45,7 +48,7 @@ const MessageInput = ({ onSend, disabled = false }) => {
         value={text}
         onChange={(e) => setText(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Nhập tin nhắn..."
+        placeholder={t('chatbot.placeholder', 'Nhập tin nhắn...')}
         disabled={disabled}
         multiline
         maxRows={4}
