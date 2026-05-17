@@ -4,9 +4,11 @@ import Checkbox from '@mui/material/Checkbox'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import FormGroup from '@mui/material/FormGroup'
 import TextField from '@mui/material/TextField'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import CountryCode from './CountryCode'
+import { getMyProfileApi } from '../../../../../shared/api/userApi'
 import { useBookingContext } from '../../../_id'
+import CountryCode from './CountryCode'
 
 const InfoContact = () => {
   const { t } = useTranslation()
@@ -14,6 +16,13 @@ const InfoContact = () => {
 
   const defaultName = booking?.userName || ''
   const defaultEmail = booking?.userEmail || ''
+  const [phone, setPhone] = useState('')
+
+  useEffect(() => {
+    getMyProfileApi()
+      .then(data => { if (data?.phone) setPhone(data.phone) })
+      .catch(() => {})
+  }, [])
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -64,6 +73,8 @@ const InfoContact = () => {
                 fullWidth
                 type="tel"
                 variant="outlined"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
                 sx={{
                   '& .MuiOutlinedInput-root': {
                     height: '48px',
