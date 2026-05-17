@@ -1039,9 +1039,9 @@ const BookingPage = () => {
       ) : (
         <Box sx={{
           position: 'fixed',
-          top: 0, left: 0,
+          top: '58px', left: 0,
           width: sidebarOpen ? SIDEBAR_W : 0,
-          height: '100vh',
+          height: 'calc(100vh - 58px)',
           overflowY: sidebarOpen ? 'auto' : 'hidden',
           overflowX: 'hidden',
           transition: 'width 0.3s ease',
