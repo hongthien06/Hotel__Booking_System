@@ -122,6 +122,13 @@ const nightsBetween = (a, b) => {
   return diff > 0 ? Math.round(diff / 86400000) : 1
 }
 
+// Tra cứu key destination trong DESTINATIONS để hỗ trợ i18n
+const getDestinationKey = (destinationStr) => {
+  if (!destinationStr) return null
+  const found = DESTINATIONS.find(d => d.province === destinationStr || d.name === destinationStr)
+  return found ? found.key : null
+}
+
 /* ─── Sidebar ─────────────────────────────────────────── */
 const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes,
   amenities, selectedAmenities, setSelectedAmenities,
@@ -962,8 +969,20 @@ const BookingPage = () => {
             sx={{ display: 'flex', alignItems: 'center', gap: 0.3, mb: 1 }}>
             <LocationOn fontSize="inherit" />
             {isMock
-              ? `${room.location} · ${room.bed}`
-              : `${room.province || 'Hà Nội'} · ${room.beds && room.beds.length > 0 ? room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ') : (room.typeName || 'Standard')}`}
+              ? (() => {
+                  const key = getDestinationKey(room.location)
+                  const loc = key ? t(`destinations.${key}.name`) : room.location
+                  return `${loc} · ${room.bed}`
+                })()
+              : (() => {
+                  const rawProv = room.province || 'Hà Nội'
+                  const key = getDestinationKey(rawProv)
+                  const loc = key ? t(`destinations.${key}.name`) : rawProv
+                  const beds = room.beds && room.beds.length > 0
+                    ? room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ')
+                    : (room.typeName || 'Standard')
+                  return `${loc} · ${beds}`
+                })()}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
             <Rating value={ratingValue} precision={0.1} readOnly size="small"
@@ -1106,7 +1125,12 @@ const BookingPage = () => {
                               textOverflow: 'ellipsis',
                               whiteSpace: 'nowrap'
                             }}>
-                              {s.destination || t('booking_page.anywhere')}
+                              {(() => {
+                                const key = getDestinationKey(s.destination)
+                                return key
+                                  ? t(`destinations.${key}.name`)
+                                  : (s.destination || t('booking_page.anywhere'))
+                              })()}
                             </Typography>
                             <Typography variant="caption" display="block" color="text.secondary">
                               {s.checkIn} — {s.checkOut}

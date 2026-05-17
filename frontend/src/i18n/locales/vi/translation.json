@@ -169,6 +169,7 @@
   },
   "bookings_history": {
     "title": "Tìm theo ngày nhận, trả",
+    "subtitle": "Quản lý các chuyến đi và lịch sử đặt phòng của bạn",
     "check_in": "NHẬN PHÒNG",
     "check_out": "TRẢ PHÒNG",
     "check_in_short": "Nhận",

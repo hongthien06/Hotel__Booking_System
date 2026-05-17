@@ -127,7 +127,7 @@ const BookingHistoryPage = () => {
           {t('header.bookings_history') || 'LỊCH SỬ ĐẶT PHÒNG'}
         </Typography>
         <Typography variant="body2" sx={{ color: '#666' }}>
-          {t('bookings_history.subtitle') || 'Quản lý các chuyến đi và lịch sử đặt phòng của bạn'}
+          {t('bookings_history.subtitle', 'Quản lý các chuyến đi và lịch sử đặt phòng của bạn')}
         </Typography>
       </Box>
 
