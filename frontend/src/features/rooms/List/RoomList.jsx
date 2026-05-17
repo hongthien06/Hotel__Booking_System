@@ -202,15 +202,15 @@ const RoomList = () => {
         setRooms(prev => prev.map(r =>
           (r.roomId || r.id) === (editRoom.roomId || editRoom.id) ? updated : r
         ))
-        showToast(`Đã cập nhật phòng #${updated.roomNumber}`)
+        showToast(t('rooms.update_success', 'Đã cập nhật phòng #{{roomNumber}}', { roomNumber: updated.roomNumber }))
       } else {
         const created = await createRoomApi(payload)
         setRooms(prev => [...prev, created])
-        showToast(`Đã tạo phòng #${created.roomNumber}`)
+        showToast(t('rooms.create_success', 'Đã tạo phòng #{{roomNumber}}', { roomNumber: created.roomNumber }))
       }
       setFormOpen(false)
     } catch (err) {
-      showToast(err?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.', 'error')
+      showToast(err?.response?.data?.message || t('rooms.generic_error', 'Có lỗi xảy ra, vui lòng thử lại.'), 'error')
     } finally {
       setFormLoading(false)
     }
@@ -224,9 +224,9 @@ const RoomList = () => {
     try {
       await deleteRoomApi(deleteConfirm.roomId)
       setRooms(prev => prev.filter(r => (r.roomId || r.id) !== deleteConfirm.roomId))
-      showToast(`Đã xóa phòng #${deleteConfirm.roomNumber}`)
+      showToast(t('rooms.delete_success', 'Đã xóa phòng #{{roomNumber}}', { roomNumber: deleteConfirm.roomNumber }))
     } catch (err) {
-      showToast(err?.response?.data?.message || 'Không thể xóa phòng này.', 'error')
+      showToast(err?.response?.data?.message || t('rooms.delete_error', 'Không thể xóa phòng này.'), 'error')
     } finally {
       setDeleteConfirm({ open: false, roomId: null, roomNumber: '' })
     }
@@ -439,11 +439,11 @@ const RoomList = () => {
       >
         <Box sx={{ p: 2, textAlign: 'center' }}>
           <Typography variant="h6" fontWeight={800} color="error.main" mb={1}>
-            Xác nhận xóa phòng
+            {t('rooms.delete_confirm_title', 'Xác nhận xóa phòng')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Bạn có chắc chắn muốn xóa phòng <strong>#{deleteConfirm.roomNumber}</strong>?
-            Thao tác này sẽ chuyển trạng thái phòng thành INACTIVE.
+            {t('rooms.delete_confirm_desc', 'Bạn có chắc chắn muốn xóa phòng')} <strong>#{deleteConfirm.roomNumber}</strong>?
+            {" "}{t('rooms.delete_confirm_warning', 'Thao tác này sẽ chuyển trạng thái phòng thành INACTIVE.')}
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 2, p: 2 }}>
@@ -459,7 +459,7 @@ const RoomList = () => {
               '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
-            HỦY BỎ
+            {t('rooms.cancel', 'HỦY BỎ')}
           </Button>
           <Button
             fullWidth
@@ -473,7 +473,7 @@ const RoomList = () => {
               '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
-            XÓA PHÒNG
+            {t('rooms.delete_room_btn', 'XÓA PHÒNG')}
           </Button>
         </Box>
       </Dialog>

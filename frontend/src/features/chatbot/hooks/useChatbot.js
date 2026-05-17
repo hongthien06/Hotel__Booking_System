@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   createConversationApi,
   getConversationsByUserApi,
@@ -25,6 +26,7 @@ const getOrCreateSessionId = () => {
 };
 
 export const useChatbot = () => {
+  const { t } = useTranslation();
   const { user, isAuthenticated } = useAuth();
 
   // Conversations
@@ -66,11 +68,11 @@ export const useChatbot = () => {
       setMessages(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('Failed to load messages', err);
-      setError('Không thể tải tin nhắn.');
+      setError(t('chatbot.error_load', 'Không thể tải tin nhắn.'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   /* ─── Select a conversation ───────────────────────── */
   const selectConversation = useCallback(
@@ -96,7 +98,7 @@ export const useChatbot = () => {
         const data = await createConversationApi({
           userId,
           sessionId,
-          title: title || 'Cuộc trò chuyện mới',
+          title: title || t('chatbot.new_conversation', 'Cuộc trò chuyện mới'),
         });
 
         setConversations((prev) => [data, ...prev]);
@@ -106,11 +108,11 @@ export const useChatbot = () => {
         return data;
       } catch (err) {
         console.error('Failed to create conversation', err);
-        setError('Không thể tạo cuộc trò chuyện.');
+        setError(t('chatbot.error_create', 'Không thể tạo cuộc trò chuyện.'));
         return null;
       }
     },
-    [isAuthenticated, user],
+    [isAuthenticated, user, t],
   );
 
   /* ─── Send a message ──────────────────────────────── */
@@ -169,7 +171,7 @@ export const useChatbot = () => {
         const msg =
           err?.response?.data?.message ||
           err?.response?.data?.error ||
-          'Gửi tin nhắn thất bại. Vui lòng thử lại.';
+          t('chatbot.error_send', 'Gửi tin nhắn thất bại. Vui lòng thử lại.');
         setError(msg);
         // Remove optimistic message on error
         setMessages((prev) => prev.filter((m) => m.messageId !== optimisticId));
@@ -178,7 +180,7 @@ export const useChatbot = () => {
         setSending(false);
       }
     },
-    [activeConvId, createConversation],
+    [activeConvId, createConversation, t],
   );
 
   /* ─── Close a conversation ────────────────────────── */

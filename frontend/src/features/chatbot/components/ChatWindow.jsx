@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Typography,
@@ -45,6 +46,7 @@ const ChatWindow = ({
   // Window control
   onClose,
 }) => {
+  const { t, i18n } = useTranslation();
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -96,18 +98,18 @@ const ChatWindow = ({
           }}
         >
           {activeConvId
-            ? activeConversation?.title || 'Cuộc trò chuyện'
-            : '🏨 Hotel Assistant'}
+            ? activeConversation?.title || t('chatbot.conversation', 'Cuộc trò chuyện')
+            : t('chatbot.assistant_title', '🏨 Hotel Assistant')}
         </Typography>
         {!activeConvId && (
           <Typography variant="caption" sx={{ opacity: 0.85, fontSize: '0.7rem' }}>
-            Xin chào! Tôi có thể giúp gì cho bạn?
+            {t('chatbot.welcome', 'Xin chào! Tôi có thể giúp gì cho bạn?')}
           </Typography>
         )}
       </Box>
 
       {activeConvId && activeConversation?.status !== 'CLOSED' && (
-        <Tooltip title="Đóng cuộc trò chuyện">
+        <Tooltip title={t('chatbot.close_conversation', 'Đóng cuộc trò chuyện')}>
           <IconButton
             size="small"
             onClick={() => onCloseConversation(activeConvId)}
@@ -152,7 +154,7 @@ const ChatWindow = ({
         >
           <Add sx={{ color: PC, fontSize: 20 }} />
           <Typography variant="body2" sx={{ fontWeight: 700, color: PC }}>
-            Cuộc trò chuyện mới
+            {t('chatbot.new_conversation', 'Cuộc trò chuyện mới')}
           </Typography>
         </Box>
       </Box>
@@ -165,10 +167,10 @@ const ChatWindow = ({
           <Box sx={{ textAlign: 'center', py: 5, px: 2 }}>
             <ChatBubbleOutline sx={{ fontSize: 48, color: '#ddd', mb: 1 }} />
             <Typography variant="body2" color="text.secondary">
-              Chưa có cuộc trò chuyện nào.
+              {t('chatbot.no_conversations', 'Chưa có cuộc trò chuyện nào.')}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              Bắt đầu cuộc trò chuyện mới để được hỗ trợ!
+              {t('chatbot.start_new_to_support', 'Bắt đầu cuộc trò chuyện mới để được hỗ trợ!')}
             </Typography>
           </Box>
         ) : (
@@ -199,10 +201,10 @@ const ChatWindow = ({
                           fontSize: '0.82rem',
                         }}
                       >
-                        {conv.title || 'Cuộc trò chuyện'}
+                        {conv.title || t('chatbot.conversation', 'Cuộc trò chuyện')}
                       </Typography>
                       <Chip
-                        label={conv.status === 'CLOSED' ? 'Đã đóng' : 'Đang mở'}
+                        label={conv.status === 'CLOSED' ? t('chatbot.status_closed', 'Đã đóng') : t('chatbot.status_open', 'Đang mở')}
                         size="small"
                         sx={{
                           height: 20,
@@ -227,7 +229,7 @@ const ChatWindow = ({
                               dateStr.endsWith('Z') || dateStr.includes('+')
                                 ? dateStr
                                 : `${dateStr}Z`;
-                            return new Date(normalizedDateStr).toLocaleDateString('vi-VN', {
+                            return new Date(normalizedDateStr).toLocaleDateString(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
                               day: '2-digit',
                               month: '2-digit',
                               hour: '2-digit',
@@ -296,11 +298,10 @@ const ChatWindow = ({
               variant="subtitle2"
               sx={{ fontWeight: 700, color: '#555', mb: 0.5 }}
             >
-              Xin chào!
+              {t('chatbot.hello', 'Xin chào!')}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.5 }}>
-              Tôi là trợ lý ảo của hệ thống khách sạn. Hãy hỏi tôi về phòng, giá
-              cả, dịch vụ, hoặc bất cứ điều gì bạn cần!
+              {t('chatbot.assistant_desc', 'Tôi là trợ lý ảo của hệ thống khách sạn. Hãy hỏi tôi về phòng, giá cả, dịch vụ, hoặc bất cứ điều gì bạn cần!')}
             </Typography>
           </Box>
         )}
@@ -326,7 +327,7 @@ const ChatWindow = ({
       ) : (
         <Box sx={{ p: 1.5, textAlign: 'center', bgcolor: '#f5f5f5' }}>
           <Typography variant="caption" color="text.secondary">
-            Cuộc trò chuyện này đã đóng.
+            {t('chatbot.conversation_closed', 'Cuộc trò chuyện này đã đóng.')}
           </Typography>
         </Box>
       )}
