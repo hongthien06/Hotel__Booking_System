@@ -133,6 +133,37 @@
         "comment": "Đã đặt phòng cho gia đình qua hệ thống này, rất tiện lợi và nhanh chóng. 10 điểm!"
       }
     },
+    "policy": {
+      "overline": "QUY ĐỊNH",
+      "title": "Chính sách chỗ ở",
+      "subtitle": "Những điều bạn cần biết trước khi đặt phòng",
+      "cards": {
+        "checkin": {
+          "title": "Nhận phòng & Trả phòng",
+          "desc": "Nhận phòng từ 14:00, trả phòng trước 12:00. Nhận/trả sớm hoặc muộn tùy tình trạng phòng, có thể phát sinh phụ phí."
+        },
+        "cancel": {
+          "title": "Chính sách hủy phòng",
+          "desc": "Hủy miễn phí trước 24 giờ nhận phòng. Hủy muộn hoặc không đến có thể bị tính phí toàn bộ giá trị đặt phòng."
+        },
+        "payment": {
+          "title": "Thanh toán",
+          "desc": "Chấp nhận thẻ tín dụng, thẻ ghi nợ và thanh toán trực tuyến. Xác nhận chỗ sau khi thanh toán hoàn tất."
+        },
+        "rules": {
+          "title": "Nội quy lưu trú",
+          "desc": "Không hút thuốc trong phòng, không mang thú cưng. Giữ yên tĩnh vào ban đêm để tôn trọng khách xung quanh."
+        },
+        "request": {
+          "title": "Yêu cầu đặc biệt",
+          "desc": "Ghi chú yêu cầu khi đặt phòng. Chúng tôi cố gắng đáp ứng tối đa nhưng không đảm bảo tuyệt đối."
+        },
+        "safety": {
+          "title": "An toàn & Bảo mật",
+          "desc": "Két sắt trong phòng, camera an ninh 24/7. Khách chịu trách nhiệm mọi thiệt hại tài sản trong thời gian lưu trú."
+        }
+      }
+    },
     "cta": {
       "title": "Sẵn sàng cho chuyến nghỉ dưỡng tiếp theo?",
       "subtitle": "Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt!"
@@ -306,7 +337,9 @@
     "search_results": "Kết quả tìm kiếm",
     "weekend_deals_title": "Ưu đãi cho cuối tuần",
     "weekend_deals_subtitle": "Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5",
-    "non_refundable_warning": "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy."
+    "non_refundable_warning": "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy.",
+    "checkin_time": "Nhận phòng từ 14g",
+    "checkout_time": "Trả phòng trước 12h"
   },
   "login_page": {
     "welcome": "Chào mừng trở lại",
@@ -372,6 +405,7 @@
     "status_maintenance": "Bảo trì",
     "status_inactive": "Ngừng HĐ",
     "validation_required": "Vui lòng điền đầy đủ: Khách sạn, Chi nhánh và Loại phòng!",
+    "check_out_after_check_in": "Ngày trả phòng phải sau hoặc bằng ngày nhận phòng",
     "management": "Quản lý phòng",
     "rooms_in_system": "phòng trong hệ thống",
     "add_room": "Thêm phòng",

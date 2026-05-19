@@ -106,7 +106,7 @@ public class RoomService {
             LocalDate checkIn, LocalDate checkOut,
             Long hotelId, String province, BigDecimal minPrice, BigDecimal maxPrice,
             List<String> typeNames, List<String> bedTypes, List<String> amenityNames) {
-        if (!checkOut.isAfter(checkIn)) throw new RuntimeException("Check out date must be after check in");
+        if (checkOut.isBefore(checkIn)) throw new RuntimeException("Check out date must be after check in");
         List<Long> busyIds = bookingService.getOccupiedRoomIds(checkIn, checkOut);
 
         List<BedType> bedTypeEnums = null;

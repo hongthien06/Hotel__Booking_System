@@ -227,8 +227,8 @@ public class BookingService {
     @Transactional
     public BookingDTO createBooking(BookingRequest request, Long userId) {
 
-        // 1. Kiểm tra thời gian checkIn < checkOut
-        if (!request.getCheckOut().isAfter(request.getCheckIn())) {
+        // 1. Kiểm tra checkOut không trước checkIn (cho phép cùng ngày)
+        if (request.getCheckOut().isBefore(request.getCheckIn())) {
             throw new RuntimeException("Ngày checkout phải sau ngày checkin");
         }
 
@@ -251,7 +251,7 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("User không tồn tại"));
 
         // 5. Tính toán
-        short totalNights = (short) ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut());
+        short totalNights = (short) Math.max(1, ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut()));
 
         // 6. Kiểm tra sức chứa (Capacity Check) — maxGuests nằm trên RoomType
         int maxGuests = room.getRoomType().getMaxGuests() != null ? room.getRoomType().getMaxGuests() : 2;

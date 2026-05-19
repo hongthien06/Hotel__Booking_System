@@ -133,6 +133,37 @@
         "comment": "Booked a room for my family through this system, very convenient and fast. 10 points!"
       }
     },
+    "policy": {
+      "overline": "POLICIES",
+      "title": "Accommodation Policies",
+      "subtitle": "What you need to know before booking",
+      "cards": {
+        "checkin": {
+          "title": "Check-in & Check-out",
+          "desc": "Check-in from 14:00, check-out by 12:00. Early or late requests depend on availability and may incur additional fees."
+        },
+        "cancel": {
+          "title": "Cancellation Policy",
+          "desc": "Free cancellation up to 24 hours before check-in. Late cancellation or no-show may result in a full charge."
+        },
+        "payment": {
+          "title": "Payment",
+          "desc": "Accepts credit cards, debit cards and online payments. Booking is confirmed once payment is completed."
+        },
+        "rules": {
+          "title": "House Rules",
+          "desc": "No smoking in rooms, no pets allowed. Please maintain quiet hours at night to respect other guests."
+        },
+        "request": {
+          "title": "Special Requests",
+          "desc": "Note your requests when booking. We will do our best to accommodate but cannot guarantee all requests."
+        },
+        "safety": {
+          "title": "Safety & Security",
+          "desc": "In-room safe, 24/7 security cameras. Guests are responsible for any property damage during their stay."
+        }
+      }
+    },
     "cta": {
       "title": "Ready for your next getaway?",
       "subtitle": "Book today to receive special offers!"
@@ -309,7 +340,9 @@
     "available_rooms_sub": "List of rooms matching your search requirements.",
     "weekend_deals_title": "Weekend Deals",
     "weekend_deals_subtitle": "Save on stays from May 8 - May 10",
-    "non_refundable_warning": "Because the booking time is within 24 hours prior to check-in, this booking will be non-refundable if canceled."
+    "non_refundable_warning": "Because the booking time is within 24 hours prior to check-in, this booking will be non-refundable if canceled.",
+  "checkin_time": "Check-in from 14:00",
+  "checkout_time": "Check-out by 12:00"
   },
   "login_page": {
     "welcome": "Welcome Back",
@@ -375,6 +408,7 @@
     "status_maintenance": "Maintenance",
     "status_inactive": "Inactive",
     "validation_required": "Please fill in all fields: Hotel, Branch, and Room Type!",
+    "check_out_after_check_in": "Check-out date must be on or after check-in date",
     "management": "Room Management",
     "rooms_in_system": "rooms in system",
     "add_room": "Add Room",

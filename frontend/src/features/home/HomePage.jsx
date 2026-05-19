@@ -1,192 +1,166 @@
-import React from 'react';
+import React from 'react'
 import {
-  Box,
-  Typography,
-  Container,
-  Grid,
-  Card,
-  CardContent,
-  Avatar,
-  Rating,
-  Button,
-  Paper,
-  Divider
-} from '@mui/material';
+  Box, Typography, Container, Grid, Card, CardContent,
+  Avatar, Rating, Button, Paper
+} from '@mui/material'
 import {
-  KingBed,
-  Security,
-  SupportAgent,
-  Star,
-  Wifi,
-  Pool,
-  Restaurant,
-  Spa,
-  EventNote
-} from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import heroBg from '../../assets/hotel_hero.png';
+  KingBed, Security, SupportAgent, Star,
+  Wifi, Pool, Restaurant, Spa, EventNote,
+  AccessTime, EventBusy, CreditCard, Gavel,
+  ChatBubbleOutline, VerifiedUser
+} from '@mui/icons-material'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import heroBg from '../../assets/hotel_hero.png'
 
-// Dữ liệu giới thiệu dịch vụ
+const PC = '#9a1c48'
+const PC_ALPHA = 'rgba(154,28,72,0.08)'
+
 const features = [
   { icon: <KingBed sx={{ fontSize: 40 }} />, title: 'home.features.rooms.title', desc: 'home.features.rooms.desc' },
   { icon: <Security sx={{ fontSize: 40 }} />, title: 'home.features.security.title', desc: 'home.features.security.desc' },
   { icon: <SupportAgent sx={{ fontSize: 40 }} />, title: 'home.features.support.title', desc: 'home.features.support.desc' },
   { icon: <Star sx={{ fontSize: 40 }} />, title: 'home.features.experience.title', desc: 'home.features.experience.desc' },
-];
+]
 
-// Dữ liệu tiện ích
 const amenities = [
-  { icon: <Wifi />, label: 'home.amenities.wifi' },
-  { icon: <Pool />, label: 'home.amenities.pool' },
-  { icon: <Restaurant />, label: 'home.amenities.restaurant' },
-  { icon: <Spa />, label: 'home.amenities.spa' },
-];
+  { icon: <Wifi sx={{ fontSize: 32 }} />, label: 'home.amenities.wifi' },
+  { icon: <Pool sx={{ fontSize: 32 }} />, label: 'home.amenities.pool' },
+  { icon: <Restaurant sx={{ fontSize: 32 }} />, label: 'home.amenities.restaurant' },
+  { icon: <Spa sx={{ fontSize: 32 }} />, label: 'home.amenities.spa' },
+]
 
-// Dữ liệu đánh giá
+const policyCards = [
+  { icon: <AccessTime sx={{ fontSize: 36 }} />, title: 'home.policy.cards.checkin.title', desc: 'home.policy.cards.checkin.desc' },
+  { icon: <EventBusy sx={{ fontSize: 36 }} />, title: 'home.policy.cards.cancel.title', desc: 'home.policy.cards.cancel.desc' },
+  { icon: <CreditCard sx={{ fontSize: 36 }} />, title: 'home.policy.cards.payment.title', desc: 'home.policy.cards.payment.desc' },
+  { icon: <Gavel sx={{ fontSize: 36 }} />, title: 'home.policy.cards.rules.title', desc: 'home.policy.cards.rules.desc' },
+  { icon: <ChatBubbleOutline sx={{ fontSize: 36 }} />, title: 'home.policy.cards.request.title', desc: 'home.policy.cards.request.desc' },
+  { icon: <VerifiedUser sx={{ fontSize: 36 }} />, title: 'home.policy.cards.safety.title', desc: 'home.policy.cards.safety.desc' },
+]
+
 const reviews = [
   { key: 'item1', avatar: 'A', rating: 5, date: '15/04/2026' },
   { key: 'item2', avatar: 'M', rating: 5, date: '10/04/2026' },
   { key: 'item3', avatar: 'P', rating: 4, date: '05/04/2026' },
   { key: 'item4', avatar: 'N', rating: 5, date: '01/04/2026' },
-];
+]
+
+const SectionHeader = ({ overline, title, subtitle }) => (
+  <Box sx={{ textAlign: 'center', mb: 7 }}>
+    <Typography variant="overline" sx={{ fontWeight: 700, letterSpacing: 3, color: PC }}>
+      {overline}
+    </Typography>
+    <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
+      {title}
+    </Typography>
+    {subtitle && (
+      <Typography variant="body1" color="text.secondary" sx={{ mt: 1.5, maxWidth: 560, mx: 'auto' }}>
+        {subtitle}
+      </Typography>
+    )}
+  </Box>
+)
 
 const HomePage = () => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
+  const { t } = useTranslation()
+  const navigate = useNavigate()
 
   return (
     <Box>
-      {/* Hero Section */}
-      <Box
-        sx={{
-          minHeight: { xs: '80vh', md: '70vh' },
-          py: { xs: 8, md: 0 },
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'white',
-          backgroundImage: `linear-gradient(135deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 100%), url(${heroBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
+
+      {/* ── Hero ─────────────────────────────────────────── */}
+      <Box sx={{
+        minHeight: { xs: '80vh', md: '70vh' },
+        py: { xs: 8, md: 0 },
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'white',
+        backgroundImage: `linear-gradient(135deg,rgba(0,0,0,0.52) 0%,rgba(0,0,0,0.28) 100%),url(${heroBg})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}>
         <Container maxWidth="md" sx={{ textAlign: 'center', zIndex: 1 }}>
           <Typography variant="overline" sx={{ letterSpacing: 4, fontSize: { xs: '0.7rem', sm: '0.9rem' }, opacity: 0.9, mb: 2, display: 'block' }}>
-            {t("home.hero.welcome")}
+            {t('home.hero.welcome')}
           </Typography>
-          <Typography variant="h2" sx={{ 
-            fontWeight: 900, 
-            mb: 2, 
+          <Typography variant="h2" sx={{
+            fontWeight: 900, mb: 2,
             textShadow: '2px 4px 20px rgba(0,0,0,0.4)',
             fontSize: { xs: '2.5rem', sm: '3.5rem', md: '4rem' }
           }}>
-            {t("home.hero.title")}
+            {t('home.hero.title')}
           </Typography>
-          <Typography variant="h6" sx={{ 
-            mb: 4, 
-            fontWeight: 300, 
-            opacity: 0.9, 
-            maxWidth: 600, 
-            mx: 'auto',
-            fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.25rem' },
-            px: 2
+          <Typography variant="h6" sx={{
+            mb: 4, fontWeight: 300, opacity: 0.9, maxWidth: 600, mx: 'auto',
+            fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.25rem' }, px: 2
           }}>
-            {t("home.hero.subtitle")}
+            {t('home.hero.subtitle')}
           </Typography>
           <Button
-            variant="contained"
-            size="large"
-            startIcon={<EventNote />}
+            variant="contained" size="large" startIcon={<EventNote />}
             onClick={() => navigate('/bookings')}
             sx={{
-              py: { xs: 1.5, md: 1.8 }, 
-              px: { xs: 4, md: 5 }, 
-              borderRadius: 3, 
-              fontWeight: 800, 
-              fontSize: { xs: '0.9rem', md: '1.1rem' },
-              bgcolor: 'white', color: '#9a1c48',
+              py: { xs: 1.5, md: 1.8 }, px: { xs: 4, md: 5 }, borderRadius: 3,
+              fontWeight: 800, fontSize: { xs: '0.9rem', md: '1.1rem' },
+              bgcolor: 'white', color: PC,
               boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
               '&:hover': {
-                bgcolor: '#9a1c48',
-                color: 'white',
+                bgcolor: PC, color: 'white',
                 transform: 'translateY(-3px)',
-                boxShadow: '0 12px 35px rgba(154, 28, 72, 0.4)'
+                boxShadow: '0 12px 35px rgba(154,28,72,0.4)'
               },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)'
             }}
           >
-            {t("home.hero.cta")}
+            {t('home.hero.cta')}
           </Button>
         </Container>
       </Box>
 
-      {/* Stats Bar */}
-      <Paper
-        elevation={8}
-        sx={{
-          mx: 'auto',
-          maxWidth: 1200,
-          width: '90%',
-          mt: { xs: -4, md: -6 },
-          borderRadius: 4,
-          position: 'relative',
-          zIndex: 2,
-          overflow: 'hidden',
-          background: 'linear-gradient(135deg, #9a1c48 0%, #c02860 100%)',
-          boxShadow: '0 10px 40px rgba(154, 28, 72, 0.3)',
-          display: 'flex',
-          flexWrap: 'wrap',
-          boxSizing: 'border-box'
-        }}
-      >
+      {/* ── Stats Bar ────────────────────────────────────── */}
+      <Paper elevation={8} sx={{
+        mx: 'auto', maxWidth: 1200, width: '90%',
+        mt: { xs: -4, md: -6 }, borderRadius: 4,
+        position: 'relative', zIndex: 2, overflow: 'hidden',
+        background: `linear-gradient(135deg,${PC} 0%,#c02860 100%)`,
+        boxShadow: '0 10px 40px rgba(154,28,72,0.3)',
+        display: 'flex', flexWrap: 'wrap'
+      }}>
         {[
           { number: '200+', labelKey: 'home.stats.rooms' },
           { number: '50K+', labelKey: 'home.stats.customers' },
           { number: '4.8★', labelKey: 'home.stats.rating' },
           { number: '24/7', labelKey: 'home.stats.support' },
         ].map((stat, i) => (
-          <Box
-            key={i}
-            sx={{
-              flex: { xs: '0 0 50%', md: 1 },
-              textAlign: 'center',
-              py: { xs: 2.5, md: 5 },
-              borderRight: { 
-                xs: (i % 2 === 0 ? '1px solid rgba(255,255,255,0.15)' : 'none'), 
-                md: (i < 3 ? '1px solid rgba(255,255,255,0.15)' : 'none') 
-              },
-              borderBottom: {
-                xs: (i < 2 ? '1px solid rgba(255,255,255,0.15)' : 'none'),
-                md: 'none'
-              },
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center'
-            }}
-          >
+          <Box key={i} sx={{
+            flex: { xs: '0 0 50%', md: 1 }, textAlign: 'center',
+            py: { xs: 2.5, md: 5 },
+            borderRight: {
+              xs: i % 2 === 0 ? '1px solid rgba(255,255,255,0.15)' : 'none',
+              md: i < 3 ? '1px solid rgba(255,255,255,0.15)' : 'none'
+            },
+            borderBottom: { xs: i < 2 ? '1px solid rgba(255,255,255,0.15)' : 'none', md: 'none' },
+            display: 'flex', flexDirection: 'column', justifyContent: 'center'
+          }}>
             <Typography variant="h3" sx={{ fontWeight: 900, color: '#fff', mb: 0.5, fontSize: { xs: '1.2rem', sm: '1.8rem', md: '2.5rem' } }}>
               {stat.number}
             </Typography>
-            <Typography variant="body1" sx={{ fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: 1, textTransform: 'uppercase', fontSize: { xs: '0.6rem', sm: '0.75rem', md: '0.9rem' } }}>
+            <Typography sx={{ fontWeight: 600, color: 'rgba(255,255,255,0.8)', letterSpacing: 1, textTransform: 'uppercase', fontSize: { xs: '0.6rem', sm: '0.75rem', md: '0.9rem' } }}>
               {t(stat.labelKey)}
             </Typography>
           </Box>
         ))}
       </Paper>
 
-      {/* Features Section */}
+      {/* ── Features ─────────────────────────────────────── */}
       <Container maxWidth="lg" sx={{ py: 10 }}>
-        <Box sx={{ textAlign: 'center', mb: 7 }}>
-          <Typography variant="overline" color="primary.contrastText" sx={{ fontWeight: 700, letterSpacing: 3 }}>
-            {t("home.features.overline")}
-          </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
-            {t("home.features.title")}
-          </Typography>
-        </Box>
-
+        <SectionHeader
+          overline={t('home.features.overline')}
+          title={t('home.features.title')}
+        />
         <Grid container spacing={4}>
           {features.map((f, i) => (
             <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
@@ -198,7 +172,7 @@ const HomePage = () => {
                 <Box sx={{
                   width: 80, height: 80, borderRadius: 3, mx: 'auto', mb: 2,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  bgcolor: '#9a1c48', color: '#fff'
+                  bgcolor: PC, color: '#fff'
                 }}>
                   {f.icon}
                 </Box>
@@ -210,25 +184,23 @@ const HomePage = () => {
         </Grid>
       </Container>
 
-      {/* Amenities Section */}
+      {/* ── Amenities ────────────────────────────────────── */}
       <Box sx={{ bgcolor: 'background.paper', py: 8 }}>
         <Container maxWidth="lg">
-          <Box sx={{ textAlign: 'center', mb: 5 }}>
-            <Typography variant="overline" color="primary.contrastText" sx={{ fontWeight: 700, letterSpacing: 3 }}>
-              {t("home.amenities.overline")}
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
-              {t("home.amenities.title")}
-            </Typography>
-          </Box>
+          <SectionHeader
+            overline={t('home.amenities.overline')}
+            title={t('home.amenities.title')}
+          />
           <Grid container spacing={3} justifyContent="center">
             {amenities.map((a, i) => (
               <Grid size={{ xs: 6, sm: 3 }} key={i}>
                 <Paper elevation={0} sx={{
-                  p: 3, textAlign: 'center', borderRadius: 3, border: '2px solid', borderColor: 'divider',
-                  transition: 'all 0.3s', '&:hover': { borderColor: 'primary.main', bgcolor: 'primary.light', color: 'primary.contrastText' }
+                  p: 3, textAlign: 'center', borderRadius: 3,
+                  border: '2px solid', borderColor: 'divider',
+                  transition: 'all 0.3s',
+                  '&:hover': { borderColor: PC, bgcolor: PC_ALPHA, transform: 'translateY(-4px)' }
                 }}>
-                  <Box sx={{ mb: 1 }}>{a.icon}</Box>
+                  <Box sx={{ mb: 1, color: PC }}>{a.icon}</Box>
                   <Typography variant="body1" sx={{ fontWeight: 700 }}>{t(a.label)}</Typography>
                 </Paper>
               </Grid>
@@ -237,85 +209,132 @@ const HomePage = () => {
         </Container>
       </Box>
 
-      {/* Reviews Section */}
+      {/* ── Policy ───────────────────────────────────────── */}
       <Container maxWidth="lg" sx={{ py: 10 }}>
-        <Box sx={{ textAlign: 'center', mb: 7 }}>
-          <Typography variant="overline" color="primary.contrastText" sx={{ fontWeight: 700, letterSpacing: 3 }}>
-            {t("home.reviews.overline")}
-          </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 900, mt: 1 }}>
-            {t("home.reviews.title")}
-          </Typography>
-        </Box>
-
-        <Grid container spacing={4}>
-          {reviews.map((r, i) => (
-            <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
+        <SectionHeader
+          overline={t('home.policy.overline')}
+          title={t('home.policy.title')}
+          subtitle={t('home.policy.subtitle')}
+        />
+        <Grid container spacing={3}>
+          {policyCards.map((item, i) => (
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} key={i}>
               <Card sx={{
-                p: 3, borderRadius: 4, height: '100%', position: 'relative',
+                p: 3, borderRadius: 4, height: '100%',
+                border: '1.5px solid', borderColor: 'divider',
+                boxShadow: 'none',
+                position: 'relative', overflow: 'hidden',
                 transition: 'all 0.3s ease',
-                '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }
+                '&:hover': {
+                  borderColor: PC,
+                  boxShadow: `0 8px 28px rgba(154,28,72,0.12)`,
+                  transform: 'translateY(-5px)'
+                },
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0, left: 0, right: 0,
+                  height: '3px',
+                  bgcolor: PC,
+                  opacity: 0,
+                  transition: 'opacity 0.3s'
+                },
+                '&:hover::before': { opacity: 1 }
               }}>
-                <CardContent sx={{ p: 0 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                    <Avatar sx={{ bgcolor: 'primary.contrastText', fontWeight: 700 }}>{r.avatar}</Avatar>
-                    <Box>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(`home.reviews.${r.key}.name`)}</Typography>
-                      <Typography variant="caption" color="text.secondary">{r.date}</Typography>
-                    </Box>
-                  </Box>
-                  <Rating value={r.rating} readOnly size="small" sx={{ mb: 1.5 }} />
-                  <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.7 }}>
-                    "{t(`home.reviews.${r.key}.comment`)}"
-                  </Typography>
-                </CardContent>
+                <Box sx={{
+                  width: 60, height: 60, borderRadius: 2.5, mb: 2,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  bgcolor: PC_ALPHA, color: PC
+                }}>
+                  {item.icon}
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 800, mb: 1, fontSize: '1rem' }}>
+                  {t(item.title)}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.75 }}>
+                  {t(item.desc)}
+                </Typography>
               </Card>
             </Grid>
           ))}
         </Grid>
       </Container>
 
-      {/* CTA Section */}
+      {/* ── Reviews ──────────────────────────────────────── */}
+      <Box sx={{ bgcolor: 'background.paper', py: 10 }}>
+        <Container maxWidth="lg">
+          <SectionHeader
+            overline={t('home.reviews.overline')}
+            title={t('home.reviews.title')}
+          />
+          <Grid container spacing={4}>
+            {reviews.map((r, i) => (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
+                <Card sx={{
+                  p: 3, borderRadius: 4, height: '100%',
+                  transition: 'all 0.3s ease',
+                  '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }
+                }}>
+                  <CardContent sx={{ p: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                      <Avatar sx={{ bgcolor: PC, fontWeight: 700 }}>{r.avatar}</Avatar>
+                      <Box>
+                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(`home.reviews.${r.key}.name`)}</Typography>
+                        <Typography variant="caption" color="text.secondary">{r.date}</Typography>
+                      </Box>
+                    </Box>
+                    <Rating value={r.rating} readOnly size="small" sx={{ mb: 1.5 }} />
+                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.7 }}>
+                      "{t(`home.reviews.${r.key}.comment`)}"
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      {/* ── CTA ──────────────────────────────────────────── */}
       <Box sx={{
-        background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.contrastText} 100%)`,
-        py: 8, textAlign: 'center', color: 'white'
+        background: `linear-gradient(135deg,${PC} 0%,#c02860 100%)`,
+        py: 10, textAlign: 'center', color: 'white'
       }}>
         <Container maxWidth="md">
           <Typography variant="h4" sx={{ fontWeight: 900, mb: 2 }}>
-            {t("home.cta.title")}
+            {t('home.cta.title')}
           </Typography>
           <Typography variant="body1" sx={{ mb: 4, opacity: 0.9 }}>
-            {t("home.cta.subtitle")}
+            {t('home.cta.subtitle')}
           </Typography>
           <Button
-            variant="contained"
-            size="large"
+            variant="contained" size="large"
             onClick={() => navigate('/bookings')}
             sx={{
-              bgcolor: 'white', color: '#9a1c48', fontWeight: 800, px: 6, py: 2, borderRadius: 3,
+              bgcolor: 'white', color: PC, fontWeight: 800, px: 6, py: 2, borderRadius: 3,
               boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
               '&:hover': {
-                bgcolor: '#9a1c48',
-                color: 'white',
+                bgcolor: 'rgba(255,255,255,0.9)',
                 transform: 'translateY(-3px)',
-                boxShadow: '0 15px 40px rgba(154, 28, 72, 0.4)'
+                boxShadow: '0 15px 40px rgba(0,0,0,0.2)'
               },
-              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)'
             }}
           >
-            {t("home.hero.cta")}
+            {t('home.hero.cta')}
           </Button>
         </Container>
       </Box>
 
-      {/* Footer */}
+      {/* ── Footer ───────────────────────────────────────── */}
       <Box sx={{ bgcolor: 'background.paper', py: 4, textAlign: 'center' }}>
         <Typography variant="body2" color="text.secondary">
-          {t("home.footer.text")}
+          {t('home.footer.text')}
         </Typography>
       </Box>
-    </Box>
-  );
-};
 
-export default HomePage;
+    </Box>
+  )
+}
+
+export default HomePage
