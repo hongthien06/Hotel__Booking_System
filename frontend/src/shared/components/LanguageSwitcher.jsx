@@ -34,14 +34,19 @@ const LanguageSwitcher = () => {
         startIcon={<Translate sx={{ fontSize: { xs: 18, sm: 20 } }} />}
         endIcon={<ExpandMore sx={{ fontSize: { xs: 14, sm: 18 }, display: { xs: 'none', sm: 'inline-flex' } }} />}
         sx={{
-          color: "inherit",
+          bgcolor: open ? "primary.dark" : "primary.main",
+          color: open ? "primary.contrastTextHover" : "primary.contrastText",
           fontWeight: 700,
-          borderRadius: 2,
-          px: { xs: 1, sm: 2 },
+          borderRadius: 3,
+          px: { xs: 1.5, sm: 2.5 },
           minWidth: { xs: 'auto', sm: 80 },
           textTransform: "none",
           fontSize: { xs: '0.75rem', sm: '0.875rem' },
-          "&:hover": { bgcolor: "rgba(255,255,255,0.1)" }
+          transition: "all 0.2s ease-in-out",
+          "&:hover": { 
+            bgcolor: "primary.dark",
+            color: "primary.contrastTextHover"
+          }
         }}
       >
         {currentLanguage}

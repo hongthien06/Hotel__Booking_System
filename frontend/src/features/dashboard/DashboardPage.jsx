@@ -42,6 +42,7 @@ import { getDashboardStats } from '../../shared/api/dashboardApi';
 import { checkInApi, checkOutApi, cancelBookingByAdminApi } from '../../shared/api/bookingApi';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
+import { formatCurrency } from '../../shared/utils/formatters';
 import {
   Dialog,
   DialogTitle,
@@ -162,12 +163,7 @@ const DashboardPage = () => {
     fetchStats();
   }, []);
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
-      style: 'currency',
-      currency: i18n.language === 'vi' ? 'VND' : 'USD'
-    }).format(i18n.language === 'vi' ? amount : amount / 25000); // Tạm tính tỷ giá
-  };
+
 
   const getStatusColor = (status) => {
     switch (status) {

@@ -6,6 +6,7 @@ import {
 } from '@mui/material'
 import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub, Business, LocationOn, ChevronLeft, ChevronRight } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
+import { formatCurrency } from '~/shared/utils/formatters'
 
 const InfoRow = ({ label, value, icon }) => (
   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', py: 1.25,
@@ -48,12 +49,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
         : room.amenities)
     : []
 
-  const price = room.pricePerNight
-    ? new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', { 
-        style: 'currency', 
-        currency: i18n.language === 'vi' ? 'VND' : 'USD' 
-      }).format(i18n.language === 'vi' ? room.pricePerNight : room.pricePerNight / 25000)
-    : '—'
+  const price = room.pricePerNight ? formatCurrency(room.pricePerNight) : '—'
 
   return (
     <Dialog

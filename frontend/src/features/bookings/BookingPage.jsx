@@ -39,6 +39,7 @@ import LoginPromptModal from '../../shared/components/modals/LoginPromptModal'
 import { useNavigate } from 'react-router-dom'
 import RoomDetail from '../rooms/Details/RoomDetail'
 import i18n from 'i18next'
+import { formatCurrency as formatCurrencyShared } from '../../shared/utils/formatters'
 const PC = '#c0496e'
 const PC_LIGHT = '#fce4ec'
 const SIDEBAR_W = 300
@@ -86,10 +87,10 @@ const BED_TYPE_LABELS = (t) => ({
   'KING': t('rooms.bed_king') || 'Giường King',
   'QUEEN': t('rooms.bed_queen') || 'Giường Queen'
 })
-const formatCurrency = (n, lang) => new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', {
-  style: 'currency',
-  currency: lang === 'vi' ? 'VND' : 'USD'
-}).format(lang === 'vi' ? n : n / 25000)
+const formatCurrency = (n, lang) => {
+  const currency = lang ? (lang === 'vi' ? 'VND' : 'USD') : null;
+  return formatCurrencyShared(n, currency);
+}
 
 const MOCK_ROOMS = [
   { id: 'm1', name: 'Phòng Deluxe View Biển', location: 'Vũng Tàu', bed: 'King', reviews: 124, rating: 4.8, type: 'Deluxe', price: 1200000, bg: '#dbeafe', emoji: '🌊' },

@@ -12,6 +12,7 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import i18n from 'i18next'
+import { formatCurrency as formatCurrencyShared } from '../../../shared/utils/formatters'
 
 const PC = '#c0496e'
 const PC_LIGHT = '#fce4ec'
@@ -21,10 +22,10 @@ const nightsBetween = (a, b) => {
   return diff > 0 ? Math.round(diff / 86400000) : 1
 }
 
-const formatCurrency = (n, lang) => new Intl.NumberFormat(lang === 'vi' ? 'vi-VN' : 'en-US', {
-  style: 'currency',
-  currency: lang === 'vi' ? 'VND' : 'USD'
-}).format(lang === 'vi' ? n : n / 25000)
+const formatCurrency = (n, lang) => {
+  const currency = lang ? (lang === 'vi' ? 'VND' : 'USD') : null;
+  return formatCurrencyShared(n, currency);
+}
 
 const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess }) => {
   const { t } = useTranslation()

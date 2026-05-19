@@ -6,6 +6,7 @@ import {
 } from '@mui/material'
 import { Edit, People, SquareFoot, KingBed, Delete } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
+import { formatCurrency } from '~/shared/utils/formatters'
 
 const MetaItem = ({ icon, text }) => (
   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
@@ -15,13 +16,8 @@ const MetaItem = ({ icon, text }) => (
 )
 
 const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
-  const { t, i18n } = useTranslation()
-  const price = room.pricePerNight
-    ? new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
-      style: 'currency',
-      currency: i18n.language === 'vi' ? 'VND' : 'USD'
-    }).format(i18n.language === 'vi' ? room.pricePerNight : room.pricePerNight / 25000)
-    : '—'
+  const { t } = useTranslation()
+  const price = room.pricePerNight ? formatCurrency(room.pricePerNight) : '—'
 
   const amenities = room.amenities
     ? (typeof room.amenities === 'string'

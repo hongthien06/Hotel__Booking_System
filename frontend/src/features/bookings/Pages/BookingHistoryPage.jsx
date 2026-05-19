@@ -21,6 +21,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { cancelBookingApi, getMyBookingsApi } from '../../../shared/api/bookingApi'
+import { formatCurrency, formatDate } from '../../../shared/utils/formatters'
 
 const PC = '#c0496e' // Tương ứng với primary.dark hoặc primary.contrastText trong theme (Màu hồng đậm chủ đạo)
 const PC_LIGHT = '#fce4ec' // Tương ứng với primary.main (Màu hồng nhạt)
@@ -94,13 +95,7 @@ const BookingHistoryPage = () => {
     fetchBookings()
   }
 
-  const formatCurrency = (value) => {
-    if (!value) return '0 ₫'
-    return new Intl.NumberFormat(i18n.language === 'vi' ? 'vi-VN' : 'en-US', {
-      style: 'currency',
-      currency: i18n.language === 'vi' ? 'VND' : 'USD'
-    }).format(i18n.language === 'vi' ? value : value / 25000)
-  }
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -334,11 +329,11 @@ const BookingHistoryPage = () => {
                     <Grid container spacing={1} sx={{ mb: 2 }}>
                       <Grid size={{ xs: 6 }}>
                         <Typography sx={{ color: '#999', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>{t('bookings_history.check_in_short') || 'In'}</Typography>
-                        <Typography sx={{ fontWeight: 700, fontSize: 13, color: '#444' }}>{booking.checkInDate}</Typography>
+                        <Typography sx={{ fontWeight: 700, fontSize: 13, color: '#444' }}>{formatDate(booking.checkInDate)}</Typography>
                       </Grid>
                       <Grid size={{ xs: 6 }}>
                         <Typography sx={{ color: '#999', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>{t('bookings_history.check_out_short') || 'Out'}</Typography>
-                        <Typography sx={{ fontWeight: 700, fontSize: 13, color: '#444' }}>{booking.checkOutDate}</Typography>
+                        <Typography sx={{ fontWeight: 700, fontSize: 13, color: '#444' }}>{formatDate(booking.checkOutDate)}</Typography>
                       </Grid>
                     </Grid>
 

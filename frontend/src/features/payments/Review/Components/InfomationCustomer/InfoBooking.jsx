@@ -9,17 +9,15 @@ import PeopleOutlineOutlinedIcon from '@mui/icons-material/PeopleOutlineOutlined
 import { useTranslation } from 'react-i18next'
 import { useBookingContext } from '../../../_id'
 
-const InfoBooking = () => {
-  const { t, i18n } = useTranslation()
-  const { form, booking } = useBookingContext() || {}
+import { formatDate as formatDateShared } from '~/shared/utils/formatters'
 
-  const locale = i18n.language === 'en' ? 'en-US' : 'vi-VN'
+const InfoBooking = () => {
+  const { t } = useTranslation()
+  const { form, booking } = useBookingContext() || {}
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '—'
-    const d = new Date(dateStr)
-    if (isNaN(d)) return String(dateStr)
-    return d.toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'numeric', year: 'numeric' })
+    return formatDateShared(dateStr)
   }
 
   const checkIn = booking?.checkInDate || form?.checkIn || ''
