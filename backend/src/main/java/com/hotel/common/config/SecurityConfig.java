@@ -57,13 +57,15 @@ public class SecurityConfig {
                         .requestMatchers(GET, "/bookings/room/*/booked-dates").permitAll()
                         .requestMatchers("/bookings/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/dashboard/**", "/admin/**").hasAnyRole("ADMIN", "MANAGER")
-                        // Voucher: user endpoints (yeu cau dang nhap)
-                        .requestMatchers(HttpMethod.GET, "/vouchers/active").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/vouchers/code/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/vouchers/apply").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/vouchers/booking/**").authenticated()
-                        // Voucher: admin/manager endpoints
-                        .requestMatchers("/vouchers/**").hasAnyRole("ADMIN", "MANAGER")
+                        // Membership: public (danh sách hạng) + customer
+                        .requestMatchers(HttpMethod.GET, "/membership/tiers", "/api/v1/membership/tiers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/membership/me", "/api/v1/membership/me").authenticated()
+                        // Membership: admin/manager
+                        .requestMatchers("/membership/**", "/api/v1/membership/**").hasAnyRole("ADMIN", "MANAGER")
+                        // Holidays: public GET (frontend cần để hiển thị giá lễ)
+                        .requestMatchers(HttpMethod.GET, "/holidays/**", "/api/v1/holidays/**").permitAll()
+                        // Holidays: admin/manager CRUD
+                        .requestMatchers("/holidays/**", "/api/v1/holidays/**").hasAnyRole("ADMIN", "MANAGER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,

@@ -214,7 +214,8 @@ public class InvoiceService implements IInvoiceService {
 
         private InvoiceResponse toResponse(Invoice invoice, List<InvoiceItem> items) {
                 com.hotel.modules.booking.entity.Booking booking = invoice.getBooking();
-                String voucherCode = (booking.getVoucher() != null) ? booking.getVoucher().getCode() : null;
+                String holidayName = (booking.getHolidayPeriod() != null)
+                                ? booking.getHolidayPeriod().getNameVi() : null;
                 return InvoiceResponse.builder()
                                 .id(invoice.getId())
                                 .bookingId(booking.getBookingId())
@@ -226,7 +227,11 @@ public class InvoiceService implements IInvoiceService {
                                 .totalNight(booking.getTotalNights())
                                 .numGuests((byte) (booking.getNumAdults() + booking.getNumChildren()))
                                 .address(booking.getRoom().getHotel().getAddress())
-                                .voucherCode(voucherCode)
+                                .membershipDiscountPct(booking.getMembershipDiscountPct())
+                                .isFirstBookingDiscount(booking.getIsFirstBookingDiscount())
+                                .holidayMultiplier(booking.getHolidayMultiplier())
+                                .holidayPeriodName(holidayName)
+                                .groupDiscountPct(booking.getGroupDiscountPct())
                                 .subtotal(invoice.getSubtotal())
                                 .taxRate(invoice.getTaxRate())
                                 .taxAmount(invoice.getTaxAmount())

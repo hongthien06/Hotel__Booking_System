@@ -7,11 +7,12 @@ import {
 } from '@mui/material'
 import {
   Person, Phone, Email, Shield, Save, Lock,
-  Visibility, VisibilityOff, CameraAlt, VerifiedUser, Info
+  Visibility, VisibilityOff, CameraAlt, VerifiedUser, Info, EmojiEvents
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { getMyProfileApi, updateMyProfileApi } from '../../shared/api/userApi'
 import { changePasswordApi } from '../../shared/api/authApi'
+import { getMyMembershipApi } from '../../shared/api/membershipApi'
 
 const ProfilePage = () => {
   const { t } = useTranslation()
@@ -20,6 +21,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', content: '' })
+  const [membership, setMembership] = useState(null)
   const fileInputRef = useRef(null)
 
   const [openPwDialog, setOpenPwDialog] = useState(false)
@@ -30,6 +32,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     fetchProfile()
+    getMyMembershipApi().then(setMembership).catch(() => {})
   }, [])
 
   const fetchProfile = async () => {
@@ -193,6 +196,22 @@ const ProfilePage = () => {
               label={profile?.roles?.[0]?.replace('ROLE_', '') || 'User'}
               sx={{ fontWeight: 700, bgcolor: (theme) => `${theme.palette.primary.contrastText}1a`, color: 'primary.contrastText' }}
             />
+            {membership?.tier && (
+              <Chip
+                icon={<EmojiEvents sx={{ fontSize: '14px !important' }} />}
+                label={`${membership.tier.displayNameVi || membership.tier.tierCode} · -${membership.tier.discountPct}%`}
+                size="small"
+                sx={{
+                  mt: 1,
+                  fontWeight: 700,
+                  bgcolor: '#fdf2f8',
+                  color: '#be185d',
+                  border: '1px solid #f9a8d4',
+                  cursor: 'pointer'
+                }}
+                onClick={() => window.location.href = '/membership'}
+              />
+            )}
             <Divider sx={{
               my: 3,
               borderColor: 'primary.main'

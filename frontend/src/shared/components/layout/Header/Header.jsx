@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Typography, Button, Avatar, Tooltip, IconButton } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../shared/hooks/useAuth'
-import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed, History, Menu as MenuIcon, Person } from '@mui/icons-material'
+import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed, History, Menu as MenuIcon, Person, EmojiEvents } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../LanguageSwitcher'
 import { Menu, MenuItem, Divider } from '@mui/material'
@@ -194,6 +194,13 @@ const Header = () => {
               <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
                 <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
               </MenuItem>
+
+              {/* Membership — only for customers */}
+              {!hasRole(['ADMIN', 'MANAGER']) && (
+                <MenuItem onClick={() => { navigate('/membership'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
+                  <EmojiEvents fontSize="small" color="primary" /> {t("header.membership") || "Hạng thành viên"}
+                </MenuItem>
+              )}
 
               <Divider sx={{ my: 1 }} />
               <MenuItem onClick={handleLogout} sx={{ py: 1.2, gap: 1.5, fontWeight: 600, color: 'error.main' }}>

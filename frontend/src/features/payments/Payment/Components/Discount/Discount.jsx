@@ -1,18 +1,5 @@
-import { useBookingContext } from '../../../_id'
-import PromoInput from './PromoInput'
+import MembershipDiscount from '../../../Review/Components/MembershipDiscount'
 
-const Discount = () => {
-  const { booking, voucherData, setVoucherData } = useBookingContext() || {}
-  const bookingId = booking?.bookingId
-
-  return (
-    <PromoInput
-      bookingId={bookingId}
-      applied={voucherData}
-      onApply={setVoucherData}
-      onRemove={() => setVoucherData(null)}
-    />
-  )
-}
+const Discount = () => <MembershipDiscount />
 
 export default Discount

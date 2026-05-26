@@ -31,10 +31,23 @@ public class BookingDTO {
     private LocalDateTime expiresAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private BigDecimal totalAmount;    // Tính tổng tiền booking (chưa tính ExtraService)
+    private BigDecimal totalAmount;    // Tiền phòng (sau áp dụng holiday multiplier)
     private BigDecimal serviceTotal;   // Tổng tiền dịch vụ
-    private BigDecimal grandTotal;     // Tổng cộng (Room + Service)
+    private BigDecimal grandTotal;     // Tổng cộng (Room + Service) trước giảm giá
+    private BigDecimal discountAmount; // Tổng giảm giá (membership + group)
+    private BigDecimal finalAmount;    // Thực trả = grandTotal - discountAmount
     private List<BookingServiceResponse> bookingServices;
+
+    // ── Price breakdown chi tiết ────────────────────────────────────────
+    private BigDecimal membershipDiscountPct;
+    private BigDecimal membershipDiscountAmt;
+    private Boolean isFirstBookingDiscount;
+    private BigDecimal holidayMultiplier;
+    private String holidayPeriodName;    // tên kỳ lễ (nếu có)
+    private BigDecimal groupDiscountPct;
+    private BigDecimal groupDiscountAmt;
+    private Integer guestCount;
+    private String membershipTierName;   // hạng thành viên áp dụng
 
     // ── Thông tin User (lấy từ booking.getUser()) ─────
     private Long userId;

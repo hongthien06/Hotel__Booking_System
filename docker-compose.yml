@@ -124,6 +124,8 @@ services:
       - hbms-network
     ports:
       - "3000:3000"
+    environment:
+      VITE_PROXY_TARGET: "http://backend:8080"
     volumes:
       - ./frontend:/app
       - /app/node_modules

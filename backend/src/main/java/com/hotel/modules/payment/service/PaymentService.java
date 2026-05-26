@@ -6,6 +6,7 @@ import com.hotel.modules.booking.service.BookingService;
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
 import com.hotel.modules.invoice.dto.request.InvoiceItemRequest;
 import com.hotel.modules.invoice.service.IInvoiceService;
+import com.hotel.modules.membership.service.IMembershipService;
 import com.hotel.modules.payment.dto.request.MoMoRequest;
 import com.hotel.modules.payment.dto.request.PaymentRequest;
 import com.hotel.modules.payment.dto.request.VNPayRequest;
@@ -38,6 +39,7 @@ public class PaymentService implements IPaymentService {
     private final PaymentRepository paymentRepository;
     private final IInvoiceService invoiceService;
     private final BookingService bookingService;
+    private final IMembershipService membershipService;
 
     private final IVNPayService vnPayService;
     private final IMomoService momoService;
@@ -165,16 +167,25 @@ public class PaymentService implements IPaymentService {
             String rawResponse,
             boolean isSuccess) {
         if (isSuccess) {
-            // nếu thành công thì set status
             payment.setStatus(PaymentStatus.SUCCESS);
             payment.setPaidAt(LocalDateTime.now());
 
-            // Cập nhật trạng thái booking là đã confirm
             Booking booking = payment.getBooking();
             if (booking != null) {
                 booking.setStatus(BookingStatus.CONFIRMED);
-                // tạo hóa đơn khi thanh toán thành công
                 autoCreateInvoice(payment, booking);
+
+                // Cập nhật hạng thành viên sau khi thanh toán thành công
+                if (booking.getUser() != null) {
+                    try {
+                        BigDecimal paidAmount = payment.getAmount();
+                        membershipService.recordCompletedBooking(
+                                booking.getUser().getUserId(), paidAmount);
+                    } catch (Exception e) {
+                        log.error("Lỗi khi cập nhật membership cho userId={}: {}",
+                                booking.getUser().getUserId(), e.getMessage());
+                    }
+                }
             }
 
         } else {

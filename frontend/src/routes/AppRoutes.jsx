@@ -13,6 +13,7 @@ import HomePage from '~/features/home/HomePage'
 import BookingPage from '~/features/bookings/BookingPage'
 import RoomList from '~/features/rooms/List/RoomList'
 import BookingHistoryPage from '~/features/bookings/Pages/BookingHistoryPage'
+import MembershipPage from '~/features/membership/MembershipPage'
 
 const AppRoutes = () => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -39,6 +40,7 @@ const AppRoutes = () => {
         <Route element={<PrivateRoute />}>
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/booking-history' element={<BookingHistoryPage />} />
+          <Route path='/membership' element={<MembershipPage />} />
           <Route path='/payment' element={<Payments />} />
         </Route>
 

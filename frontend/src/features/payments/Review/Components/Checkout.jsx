@@ -2,7 +2,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
-import { Alert, Box, Button, Collapse, Divider, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, Collapse, Divider, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -46,6 +46,17 @@ const Checkout = () => {
   const roomTotal = Number(booking?.totalAmount || pricePerNight * nights)
   const grandTotal = Number(booking?.grandTotal || roomTotal * 1.1)
   const taxFee = Math.round(grandTotal - roomTotal)
+
+  // Membership / group / holiday discount fields
+  const holidayMultiplier = Number(booking?.holidayMultiplier || 1)
+  const holidayName = booking?.holidayPeriodName
+  const membershipDiscountAmt = Number(booking?.membershipDiscountAmt || 0)
+  const membershipDiscountPct = Number(booking?.membershipDiscountPct || 0)
+  const groupDiscountAmt = Number(booking?.groupDiscountAmt || 0)
+  const groupDiscountPct = Number(booking?.groupDiscountPct || 0)
+  const isFirstBooking = booking?.isFirstBookingDiscount
+  const totalDiscount = membershipDiscountAmt + groupDiscountAmt
+  const finalAmount = Number(booking?.finalAmount || grandTotal - totalDiscount)
 
   const roomTypeName = booking?.roomTypeName || room?.roomTypeName || 'Standard'
   const roomNumber = booking?.roomNumber || room?.roomNumber || ''
@@ -97,14 +108,56 @@ const Checkout = () => {
                 value={formatVND(roomTotal)}
                 sub={`(${nights} ${nightUnit}) ${roomTypeName}${roomNumber ? ` – ${t('payment.room')} ` + roomNumber : ''} × ${formatVND(pricePerNight)}/${nightUnit}`}
               />
+
+              {/* Holiday multiplier badge */}
+              {holidayMultiplier > 1 && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.5 }}>
+                  <Stack direction="row" alignItems="center" spacing={0.75}>
+                    <Typography variant="body2" color="#b45309">🎉 {t('membership.holiday_price')}</Typography>
+                    {holidayName && (
+                      <Chip label={holidayName} size="small" sx={{ bgcolor: '#fef3c7', color: '#b45309', fontSize: 10, height: 18 }} />
+                    )}
+                  </Stack>
+                  <Chip label={`×${holidayMultiplier}`} size="small" sx={{ bgcolor: '#fef3c7', color: '#b45309', fontWeight: 700 }} />
+                </Box>
+              )}
+
               <InfoRow
                 label={t('payment.num_guests')}
                 value={`${numAdults} ${t('payment.adults_label')}${numChildren > 0 ? `, ${numChildren} ${t('payment.children_label')}` : ''}`}
               />
+
               {taxFee > 0 && (
                 <InfoRow label={t('payment.tax_fee')} value={formatVND(taxFee)} />
               )}
+
+              {/* Membership discount row */}
+              {membershipDiscountAmt > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.75 }}>
+                  <Typography variant="body2" color="#be185d">
+                    {isFirstBooking
+                      ? `🎁 ${t('membership.first_booking_discount')} (-${membershipDiscountPct}%)`
+                      : `⭐ ${t('membership.tier_discount')} (-${membershipDiscountPct}%)`}
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} color="#be185d">
+                    -{formatVND(membershipDiscountAmt)}
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Group discount row */}
+              {groupDiscountAmt > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.75 }}>
+                  <Typography variant="body2" color="#16a34a">
+                    👥 {t('membership.group_discount')} (-{groupDiscountPct}%)
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} color="#16a34a">
+                    -{formatVND(groupDiscountAmt)}
+                  </Typography>
+                </Box>
+              )}
             </Box>
+
             <Box sx={{
               mt: 1,
               bgcolor: '#ff2fee11',
@@ -116,9 +169,16 @@ const Checkout = () => {
                 <Typography variant="body2" fontWeight={700}>{t('payment.total')}</Typography>
                 <Typography variant="caption" color="text.secondary">{nights} {nightUnit}, {totalPeople} {guestUnit}</Typography>
               </Box>
-              <Typography variant="h6" fontWeight={800} color="error.main">
-                {formatVND(grandTotal)}
-              </Typography>
+              <Box sx={{ textAlign: 'right' }}>
+                {totalDiscount > 0 && (
+                  <Typography variant="caption" sx={{ textDecoration: 'line-through', color: 'text.disabled', display: 'block' }}>
+                    {formatVND(grandTotal)}
+                  </Typography>
+                )}
+                <Typography variant="h6" fontWeight={800} color="error.main">
+                  {formatVND(totalDiscount > 0 ? finalAmount : grandTotal)}
+                </Typography>
+              </Box>
             </Box>
           </Collapse>
         </Box>
