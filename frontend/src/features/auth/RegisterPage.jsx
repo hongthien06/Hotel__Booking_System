@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Alert, IconButton, InputAdornment } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { Link, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../shared/hooks/useAuth'
 import { registerApi } from '../../shared/api/authApi'
 
 const RegisterPage = () => {
+  const { t } = useTranslation()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -29,7 +31,7 @@ const RegisterPage = () => {
     setError('')
 
     if (formData.password !== formData.confirmPassword) {
-      return setError('Mật khẩu xác nhận không khớp.')
+      return setError(t('register.match_error'))
     }
     const { fullName, email, phone, password } = formData;
     setIsLoading(true)
@@ -39,7 +41,7 @@ const RegisterPage = () => {
       navigate('/dashboard')
     } catch (err) {
       const data = err.response?.data;
-      let errMsg = 'Đăng ký thất bại. Xin vui lòng thử lại.';
+      let errMsg = t('register.failed');
       if (data) {
         if (data.message) errMsg = data.message;
         else if (data.error) errMsg = data.error;
@@ -67,10 +69,10 @@ const RegisterPage = () => {
         borderRadius: 4
       }}>
         <Typography variant="h4" align="center" color="primary.contrastText" sx={{ mb: 1, fontWeight: 800, letterSpacing: '-0.5px' }}>
-          Tạo tài khoản mới
+          {t('register.title')}
         </Typography>
         <Typography variant="body1" align="center" color="text.primary" sx={{ mb: 4 }}>
-          Tham gia cùng chúng tôi để trải nghiệm dịch vụ tốt nhất
+          {t('register.subtitle')}
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
@@ -87,7 +89,7 @@ const RegisterPage = () => {
             <Box sx={{ gridColumn: 'span 1' }}>
               <TextField
                 fullWidth
-                label="Họ và tên"
+                label={t('register.full_name')}
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
@@ -97,7 +99,7 @@ const RegisterPage = () => {
             <Box sx={{ gridColumn: 'span 1' }}>
               <TextField
                 fullWidth
-                label="Email"
+                label={t('profile.email')}
                 name="email"
                 type="email"
                 value={formData.email}
@@ -110,7 +112,7 @@ const RegisterPage = () => {
             <Box sx={{ gridColumn: 'span 1' }}>
               <TextField
                 fullWidth
-                label="Số điện thoại"
+                label={t('register.phone')}
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
@@ -120,7 +122,7 @@ const RegisterPage = () => {
             <Box sx={{ gridColumn: 'span 1' }}>
               <TextField
                 fullWidth
-                label="Mật khẩu"
+                label={t('login_page.password')}
                 name="password"
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
@@ -142,7 +144,7 @@ const RegisterPage = () => {
             <Box sx={{ gridColumn: 'span 1' }}>
               <TextField
                 fullWidth
-                label="Xác nhận mật khẩu"
+                label={t('register.confirm_password')}
                 name="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={formData.confirmPassword}
@@ -182,13 +184,13 @@ const RegisterPage = () => {
               }
             }}
           >
-            {isLoading ? 'Đang xử lý...' : 'Đăng ký ngay'}
+            {isLoading ? t('register.processing') : t('register.submit_button')}
           </Button>
         </form>
 
         <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Typography variant="body2" color="text.secondary">
-            Đã có tài khoản?{'  '}
+            {t('register.have_account')}{'  '}
             <Box
               component={Link}
               to="/login"
@@ -205,7 +207,7 @@ const RegisterPage = () => {
                 }
               }}
             >
-              Đăng nhập
+              {t('register.login_link')}
             </Box>
           </Typography>
         </Box>

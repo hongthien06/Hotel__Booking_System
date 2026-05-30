@@ -351,7 +351,9 @@
     "login_button": "Đăng nhập",
     "logging_in": "Đang đăng nhập...",
     "no_account": "Chưa có tài khoản?",
-    "register_now": "Đăng ký ngay"
+    "register_now": "Đăng ký ngay",
+    "password": "Mật khẩu",
+    "failed": "Đăng nhập thất bại. Xin vui lòng kiểm tra lại thông tin."
   },
   "forgot_password": {
     "title": "Quên mật khẩu?",
@@ -668,5 +670,29 @@
     "go_home": "Về trang chủ",
     "retry_booking": "Thử lại",
     "loading_payment": "Đang xử lý thanh toán..."
+  },
+  "register": {
+    "title": "Tạo tài khoản mới",
+    "subtitle": "Tham gia cùng chúng tôi để trải nghiệm dịch vụ tốt nhất",
+    "full_name": "Họ và tên",
+    "phone": "Số điện thoại",
+    "confirm_password": "Xác nhận mật khẩu",
+    "submit_button": "Đăng ký ngay",
+    "processing": "Đang xử lý...",
+    "have_account": "Đã có tài khoản?",
+    "login_link": "Đăng nhập",
+    "match_error": "Mật khẩu xác nhận không khớp.",
+    "failed": "Đăng ký thất bại. Xin vui lòng thử lại."
+  },
+  "user_management": {
+    "title": "Quản lý người dùng",
+    "user": "Người dùng",
+    "email": "Email",
+    "role": "Vai trò",
+    "actions": "Thao tác",
+    "grant_admin": "Cấp quyền Admin",
+    "revoke_admin": "Gỡ quyền Admin",
+    "load_error": "Không thể tải danh sách người dùng.",
+    "update_error": "Lỗi khi cập nhật quyền hạn."
   }
 }
