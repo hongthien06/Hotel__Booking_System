@@ -15,6 +15,7 @@ public class CustomerMembershipResponse {
     private Long userId;
     private String userName;
     private String userEmail;
+    private String userPhone;
     private MembershipTierResponse tier;
     private BigDecimal totalSpent;
     private Integer bookingCount;

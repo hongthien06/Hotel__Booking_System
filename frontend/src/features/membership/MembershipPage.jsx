@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getMembershipTiersApi, getMyMembershipApi, getHolidaysApi, getGroupDiscountRulesApi } from '~/shared/api/membershipApi'
+import { getMembershipTrackingPhone, getMembershipTierName } from '~/shared/utils/membership'
 
 // ── Tier visual config ──────────────────────────────────────────────────────
 const TIER_VISUAL = {
@@ -71,8 +72,9 @@ const CurrentTierCard = ({ membership, tiers, t, lang }) => {
     ? Math.min(100, Math.max(5, (membership.bookingCount / (membership.bookingCount + bookingsToNext)) * 100))
     : 100
 
-  const tierName = lang === 'en' ? (tier.displayNameEn || tier.tierCode) : (tier.displayNameVi || tier.tierCode)
-  const nextTierName = nextTier ? (lang === 'en' ? nextTier.displayNameEn : nextTier.displayNameVi) : null
+  const tierName = getMembershipTierName(tier, lang)
+  const nextTierName = nextTier ? getMembershipTierName(nextTier, lang) : null
+  const membershipPhone = getMembershipTrackingPhone(membership)
 
   return (
     <Paper elevation={0} sx={{
@@ -149,6 +151,15 @@ const CurrentTierCard = ({ membership, tiers, t, lang }) => {
             </Box>
           </Grid>
         </Grid>
+
+        <Box sx={{ mb: 2.5, p: 1.5, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.55)', border: `1px solid ${v.border}` }}>
+          <Typography variant="caption" sx={{ display: 'block', color: v.textColor, fontWeight: 700, mb: 0.25 }}>
+            {t('membership.points_phone')}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {membershipPhone || t('membership.points_phone_missing')}
+          </Typography>
+        </Box>
 
         {/* Progress to next tier */}
         {!isVIP && nextTier && (

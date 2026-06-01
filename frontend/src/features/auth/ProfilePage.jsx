@@ -1,34 +1,59 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
-  Box, Typography, Paper, TextField, Button, Avatar,
-  Grid, Divider, Alert, CircularProgress, Chip,
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  IconButton, InputAdornment, Tooltip
+  Alert,
+  Avatar,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Divider,
+  Grid,
+  IconButton,
+  InputAdornment,
+  Paper,
+  TextField,
+  Tooltip,
+  Typography,
+  Chip
 } from '@mui/material'
 import {
-  Person, Phone, Email, Shield, Save, Lock,
-  Visibility, VisibilityOff, CameraAlt, VerifiedUser, Info, EmojiEvents
+  CameraAlt,
+  Email,
+  EmojiEvents,
+  Info,
+  Person,
+  Phone,
+  Shield,
+  VerifiedUser,
+  Visibility,
+  VisibilityOff
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { getMyProfileApi, updateMyProfileApi } from '../../shared/api/userApi'
 import { changePasswordApi } from '../../shared/api/authApi'
 import { getMyMembershipApi } from '../../shared/api/membershipApi'
+import { getMyProfileApi, updateMyProfileApi } from '../../shared/api/userApi'
+import { getMembershipTierName, getMembershipTrackingPhone } from '../../shared/utils/membership'
 
 const ProfilePage = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [profile, setProfile] = useState(null)
   const [formData, setFormData] = useState({ fullName: '', phone: '' })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', content: '' })
   const [membership, setMembership] = useState(null)
-  const fileInputRef = useRef(null)
-
   const [openPwDialog, setOpenPwDialog] = useState(false)
   const [pwData, setPwData] = useState({ oldPassword: '', newPassword: '', confirmPassword: '' })
   const [pwLoading, setPwLoading] = useState(false)
   const [pwError, setPwError] = useState('')
   const [showPw, setShowPw] = useState({ old: false, new: false, confirm: false })
+  const fileInputRef = useRef(null)
+
+  const membershipTierName = getMembershipTierName(membership?.tier, i18n.language)
+  const membershipPhone = getMembershipTrackingPhone(membership)
 
   useEffect(() => {
     fetchProfile()
@@ -52,17 +77,17 @@ const ProfilePage = () => {
   }
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   const handleAvatarClick = () => {
-    fileInputRef.current.click()
+    fileInputRef.current?.click()
   }
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0]
+    const file = e.target.files?.[0]
     if (file) {
-      setMessage({ type: 'success', content: t('profile.update_success') + ' (Avatar feature coming soon!)' })
+      setMessage({ type: 'success', content: `${t('profile.update_success')} (Avatar feature coming soon!)` })
     }
   }
 
@@ -77,6 +102,8 @@ const ProfilePage = () => {
         fullName: updated.fullName || '',
         phone: updated.phone || ''
       })
+      const latestMembership = await getMyMembershipApi().catch(() => null)
+      if (latestMembership) setMembership(latestMembership)
       setMessage({ type: 'success', content: t('profile.update_success') })
     } catch (err) {
       console.error('Update profile error:', err)
@@ -87,7 +114,7 @@ const ProfilePage = () => {
   }
 
   const handlePwChange = (e) => {
-    setPwData({ ...pwData, [e.target.name]: e.target.value })
+    setPwData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
   const handlePwSubmit = async () => {
@@ -123,18 +150,19 @@ const ProfilePage = () => {
   }
 
   return (
-    <Box sx={{
-      maxWidth: 1100,
-      mx: 'auto',
-      my: 5,
-      px: 4,                // GIẢM lề trái phải xuống mức 4 (32px) cho gọn
-      py: 4,
-      bgcolor: 'background.paper', // Light version of primary.main
-      borderRadius: 10,
-      border: (theme) => `1px solid ${theme.palette.primary.main}`,
-      boxShadow: (theme) => `0 15px 45px ${theme.palette.primary.contrastText}08`
-    }}>
-      {/* PHẦN TIÊU ĐỀ TRANG */}
+    <Box
+      sx={{
+        maxWidth: 1100,
+        mx: 'auto',
+        my: 5,
+        px: 4,
+        py: 4,
+        bgcolor: 'background.paper',
+        borderRadius: 10,
+        border: (theme) => `1px solid ${theme.palette.primary.main}`,
+        boxShadow: (theme) => `0 15px 45px ${theme.palette.primary.contrastText}08`
+      }}
+    >
       <Box sx={{ mb: 5, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 2 }}>
         <VerifiedUser sx={{ color: 'primary.contrastText', fontSize: 50 }} />
         <Box>
@@ -148,19 +176,27 @@ const ProfilePage = () => {
       </Box>
 
       <Grid container spacing={5} justifyContent="center">
-        {/* KHUNG TRÁI: AVATAR & INFO CƠ BẢN */}
         <Grid size={{ xs: 12, md: 4 }}>
-          <Paper elevation={0} sx={{
-            p: 4, textAlign: 'center', borderRadius: 10, bgcolor: 'white',
-            border: (theme) => `1px solid ${theme.palette.primary.main}`,
-            height: '100%',
-            boxShadow: (theme) => `0 10px 20px ${theme.palette.primary.contrastText}10`
-          }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 4,
+              textAlign: 'center',
+              borderRadius: 10,
+              bgcolor: 'white',
+              border: (theme) => `1px solid ${theme.palette.primary.main}`,
+              height: '100%',
+              boxShadow: (theme) => `0 10px 20px ${theme.palette.primary.contrastText}10`
+            }}
+          >
             <Box sx={{ position: 'relative', width: 180, height: 180, mx: 'auto', mb: 3 }}>
               <Avatar
                 sx={{
-                  width: 180, height: 180,
-                  bgcolor: 'primary.contrastText', fontSize: '4rem', fontWeight: 700,
+                  width: 180,
+                  height: 180,
+                  bgcolor: 'primary.contrastText',
+                  fontSize: '4rem',
+                  fontWeight: 700,
                   boxShadow: (theme) => `0 15px 35px ${theme.palette.primary.contrastText}33`,
                   border: (theme) => `6px solid ${theme.palette.primary.main}40`
                 }}
@@ -187,104 +223,147 @@ const ProfilePage = () => {
               </Tooltip>
               <input type="file" ref={fileInputRef} hidden accept="image/*" onChange={handleFileChange} />
             </Box>
-            <Typography variant="h5" sx={{
-              fontWeight: 800,
-              color: '#333',
-              mb: 1
-            }}>{profile?.fullName}</Typography>
+
+            <Typography variant="h5" sx={{ fontWeight: 800, color: '#333', mb: 1 }}>
+              {profile?.fullName}
+            </Typography>
+
             <Chip
               label={profile?.roles?.[0]?.replace('ROLE_', '') || 'User'}
               sx={{ fontWeight: 700, bgcolor: (theme) => `${theme.palette.primary.contrastText}1a`, color: 'primary.contrastText' }}
             />
+
             {membership?.tier && (
-              <Chip
-                icon={<EmojiEvents sx={{ fontSize: '14px !important' }} />}
-                label={`${membership.tier.displayNameVi || membership.tier.tierCode} · -${membership.tier.discountPct}%`}
-                size="small"
-                sx={{
-                  mt: 1,
-                  fontWeight: 700,
-                  bgcolor: '#fdf2f8',
-                  color: '#be185d',
-                  border: '1px solid #f9a8d4',
-                  cursor: 'pointer'
-                }}
-                onClick={() => window.location.href = '/membership'}
-              />
+              <>
+                <Chip
+                  icon={<EmojiEvents sx={{ fontSize: '14px !important' }} />}
+                  label={`${membershipTierName} · -${membership.tier.discountPct}%`}
+                  size="small"
+                  sx={{
+                    mt: 1,
+                    fontWeight: 700,
+                    bgcolor: '#fdf2f8',
+                    color: '#be185d',
+                    border: '1px solid #f9a8d4',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => { window.location.href = '/membership' }}
+                />
+
+                <Box sx={{ mt: 2, px: 2.5, py: 2, borderRadius: 4, bgcolor: '#fff8fb', border: '1px solid #fbcfe8', textAlign: 'left' }}>
+                  <Typography variant="caption" sx={{ display: 'block', color: '#9d174d', fontWeight: 800, mb: 0.5 }}>
+                    {t('profile.membership_tier')}
+                  </Typography>
+                  <Typography sx={{ color: '#831843', fontWeight: 800 }}>
+                    {membershipTierName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+                    {t('profile.membership_discount_value', { discount: membership.tier.discountPct })}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.75 }}>
+                    {membershipPhone
+                      ? t('profile.membership_phone_value', { phone: membershipPhone })
+                      : t('profile.membership_phone_missing')}
+                  </Typography>
+                </Box>
+              </>
             )}
-            <Divider sx={{
-              my: 3,
-              borderColor: 'primary.main'
-            }} />
+
+            <Divider sx={{ my: 3, borderColor: 'primary.main' }} />
             <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
               {t('profile.member_since')}: {new Date().getFullYear()}
             </Typography>
           </Paper>
         </Grid>
 
-        {/* KHUNG PHẢI: FORM THÔNG TIN CHI TIẾT */}
         <Grid size={{ xs: 12, md: 8 }}>
-          <Paper elevation={0} sx={{
-            p: { xs: 3, md: 5 }, borderRadius: 10, bgcolor: 'white',
-            border: (theme) => `1px solid ${theme.palette.primary.main}`,
-            height: '100%',
-            boxShadow: (theme) => `0 10px 20px ${theme.palette.primary.contrastText}10`
-          }}>
-            <Box sx={{
-              mb: 4,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1.5
-            }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: { xs: 3, md: 5 },
+              borderRadius: 10,
+              bgcolor: 'white',
+              border: (theme) => `1px solid ${theme.palette.primary.main}`,
+              height: '100%',
+              boxShadow: (theme) => `0 10px 20px ${theme.palette.primary.contrastText}10`
+            }}
+          >
+            <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: 1.5 }}>
               <Info sx={{ color: 'primary.contrastText' }} />
               <Typography variant="h6" sx={{ fontWeight: 800, color: '#333' }}>
                 {t('profile.personal_info')}
               </Typography>
             </Box>
 
-            {message.content && <Alert severity={message.type} sx={{
-              mb: 4, // Khoảng cách dưới của thông báo Alert
-              borderRadius: 3
-            }}>{message.content}</Alert>}
+            {message.content && (
+              <Alert severity={message.type} sx={{ mb: 4, borderRadius: 3 }}>
+                {message.content}
+              </Alert>
+            )}
 
             <form onSubmit={handleSubmit}>
-              <Box sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 3 // Khoảng cách giữa các ô nhập liệu (TextField)
-              }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                 <TextField
-                  fullWidth label={t('profile.full_name')} name="fullName"
-                  value={formData.fullName || ''} onChange={handleChange} required
-                  InputProps={{ startAdornment: <InputAdornment position="start"><Person sx={{ color: 'primary.contrastText' }} /></InputAdornment> }}
+                  fullWidth
+                  label={t('profile.full_name')}
+                  name="fullName"
+                  value={formData.fullName || ''}
+                  onChange={handleChange}
+                  required
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Person sx={{ color: 'primary.contrastText' }} />
+                      </InputAdornment>
+                    )
+                  }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
+
                 <TextField
-                  fullWidth label={t('profile.email')} value={profile?.email || ''} disabled
-                  InputProps={{ startAdornment: <InputAdornment position="start"><Email sx={{ color: 'primary.contrastText' }} /></InputAdornment> }}
+                  fullWidth
+                  label={t('profile.email')}
+                  value={profile?.email || ''}
+                  disabled
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Email sx={{ color: 'primary.contrastText' }} />
+                      </InputAdornment>
+                    )
+                  }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
+
                 <TextField
-                  fullWidth label={t('profile.phone')} name="phone"
-                  value={formData.phone || ''} onChange={handleChange}
-                  InputProps={{ startAdornment: <InputAdornment position="start"><Phone sx={{ color: 'primary.contrastText' }} /></InputAdornment> }}
+                  fullWidth
+                  label={t('profile.phone')}
+                  name="phone"
+                  value={formData.phone || ''}
+                  onChange={handleChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Phone sx={{ color: 'primary.contrastText' }} />
+                      </InputAdornment>
+                    )
+                  }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
               </Box>
 
-              <Box sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                mt: 5 // Khoảng cách từ hàng TextField cuối cùng đến nút Lưu
-              }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
                 <Button
-                  type="submit" variant="contained" disabled={saving}
+                  type="submit"
+                  variant="contained"
+                  disabled={saving}
                   sx={{
-                    px: 8, // Độ rộng padding ngang của nút (làm nút dài ra)
-                    py: 1.5, // Độ cao padding dọc của nút
+                    px: 8,
+                    py: 1.5,
                     borderRadius: 3,
                     fontWeight: 800,
-                    bgcolor: 'primary.main', color: 'primary.contrastText',
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
                     '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
                   }}
                 >
@@ -293,24 +372,10 @@ const ProfilePage = () => {
               </Box>
             </form>
 
-            <Divider sx={{
-              my: 5, // Khoảng cách trên và dưới của đường kẻ phân cách (Divider)
-              borderColor: 'primary.main',
-              borderStyle: 'dashed'
-            }} />
+            <Divider sx={{ my: 5, borderColor: 'primary.main', borderStyle: 'dashed' }} />
 
-            <Box sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              flexWrap: 'wrap',
-              gap: 3 // Khoảng cách giữa cụm "Bảo mật" và nút "Đổi mật khẩu"
-            }}>
-              <Box sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2 // Khoảng cách giữa Icon Shield và text "Bảo mật tài khoản"
-              }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 3 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Shield sx={{ color: 'primary.contrastText' }} />
                 <Typography sx={{ fontWeight: 700 }}>{t('profile.security')}</Typography>
               </Box>
@@ -320,9 +385,10 @@ const ProfilePage = () => {
                 sx={{
                   borderRadius: 3,
                   fontWeight: 800,
-                  bgcolor: 'primary.main', color: 'primary.contrastText',
+                  bgcolor: 'primary.main',
+                  color: 'primary.contrastText',
                   '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
-                  px: 4 // Padding ngang của nút đổi mật khẩu
+                  px: 4
                 }}
               >
                 {t('profile.change_password')}
@@ -337,60 +403,76 @@ const ProfilePage = () => {
         onClose={() => setOpenPwDialog(false)}
         fullWidth
         maxWidth="xs"
-        PaperProps={{
-          sx: { borderRadius: 6, p: 1 } // Bo tròn khung Dialog
-        }}
+        PaperProps={{ sx: { borderRadius: 6, p: 1 } }}
       >
         <DialogTitle sx={{ fontWeight: 800, textAlign: 'center' }}>{t('profile.change_password')}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
             {pwError && <Alert severity="error">{pwError}</Alert>}
+
             <TextField
-              fullWidth label={t('profile.old_password')} name="oldPassword" type={showPw.old ? 'text' : 'password'}
-              value={pwData.oldPassword} onChange={handlePwChange}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }} // Bo tròn ô nhập liệu
+              fullWidth
+              label={t('profile.old_password')}
+              name="oldPassword"
+              type={showPw.old ? 'text' : 'password'}
+              value={pwData.oldPassword}
+              onChange={handlePwChange}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPw({ ...showPw, old: !showPw.old })}>
+                    <IconButton onClick={() => setShowPw((prev) => ({ ...prev, old: !prev.old }))}>
                       {showPw.old ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
-                ),
+                )
               }}
             />
+
             <TextField
-              fullWidth label={t('profile.new_password')} name="newPassword" type={showPw.new ? 'text' : 'password'}
-              value={pwData.newPassword} onChange={handlePwChange}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }} // Bo tròn ô nhập liệu
+              fullWidth
+              label={t('profile.new_password')}
+              name="newPassword"
+              type={showPw.new ? 'text' : 'password'}
+              value={pwData.newPassword}
+              onChange={handlePwChange}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPw({ ...showPw, new: !showPw.new })}>
+                    <IconButton onClick={() => setShowPw((prev) => ({ ...prev, new: !prev.new }))}>
                       {showPw.new ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
-                ),
+                )
               }}
             />
+
             <TextField
-              fullWidth label={t('profile.confirm_password')} name="confirmPassword" type={showPw.confirm ? 'text' : 'password'}
-              value={pwData.confirmPassword} onChange={handlePwChange}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }} // Bo tròn ô nhập liệu
+              fullWidth
+              label={t('profile.confirm_password')}
+              name="confirmPassword"
+              type={showPw.confirm ? 'text' : 'password'}
+              value={pwData.confirmPassword}
+              onChange={handlePwChange}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 5 } }}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPw({ ...showPw, confirm: !showPw.confirm })}>
+                    <IconButton onClick={() => setShowPw((prev) => ({ ...prev, confirm: !prev.confirm }))}>
                       {showPw.confirm ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
-                ),
+                )
               }}
             />
           </Box>
         </DialogContent>
+
         <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 2 }}>
-          <Button onClick={() => setOpenPwDialog(false)} sx={{ borderRadius: 3 }}>{t('profile.cancel')}</Button>
+          <Button onClick={() => setOpenPwDialog(false)} sx={{ borderRadius: 3 }}>
+            {t('profile.cancel')}
+          </Button>
           <Button
             onClick={handlePwSubmit}
             variant="contained"
@@ -398,7 +480,7 @@ const ProfilePage = () => {
             sx={{
               bgcolor: 'primary.contrastText',
               color: 'white',
-              borderRadius: 3, // Bo tròn nút cập nhật
+              borderRadius: 3,
               px: 4,
               '&:hover': { bgcolor: 'primary.dark' }
             }}

@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -32,8 +33,6 @@ public class MembershipService implements IMembershipService {
     private final MembershipTierRepository tierRepository;
     private final CustomerMembershipRepository membershipRepository;
     private final UserRepository userRepository;
-
-    // ── Admin ──────────────────────────────────────────────────────────────────
 
     @Override
     @Transactional(readOnly = true)
@@ -48,16 +47,32 @@ public class MembershipService implements IMembershipService {
     @Transactional
     public MembershipTierResponse updateTierConfig(Long tierId, UpdateTierConfigRequest req) {
         MembershipTier tier = tierRepository.findById(tierId)
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hạng id=" + tierId));
+                .orElseThrow(() -> new EntityNotFoundException("Khong tim thay hang id=" + tierId));
 
-        if (req.getDiscountPct() != null)    tier.setDiscountPct(req.getDiscountPct());
-        if (req.getMinTotalSpent() != null)  tier.setMinTotalSpent(req.getMinTotalSpent());
-        if (req.getMinBookingCount() != null) tier.setMinBookingCount(req.getMinBookingCount());
-        if (req.getDisplayNameVi() != null)  tier.setDisplayNameVi(req.getDisplayNameVi());
-        if (req.getDisplayNameEn() != null)  tier.setDisplayNameEn(req.getDisplayNameEn());
-        if (req.getColorCode() != null)      tier.setColorCode(req.getColorCode());
-        if (req.getBenefitsVi() != null)     tier.setBenefitsVi(req.getBenefitsVi());
-        if (req.getBenefitsEn() != null)     tier.setBenefitsEn(req.getBenefitsEn());
+        if (req.getDiscountPct() != null) {
+            tier.setDiscountPct(req.getDiscountPct());
+        }
+        if (req.getMinTotalSpent() != null) {
+            tier.setMinTotalSpent(req.getMinTotalSpent());
+        }
+        if (req.getMinBookingCount() != null) {
+            tier.setMinBookingCount(req.getMinBookingCount());
+        }
+        if (req.getDisplayNameVi() != null) {
+            tier.setDisplayNameVi(req.getDisplayNameVi());
+        }
+        if (req.getDisplayNameEn() != null) {
+            tier.setDisplayNameEn(req.getDisplayNameEn());
+        }
+        if (req.getColorCode() != null) {
+            tier.setColorCode(req.getColorCode());
+        }
+        if (req.getBenefitsVi() != null) {
+            tier.setBenefitsVi(req.getBenefitsVi());
+        }
+        if (req.getBenefitsEn() != null) {
+            tier.setBenefitsEn(req.getBenefitsEn());
+        }
 
         tier = tierRepository.save(tier);
         log.info("MembershipTier updated: id={}, code={}", tierId, tier.getTierCode());
@@ -68,72 +83,53 @@ public class MembershipService implements IMembershipService {
     @Transactional(readOnly = true)
     public Page<CustomerMembershipResponse> getAllCustomerMemberships(Pageable pageable) {
         return membershipRepository.findAllWithDetails(pageable)
-                .map(this::toMembershipResponse);
+                .map(cm -> toMembershipResponse(cm, null));
     }
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CustomerMembershipResponse getCustomerMembership(Long userId) {
-        CustomerMembership cm = membershipRepository.findByUser_UserId(userId)
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Không tìm thấy membership cho userId=" + userId));
-        return toMembershipResponse(cm);
+        User user = getUserOrThrow(userId);
+        CustomerMembership cm = resolveMembershipForUser(user, true);
+        return toMembershipResponse(cm, user);
     }
 
     @Override
     @Transactional
     public CustomerMembershipResponse manualUpgrade(Long userId, String tierCode) {
-        CustomerMembership cm = getOrCreateMembership(userId);
+        User user = getUserOrThrow(userId);
+        CustomerMembership cm = resolveMembershipForUser(user, true);
         MembershipTier newTier = tierRepository.findByTierCode(tierCode.toUpperCase())
-                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hạng: " + tierCode));
+                .orElseThrow(() -> new EntityNotFoundException("Khong tim thay hang: " + tierCode));
 
         cm.setTier(newTier);
         cm.setUpgradedAt(LocalDateTime.now());
         cm.setUpdatedAt(LocalDateTime.now());
         membershipRepository.save(cm);
 
-        log.info("Manual upgrade userId={} → {}", userId, tierCode);
-        return toMembershipResponse(cm);
+        log.info("Manual upgrade userId={} -> {}", userId, tierCode);
+        return toMembershipResponse(cm, user);
     }
-
-    // ── Customer ───────────────────────────────────────────────────────────────
 
     @Override
-    @Transactional(readOnly = true)
+    @Transactional
     public CustomerMembershipResponse getMyMembership(Long userId) {
-        CustomerMembership cm = getOrCreateMembership(userId);
-        return toMembershipResponse(cm);
+        User user = getUserOrThrow(userId);
+        CustomerMembership cm = resolveMembershipForUser(user, true);
+        return toMembershipResponse(cm, user);
     }
-
-    // ── Internal ───────────────────────────────────────────────────────────────
 
     @Override
     @Transactional
     public CustomerMembership getOrCreateMembership(Long userId) {
-        return membershipRepository.findByUser_UserId(userId)
-                .orElseGet(() -> {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new EntityNotFoundException(
-                                    "User không tồn tại: " + userId));
-                    MembershipTier firstTier = tierRepository.findByTierCode(FIRST_TIME_CODE)
-                            .orElseThrow(() -> new IllegalStateException(
-                                    "Tier FIRST_TIME chưa được seed vào DB"));
-                    CustomerMembership cm = CustomerMembership.builder()
-                            .user(user)
-                            .tier(firstTier)
-                            .totalSpent(BigDecimal.ZERO)
-                            .bookingCount(0)
-                            .isFirstBookingUsed(false)
-                            .build();
-                    return membershipRepository.save(cm);
-                });
+        return resolveMembershipForUser(getUserOrThrow(userId), true);
     }
 
     @Override
     @Transactional(readOnly = true)
     public BigDecimal getFirstBookingDiscountPct(Long userId) {
-        CustomerMembership cm = membershipRepository.findByUser_UserId(userId).orElse(null);
-        if (cm == null || !cm.getIsFirstBookingUsed()) {
+        CustomerMembership cm = resolveMembershipForUser(getUserOrThrow(userId), false);
+        if (cm == null || !Boolean.TRUE.equals(cm.getIsFirstBookingUsed())) {
             return FIRST_TIME_DISCOUNT;
         }
         return BigDecimal.ZERO;
@@ -142,33 +138,36 @@ public class MembershipService implements IMembershipService {
     @Override
     @Transactional(readOnly = true)
     public BigDecimal getCurrentTierDiscountPct(Long userId) {
-        CustomerMembership cm = membershipRepository.findByUser_UserId(userId).orElse(null);
-        if (cm == null) return BigDecimal.ZERO;
+        CustomerMembership cm = resolveMembershipForUser(getUserOrThrow(userId), false);
+        if (cm == null) {
+            return BigDecimal.ZERO;
+        }
+
         MembershipTier tier = cm.getTier();
-        // FIRST_TIME tier discount chỉ áp dụng qua getFirstBookingDiscountPct
-        if (FIRST_TIME_CODE.equals(tier.getTierCode())) return BigDecimal.ZERO;
+        if (FIRST_TIME_CODE.equals(tier.getTierCode())) {
+            return BigDecimal.ZERO;
+        }
         return tier.getDiscountPct();
     }
 
     @Override
     @Transactional
     public void recordCompletedBooking(Long userId, BigDecimal paidAmount) {
-        CustomerMembership cm = getOrCreateMembership(userId);
+        CustomerMembership cm = resolveMembershipForUser(getUserOrThrow(userId), true);
 
         cm.setTotalSpent(cm.getTotalSpent().add(paidAmount));
         cm.setBookingCount(cm.getBookingCount() + 1);
         cm.setIsFirstBookingUsed(true);
         cm.setUpdatedAt(LocalDateTime.now());
 
-        // Tự động xét lên hạng
         List<MembershipTier> eligible = tierRepository
                 .findEligibleTiers(cm.getTotalSpent(), cm.getBookingCount());
 
         if (!eligible.isEmpty()) {
-            MembershipTier best = eligible.get(0);  // đã sort DESC — hạng cao nhất trước
+            MembershipTier best = eligible.get(0);
             if (best.getTierLevel() > cm.getTier().getTierLevel()) {
-                log.info("Auto-upgrade userId={}: {} → {}", userId,
-                        cm.getTier().getTierCode(), best.getTierCode());
+                log.info("Auto-upgrade membershipId={}: {} -> {}",
+                        cm.getMembershipId(), cm.getTier().getTierCode(), best.getTierCode());
                 cm.setTier(best);
                 cm.setUpgradedAt(LocalDateTime.now());
             }
@@ -177,49 +176,48 @@ public class MembershipService implements IMembershipService {
         membershipRepository.save(cm);
     }
 
-    // ── Mappers ────────────────────────────────────────────────────────────────
-
-    private MembershipTierResponse toTierResponse(MembershipTier t) {
+    private MembershipTierResponse toTierResponse(MembershipTier tier) {
         return MembershipTierResponse.builder()
-                .tierId(t.getTierId())
-                .tierCode(t.getTierCode())
-                .tierLevel(t.getTierLevel())
-                .discountPct(t.getDiscountPct())
-                .minTotalSpent(t.getMinTotalSpent())
-                .minBookingCount(t.getMinBookingCount())
-                .displayNameVi(t.getDisplayNameVi())
-                .displayNameEn(t.getDisplayNameEn())
-                .colorCode(t.getColorCode())
-                .benefitsVi(t.getBenefitsVi())
-                .benefitsEn(t.getBenefitsEn())
+                .tierId(tier.getTierId())
+                .tierCode(tier.getTierCode())
+                .tierLevel(tier.getTierLevel())
+                .discountPct(tier.getDiscountPct())
+                .minTotalSpent(tier.getMinTotalSpent())
+                .minBookingCount(tier.getMinBookingCount())
+                .displayNameVi(tier.getDisplayNameVi())
+                .displayNameEn(tier.getDisplayNameEn())
+                .colorCode(tier.getColorCode())
+                .benefitsVi(tier.getBenefitsVi())
+                .benefitsEn(tier.getBenefitsEn())
                 .build();
     }
 
-    private CustomerMembershipResponse toMembershipResponse(CustomerMembership cm) {
+    private CustomerMembershipResponse toMembershipResponse(CustomerMembership cm, User requestedUser) {
         List<MembershipTier> allTiers = tierRepository.findAllByOrderByTierLevelAsc();
+        User responseUser = requestedUser != null ? requestedUser : cm.getUser();
 
-        // Tìm hạng tiếp theo
         MembershipTierResponse nextTierResp = null;
         BigDecimal spentToNext = null;
         Integer bookingsToNext = null;
 
-        for (MembershipTier t : allTiers) {
-            if (t.getTierLevel() > cm.getTier().getTierLevel()
-                    && !FIRST_TIME_CODE.equals(t.getTierCode())) {
-                nextTierResp = toTierResponse(t);
-                BigDecimal spentGap = t.getMinTotalSpent().subtract(cm.getTotalSpent());
+        for (MembershipTier tier : allTiers) {
+            if (tier.getTierLevel() > cm.getTier().getTierLevel()
+                    && !FIRST_TIME_CODE.equals(tier.getTierCode())) {
+                nextTierResp = toTierResponse(tier);
+                BigDecimal spentGap = tier.getMinTotalSpent().subtract(cm.getTotalSpent());
                 spentToNext = spentGap.compareTo(BigDecimal.ZERO) > 0 ? spentGap : BigDecimal.ZERO;
-                int bookingGap = t.getMinBookingCount() - cm.getBookingCount();
-                bookingsToNext = bookingGap > 0 ? bookingGap : 0;
+                int bookingGap = tier.getMinBookingCount() - cm.getBookingCount();
+                bookingsToNext = Math.max(bookingGap, 0);
                 break;
             }
         }
 
         return CustomerMembershipResponse.builder()
                 .membershipId(cm.getMembershipId())
-                .userId(cm.getUser().getUserId())
-                .userName(cm.getUser().getFullName())
-                .userEmail(cm.getUser().getEmail())
+                .userId(responseUser.getUserId())
+                .userName(responseUser.getFullName())
+                .userEmail(responseUser.getEmail())
+                .userPhone(normalizePhone(responseUser.getPhone()))
                 .tier(toTierResponse(cm.getTier()))
                 .totalSpent(cm.getTotalSpent())
                 .bookingCount(cm.getBookingCount())
@@ -230,5 +228,50 @@ public class MembershipService implements IMembershipService {
                 .spentToNextTier(spentToNext)
                 .bookingsToNextTier(bookingsToNext)
                 .build();
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User khong ton tai: " + userId));
+    }
+
+    private CustomerMembership resolveMembershipForUser(User user, boolean createIfMissing) {
+        String phone = normalizePhone(user.getPhone());
+        if (phone != null) {
+            Optional<CustomerMembership> byPhone = membershipRepository
+                    .findFirstByUser_PhoneOrderByMembershipIdAsc(phone);
+            if (byPhone.isPresent()) {
+                return byPhone.get();
+            }
+        }
+
+        Optional<CustomerMembership> byUser = membershipRepository.findByUser_UserId(user.getUserId());
+        if (byUser.isPresent()) {
+            return byUser.get();
+        }
+
+        return createIfMissing ? createMembershipForUser(user) : null;
+    }
+
+    private CustomerMembership createMembershipForUser(User user) {
+        MembershipTier firstTier = tierRepository.findByTierCode(FIRST_TIME_CODE)
+                .orElseThrow(() -> new IllegalStateException("Tier FIRST_TIME chua duoc seed vao DB"));
+
+        CustomerMembership membership = CustomerMembership.builder()
+                .user(user)
+                .tier(firstTier)
+                .totalSpent(BigDecimal.ZERO)
+                .bookingCount(0)
+                .isFirstBookingUsed(false)
+                .build();
+        return membershipRepository.save(membership);
+    }
+
+    private String normalizePhone(String phone) {
+        if (phone == null) {
+            return null;
+        }
+        String normalized = phone.trim();
+        return normalized.isEmpty() ? null : normalized;
     }
 }

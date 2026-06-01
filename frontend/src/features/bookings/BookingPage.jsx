@@ -30,16 +30,18 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import { useTranslation } from 'react-i18next'
-import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material'
+import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward, EmojiEvents, Phone } from '@mui/icons-material'
 import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi'
 import { getAmenitiesApi } from '../../shared/api/amenityApi'
 import { createBookingApi, getBookedDatesApi } from '../../shared/api/bookingApi'
+import { getMyMembershipApi } from '../../shared/api/membershipApi'
 import { useAuth } from '../../shared/hooks/useAuth'
 import LoginPromptModal from '../../shared/components/modals/LoginPromptModal'
 import { useNavigate } from 'react-router-dom'
 import RoomDetail from '../rooms/Details/RoomDetail'
 import i18n from 'i18next'
 import { formatCurrency as formatCurrencyShared } from '../../shared/utils/formatters'
+import { getMembershipTierName, getMembershipTrackingPhone } from '../../shared/utils/membership'
 const PC = '#c0496e'
 const PC_LIGHT = '#fce4ec'
 const SIDEBAR_W = 300
@@ -318,8 +320,11 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 }
 
 
-const OffersSection = () => {
+const OffersSection = ({ membership, lang, onOpenMembership }) => {
   const { t } = useTranslation()
+  const tierName = getMembershipTierName(membership?.tier, lang)
+  const trackingPhone = getMembershipTrackingPhone(membership)
+
   return (
     <Box sx={{ mb: 6, px: { xs: 2, md: 6 } }}>
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
@@ -339,6 +344,29 @@ const OffersSection = () => {
         bgcolor: '#fff'
       }}>
         <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          {membership?.tier && (
+            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              <Chip
+                icon={<EmojiEvents sx={{ fontSize: '16px !important' }} />}
+                label={`${t('banners.membership_badge_label')}: ${tierName}`}
+                onClick={onOpenMembership}
+                sx={{
+                  fontWeight: 800,
+                  bgcolor: '#fdf2f8',
+                  color: '#be185d',
+                  border: '1px solid #f9a8d4',
+                  cursor: 'pointer'
+                }}
+              />
+              {trackingPhone && (
+                <Chip
+                  icon={<Phone sx={{ fontSize: '16px !important' }} />}
+                  label={trackingPhone}
+                  sx={{ fontWeight: 700, bgcolor: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1' }}
+                />
+              )}
+            </Box>
+          )}
           <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#333' }}>
             {t('banners.no_strings_attached')}
           </Typography>
@@ -634,11 +662,13 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 /* ─── Main ─────────────────────────────────────────────── */
 const BookingPage = () => {
   const { t } = useTranslation()
+  const currentLang = i18n.language || 'vi'
   const navigate = useNavigate()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { isAuthenticated } = useAuth()
+  const [membership, setMembership] = useState(null)
   const [sidebarOpen, setSidebarOpen] = useState(!isMobile)
   const [rooms, setRooms] = useState([])
   const [allTypeNames, setAllTypeNames] = useState([])
@@ -826,6 +856,16 @@ const BookingPage = () => {
   }, [])
 
   // Hàm bổ trợ để mở rộng loại phòng được chọn (ví dụ: "Deluxe" -> ["Deluxe King", "Deluxe Twin", ...])
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setMembership(null)
+      return
+    }
+    getMyMembershipApi()
+      .then(setMembership)
+      .catch(() => setMembership(null))
+  }, [isAuthenticated])
+
   const expandRoomTypes = (selectedTypes) => {
     if (!selectedTypes || selectedTypes.length === 0) return undefined
     const expanded = []
@@ -1243,7 +1283,11 @@ const BookingPage = () => {
                 </Box>
 
 
-                <OffersSection />
+                <OffersSection
+                  membership={membership}
+                  lang={currentLang}
+                  onOpenMembership={() => navigate('/membership')}
+                />
 
 
                 {/* 3. Tìm kiếm theo loại phòng */}
