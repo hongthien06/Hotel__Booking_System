@@ -714,7 +714,7 @@ const BookingPage = () => {
   const scrollRooms = (dir) => {
     if (roomScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = roomScrollRef.current
-      const itemsPerView = isMobile ? 1.2 : 3
+      const itemsPerView = isMobile ? 1.2 : 4
       const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
@@ -738,7 +738,7 @@ const BookingPage = () => {
   const scrollBudget = (dir) => {
     if (budgetScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = budgetScrollRef.current
-      const itemsPerView = isMobile ? 1.2 : 3
+      const itemsPerView = isMobile ? 1.2 : 4
       const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
@@ -817,7 +817,7 @@ const BookingPage = () => {
   const scrollWeekend = (dir) => {
     if (weekendScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = weekendScrollRef.current
-      const itemsPerView = isMobile ? 1.2 : 3
+      const itemsPerView = isMobile ? 1.2 : 4
       const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
@@ -829,7 +829,7 @@ const BookingPage = () => {
   const scrollTopRated = (dir) => {
     if (topRatedScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = topRatedScrollRef.current
-      const itemsPerView = isMobile ? 1.2 : 3
+      const itemsPerView = isMobile ? 1.2 : 4
       const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
@@ -919,7 +919,9 @@ const BookingPage = () => {
         maxPrice,
         expandRoomTypes(roomTypes),
         bedTypes.length > 0 ? bedTypes : undefined,
-        selectedAmenities.length > 0 ? selectedAmenities : undefined
+        selectedAmenities.length > 0 ? selectedAmenities : undefined,
+        searchParams.adults,
+        searchParams.children
       )
       setRooms(Array.isArray(d) ? d : [])
     } catch { setRooms([]) }
@@ -973,7 +975,9 @@ const BookingPage = () => {
         maxPrice,
         expandRoomTypes([typeKey]),
         bedTypes.length > 0 ? bedTypes : undefined,
-        selectedAmenities.length > 0 ? selectedAmenities : undefined
+        selectedAmenities.length > 0 ? selectedAmenities : undefined,
+        params.adults,
+        params.children
       )
       setRooms(Array.isArray(d) ? d : [])
     } catch { setRooms([]) }
@@ -991,7 +995,7 @@ const BookingPage = () => {
   }
 
   /* ── Room Card ─────────────────────────────────────────── */
-  const RoomCard = ({ room, isMock, oldPrice }) => {
+  const RoomCard = ({ room, isMock, oldPrice, showBookButton = true }) => {
     const { t, i18n } = useTranslation()
 
     // Tạo data đánh giá từ MOCK_ROOMS để tránh bị trùng nhau nếu không phải isMock
@@ -1060,13 +1064,15 @@ const BookingPage = () => {
               )}
               {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
             </Typography>
-            <Button
-              size="small" variant="contained" color="primary"
-              onClick={(e) => { e.stopPropagation(); openBooking(room, isMock) }}
-              sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
-            >
-              {t('common.book_now')}
-            </Button>
+            {showBookButton && (
+              <Button
+                size="small" variant="contained" color="primary"
+                onClick={(e) => { e.stopPropagation(); openBooking(room, isMock) }}
+                sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
+              >
+                {t('common.book_now')}
+              </Button>
+            )}
           </Box>
         </CardContent>
       </Card>
@@ -1387,18 +1393,18 @@ const BookingPage = () => {
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                     scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
-                    {loading ? (
-                      [...Array(3)].map((_, i) => (
-                        <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0 }}>
-                          <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
-                          <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
-                          <Skeleton width="50%" height={18} />
-                        </Box>
-                      ))
-                    ) : (
+                        {loading ? (
+                          [...Array(4)].map((_, i) => (
+                            <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0 }}>
+                              <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
+                              <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
+                              <Skeleton width="50%" height={18} />
+                            </Box>
+                          ))
+                        ) : (
                       featuredRooms.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                          <RoomCard room={r} isMock={rooms.length === 0} />
+                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                          <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
                         </Box>
                       ))
                     )}
@@ -1455,8 +1461,8 @@ const BookingPage = () => {
                         scrollSnapType: { xs: 'none', md: 'x mandatory' }
                       }}>
                         {topRatedRooms.map(r => (
-                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                            <RoomCard room={r} isMock={rooms.length === 0} />
+                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                            <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
                           </Box>
                         ))}
                       </Box>
@@ -1514,8 +1520,8 @@ const BookingPage = () => {
                         scrollSnapType: { xs: 'none', md: 'x mandatory' }
                       }}>
                         {budgetRooms.map(r => (
-                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                            <RoomCard room={r} isMock={rooms.length === 0} />
+                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                            <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
                           </Box>
                         ))}
                       </Box>
@@ -1554,8 +1560,8 @@ const BookingPage = () => {
                     scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
                     {weekendDeals.map(r => (
-                      <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                        <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} />
+                      <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                        <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} showBookButton={false} />
                       </Box>
                     ))}
                   </Box>

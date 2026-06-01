@@ -8,11 +8,13 @@ export const getRoomsApi = async () => {
   return response.data;
 };
 
-export const getAvailableRoomsApi = async (checkIn, checkOut, province, minPrice, maxPrice, typeNames, bedTypes, amenityNames) => {
+export const getAvailableRoomsApi = async (checkIn, checkOut, province, minPrice, maxPrice, typeNames, bedTypes, amenityNames, numAdults, numChildren) => {
   const params = { checkIn, checkOut };
   if (province && province.trim())   params.province  = province.trim();
   if (minPrice  != null)             params.minPrice  = minPrice;
   if (maxPrice  != null)             params.maxPrice  = maxPrice;
+  if (numAdults != null)             params.numAdults = numAdults;
+  if (numChildren != null)           params.numChildren = numChildren;
   if (typeNames && typeNames.length > 0) params.typeNames = Array.isArray(typeNames) ? typeNames.join(',') : typeNames;
   if (bedTypes && bedTypes.length > 0) params.bedTypes = Array.isArray(bedTypes) ? bedTypes.join(',') : bedTypes;
   if (amenityNames && amenityNames.length > 0) params.amenityNames = Array.isArray(amenityNames) ? amenityNames.join(',') : amenityNames;
