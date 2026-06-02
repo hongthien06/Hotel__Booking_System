@@ -21,6 +21,24 @@ export const registerApi = async (fullName, email, phone, password) => {
   return response.data
 }
 
+export const registerInitApi = async (fullName, email, phone, password) => {
+  const response = await axios.post(`${API_URL}/register/init`, {
+    fullName,
+    email,
+    phone,
+    password
+  })
+  return response.data
+}
+
+export const registerVerifyApi = async (email, otpCode) => {
+  const response = await axios.post(`${API_URL}/register/verify`, {
+    email,
+    otpCode
+  })
+  return response.data
+}
+
 export const forgotPasswordApi = async (email) => {
   const response = await axios.post(`${API_URL}/forgot-password`, { email })
   return response.data

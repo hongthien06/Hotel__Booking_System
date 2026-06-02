@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -22,6 +24,22 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(
             @Valid @RequestBody RegisterRequest request) {
         AuthResponse result = authService.register(request);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "Đăng ký - Bước 1: Gửi OTP", description = "Gửi mã OTP 6 chữ số đến email để xác thực đăng ký")
+    @PostMapping("/register/init")
+    public ResponseEntity<Map<String, String>> registerInit(
+            @Valid @RequestBody RegisterRequest request) {
+        Map<String, String> result = authService.registerInit(request);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "Đăng ký - Bước 2: Xác nhận OTP", description = "Xác nhận mã OTP và hoàn tất đăng ký tài khoản")
+    @PostMapping("/register/verify")
+    public ResponseEntity<AuthResponse> registerVerify(
+            @Valid @RequestBody VerifyOtpRequest request) {
+        AuthResponse result = authService.registerVerify(request);
         return ResponseEntity.ok(result);
     }
 

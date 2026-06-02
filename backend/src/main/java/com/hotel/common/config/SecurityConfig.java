@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/bookings/occupied-rooms").permitAll()
                         .requestMatchers(GET, "/bookings/room/*/booked-dates").permitAll()
                         .requestMatchers("/bookings/**").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers("/admin/users/**").hasRole("MANAGER")
                         .requestMatchers("/dashboard/**", "/admin/**").hasAnyRole("ADMIN", "MANAGER")
                         // Membership: public (danh sách hạng) + customer
                         .requestMatchers(HttpMethod.GET, "/membership/tiers", "/api/v1/membership/tiers").permitAll()
@@ -66,6 +67,14 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/holidays/**", "/api/v1/holidays/**").permitAll()
                         // Holidays: admin/manager CRUD
                         .requestMatchers("/holidays/**", "/api/v1/holidays/**").hasAnyRole("ADMIN", "MANAGER")
+                        // Reviews: public endpoints
+                        .requestMatchers(GET, "/reviews/approved/**", "/reviews/approved").permitAll()
+                        // Reviews: customer create
+                        .requestMatchers(HttpMethod.POST, "/reviews").authenticated()
+                        // Reviews: admin manage
+                        .requestMatchers(HttpMethod.PUT, "/reviews/*/approve", "/reviews/*/reply").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.DELETE, "/reviews/*").hasAnyRole("ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/reviews").hasAnyRole("ADMIN", "MANAGER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,
@@ -84,10 +93,13 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    @org.springframework.beans.factory.annotation.Value("${app.cors.allowed-origins}")
+    private List<String> allowedOrigins;
+
     @Bean
     public CorsConfigurationSource corsConfig() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("*"));
+        config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

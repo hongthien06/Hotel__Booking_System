@@ -100,4 +100,46 @@ public class EmailService {
             log.error("Lỗi gửi email xác nhận cho booking {}: {}", booking.getBookingId(), e.getMessage());
         }
     }
+
+    /**
+     * Gửi email chứa mã OTP cho đăng ký
+     */
+    public void sendOtpEmail(String toEmail, String otpCode, String fullName) {
+        try {
+            Context context = new Context();
+            context.setVariable("fullName", fullName);
+            context.setVariable("otpCode", otpCode);
+            String htmlContent = templateEngine.process("otp-email", context);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message, "utf-8");
+            messageHelper.setTo(toEmail);
+            messageHelper.setSubject("Mã xác thực đăng ký - Hotel Booking System");
+            messageHelper.setText(htmlContent, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            log.error("Lỗi gửi email OTP đến {}: {}", toEmail, e.getMessage());
+            throw new RuntimeException("Không thể gửi email OTP. Vui lòng thử lại!");
+        }
+    }
+
+    /**
+     * Gửi email chúc mừng đăng ký thành công
+     */
+    public void sendRegistrationSuccessEmail(String toEmail, String fullName) {
+        try {
+            Context context = new Context();
+            context.setVariable("fullName", fullName);
+            String htmlContent = templateEngine.process("registration-success", context);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper messageHelper = new MimeMessageHelper(message, "utf-8");
+            messageHelper.setTo(toEmail);
+            messageHelper.setSubject("Chào mừng bạn đến với Hotel Booking System!");
+            messageHelper.setText(htmlContent, true);
+            mailSender.send(message);
+        } catch (MessagingException e) {
+            log.error("Lỗi gửi email chúc mừng đến {}: {}", toEmail, e.getMessage());
+        }
+    }
 }
