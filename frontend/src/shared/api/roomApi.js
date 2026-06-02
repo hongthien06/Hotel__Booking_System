@@ -26,3 +26,23 @@ export const getRoomByIdApi = async (id) => {
   const response = await axiosInstance.get(`${API_URL}/${id}`);
   return response.data;
 };
+
+export const getFeaturedRoomsApi = async (limit = 10) => {
+  const response = await axiosInstance.get(`${API_URL}/featured`, { params: { limit } });
+  return response.data;
+};
+
+export const getTopRatedRoomsApi = async (limit = 10) => {
+  const response = await axiosInstance.get(`${API_URL}/top-rated`, { params: { limit } });
+  return response.data;
+};
+
+export const getWeekendDealsApi = async (limit = 10) => {
+  const response = await axiosInstance.get(`${API_URL}/weekend-deals`, { params: { limit } });
+  return response.data;
+};
+
+export const getBudgetRoomsApi = async (limit = 10) => {
+  const response = await axiosInstance.get(`${API_URL}/budget`, { params: { limit } });
+  return response.data;
+};
