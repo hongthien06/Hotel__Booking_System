@@ -58,7 +58,14 @@ public class EmailService {
             }
             Long priceBooking = booking.getRoomPriceSnapshot().longValue() * booking.getTotalNights();
             Long discount = booking.getDiscountAmount() != null ? booking.getDiscountAmount().longValue() : 0L;
-            String voucherCode = booking.getVoucher() != null ? booking.getVoucher().getCode() : null;
+            // Hiển thị thông tin hạng thành viên thay vì voucher code
+            String membershipInfo = null;
+            if (booking.getIsFirstBookingDiscount() != null && booking.getIsFirstBookingDiscount()) {
+                membershipInfo = "Ưu đãi khách lần đầu (-" + booking.getMembershipDiscountPct() + "%)";
+            } else if (booking.getMembershipDiscountPct() != null
+                    && booking.getMembershipDiscountPct().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                membershipInfo = "Ưu đãi thành viên (-" + booking.getMembershipDiscountPct() + "%)";
+            }
             Long tax = (long) (priceBooking * 0.1);
             long totalPrice = priceBooking + tax - discount;
 
@@ -80,7 +87,7 @@ public class EmailService {
                     .priceBreakfast(0L)
                     .feeService(0L)
                     .discount(discount)
-                    .voucherCode(voucherCode)
+                    .voucherCode(membershipInfo)
                     .tax(tax)
                     .totalPrice(totalPrice)
                     .language(language != null ? language : "vi")

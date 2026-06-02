@@ -30,16 +30,18 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import { useTranslation } from 'react-i18next'
-import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward } from '@mui/icons-material'
+import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward, EmojiEvents, Phone } from '@mui/icons-material'
 import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi'
 import { getAmenitiesApi } from '../../shared/api/amenityApi'
 import { createBookingApi, getBookedDatesApi } from '../../shared/api/bookingApi'
+import { getMyMembershipApi } from '../../shared/api/membershipApi'
 import { useAuth } from '../../shared/hooks/useAuth'
 import LoginPromptModal from '../../shared/components/modals/LoginPromptModal'
 import { useNavigate } from 'react-router-dom'
 import RoomDetail from '../rooms/Details/RoomDetail'
 import i18n from 'i18next'
 import { formatCurrency as formatCurrencyShared } from '../../shared/utils/formatters'
+import { getMembershipTierName, getMembershipTrackingPhone } from '../../shared/utils/membership'
 const PC = '#c0496e'
 const PC_LIGHT = '#fce4ec'
 const SIDEBAR_W = 300
@@ -117,6 +119,11 @@ const MOCK_WEEKEND_DEALS = [
   { id: 'w9', name: 'Cliffside Ocean View', location: 'Vũng Tàu', province: 'Bà Rịa - Vũng Tàu', bed: 'Queen', reviews: 147, rating: 8.9, type: 'Deluxe', pricePerNight: 1750000, image: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400' },
   { id: 'w10', name: 'Wellness Spa Retreat', location: 'Huế', province: 'Thừa Thiên Huế', bed: 'Queen', reviews: 88, rating: 9.2, type: 'Superior', pricePerNight: 2100000, image: 'https://images.unsplash.com/photo-1601053081350-c1e37a5e7e99?w=400' }
 ]
+
+const stablePriceMultiplier = (id) => {
+  const n = String(id).split('').reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) & 0xffff, 0)
+  return 1.2 + (n % 150) / 1000
+}
 
 const nightsBetween = (a, b) => {
   const diff = new Date(b) - new Date(a)
@@ -313,8 +320,11 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
 }
 
 
-const OffersSection = () => {
+const OffersSection = ({ membership, lang, onOpenMembership }) => {
   const { t } = useTranslation()
+  const tierName = getMembershipTierName(membership?.tier, lang)
+  const trackingPhone = getMembershipTrackingPhone(membership)
+
   return (
     <Box sx={{ mb: 6, px: { xs: 2, md: 6 } }}>
       <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
@@ -334,6 +344,29 @@ const OffersSection = () => {
         bgcolor: '#fff'
       }}>
         <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          {membership?.tier && (
+            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+              <Chip
+                icon={<EmojiEvents sx={{ fontSize: '16px !important' }} />}
+                label={`${t('banners.membership_badge_label')}: ${tierName}`}
+                onClick={onOpenMembership}
+                sx={{
+                  fontWeight: 800,
+                  bgcolor: '#fdf2f8',
+                  color: '#be185d',
+                  border: '1px solid #f9a8d4',
+                  cursor: 'pointer'
+                }}
+              />
+              {trackingPhone && (
+                <Chip
+                  icon={<Phone sx={{ fontSize: '16px !important' }} />}
+                  label={trackingPhone}
+                  sx={{ fontWeight: 700, bgcolor: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1' }}
+                />
+              )}
+            </Box>
+          )}
           <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#333' }}>
             {t('banners.no_strings_attached')}
           </Typography>
@@ -389,32 +422,31 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
   const [loadingDates, setLoadingDates] = useState(false)
 
   useEffect(() => {
-    if (open && room && !isMock) {
-      // Đảm bảo lấy đúng ID (backend dùng roomId trong RoomResponse)
-      const rid = room.roomId || room.id;
-      if (!rid) return;
-
-      console.log('Fetching booked dates for room ID:', rid);
-      setLoadingDates(true);
-      setError('');
-      
-      getBookedDatesApi(rid)
-        .then(dates => {
-          console.log('Booked dates for Room ' + rid + ':', dates);
-          setBookedDates(Array.isArray(dates) ? dates : []);
-        })
-        .catch(err => {
-          console.error('Failed to fetch booked dates:', err);
-          setBookedDates([]);
-        })
-        .finally(() => setLoadingDates(false));
-    } else {
-      setBookedDates([]);
+    if (!open || !room || isMock) {
+      Promise.resolve().then(() => setBookedDates([]))
+      return
     }
-  }, [open, room?.roomId, room?.id, isMock])
+    const rid = room.roomId || room.id
+    if (!rid) return
+    Promise.resolve()
+      .then(() => {
+        setLoadingDates(true)
+        setError('')
+        return getBookedDatesApi(rid)
+      })
+      .then(dates => {
+        setLoadingDates(false)
+        setBookedDates(Array.isArray(dates) ? dates : [])
+      })
+      .catch(() => {
+        setLoadingDates(false)
+        setBookedDates([])
+      })
+  }, [open, room, isMock])
 
   useEffect(() => {
-    if (open) {
+    if (!open) return
+    Promise.resolve().then(() => {
       setForm({
         checkIn: searchParams?.checkIn || '',
         checkOut: searchParams?.checkOut || '',
@@ -423,7 +455,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         specialRequest: ''
       })
       setError('')
-    }
+    })
   }, [open, searchParams])
 
   if (!room) return null
@@ -437,7 +469,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
   const handleBook = async () => {
     if (!form.checkIn || !form.checkOut) { setError(t('rooms.validation_required')); return }
-    if (new Date(form.checkOut) <= new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return }
+    if (new Date(form.checkOut) < new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return }
     if (isMock) { setError('Phòng mẫu — vui lòng tìm kiếm phòng thực trên hệ thống.'); return }
 
     setSubmitting(true)
@@ -490,16 +522,22 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
               <DatePicker
                 label={t('booking_page.check_in')}
                 value={form.checkIn ? dayjs(form.checkIn) : null}
-                onChange={newValue => setForm(f => ({ ...f, checkIn: newValue ? newValue.format('YYYY-MM-DD') : '' }))}
+                onChange={newValue => {
+                  const newCheckIn = newValue ? newValue.format('YYYY-MM-DD') : ''
+                  setForm(f => ({
+                    ...f,
+                    checkIn: newCheckIn,
+                    checkOut: (f.checkOut && newCheckIn && f.checkOut < newCheckIn) ? '' : f.checkOut
+                  }))
+                  setError('')
+                }}
                 minDate={dayjs()}
                 shouldDisableDate={(date) => {
-                  const dateStr = date.format('YYYY-MM-DD');
-                  const isDisabled = bookedDates.includes(dateStr);
-                  if (isDisabled) console.log('Disabling date:', dateStr);
-                  return isDisabled;
+                  const dateStr = date.format('YYYY-MM-DD')
+                  return bookedDates.includes(dateStr)
                 }}
                 loading={loadingDates}
-                slotProps={{ 
+                slotProps={{
                   textField: { size: 'small', fullWidth: true },
                   day: {
                     sx: {
@@ -508,20 +546,28 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
                   }
                 }}
               />
+              <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block', pl: 0.5 }}>
+                {t('booking_page.checkin_time')}
+              </Typography>
             </Grid>
             <Grid item xs={6}>
               <DatePicker
                 label={t('booking_page.check_out')}
                 value={form.checkOut ? dayjs(form.checkOut) : null}
-                onChange={newValue => setForm(f => ({ ...f, checkOut: newValue ? newValue.format('YYYY-MM-DD') : '' }))}
-                minDate={form.checkIn ? dayjs(form.checkIn).add(1, 'day') : dayjs().add(1, 'day')}
+                onChange={newValue => {
+                  setForm(f => ({ ...f, checkOut: newValue ? newValue.format('YYYY-MM-DD') : '' }))
+                  setError('')
+                }}
+                minDate={form.checkIn ? dayjs(form.checkIn).subtract(1, 'day') : dayjs().subtract(1, 'day')}
                 shouldDisableDate={(date) => {
-                  const dateStr = date.format('YYYY-MM-DD');
-                  const isDisabled = bookedDates.includes(dateStr);
-                  return isDisabled;
+                  const dateStr = date.format('YYYY-MM-DD')
+                  const minStr = form.checkIn || dayjs().format('YYYY-MM-DD')
+                  if (dateStr < minStr) return true
+                  if (dateStr === minStr) return false
+                  return bookedDates.includes(dateStr)
                 }}
                 loading={loadingDates}
-                slotProps={{ 
+                slotProps={{
                   textField: { size: 'small', fullWidth: true },
                   day: {
                     sx: {
@@ -530,6 +576,11 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
                   }
                 }}
               />
+              {form.checkIn !== form.checkOut && (
+                <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block', pl: 0.5 }}>
+                  {t('booking_page.checkout_time')}
+                </Typography>
+              )}
             </Grid>
           </Grid>
         </LocalizationProvider>
@@ -611,16 +662,14 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 /* ─── Main ─────────────────────────────────────────────── */
 const BookingPage = () => {
   const { t } = useTranslation()
+  const currentLang = i18n.language || 'vi'
   const navigate = useNavigate()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
   const { isAuthenticated } = useAuth()
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  useEffect(() => {
-    setSidebarOpen(!isMobile)
-  }, [isMobile])
+  const [membership, setMembership] = useState(null)
+  const [sidebarOpen, setSidebarOpen] = useState(!isMobile)
   const [rooms, setRooms] = useState([])
   const [allTypeNames, setAllTypeNames] = useState([])
   const [loading, setLoading] = useState(true)
@@ -635,12 +684,12 @@ const BookingPage = () => {
 
   const [minPrice, setMinPrice] = useState(undefined)
   const [maxPrice, setMaxPrice] = useState(undefined)
-  const [params, setParams] = useState({
+  const [params, setParams] = useState(() => ({
     destination: '',
-    checkIn: new Date().toISOString().split('T')[0],
-    checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+    checkIn: dayjs().format('YYYY-MM-DD'),
+    checkOut: dayjs().add(1, 'day').format('YYYY-MM-DD'),
     adults: 2, children: 0
-  })
+  }))
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -665,7 +714,7 @@ const BookingPage = () => {
   const scrollRooms = (dir) => {
     if (roomScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = roomScrollRef.current
-      const itemsPerView = isMobile ? 1.2 : 3
+      const itemsPerView = isMobile ? 1.2 : 4
       const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
@@ -689,7 +738,7 @@ const BookingPage = () => {
   const scrollBudget = (dir) => {
     if (budgetScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = budgetScrollRef.current
-      const itemsPerView = isMobile ? 1.2 : 3
+      const itemsPerView = isMobile ? 1.2 : 4
       const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
@@ -732,22 +781,22 @@ const BookingPage = () => {
   }, [rooms, searched])
 
   const weekendDeals = React.useMemo(() => {
-    // Lấy tối đa 10 phòng thật từ backend, shuffle để khác phần "Phòng nổi bật"
-    const shuffledReal = [...rooms].sort(() => Math.random() - 0.5)
-    const realRooms = shuffledReal.slice(0, 10).map(r => ({
+    const sortedReal = [...rooms].sort((a, b) => {
+      const ha = String(a.roomId || a.id).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+      const hb = String(b.roomId || b.id).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+      return ha - hb
+    })
+    const realRooms = sortedReal.slice(0, 10).map(r => ({
       ...r,
       _isMockCard: false,
-      oldPrice: Number(r.pricePerNight || r.priceDay || 0) * (1.2 + Math.random() * 0.15)
+      oldPrice: Number(r.pricePerNight || r.priceDay || 0) * stablePriceMultiplier(r.roomId || r.id)
     }))
-
-    // Nếu phòng thật < 10, bổ sung bằng MOCK_WEEKEND_DEALS
     const needed = Math.max(0, 10 - realRooms.length)
     const mockFill = MOCK_WEEKEND_DEALS.slice(0, needed).map(r => ({
       ...r,
       _isMockCard: true,
-      oldPrice: Number(r.pricePerNight || 0) * (1.2 + Math.random() * 0.15)
+      oldPrice: Number(r.pricePerNight || 0) * stablePriceMultiplier(r.id)
     }))
-
     return [...realRooms, ...mockFill]
   }, [rooms])
 
@@ -768,7 +817,7 @@ const BookingPage = () => {
   const scrollWeekend = (dir) => {
     if (weekendScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = weekendScrollRef.current
-      const itemsPerView = isMobile ? 1.2 : 3
+      const itemsPerView = isMobile ? 1.2 : 4
       const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
@@ -780,7 +829,7 @@ const BookingPage = () => {
   const scrollTopRated = (dir) => {
     if (topRatedScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = topRatedScrollRef.current
-      const itemsPerView = isMobile ? 1.2 : 3
+      const itemsPerView = isMobile ? 1.2 : 4
       const scrollAmount = (clientWidth + 24) / itemsPerView
       if (dir > 0 && scrollLeft + clientWidth >= scrollWidth - 10) return
       if (dir < 0 && scrollLeft <= 10) return
@@ -807,6 +856,16 @@ const BookingPage = () => {
   }, [])
 
   // Hàm bổ trợ để mở rộng loại phòng được chọn (ví dụ: "Deluxe" -> ["Deluxe King", "Deluxe Twin", ...])
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setMembership(null)
+      return
+    }
+    getMyMembershipApi()
+      .then(setMembership)
+      .catch(() => setMembership(null))
+  }, [isAuthenticated])
+
   const expandRoomTypes = (selectedTypes) => {
     if (!selectedTypes || selectedTypes.length === 0) return undefined
     const expanded = []
@@ -814,8 +873,8 @@ const BookingPage = () => {
       let searchStr = st
       if (st === 'Family Room') searchStr = 'Family'
       if (st === 'Presidential Suite') searchStr = 'President'
-      
-      const matches = allTypeNames.filter(name => 
+
+      const matches = allTypeNames.filter(name =>
         name.toLowerCase().includes(searchStr.toLowerCase())
       )
       if (matches.length > 0) {
@@ -860,7 +919,9 @@ const BookingPage = () => {
         maxPrice,
         expandRoomTypes(roomTypes),
         bedTypes.length > 0 ? bedTypes : undefined,
-        selectedAmenities.length > 0 ? selectedAmenities : undefined
+        selectedAmenities.length > 0 ? selectedAmenities : undefined,
+        searchParams.adults,
+        searchParams.children
       )
       setRooms(Array.isArray(d) ? d : [])
     } catch { setRooms([]) }
@@ -914,7 +975,9 @@ const BookingPage = () => {
         maxPrice,
         expandRoomTypes([typeKey]),
         bedTypes.length > 0 ? bedTypes : undefined,
-        selectedAmenities.length > 0 ? selectedAmenities : undefined
+        selectedAmenities.length > 0 ? selectedAmenities : undefined,
+        params.adults,
+        params.children
       )
       setRooms(Array.isArray(d) ? d : [])
     } catch { setRooms([]) }
@@ -932,9 +995,9 @@ const BookingPage = () => {
   }
 
   /* ── Room Card ─────────────────────────────────────────── */
-  const RoomCard = ({ room, isMock, oldPrice }) => {
+  const RoomCard = ({ room, isMock, oldPrice, showBookButton = true }) => {
     const { t, i18n } = useTranslation()
-    
+
     // Tạo data đánh giá từ MOCK_ROOMS để tránh bị trùng nhau nếu không phải isMock
     const numericId = parseInt(String(room.id || room.roomId || 0).replace(/\D/g, '') || 0)
     const mockData = MOCK_ROOMS[numericId % MOCK_ROOMS.length] || MOCK_ROOMS[0]
@@ -971,19 +1034,19 @@ const BookingPage = () => {
             <LocationOn fontSize="inherit" />
             {isMock
               ? (() => {
-                  const key = getDestinationKey(room.location)
-                  const loc = key ? t(`destinations.${key}.name`) : room.location
-                  return `${loc} · ${room.bed}`
-                })()
+                const key = getDestinationKey(room.location)
+                const loc = key ? t(`destinations.${key}.name`) : room.location
+                return `${loc} · ${room.bed}`
+              })()
               : (() => {
-                  const rawProv = room.province || 'Hà Nội'
-                  const key = getDestinationKey(rawProv)
-                  const loc = key ? t(`destinations.${key}.name`) : rawProv
-                  const beds = room.beds && room.beds.length > 0
-                    ? room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ')
-                    : (room.typeName || 'Standard')
-                  return `${loc} · ${beds}`
-                })()}
+                const rawProv = room.province || 'Hà Nội'
+                const key = getDestinationKey(rawProv)
+                const loc = key ? t(`destinations.${key}.name`) : rawProv
+                const beds = room.beds && room.beds.length > 0
+                  ? room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ')
+                  : (room.typeName || 'Standard')
+                return `${loc} · ${beds}`
+              })()}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
             <Rating value={ratingValue} precision={0.1} readOnly size="small"
@@ -1001,13 +1064,15 @@ const BookingPage = () => {
               )}
               {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
             </Typography>
-            <Button
-              size="small" variant="contained" color="primary"
-              onClick={(e) => { e.stopPropagation(); openBooking(room, isMock) }}
-              sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
-            >
-              {t('common.book_now')}
-            </Button>
+            {showBookButton && (
+              <Button
+                size="small" variant="contained" color="primary"
+                onClick={(e) => { e.stopPropagation(); openBooking(room, isMock) }}
+                sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
+              >
+                {t('common.book_now')}
+              </Button>
+            )}
           </Box>
         </CardContent>
       </Card>
@@ -1224,7 +1289,11 @@ const BookingPage = () => {
                 </Box>
 
 
-                <OffersSection />
+                <OffersSection
+                  membership={membership}
+                  lang={currentLang}
+                  onOpenMembership={() => navigate('/membership')}
+                />
 
 
                 {/* 3. Tìm kiếm theo loại phòng */}
@@ -1324,18 +1393,18 @@ const BookingPage = () => {
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                     scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
-                    {loading ? (
-                      [...Array(3)].map((_, i) => (
-                        <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0 }}>
-                          <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
-                          <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
-                          <Skeleton width="50%" height={18} />
-                        </Box>
-                      ))
-                    ) : (
+                        {loading ? (
+                          [...Array(4)].map((_, i) => (
+                            <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0 }}>
+                              <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
+                              <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
+                              <Skeleton width="50%" height={18} />
+                            </Box>
+                          ))
+                        ) : (
                       featuredRooms.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                          <RoomCard room={r} isMock={rooms.length === 0} />
+                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                          <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
                         </Box>
                       ))
                     )}
@@ -1392,8 +1461,8 @@ const BookingPage = () => {
                         scrollSnapType: { xs: 'none', md: 'x mandatory' }
                       }}>
                         {topRatedRooms.map(r => (
-                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                            <RoomCard room={r} isMock={rooms.length === 0} />
+                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                            <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
                           </Box>
                         ))}
                       </Box>
@@ -1451,8 +1520,8 @@ const BookingPage = () => {
                         scrollSnapType: { xs: 'none', md: 'x mandatory' }
                       }}>
                         {budgetRooms.map(r => (
-                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                            <RoomCard room={r} isMock={rooms.length === 0} />
+                          <Box key={r.id} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                            <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
                           </Box>
                         ))}
                       </Box>
@@ -1491,8 +1560,8 @@ const BookingPage = () => {
                     scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
                     {weekendDeals.map(r => (
-                      <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 48px) / 3)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                        <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} />
+                      <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                        <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} showBookButton={false} />
                       </Box>
                     ))}
                   </Box>

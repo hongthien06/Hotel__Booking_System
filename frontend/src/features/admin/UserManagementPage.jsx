@@ -5,10 +5,12 @@ import {
   CircularProgress, Alert, Avatar, Tooltip, IconButton
 } from '@mui/material'
 import { AdminPanelSettings, Person, VerifiedUser, Security } from '@mui/icons-material'
+import { useTranslation } from 'react-i18next'
 import { getAllUsersApi, updateUserRolesApi } from '../../shared/api/adminUserApi'
 import { useAuth } from '../../shared/hooks/useAuth'
 
 const UserManagementPage = () => {
+  const { t } = useTranslation()
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -36,7 +38,7 @@ const UserManagementPage = () => {
       }
     } catch (err) {
       console.error('Error Fetching users:', err)
-      setError('Không thể tải danh sách người dùng.')
+      setError(t('user_management.load_error'))
     } finally {
       setLoading(false)
     }
@@ -57,7 +59,7 @@ const UserManagementPage = () => {
       const updatedUser = await updateUserRolesApi(userId, Array.from(newRoles))
       setUsers(users.map(u => u.userId === userId ? updatedUser : u))
     } catch (err) {
-      setError('Lỗi khi cập nhật quyền hạn.')
+      setError(t('user_management.update_error'))
     } finally {
       setActionLoading(null)
     }
@@ -68,7 +70,7 @@ const UserManagementPage = () => {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" sx={{ mb: 4, fontWeight: 800, color: 'primary.contrastText', display: 'flex', alignItems: 'center', gap: 2 }}>
-        <Security fontSize="large" /> Quản lý người dùng
+        <Security fontSize="large" /> {t('user_management.title')}
       </Typography>
 
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
@@ -77,10 +79,10 @@ const UserManagementPage = () => {
         <Table>
           <TableHead sx={{ bgcolor: 'action.hover' }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Người dùng</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Vai trò</TableCell>
-              <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>Thao tác</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('user_management.user')}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('user_management.email')}</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>{t('user_management.role')}</TableCell>
+              <TableCell sx={{ fontWeight: 700, textAlign: 'center' }}>{t('user_management.actions')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -122,7 +124,7 @@ const UserManagementPage = () => {
                       onClick={() => handleGrantAdmin(u.userId, u.roles || [])}
                       sx={{ borderRadius: 2, textTransform: 'none', fontWeight: 700 }}
                     >
-                      {isAdmin ? 'Gỡ quyền Admin' : 'Cấp quyền Admin'}
+                      {isAdmin ? t('user_management.revoke_admin') : t('user_management.grant_admin')}
                     </Button>
                   </TableCell>
                 </TableRow>

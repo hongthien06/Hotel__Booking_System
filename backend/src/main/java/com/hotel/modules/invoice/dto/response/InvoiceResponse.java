@@ -24,7 +24,12 @@ public class InvoiceResponse {
     private Byte numGuests;
     private String address;
 
-    private String voucherCode;
+    private String membershipTierName;   // hạng thành viên áp dụng
+    private BigDecimal membershipDiscountPct;
+    private Boolean isFirstBookingDiscount;
+    private BigDecimal holidayMultiplier;
+    private String holidayPeriodName;
+    private BigDecimal groupDiscountPct;
 
     private BigDecimal subtotal;
     private BigDecimal taxRate;

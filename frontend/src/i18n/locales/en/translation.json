@@ -34,7 +34,8 @@
     "profile": "Profile",
     "bookings_history": "Booking History",
     "logo_text": "Hotel Booking",
-    "users": "Users"
+    "users": "Users",
+    "membership": "Membership"
   },
   "auth": {
     "login_required_title": "Login Required",
@@ -133,6 +134,37 @@
         "comment": "Booked a room for my family through this system, very convenient and fast. 10 points!"
       }
     },
+    "policy": {
+      "overline": "POLICIES",
+      "title": "Accommodation Policies",
+      "subtitle": "What you need to know before booking",
+      "cards": {
+        "checkin": {
+          "title": "Check-in & Check-out",
+          "desc": "Check-in from 14:00, check-out by 12:00. Early or late requests depend on availability and may incur additional fees."
+        },
+        "cancel": {
+          "title": "Cancellation Policy",
+          "desc": "Free cancellation up to 24 hours before check-in. Late cancellation or no-show may result in a full charge."
+        },
+        "payment": {
+          "title": "Payment",
+          "desc": "Accepts credit cards, debit cards and online payments. Booking is confirmed once payment is completed."
+        },
+        "rules": {
+          "title": "House Rules",
+          "desc": "No smoking in rooms, no pets allowed. Please maintain quiet hours at night to respect other guests."
+        },
+        "request": {
+          "title": "Special Requests",
+          "desc": "Note your requests when booking. We will do our best to accommodate but cannot guarantee all requests."
+        },
+        "safety": {
+          "title": "Safety & Security",
+          "desc": "In-room safe, 24/7 security cameras. Guests are responsible for any property damage during their stay."
+        }
+      }
+    },
     "cta": {
       "title": "Ready for your next getaway?",
       "subtitle": "Book today to receive special offers!"
@@ -159,6 +191,10 @@
     "cancel": "Cancel",
     "avatar_tooltip": "Change Avatar",
     "member_since": "Member since",
+    "membership_tier": "Membership tier",
+    "membership_discount_value": "Current discount: {{discount}}%",
+    "membership_phone_value": "Points tracked by phone: {{phone}}",
+    "membership_phone_missing": "Add a phone number to track membership points.",
     "fetch_error": "Unable to load personal information.",
     "update_success": "Profile updated successfully!",
     "update_error": "An error occurred during update.",
@@ -309,7 +345,9 @@
     "available_rooms_sub": "List of rooms matching your search requirements.",
     "weekend_deals_title": "Weekend Deals",
     "weekend_deals_subtitle": "Save on stays from May 8 - May 10",
-    "non_refundable_warning": "Because the booking time is within 24 hours prior to check-in, this booking will be non-refundable if canceled."
+    "non_refundable_warning": "Because the booking time is within 24 hours prior to check-in, this booking will be non-refundable if canceled.",
+  "checkin_time": "Check-in from 14:00",
+  "checkout_time": "Check-out by 12:00"
   },
   "login_page": {
     "welcome": "Welcome Back",
@@ -320,7 +358,9 @@
     "login_button": "Login",
     "logging_in": "Logging in...",
     "no_account": "Don't have an account?",
-    "register_now": "Register Now"
+    "register_now": "Register Now",
+    "password": "Password",
+    "failed": "Login failed. Please verify your credentials."
   },
   "forgot_password": {
     "title": "Forgot Password?",
@@ -375,6 +415,7 @@
     "status_maintenance": "Maintenance",
     "status_inactive": "Inactive",
     "validation_required": "Please fill in all fields: Hotel, Branch, and Room Type!",
+    "check_out_after_check_in": "Check-out date must be on or after check-in date",
     "management": "Room Management",
     "rooms_in_system": "rooms in system",
     "add_room": "Add Room",
@@ -468,6 +509,7 @@
   "banners": {
     "offers_title": "Deals",
     "offers_subtitle": "Promotions, discounts, and special offers just for you",
+    "membership_badge_label": "Membership",
     "no_strings_attached": "No strings attached. Peace of mind stays.",
     "travel_offer_title": "Book with Getaway Deals",
     "travel_offer_desc": "Save at least 15% on select stays when booking from now until the end of the travel season.",
@@ -595,5 +637,72 @@
     "go_home": "Back to Home",
     "retry_booking": "Try Again",
     "loading_payment": "Processing your payment..."
+  },
+  "register": {
+    "title": "Create a new account",
+    "subtitle": "Join us to experience the best service",
+    "full_name": "Full Name",
+    "phone": "Phone Number",
+    "confirm_password": "Confirm Password",
+    "submit_button": "Register Now",
+    "processing": "Processing...",
+    "have_account": "Already have an account?",
+    "login_link": "Login",
+    "match_error": "Confirm password does not match.",
+    "failed": "Registration failed. Please try again."
+  },
+  "user_management": {
+    "title": "User Management",
+    "user": "User",
+    "email": "Email",
+    "role": "Role",
+    "actions": "Actions",
+    "grant_admin": "Grant Admin",
+    "revoke_admin": "Revoke Admin",
+    "load_error": "Unable to load user list.",
+    "update_error": "Error updating privileges."
+  },
+  "membership": {
+    "page_title": "Membership Tiers",
+    "page_subtitle": "Track your membership tier and discount benefits",
+    "current_tier": "Current Tier",
+    "discount": "Discount",
+    "discount_rate": "Discount Rate",
+    "total_bookings": "Total Bookings",
+    "total_spent": "Total Spent",
+    "available": "Available",
+    "first_booking_perk": "First Stay Perk",
+    "progress_to": "Progress to",
+    "spent_progress": "Spending",
+    "booking_progress": "Booking Count",
+    "more": "more to upgrade",
+    "bookings_more": "more bookings",
+    "upgrade_note": "Tier is automatically updated after successful payment",
+    "vip_congrats": "You've reached the highest VIP tier! Thank you for your loyalty.",
+    "vip_badge": "Top VIP",
+    "all_tiers_title": "All Membership Tiers",
+    "comparison_title": "Benefits Comparison",
+    "your_tier": "Your tier",
+    "tier": "Tier",
+    "min_spent": "Min. Spending",
+    "min_bookings": "Min. Bookings",
+    "first_booking_benefit": "10% off the first booking",
+    "tier_booking_benefit": "{{discount}}% off every booking",
+    "spending_requirement": "Spend ≥ {{amount}}",
+    "booking_requirement": "Book ≥ {{count}} stays",
+    "once_only": "One time only",
+    "holiday_notice_title": "Notice: Holiday Pricing",
+    "holiday_price_note": "During holiday periods, room price is multiplied by ×1.5. Member discounts still apply on top.",
+    "holiday_price": "Holiday Price",
+    "group_discount_title": "Group Booking Discounts",
+    "group_discount_desc": "Book with a group of 4 or more guests to receive additional discounts.",
+    "guests": "guests",
+    "points_phone": "Membership points phone",
+    "points_phone_missing": "Add a phone number in your profile to track points.",
+    "fetch_error": "Unable to load membership information",
+    "discount_applied": "Benefits Applied",
+    "first_booking_discount": "First-time Guest Discount",
+    "tier_discount": "Member Discount",
+    "group_discount": "Group Discount"
   }
 }

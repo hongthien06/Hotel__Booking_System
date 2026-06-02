@@ -18,9 +18,15 @@ const PC = '#c0496e'
 const PC_LIGHT = '#fce4ec'
 
 const nightsBetween = (a, b) => {
+  if (!a || !b) return 0
   const diff = new Date(b) - new Date(a)
-  return diff > 0 ? Math.round(diff / 86400000) : 1
+  // Cùng ngày hoặc diff dương => ít nhất 1 đêm
+  return diff >= 0 ? Math.max(1, Math.round(diff / 86400000)) : 0
 }
+
+// Cho phép checkOut = checkIn (đặt trong ngày), chỉ xóa nếu checkOut < checkIn
+const sanitizeCheckOut = (checkIn, checkOut) =>
+  checkIn && checkOut && checkOut < checkIn ? '' : checkOut
 
 const formatCurrency = (n, lang) => {
   const currency = lang ? (lang === 'vi' ? 'VND' : 'USD') : null;
@@ -31,12 +37,16 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
   const { t } = useTranslation()
   const theme = useTheme()
   const isMobileDialog = useMediaQuery(theme.breakpoints.down('sm'))
-  const [form, setForm] = useState({
-    checkIn: searchParams?.checkIn || '',
-    checkOut: searchParams?.checkOut || '',
-    numAdults: (searchParams?.adults || 2),
-    numChildren: (searchParams?.children || 0),
-    specialRequest: ''
+  const [form, setForm] = useState(() => {
+    const checkIn = searchParams?.checkIn || ''
+    const checkOut = sanitizeCheckOut(checkIn, searchParams?.checkOut || '')
+    return {
+      checkIn,
+      checkOut,
+      numAdults: searchParams?.adults || 2,
+      numChildren: searchParams?.children || 0,
+      specialRequest: ''
+    }
   })
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -44,41 +54,42 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
   const [loadingDates, setLoadingDates] = useState(false)
 
   useEffect(() => {
-    if (open && room && !isMock) {
-      // Đảm bảo lấy đúng ID (backend dùng roomId trong RoomResponse)
-      const rid = room.roomId || room.id;
-      if (!rid) return;
-
-      console.log('Fetching booked dates for room ID:', rid);
-      setLoadingDates(true);
-      setError('');
-      
-      getBookedDatesApi(rid)
-        .then(dates => {
-          console.log('Booked dates for Room ' + rid + ':', dates);
-          setBookedDates(Array.isArray(dates) ? dates : []);
-        })
-        .catch(err => {
-          console.error('Failed to fetch booked dates:', err);
-          setBookedDates([]);
-        })
-        .finally(() => setLoadingDates(false));
-    } else {
-      setBookedDates([]);
+    if (!open || !room || isMock) {
+      Promise.resolve().then(() => setBookedDates([]))
+      return
     }
+    const rid = room.roomId || room.id
+    if (!rid) return
+    Promise.resolve()
+      .then(() => {
+        setLoadingDates(true)
+        setError('')
+        return getBookedDatesApi(rid)
+      })
+      .then(dates => {
+        setLoadingDates(false)
+        setBookedDates(Array.isArray(dates) ? dates : [])
+      })
+      .catch(() => {
+        setLoadingDates(false)
+        setBookedDates([])
+      })
   }, [open, room?.roomId, room?.id, isMock])
 
   useEffect(() => {
-    if (open) {
+    if (!open) return
+    Promise.resolve().then(() => {
+      const checkIn = searchParams?.checkIn || ''
+      const checkOut = sanitizeCheckOut(checkIn, searchParams?.checkOut || '')
       setForm({
-        checkIn: searchParams?.checkIn || '',
-        checkOut: searchParams?.checkOut || '',
-        numAdults: (searchParams?.adults || 2),
-        numChildren: (searchParams?.children || 0),
+        checkIn,
+        checkOut,
+        numAdults: searchParams?.adults || 2,
+        numChildren: searchParams?.children || 0,
         specialRequest: ''
       })
       setError('')
-    }
+    })
   }, [open, searchParams])
 
   if (!room) return null
@@ -92,8 +103,9 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 
   const handleBook = async () => {
     if (!form.checkIn || !form.checkOut) { setError(t('rooms.validation_required')); return }
-    if (new Date(form.checkOut) <= new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return }
-    
+    // Cho phép checkOut = checkIn (đặt trong ngày, tính 1 đêm)
+    if (new Date(form.checkOut) < new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return }
+
     // Kiểm tra sức chứa tối đa (maxGuests)
     const maxGuests = room.maxGuests || 99
     if (Number(form.numAdults) + Number(form.numChildren) > maxGuests) {
@@ -153,7 +165,15 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
               <DatePicker
                 label={t('booking_page.check_in')}
                 value={form.checkIn ? dayjs(form.checkIn) : null}
-                onChange={newValue => setForm(f => ({ ...f, checkIn: newValue ? newValue.format('YYYY-MM-DD') : '' }))}
+                onChange={newValue => {
+                  const newCheckIn = newValue ? newValue.format('YYYY-MM-DD') : ''
+                  setForm(f => ({
+                    ...f,
+                    checkIn: newCheckIn,
+                    checkOut: (f.checkOut && newCheckIn && f.checkOut < newCheckIn) ? '' : f.checkOut
+                  }))
+                  setError('')
+                }}
                 minDate={dayjs()}
                 shouldDisableDate={(date) => {
                   const dateStr = date.format('YYYY-MM-DD');
@@ -162,7 +182,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
                   return isDisabled;
                 }}
                 loading={loadingDates}
-                slotProps={{ 
+                slotProps={{
                   textField: { size: 'small', fullWidth: true },
                   day: {
                     sx: {
@@ -171,20 +191,28 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
                   }
                 }}
               />
+              <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block', pl: 0.5 }}>
+                {t('booking_page.checkin_time')}
+              </Typography>
             </Grid>
             <Grid item xs={6}>
               <DatePicker
                 label={t('booking_page.check_out')}
                 value={form.checkOut ? dayjs(form.checkOut) : null}
-                onChange={newValue => setForm(f => ({ ...f, checkOut: newValue ? newValue.format('YYYY-MM-DD') : '' }))}
-                minDate={form.checkIn ? dayjs(form.checkIn).add(1, 'day') : dayjs().add(1, 'day')}
+                onChange={newValue => {
+                  setForm(f => ({ ...f, checkOut: newValue ? newValue.format('YYYY-MM-DD') : '' }))
+                  setError('')
+                }}
+                minDate={form.checkIn ? dayjs(form.checkIn).subtract(1, 'day') : dayjs().subtract(1, 'day')}
                 shouldDisableDate={(date) => {
-                  const dateStr = date.format('YYYY-MM-DD');
-                  const isDisabled = bookedDates.includes(dateStr);
-                  return isDisabled;
+                  const dateStr = date.format('YYYY-MM-DD')
+                  const minStr = form.checkIn || dayjs().format('YYYY-MM-DD')
+                  if (dateStr < minStr) return true
+                  if (dateStr === minStr) return false
+                  return bookedDates.includes(dateStr)
                 }}
                 loading={loadingDates}
-                slotProps={{ 
+                slotProps={{
                   textField: { size: 'small', fullWidth: true },
                   day: {
                     sx: {
@@ -193,6 +221,11 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
                   }
                 }}
               />
+              {form.checkIn !== form.checkOut && (
+                <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block', pl: 0.5 }}>
+                  {t('booking_page.checkout_time')}
+                </Typography>
+              )}
             </Grid>
           </Grid>
         </LocalizationProvider>

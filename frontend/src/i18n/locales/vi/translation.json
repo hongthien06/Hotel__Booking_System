@@ -34,7 +34,8 @@
     "profile": "Trang cá nhân",
     "bookings_history": "Lịch sử đặt phòng",
     "logo_text": "Hệ thống Đặt phòng",
-    "users": "Người dùng"
+    "users": "Người dùng",
+    "membership": "Hạng thành viên"
   },
   "auth": {
     "login_required_title": "Yêu cầu đăng nhập",
@@ -133,6 +134,37 @@
         "comment": "Đã đặt phòng cho gia đình qua hệ thống này, rất tiện lợi và nhanh chóng. 10 điểm!"
       }
     },
+    "policy": {
+      "overline": "QUY ĐỊNH",
+      "title": "Chính sách chỗ ở",
+      "subtitle": "Những điều bạn cần biết trước khi đặt phòng",
+      "cards": {
+        "checkin": {
+          "title": "Nhận phòng & Trả phòng",
+          "desc": "Nhận phòng từ 14:00, trả phòng trước 12:00. Nhận/trả sớm hoặc muộn tùy tình trạng phòng, có thể phát sinh phụ phí."
+        },
+        "cancel": {
+          "title": "Chính sách hủy phòng",
+          "desc": "Hủy miễn phí trước 24 giờ nhận phòng. Hủy muộn hoặc không đến có thể bị tính phí toàn bộ giá trị đặt phòng."
+        },
+        "payment": {
+          "title": "Thanh toán",
+          "desc": "Chấp nhận thẻ tín dụng, thẻ ghi nợ và thanh toán trực tuyến. Xác nhận chỗ sau khi thanh toán hoàn tất."
+        },
+        "rules": {
+          "title": "Nội quy lưu trú",
+          "desc": "Không hút thuốc trong phòng, không mang thú cưng. Giữ yên tĩnh vào ban đêm để tôn trọng khách xung quanh."
+        },
+        "request": {
+          "title": "Yêu cầu đặc biệt",
+          "desc": "Ghi chú yêu cầu khi đặt phòng. Chúng tôi cố gắng đáp ứng tối đa nhưng không đảm bảo tuyệt đối."
+        },
+        "safety": {
+          "title": "An toàn & Bảo mật",
+          "desc": "Két sắt trong phòng, camera an ninh 24/7. Khách chịu trách nhiệm mọi thiệt hại tài sản trong thời gian lưu trú."
+        }
+      }
+    },
     "cta": {
       "title": "Sẵn sàng cho chuyến nghỉ dưỡng tiếp theo?",
       "subtitle": "Đặt phòng ngay hôm nay để nhận ưu đãi đặc biệt!"
@@ -159,6 +191,10 @@
     "cancel": "Hủy",
     "avatar_tooltip": "Thay đổi ảnh đại diện",
     "member_since": "Thành viên từ",
+    "membership_tier": "Hạng thành viên",
+    "membership_discount_value": "Ưu đãi hiện tại: giảm {{discount}}%",
+    "membership_phone_value": "Số điện thoại tích điểm: {{phone}}",
+    "membership_phone_missing": "Hãy cập nhật số điện thoại để tích điểm thành viên.",
     "fetch_error": "Không thể tải thông tin cá nhân.",
     "update_success": "Cập nhật thông tin thành công!",
     "update_error": "Có lỗi xảy ra khi cập nhật.",
@@ -306,7 +342,9 @@
     "search_results": "Kết quả tìm kiếm",
     "weekend_deals_title": "Ưu đãi cho cuối tuần",
     "weekend_deals_subtitle": "Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5",
-    "non_refundable_warning": "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy."
+    "non_refundable_warning": "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy.",
+    "checkin_time": "Nhận phòng từ 14g",
+    "checkout_time": "Trả phòng trước 12h"
   },
   "login_page": {
     "welcome": "Chào mừng trở lại",
@@ -317,7 +355,9 @@
     "login_button": "Đăng nhập",
     "logging_in": "Đang đăng nhập...",
     "no_account": "Chưa có tài khoản?",
-    "register_now": "Đăng ký ngay"
+    "register_now": "Đăng ký ngay",
+    "password": "Mật khẩu",
+    "failed": "Đăng nhập thất bại. Xin vui lòng kiểm tra lại thông tin."
   },
   "forgot_password": {
     "title": "Quên mật khẩu?",
@@ -372,6 +412,7 @@
     "status_maintenance": "Bảo trì",
     "status_inactive": "Ngừng HĐ",
     "validation_required": "Vui lòng điền đầy đủ: Khách sạn, Chi nhánh và Loại phòng!",
+    "check_out_after_check_in": "Ngày trả phòng phải sau hoặc bằng ngày nhận phòng",
     "management": "Quản lý phòng",
     "rooms_in_system": "phòng trong hệ thống",
     "add_room": "Thêm phòng",
@@ -465,6 +506,7 @@
   "banners": {
     "offers_title": "Ưu đãi",
     "offers_subtitle": "Khuyến mãi, giảm giá và ưu đãi đặc biệt dành riêng cho bạn",
+    "membership_badge_label": "Hạng thành viên",
     "no_strings_attached": "Không điều kiện ràng buộc. An tâm nghỉ dưỡng.",
     "travel_offer_title": "Đặt với Ưu Đãi Mùa Du Lịch",
     "travel_offer_desc": "Giảm ít nhất 15% cho một số chỗ nghỉ khi đặt phòng từ nay đến hết mùa du lịch.",
@@ -481,6 +523,49 @@
     "Phòng họp": "Phòng họp",
     "Spa & Làm đẹp": "Spa & Làm đẹp",
     "WiFi miễn phí": "WiFi miễn phí"
+  },
+  "membership": {
+    "page_title": "Hạng Thành Viên",
+    "page_subtitle": "Theo dõi hạng thành viên và ưu đãi giảm giá của bạn",
+    "current_tier": "Hạng hiện tại",
+    "discount": "Giảm giá",
+    "discount_rate": "Mức giảm",
+    "total_bookings": "Tổng lượt đặt",
+    "total_spent": "Tổng chi tiêu",
+    "available": "Chưa dùng",
+    "first_booking_perk": "Ưu đãi lần đầu",
+    "progress_to": "Tiến độ lên hạng",
+    "spent_progress": "Chi tiêu",
+    "booking_progress": "Số lần đặt",
+    "more": "nữa để lên hạng",
+    "bookings_more": "lần nữa",
+    "upgrade_note": "Hạng được tự động cập nhật sau khi thanh toán thành công",
+    "vip_congrats": "Bạn đã đạt hạng VIP cao nhất! Cảm ơn vì sự trung thành của bạn.",
+    "vip_badge": "VIP Tối Cao",
+    "all_tiers_title": "Tất cả hạng thành viên",
+    "comparison_title": "Bảng so sánh quyền lợi",
+    "your_tier": "Hạng của bạn",
+    "tier": "Hạng",
+    "min_spent": "Chi tiêu tối thiểu",
+    "min_bookings": "Số lần đặt tối thiểu",
+    "first_booking_benefit": "Giảm 10% cho lần đặt đầu tiên",
+    "tier_booking_benefit": "Giảm {{discount}}% mỗi lần đặt phòng",
+    "spending_requirement": "Chi tiêu ≥ {{amount}}",
+    "booking_requirement": "Đặt phòng ≥ {{count}} lần",
+    "once_only": "1 lần duy nhất",
+    "holiday_notice_title": "Lưu ý: Giá dịp lễ",
+    "holiday_price_note": "Trong các dịp lễ, giá phòng được nhân với hệ số ×1.5. Ưu đãi thành viên vẫn được áp dụng thêm.",
+    "holiday_price": "Giá dịp lễ",
+    "group_discount_title": "Ưu đãi đặt nhóm",
+    "group_discount_desc": "Đặt phòng với nhóm từ 4 người trở lên để nhận thêm ưu đãi giảm giá.",
+    "guests": "khách",
+    "points_phone": "Số điện thoại tích điểm",
+    "points_phone_missing": "Hãy cập nhật số điện thoại trong profile để tích điểm.",
+    "fetch_error": "Không thể tải thông tin hạng thành viên",
+    "discount_applied": "Ưu đãi đang áp dụng",
+    "first_booking_discount": "Ưu đãi khách lần đầu",
+    "tier_discount": "Ưu đãi thành viên",
+    "group_discount": "Ưu đãi nhóm"
   },
   "payment": {
     "step1": "Kiểm tra đặt phòng",
@@ -592,5 +677,29 @@
     "go_home": "Về trang chủ",
     "retry_booking": "Thử lại",
     "loading_payment": "Đang xử lý thanh toán..."
+  },
+  "register": {
+    "title": "Tạo tài khoản mới",
+    "subtitle": "Tham gia cùng chúng tôi để trải nghiệm dịch vụ tốt nhất",
+    "full_name": "Họ và tên",
+    "phone": "Số điện thoại",
+    "confirm_password": "Xác nhận mật khẩu",
+    "submit_button": "Đăng ký ngay",
+    "processing": "Đang xử lý...",
+    "have_account": "Đã có tài khoản?",
+    "login_link": "Đăng nhập",
+    "match_error": "Mật khẩu xác nhận không khớp.",
+    "failed": "Đăng ký thất bại. Xin vui lòng thử lại."
+  },
+  "user_management": {
+    "title": "Quản lý người dùng",
+    "user": "Người dùng",
+    "email": "Email",
+    "role": "Vai trò",
+    "actions": "Thao tác",
+    "grant_admin": "Cấp quyền Admin",
+    "revoke_admin": "Gỡ quyền Admin",
+    "load_error": "Không thể tải danh sách người dùng.",
+    "update_error": "Lỗi khi cập nhật quyền hạn."
   }
 }

@@ -2,7 +2,7 @@ package com.hotel.modules.booking.entity;
 
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.rooms.entity.Room;
-import com.hotel.modules.voucher.entity.Voucher;
+import com.hotel.modules.holiday.entity.HolidayPeriod;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -86,10 +86,35 @@ public class Booking {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "voucher_id")
-    private Voucher voucher;
+    // ── Membership discount ───────────────────────────────────────────────────
+    @Column(name = "membership_discount_pct", nullable = false, precision = 5, scale = 2)
+    private BigDecimal membershipDiscountPct = BigDecimal.ZERO;
 
+    @Column(name = "membership_discount_amt", nullable = false, precision = 18, scale = 2)
+    private BigDecimal membershipDiscountAmt = BigDecimal.ZERO;
+
+    @Column(name = "is_first_booking_discount", nullable = false)
+    private Boolean isFirstBookingDiscount = false;
+
+    // ── Holiday pricing ───────────────────────────────────────────────────────
+    @Column(name = "holiday_multiplier", nullable = false, precision = 5, scale = 2)
+    private BigDecimal holidayMultiplier = BigDecimal.ONE;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "holiday_period_id")
+    private HolidayPeriod holidayPeriod;
+
+    // ── Group discount ────────────────────────────────────────────────────────
+    @Column(name = "group_discount_pct", nullable = false, precision = 5, scale = 2)
+    private BigDecimal groupDiscountPct = BigDecimal.ZERO;
+
+    @Column(name = "group_discount_amt", nullable = false, precision = 18, scale = 2)
+    private BigDecimal groupDiscountAmt = BigDecimal.ZERO;
+
+    @Column(name = "guest_count", nullable = false)
+    private Integer guestCount = 1;
+
+    // total discount = membershipDiscountAmt + groupDiscountAmt (kept for invoice compat)
     @Column(name = "discount_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 

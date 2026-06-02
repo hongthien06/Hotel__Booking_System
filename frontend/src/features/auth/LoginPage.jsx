@@ -46,7 +46,7 @@ const LoginPage = () => {
       login(data.token, { email: data.email, fullName: data.fullName, roles: roles })
       // Redirection is handled by useEffect based on roles
     } catch (err) {
-      const errMsg = err.message || 'Đăng nhập thất bại. Xin vui lòng kiểm tra lại thông tin.';
+      const errMsg = err.message || t('login_page.failed');
       setError(errMsg);
       setIsLoading(false)
     }
@@ -89,7 +89,7 @@ const LoginPage = () => {
           />
           <TextField
             fullWidth
-            label="Mật khẩu"
+            label={t('login_page.password')}
             type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
