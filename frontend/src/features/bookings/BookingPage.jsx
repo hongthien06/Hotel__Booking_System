@@ -31,7 +31,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import { useTranslation } from 'react-i18next'
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward, EmojiEvents, Phone } from '@mui/icons-material'
-import { getRoomsApi, getAvailableRoomsApi } from '../../shared/api/roomApi'
+import { getRoomsApi, getAvailableRoomsApi, getFeaturedRoomsApi, getTopRatedRoomsApi, getWeekendDealsApi, getBudgetRoomsApi } from '../../shared/api/roomApi'
 import { getAmenitiesApi } from '../../shared/api/amenityApi'
 import { createBookingApi, getBookedDatesApi } from '../../shared/api/bookingApi'
 import { getMyMembershipApi } from '../../shared/api/membershipApi'
@@ -682,6 +682,36 @@ const BookingPage = () => {
   const [amenities, setAmenities] = useState([])
   const [selectedAmenities, setSelectedAmenities] = useState([])
 
+  // Sections fetched from backend (featured / top rated / weekend / budget)
+  const [featuredList, setFeaturedList] = useState([])
+  const [topRatedList, setTopRatedList] = useState([])
+  const [weekendList, setWeekendList] = useState([])
+  const [budgetList, setBudgetList] = useState([])
+  const [sectionsLoading, setSectionsLoading] = useState(false)
+
+  const fetchSections = async (limit = 10) => {
+    setSectionsLoading(true)
+    try {
+      const [f, t, w, b] = await Promise.all([
+        getFeaturedRoomsApi(limit).catch(() => []),
+        getTopRatedRoomsApi(limit).catch(() => []),
+        getWeekendDealsApi(limit).catch(() => []),
+        getBudgetRoomsApi(limit).catch(() => [])
+      ])
+      setFeaturedList(Array.isArray(f) ? f : [])
+      setTopRatedList(Array.isArray(t) ? t : [])
+      setWeekendList(Array.isArray(w) ? w : [])
+      setBudgetList(Array.isArray(b) ? b : [])
+    } catch (err) {
+      setFeaturedList([])
+      setTopRatedList([])
+      setWeekendList([])
+      setBudgetList([])
+    } finally {
+      setSectionsLoading(false)
+    }
+  }
+
   const [minPrice, setMinPrice] = useState(undefined)
   const [maxPrice, setMaxPrice] = useState(undefined)
   const [params, setParams] = useState(() => ({
@@ -753,7 +783,7 @@ const BookingPage = () => {
 
   const budgetRooms = React.useMemo(() => {
     if (searched && rooms.length === 0) return []
-    const list = rooms.length > 0 ? rooms : MOCK_ROOMS
+    const list = budgetList && budgetList.length > 0 ? budgetList : (rooms.length > 0 ? rooms : MOCK_ROOMS)
     return [...list].sort((a, b) => {
       const pA = Number(a.pricePerNight || a.priceDay || a.price || 0)
       const pB = Number(b.pricePerNight || b.priceDay || b.price || 0)
@@ -763,13 +793,13 @@ const BookingPage = () => {
 
   const featuredRooms = React.useMemo(() => {
     if (searched && rooms.length === 0) return []
-    const list = rooms.length > 0 ? rooms : MOCK_ROOMS
+    const list = featuredList && featuredList.length > 0 ? featuredList : (rooms.length > 0 ? rooms : MOCK_ROOMS)
     return list.slice(0, 10)
   }, [rooms, searched])
 
   const topRatedRooms = React.useMemo(() => {
     if (searched && rooms.length === 0) return []
-    const list = rooms.length > 0 ? rooms : MOCK_ROOMS
+    const list = topRatedList && topRatedList.length > 0 ? topRatedList : (rooms.length > 0 ? rooms : MOCK_ROOMS)
     return [...list].sort((a, b) => {
       const rA = Number(a.rating || 0)
       const rB = Number(b.rating || 0)
@@ -781,6 +811,7 @@ const BookingPage = () => {
   }, [rooms, searched])
 
   const weekendDeals = React.useMemo(() => {
+    if (weekendList && weekendList.length > 0) return weekendList.slice(0, 10)
     const sortedReal = [...rooms].sort((a, b) => {
       const ha = String(a.roomId || a.id).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
       const hb = String(b.roomId || b.id).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
@@ -848,6 +879,8 @@ const BookingPage = () => {
       })
       .catch(() => setRooms([]))
       .finally(() => setLoading(false))
+    // Fetch section lists for UI (featured, top-rated, weekend, budget)
+    fetchSections()
 
     // Fetch amenities for the sidebar
     getAmenitiesApi()
@@ -925,7 +958,11 @@ const BookingPage = () => {
       )
       setRooms(Array.isArray(d) ? d : [])
     } catch { setRooms([]) }
-    finally { setLoading(false) }
+    finally {
+      setLoading(false)
+      // refresh UI sections so scroll lists reflect latest availability
+      fetchSections()
+    }
   }
 
   const handleClearSearch = () => {
@@ -960,6 +997,8 @@ const BookingPage = () => {
   const handleBookingSuccess = () => {
     setDialogOpen(false)
     setSnackbar({ open: true, msg: t('booking_page.booking_success'), severity: 'success' })
+    // refresh section lists after a booking — availability / deals may change
+    fetchSections()
   }
 
   const handleTypeClick = async (typeKey) => {
