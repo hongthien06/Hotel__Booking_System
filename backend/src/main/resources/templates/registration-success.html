@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Đăng ký thành công</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f8f9fa;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f8f9fa;padding:40px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background:linear-gradient(135deg,#9a1c48 0%,#c02860 100%);padding:40px 40px 30px;text-align:center;">
+                            <div style="font-size:48px;margin-bottom:16px;">🎉</div>
+                            <h1 style="color:#ffffff;font-size:24px;margin:0 0 8px;font-weight:800;">Chào mừng bạn!</h1>
+                            <p style="color:rgba(255,255,255,0.85);font-size:14px;margin:0;">Đăng ký tài khoản thành công</p>
+                        </td>
+                    </tr>
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding:40px;">
+                            <p style="color:#333;font-size:16px;margin:0 0 20px;line-height:1.6;">
+                                Xin chào <strong th:text="${fullName}">Bạn</strong>,
+                            </p>
+                            <p style="color:#555;font-size:15px;margin:0 0 24px;line-height:1.6;">
+                                Tài khoản của bạn tại <strong>Hotel Booking System</strong> đã được tạo thành công! 🎊
+                            </p>
+                            <!-- Welcome Box -->
+                            <div style="background:linear-gradient(135deg,#e8f5e9 0%,#f1f8e9 100%);border-radius:12px;padding:24px;margin:0 0 24px;text-align:center;">
+                                <p style="color:#2e7d32;font-size:14px;margin:0 0 16px;font-weight:600;">Bạn có thể bắt đầu:</p>
+                                <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                                    <tr>
+                                        <td style="padding:8px;text-align:center;">
+                                            <div style="font-size:24px;margin-bottom:6px;">🏨</div>
+                                            <p style="color:#444;font-size:13px;margin:0;font-weight:600;">Tìm kiếm phòng</p>
+                                        </td>
+                                        <td style="padding:8px;text-align:center;">
+                                            <div style="font-size:24px;margin-bottom:6px;">📅</div>
+                                            <p style="color:#444;font-size:13px;margin:0;font-weight:600;">Đặt phòng online</p>
+                                        </td>
+                                        <td style="padding:8px;text-align:center;">
+                                            <div style="font-size:24px;margin-bottom:6px;">⭐</div>
+                                            <p style="color:#444;font-size:13px;margin:0;font-weight:600;">Tích điểm thành viên</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <p style="color:#888;font-size:13px;margin:0;line-height:1.6;">
+                                Chúc bạn có những trải nghiệm tuyệt vời cùng chúng tôi!
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color:#f8f9fa;padding:24px 40px;text-align:center;border-top:1px solid #eee;">
+                            <p style="color:#999;font-size:12px;margin:0;">
+                                © 2026 Hotel Booking System — Email tự động, vui lòng không trả lời.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

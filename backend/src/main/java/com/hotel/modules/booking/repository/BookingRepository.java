@@ -70,5 +70,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findByBookingCode(String bookingCode);
 
+    // ── Dashboard Queries ────────────────────
+    @Query("SELECT b.status, COUNT(b) FROM Booking b GROUP BY b.status")
+    List<Object[]> countByStatusGrouped();
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.createdAt >= :start AND b.createdAt < :end")
+    long countByCreatedAtBetween(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = :status AND b.checkInDate = :date")
+    long countByStatusAndCheckInDate(@Param("status") BookingStatus status, @Param("date") LocalDate date);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = :status AND b.checkOutDate = :date")
+    long countByStatusAndCheckOutDate(@Param("status") BookingStatus status, @Param("date") LocalDate date);
 }
 

@@ -346,8 +346,8 @@
     "weekend_deals_title": "Weekend Deals",
     "weekend_deals_subtitle": "Save on stays from May 8 - May 10",
     "non_refundable_warning": "Because the booking time is within 24 hours prior to check-in, this booking will be non-refundable if canceled.",
-  "checkin_time": "Check-in from 14:00",
-  "checkout_time": "Check-out by 12:00"
+    "checkin_time": "Check-in from 14:00",
+    "checkout_time": "Check-out by 12:00"
   },
   "login_page": {
     "welcome": "Welcome Back",

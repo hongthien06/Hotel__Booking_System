@@ -2,7 +2,9 @@ package com.hotel.modules.dashboard.service;
 
 import com.hotel.modules.auth.repository.UserRepository;
 import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.repository.BookingRepository;
+import com.hotel.modules.dashboard.dto.DashboardChartDTO;
 import com.hotel.modules.dashboard.dto.DashboardStatsDTO;
 import com.hotel.modules.dashboard.dto.RecentBookingDTO;
 import com.hotel.modules.payment.entity.PaymentStatus;
@@ -15,6 +17,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,6 +81,90 @@ public class DashboardService {
         } catch (Exception e) {
             throw new RuntimeException("Lỗi khi lấy thống kê dashboard: " + e.getMessage());
         }
+    }
+
+    /**
+     * Lấy dữ liệu cho biểu đồ Dashboard
+     */
+    public DashboardChartDTO getChartData(int days) {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusDays(days - 1);
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = today.plusDays(1).atStartOfDay();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM");
+
+        // 1. Doanh thu theo ngày
+        List<Object[]> dailyRevenueRaw = paymentRepository.findDailyRevenue(PaymentStatus.SUCCESS, startDateTime, endDateTime);
+        List<DashboardChartDTO.DailyRevenue> revenueByDay = new ArrayList<>();
+        for (LocalDate d = startDate; !d.isAfter(today); d = d.plusDays(1)) {
+            final LocalDate date = d;
+            double revenue = dailyRevenueRaw.stream()
+                    .filter(row -> {
+                        Object dateObj = row[0];
+                        if (dateObj instanceof LocalDate ld) return ld.equals(date);
+                        if (dateObj instanceof java.sql.Date sd) return sd.toLocalDate().equals(date);
+                        return false;
+                    })
+                    .mapToDouble(row -> ((Number) row[1]).doubleValue())
+                    .findFirst().orElse(0);
+            revenueByDay.add(DashboardChartDTO.DailyRevenue.builder()
+                    .date(date.format(fmt))
+                    .revenue(revenue)
+                    .build());
+        }
+
+        // 2. Booking theo trạng thái
+        List<Object[]> statusRaw = bookingRepository.countByStatusGrouped();
+        List<DashboardChartDTO.BookingByStatus> bookingsByStatus = statusRaw.stream()
+                .map(row -> DashboardChartDTO.BookingByStatus.builder()
+                        .status(row[0].toString())
+                        .count(((Number) row[1]).longValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        // 3. Công suất phòng theo ngày (dùng room count)
+        long totalRooms = roomRepository.count();
+        List<DashboardChartDTO.RoomOccupancy> roomOccupancy = new ArrayList<>();
+        for (LocalDate d = startDate; !d.isAfter(today); d = d.plusDays(1)) {
+            long occupied = roomRepository.findByStatus(RoomStatus.OCCUPIED).size(); // simplified
+            roomOccupancy.add(DashboardChartDTO.RoomOccupancy.builder()
+                    .date(d.format(fmt))
+                    .occupied(occupied)
+                    .available(totalRooms - occupied)
+                    .build());
+        }
+
+        // 4. Doanh thu theo loại phòng
+        List<Object[]> roomTypeRevenueRaw = paymentRepository.findRevenueByRoomType(PaymentStatus.SUCCESS, startDateTime, endDateTime);
+        List<DashboardChartDTO.RevenueByRoomType> revenueByRoomType = roomTypeRevenueRaw.stream()
+                .map(row -> DashboardChartDTO.RevenueByRoomType.builder()
+                        .roomType((String) row[0])
+                        .revenue(((Number) row[1]).doubleValue())
+                        .build())
+                .collect(Collectors.toList());
+
+        // 5. Số liệu hôm nay
+        LocalDateTime todayStart = today.atStartOfDay();
+        LocalDateTime todayEnd = today.plusDays(1).atStartOfDay();
+        BigDecimal todayRevenueBD = paymentRepository.sumRevenueByDateRange(PaymentStatus.SUCCESS, todayStart, todayEnd);
+        long todayBookings = bookingRepository.countByCreatedAtBetween(todayStart, todayEnd);
+        long todayCheckIns = bookingRepository.countByStatusAndCheckInDate(BookingStatus.CHECKED_IN, today);
+        long todayCheckOuts = bookingRepository.countByStatusAndCheckOutDate(BookingStatus.CHECKED_OUT, today);
+        double occupancyRate = totalRooms > 0
+                ? (double) roomRepository.findByStatus(RoomStatus.OCCUPIED).size() / totalRooms * 100
+                : 0;
+
+        return DashboardChartDTO.builder()
+                .revenueByDay(revenueByDay)
+                .bookingsByStatus(bookingsByStatus)
+                .roomOccupancy(roomOccupancy)
+                .revenueByRoomType(revenueByRoomType)
+                .todayRevenue(todayRevenueBD != null ? todayRevenueBD.doubleValue() : 0)
+                .todayBookings(todayBookings)
+                .todayCheckIns(todayCheckIns)
+                .todayCheckOuts(todayCheckOuts)
+                .occupancyRate(Math.round(occupancyRate * 10.0) / 10.0)
+                .build();
     }
 
     private RecentBookingDTO mapToRecentBookingDTO(Booking booking) {
