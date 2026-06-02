@@ -147,6 +147,27 @@ public class RoomService {
         );
         return availableRooms.stream().map(RoomResponse::from).toList();
     }
+
+    // UI helpers: return limited lists for frontend sections
+    public List<RoomResponse> getFeaturedRooms(int limit) {
+        var page = roomRepository.findAllByOrderByCreatedAtDesc(org.springframework.data.domain.PageRequest.of(0, Math.max(1, limit)));
+        return page.getContent().stream().map(RoomResponse::from).toList();
+    }
+
+    public List<RoomResponse> getTopRatedRooms(int limit) {
+        var page = roomRepository.findTopRatedRooms(org.springframework.data.domain.PageRequest.of(0, Math.max(1, limit)));
+        return page.getContent().stream().map(RoomResponse::from).toList();
+    }
+
+    public List<RoomResponse> getWeekendDeals(int limit) {
+        var page = roomRepository.findAllByOrderByRoomType_PricePerNightDesc(org.springframework.data.domain.PageRequest.of(0, Math.max(1, limit)));
+        return page.getContent().stream().map(RoomResponse::from).toList();
+    }
+
+    public List<RoomResponse> getBudgetRooms(int limit) {
+        var page = roomRepository.findAllByOrderByRoomType_PricePerNightAsc(org.springframework.data.domain.PageRequest.of(0, Math.max(1, limit)));
+        return page.getContent().stream().map(RoomResponse::from).toList();
+    }
     
     //Internal Helper Methods
     private void mapRequestToEntity(RoomRequest req, Room room, RoomType type, Hotel hotel) {

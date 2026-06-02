@@ -74,6 +74,26 @@ public class RoomController {
         ));
     }
 
+    @GetMapping("/featured")
+    public ResponseEntity<List<RoomResponse>> getFeaturedRooms(@RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(roomService.getFeaturedRooms(limit));
+    }
+
+    @GetMapping("/top-rated")
+    public ResponseEntity<List<RoomResponse>> getTopRatedRooms(@RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(roomService.getTopRatedRooms(limit));
+    }
+
+    @GetMapping("/weekend-deals")
+    public ResponseEntity<List<RoomResponse>> getWeekendDeals(@RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(roomService.getWeekendDeals(limit));
+    }
+
+    @GetMapping("/budget")
+    public ResponseEntity<List<RoomResponse>> getBudgetRooms(@RequestParam(defaultValue = "10") int limit) {
+        return ResponseEntity.ok(roomService.getBudgetRooms(limit));
+    }
+
     @PostMapping
     public ResponseEntity<RoomResponse> createRoom(@RequestBody RoomRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(roomService.create(req));

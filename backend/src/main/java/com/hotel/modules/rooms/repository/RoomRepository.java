@@ -67,4 +67,14 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
             @Param("bedTypes") List<BedType> bedTypes,
             @Param("hotelIds") List<Long> hotelIds
     );
+
+        // Paging-based helpers for UI sections
+        org.springframework.data.domain.Page<Room> findAllByOrderByCreatedAtDesc(org.springframework.data.domain.Pageable pageable);
+
+        org.springframework.data.domain.Page<Room> findAllByOrderByRoomType_PricePerNightDesc(org.springframework.data.domain.Pageable pageable);
+
+        org.springframework.data.domain.Page<Room> findAllByOrderByRoomType_PricePerNightAsc(org.springframework.data.domain.Pageable pageable);
+
+        @Query("SELECT r FROM Room r LEFT JOIN com.hotel.modules.review.entity.Review rev ON rev.room = r GROUP BY r ORDER BY COALESCE(AVG(rev.ratingOverall), 0) DESC")
+        org.springframework.data.domain.Page<Room> findTopRatedRooms(org.springframework.data.domain.Pageable pageable);
 }
