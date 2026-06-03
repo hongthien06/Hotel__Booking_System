@@ -26,10 +26,7 @@ public class RoomController {
         return ResponseEntity.ok(roomService.getAll());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<RoomResponse> getRoomById(@PathVariable Long id) {
-        return ResponseEntity.ok(roomService.getById(id));
-    }
+    // Note: id-based endpoints are declared later to avoid path collisions with fixed routes
 
     @GetMapping("/status/{status}")
     public ResponseEntity<List<RoomResponse>> getAllRoomsByStatus(@PathVariable RoomStatus status) {
@@ -99,18 +96,24 @@ public class RoomController {
         return ResponseEntity.status(HttpStatus.CREATED).body(roomService.create(req));
     }
 
-    @PutMapping("/{id}")
+    // ID-based endpoints placed after fixed routes to prevent collisions (e.g. /featured)
+    @GetMapping("/{id:[0-9]+}")
+    public ResponseEntity<RoomResponse> getRoomById(@PathVariable Long id) {
+        return ResponseEntity.ok(roomService.getById(id));
+    }
+
+    @PutMapping("/{id:[0-9]+}")
     public ResponseEntity<RoomResponse> updateRoom(@PathVariable Long id, @RequestBody RoomRequest req) {
         return ResponseEntity.ok(roomService.update(id, req));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id:[0-9]+}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
         roomService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/status")
+    @PatchMapping("/{id:[0-9]+}/status")
     public ResponseEntity<RoomResponse> updateRoomStatus(@PathVariable Long id, @RequestBody RoomStatus status) {
         return ResponseEntity.ok(roomService.updateStatus(id, status));
     }

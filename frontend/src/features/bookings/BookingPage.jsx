@@ -688,8 +688,11 @@ const BookingPage = () => {
   const [weekendList, setWeekendList] = useState([])
   const [budgetList, setBudgetList] = useState([])
   const [sectionsLoading, setSectionsLoading] = useState(false)
+  const isFetchingSectionsRef = useRef(false)
 
   const fetchSections = async (limit = 10) => {
+    if (isFetchingSectionsRef.current) return
+    isFetchingSectionsRef.current = true
     setSectionsLoading(true)
     try {
       const [f, t, w, b] = await Promise.all([
@@ -709,6 +712,7 @@ const BookingPage = () => {
       setBudgetList([])
     } finally {
       setSectionsLoading(false)
+      isFetchingSectionsRef.current = false
     }
   }
 
