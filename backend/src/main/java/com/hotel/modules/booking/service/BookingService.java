@@ -178,15 +178,18 @@ public class BookingService {
         short totalNights = (short) Math.max(1,
                 ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut()));
 
-        // 6. Kiểm tra sức chứa theo tổng số phòng trong đơn
+        // 6. Kiểm tra sức chứa theo tổng số phòng trong đơn (Miễn phí tối đa 1 trẻ em đi kèm mỗi phòng)
         int maxGuests = rooms.stream()
                 .mapToInt(room -> room.getRoomType().getMaxGuests() != null
                         ? room.getRoomType().getMaxGuests() : 2)
                 .sum();
         int totalGuests = request.getNumAdults() + request.getNumChildren();
-        if (totalGuests > maxGuests) {
-            throw new RuntimeException("Tổng số khách (" + totalGuests
-                    + ") vượt quá sức chứa các phòng đã chọn (" + maxGuests + ")");
+        int numRooms = rooms.size();
+        int effectiveGuests = request.getNumAdults() + Math.max(0, request.getNumChildren() - numRooms);
+        if (effectiveGuests > maxGuests) {
+            throw new RuntimeException("Số khách quy đổi (" + effectiveGuests
+                    + ") vượt quá tổng sức chứa của các phòng đã chọn (" + maxGuests
+                    + "). Lưu ý: Mỗi phòng chỉ được đi kèm tối đa 1 trẻ em miễn phí.");
         }
 
         // 7. Kiểm tra kỳ lễ
@@ -333,14 +336,17 @@ public class BookingService {
             throw new RuntimeException("Số lượng khách vượt quá giới hạn cho một đơn");
         }
         int totalGuests = adults + children;
+        int numRooms = snapshots.size();
+        int effectiveGuests = adults + Math.max(0, children - numRooms);
         int maxGuests = snapshots.values().stream()
                 .map(RoomSnapshot::room)
                 .mapToInt(room -> room.getRoomType().getMaxGuests() != null
                         ? room.getRoomType().getMaxGuests() : 2)
                 .sum();
-        if (totalGuests > maxGuests) {
-            throw new RuntimeException("Tổng số khách (" + totalGuests
-                    + ") vượt quá sức chứa các phòng đã chọn (" + maxGuests + ")");
+        if (effectiveGuests > maxGuests) {
+            throw new RuntimeException("Số khách quy đổi (" + effectiveGuests
+                    + ") vượt quá tổng sức chứa của các phòng đã chọn (" + maxGuests
+                    + "). Lưu ý: Mỗi phòng chỉ được đi kèm tối đa 1 trẻ em miễn phí.");
         }
 
         BigDecimal nightlyTotal = snapshots.values().stream()

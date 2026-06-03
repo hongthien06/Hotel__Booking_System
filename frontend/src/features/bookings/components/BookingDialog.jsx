@@ -95,17 +95,25 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
   }, [open, searchParams])
 
   const selectedRooms = rooms.length > 0 ? rooms : (room ? [room] : [])
-  if (!room && selectedRooms.length === 0) return null
+  if (!open || selectedRooms.length === 0) return null
 
+  const primaryRoom = room || selectedRooms[0]
   const roomName = selectedRooms.length > 1
     ? `${selectedRooms.length} ${t('payment.room').toLowerCase()}`
-    : (isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`)
-  const roomType = isMock ? room.type : (room.typeName || 'Standard')
+    : (isMock ? primaryRoom.name : `${t('booking_page.room')} ${primaryRoom.roomNumber}`)
+  const roomType = isMock ? primaryRoom.type : (primaryRoom.typeName || 'Standard')
   const roomPrice = selectedRooms.reduce((sum, item) =>
     sum + Number(isMock ? item.price : (item.pricePerNight || item.priceDay || 0)), 0)
   const nights = nightsBetween(form.checkIn, form.checkOut)
 
   const total = roomPrice * nights
+
+  const maxGuests = selectedRooms.reduce((sum, item) => sum + Number(item.maxGuests || 0), 0) || 99
+  const totalGuests = Number(form.numAdults) + Number(form.numChildren)
+  const numRooms = selectedRooms.length
+  // 1 child per room stays for free (does not count towards capacity limit)
+  const effectiveGuests = Number(form.numAdults) + Math.max(0, Number(form.numChildren) - numRooms)
+  const isCapacityExceeded = effectiveGuests > maxGuests
 
   const handleBook = async () => {
     if (!form.checkIn || !form.checkOut) { setError(t('rooms.validation_required')); return }
@@ -113,8 +121,7 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
     if (new Date(form.checkOut) < new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return }
 
     // Kiểm tra sức chứa tối đa (maxGuests)
-    const maxGuests = selectedRooms.reduce((sum, item) => sum + Number(item.maxGuests || 0), 0) || 99
-    if (Number(form.numAdults) + Number(form.numChildren) > maxGuests) {
+    if (isCapacityExceeded) {
       setError(t('booking_page.max_guests_exceeded', { max: maxGuests }))
       return
     }
@@ -244,11 +251,23 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
           </Grid>
         </LocalizationProvider>
 
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, px: 0.5 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
+            {t('booking_page.num_guests') || 'Số khách'}
+          </Typography>
+          <Typography variant="caption" sx={{ fontWeight: 700, color: isCapacityExceeded ? 'error.main' : 'success.main' }}>
+            Sức chứa tối đa: {maxGuests} khách
+          </Typography>
+        </Box>
+
         <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid item xs={6}>
             <TextField fullWidth label={t('booking_page.adults')} type="number" size="small"
               value={form.numAdults}
-              onChange={e => setForm(f => ({ ...f, numAdults: Math.max(1, parseInt(e.target.value) || 1) }))}
+              onChange={e => {
+                setForm(f => ({ ...f, numAdults: Math.max(1, parseInt(e.target.value) || 1) }))
+                setError('')
+              }}
               inputProps={{ min: 1 }}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#f0f7ff' } }}
             />
@@ -256,7 +275,10 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
           <Grid item xs={6}>
             <TextField fullWidth label={t('booking_page.children')} type="number" size="small"
               value={form.numChildren}
-              onChange={e => setForm(f => ({ ...f, numChildren: Math.max(0, parseInt(e.target.value) || 0) }))}
+              onChange={e => {
+                setForm(f => ({ ...f, numChildren: Math.max(0, parseInt(e.target.value) || 0) }))
+                setError('')
+              }}
               inputProps={{ min: 0 }}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#f0f7ff' } }}
             />
@@ -269,6 +291,29 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
           placeholder={t('booking_page.special_request_placeholder')}
           sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#f0f7ff' } }}
         />
+
+        {isCapacityExceeded && (
+          <Alert severity="error" sx={{ mb: 2, borderRadius: 2, '& .MuiAlert-message': { width: '100%' } }}>
+            <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>
+              {t('booking_page.max_guests_exceeded', { max: maxGuests }) === 'booking_page.max_guests_exceeded'
+                ? `Tổng số khách quy đổi (${effectiveGuests} người) vượt quá sức chứa tối đa của các phòng đã chọn (tối đa ${maxGuests} khách).`
+                : t('booking_page.max_guests_exceeded', { max: maxGuests })}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5, lineHeight: 1.4 }}>
+              {selectedRooms.length === 1 ? (
+                <>
+                  Gợi ý: Phòng <strong>{roomName}</strong> chỉ chứa tối đa <strong>{maxGuests} khách</strong> (miễn phí tối đa 1 trẻ em đi kèm). 
+                  Bạn có thể giảm số lượng khách hoặc quay lại trang tìm kiếm phòng, chọn đồng thời nhiều phòng để phù hợp với đoàn khách <strong>{totalGuests} người</strong>.
+                </>
+              ) : (
+                <>
+                  Gợi ý: Tổng sức chứa của các phòng đã chọn là <strong>{maxGuests} khách</strong>. 
+                  Bạn có thể chọn thêm phòng hoặc giảm số lượng khách để phù hợp với giới hạn sức chứa (mỗi phòng được đi kèm 1 trẻ em miễn phí).
+                </>
+              )}
+            </Typography>
+          </Alert>
+        )}
 
         {/* Price summary */}
         {form.checkIn && form.checkOut && nights > 0 && (
@@ -306,7 +351,7 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
 
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={onClose} sx={{ borderRadius: 2 }}>{t('common.cancel')}</Button>
-        <Button variant="contained" color="primary" onClick={handleBook} disabled={submitting}
+        <Button variant="contained" color="primary" onClick={handleBook} disabled={submitting || isCapacityExceeded}
           sx={{ borderRadius: 2, fontWeight: 700, px: 3 }}
           startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : null}
         >

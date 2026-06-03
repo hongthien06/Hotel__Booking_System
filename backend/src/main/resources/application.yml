@@ -9,8 +9,9 @@ spring:
       base-url: https://openrouter.ai/api
       chat:
         options:
-          model: google/gemini-2.0-flash-lite-001
+          model: google/gemini-2.5-flash
           temperature: 0.3
+          max-tokens: 1000
   jpa:
     hibernate:
       ddl-auto: none

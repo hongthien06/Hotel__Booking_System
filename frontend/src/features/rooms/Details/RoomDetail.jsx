@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog, Box, Typography, Button,
-  IconButton, Chip, useTheme, useMediaQuery
+  IconButton, Chip, useTheme, useMediaQuery, Alert
 } from '@mui/material'
 import { Close, Edit, People, SquareFoot, KingBed, Layers, Bathtub, Business, LocationOn, ChevronLeft, ChevronRight } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
@@ -21,7 +21,7 @@ const InfoRow = ({ label, value, icon }) => (
   </Box>
 )
 
-const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
+const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook, isCapacityInsufficient = false, totalGuests = 0 }) => {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -129,6 +129,11 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
 
       {/* Body */}
       <Box sx={{ flex: 1, overflowY: 'auto', px: 3, py: 2.5 }}>
+        {isCapacityInsufficient && (
+          <Alert severity="warning" sx={{ mb: 2.5, borderRadius: 3, '& .MuiAlert-message': { fontWeight: 600 } }}>
+            {t('booking_page.insufficient_capacity_desc', { maxGuests: room.maxGuests, totalGuests: totalGuests })}
+          </Alert>
+        )}
         {/* Title & price */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2.5 }}>
           <Box>
@@ -227,17 +232,18 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook }) => {
           <Button
             fullWidth
             variant="contained"
+            disabled={isCapacityInsufficient}
             onClick={() => { onClose(); onBook(room) }}
             sx={{ 
               borderRadius: 4, py: 1.5, fontWeight: 800, textTransform: 'none', fontSize: '0.875rem',
-              boxShadow: '0 8px 25px rgba(216,27,96,0.3)',
+              boxShadow: isCapacityInsufficient ? 'none' : '0 8px 25px rgba(216,27,96,0.3)',
               bgcolor: 'primary.main',
               color: 'primary.contrastText',
               '&:hover': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' },
               '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
-            {t('common.book_now')}
+            {isCapacityInsufficient ? t('booking_page.insufficient_capacity') : t('common.book_now')}
           </Button>
         )}
         <Button

@@ -379,6 +379,9 @@ const BookingHistoryPage = () => {
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={booking.bookingId || index}>
                 {(() => {
                   const primaryRoom = getHistoryRoom(booking)
+                  const allRooms = getBookingRooms(booking)
+                  const roomNumbersStr = allRooms.map(r => r.roomNumber).filter(Boolean).join(', ')
+                  const roomTypesStr = allRooms.map(r => r.roomTypeName || 'Standard').filter((v, i, a) => a.indexOf(v) === i).join(' + ')
                   return (
                 <Card sx={{
                   height: '100%',
@@ -434,10 +437,12 @@ const BookingHistoryPage = () => {
 
                   <CardContent sx={{ p: 2.5 }}>
                     <Typography variant="caption" sx={{ color: PC, fontWeight: 700, mb: 0.5, display: 'block' }}>
-                      {primaryRoom.roomTypeName || booking.roomTypeName || 'Standard'}
+                      {roomTypesStr || 'Standard'}
                     </Typography>
                     <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1, lineHeight: 1.2, color: '#333' }}>
-                      {t('booking_page.room') || 'Phòng'} {primaryRoom.roomNumber || booking.roomNumber}
+                      {allRooms.length > 1 
+                        ? `${t('booking_page.room') || 'Phòng'} ${roomNumbersStr}`
+                        : `${t('booking_page.room') || 'Phòng'} ${primaryRoom.roomNumber || booking.roomNumber}`}
                     </Typography>
                     {(primaryRoom.hotelName || primaryRoom.hotelAddress) && (
                       <Box sx={{ mb: 1.5 }}>
@@ -470,9 +475,8 @@ const BookingHistoryPage = () => {
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
                       <Typography variant="subtitle1" sx={{ fontWeight: 900, color: PC }}>
-                        {formatCurrency(getHistoryRoomTotal(booking))}
+                        {formatCurrency(booking.finalAmount || booking.totalAmount || getHistoryRoomTotal(booking))}
                       </Typography>
-
                     </Box>
 
                     {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (

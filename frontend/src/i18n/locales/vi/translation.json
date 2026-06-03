@@ -365,7 +365,15 @@
     "weekend_deals_subtitle": "Tiết kiệm cho chỗ nghỉ từ ngày 8 tháng 5 - ngày 10 tháng 5",
     "non_refundable_warning": "Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy.",
     "checkin_time": "Nhận phòng từ 14g",
-    "checkout_time": "Trả phòng trước 12h"
+    "checkout_time": "Trả phòng trước 12h",
+    "insufficient_capacity": "Sức chứa không đủ",
+    "insufficient_capacity_desc": "Phòng này chỉ chứa tối đa {{maxGuests}} khách. Bạn đang tìm cho {{totalGuests}} khách. Vui lòng chọn nhiều phòng.",
+    "selected_rooms_count": "Đã chọn {{count}} phòng",
+    "selected_capacity_status": "Sức chứa đã chọn: {{selected}} / {{required}} khách",
+    "insufficient_total_capacity": "Tổng sức chứa của các phòng đã chọn ({{selected}} khách) chưa đủ cho {{required}} khách. Vui lòng chọn thêm phòng.",
+    "book_selected_rooms": "Đặt các phòng đã chọn",
+    "max_guests_exceeded": "Tổng số khách vượt quá sức chứa tối đa của các phòng đã chọn (tối đa {{max}} khách).",
+    "remaining_guests_needed": "Còn thiếu {{adults}} người lớn và {{children}} trẻ em. Vui lòng chọn thêm phòng."
   },
   "login_page": {
     "welcome": "Chào mừng trở lại",

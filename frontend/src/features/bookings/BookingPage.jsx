@@ -39,6 +39,7 @@ import { useAuth } from '../../shared/hooks/useAuth'
 import LoginPromptModal from '../../shared/components/modals/LoginPromptModal'
 import { useNavigate } from 'react-router-dom'
 import RoomDetail from '../rooms/Details/RoomDetail'
+import BookingDialog from './components/BookingDialog'
 import i18n from 'i18next'
 import { formatCurrency as formatCurrencyShared } from '../../shared/utils/formatters'
 import { getMembershipTierName, getMembershipTrackingPhone } from '../../shared/utils/membership'
@@ -135,6 +136,135 @@ const getDestinationKey = (destinationStr) => {
   if (!destinationStr) return null
   const found = DESTINATIONS.find(d => d.province === destinationStr || d.name === destinationStr)
   return found ? found.key : null
+}
+
+/* ─── RoomCard ─────────────────────────────────────────── */
+const RoomCard = ({
+  room,
+  isMock,
+  oldPrice,
+  showBookButton = true,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
+  onOpenDetail,
+  onOpenBooking,
+  params = {},
+  searched = false
+}) => {
+  const { t, i18n } = useTranslation()
+
+  // Tạo data đánh giá từ MOCK_ROOMS để tránh bị trùng nhau nếu không phải isMock
+  const numericId = parseInt(String(room.id || room.roomId || 0).replace(/\D/g, '') || 0)
+  const mockData = MOCK_ROOMS[numericId % MOCK_ROOMS.length] || MOCK_ROOMS[0]
+  const ratingValue = isMock ? room.rating : mockData.rating
+  const reviewCount = isMock ? room.reviews : mockData.reviews
+
+  // 1 child per room stays for free (does not count towards capacity limit)
+  const effectiveGuestsForRoom = Number(params.adults || 0) + Math.max(0, Number(params.children || 0) - 1)
+  const isCapacityInsufficient = searched && !isMock && room.maxGuests < effectiveGuestsForRoom
+
+  return (
+    <Card
+      onClick={() => onOpenDetail?.(room, isMock)}
+      sx={{
+        cursor: 'pointer',
+        position: 'relative',
+        borderRadius: 3, overflow: 'hidden', transition: 'all 0.3s',
+        boxShadow: 1,
+        border: selected ? `2px solid ${PC}` : '2px solid transparent',
+        '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
+      }}
+    >
+      {selectable && (
+        <Checkbox
+          checked={selected}
+          onClick={(e) => { e.stopPropagation(); onToggleSelect?.(room) }}
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            zIndex: 2,
+            bgcolor: 'rgba(255,255,255,0.9)',
+            borderRadius: '50%',
+            color: PC,
+            '&.Mui-checked': { color: PC },
+            '&:hover': { bgcolor: 'white' }
+          }}
+        />
+      )}
+      {isMock
+        ? <Box sx={{ height: 160, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
+        </Box>
+        : <CardMedia
+          component="img"
+          height="160"
+          image={(room.imageUrls && room.imageUrls.length > 0) ? room.imageUrls[0] : (room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600')}
+          alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
+        />
+      }
+      <CardContent sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
+          <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.typeName || 'Standard')} size="small"
+            sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, fontSize: 11 }} />
+          {isCapacityInsufficient && (
+            <Chip label={t('booking_page.insufficient_capacity')} size="small" color="error" variant="outlined"
+              sx={{ fontWeight: 700, fontSize: 10 }} />
+          )}
+        </Box>
+        <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}>
+          {isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
+        </Typography>
+        <Typography variant="caption" color="text.secondary"
+          sx={{ display: 'flex', alignItems: 'center', gap: 0.3, mb: 1 }}>
+          <LocationOn fontSize="inherit" />
+          {isMock
+            ? (() => {
+              const key = getDestinationKey(room.location)
+              const loc = key ? t(`destinations.${key}.name`) : room.location
+              return `${loc} · ${room.bed}`
+            })()
+            : (() => {
+              const rawProv = room.province || 'Hà Nội'
+              const key = getDestinationKey(rawProv)
+              const loc = key ? t(`destinations.${key}.name`) : rawProv
+              const beds = room.beds && room.beds.length > 0
+                ? room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ')
+                : (room.typeName || 'Standard')
+              return `${loc} · ${beds}`
+            })()}
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
+          <Rating value={ratingValue} precision={0.1} readOnly size="small"
+            sx={{ '& .MuiRating-iconFilled': { color: PC } }} />
+          <Typography variant="caption" color="text.secondary">
+            ({reviewCount} {t('room_detail.reviews')})
+          </Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
+            {oldPrice && (
+              <Typography component="span" variant="caption" sx={{ textDecoration: 'line-through', color: '#d32f2f', mr: 1, fontWeight: 500, fontSize: '0.75rem' }}>
+                {formatCurrency(oldPrice, i18n.language)}
+              </Typography>
+            )}
+            {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
+          </Typography>
+          {showBookButton && (
+            <Button
+              size="small" variant="contained" color="primary"
+              disabled={isCapacityInsufficient}
+              onClick={(e) => { e.stopPropagation(); onOpenBooking?.(room, isMock) }}
+              sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
+            >
+              {isCapacityInsufficient ? t('booking_page.insufficient_capacity') : t('common.book_now')}
+            </Button>
+          )}
+        </Box>
+      </CardContent>
+    </Card>
+  )
 }
 
 /* ─── Sidebar ─────────────────────────────────────────── */
@@ -404,273 +534,7 @@ const OffersSection = ({ membership, lang, onOpenMembership }) => {
   )
 }
 
-/* ─── BookingDialog ────────────────────────────────────── */
-const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, onSuccess }) => {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-  const theme = useTheme()
-  const isMobileDialog = useMediaQuery(theme.breakpoints.down('sm'))
-  const [form, setForm] = useState({
-    checkIn: searchParams?.checkIn || '',
-    checkOut: searchParams?.checkOut || '',
-    numAdults: (searchParams?.adults || 2),
-    numChildren: (searchParams?.children || 0),
-    specialRequest: ''
-  })
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState('')
-  const [bookedDates, setBookedDates] = useState([])
-  const [loadingDates, setLoadingDates] = useState(false)
 
-  useEffect(() => {
-    if (!open || !room || isMock) {
-      Promise.resolve().then(() => setBookedDates([]))
-      return
-    }
-    const rid = room.roomId || room.id
-    if (!rid) return
-    Promise.resolve()
-      .then(() => {
-        setLoadingDates(true)
-        setError('')
-        return getBookedDatesApi(rid)
-      })
-      .then(dates => {
-        setLoadingDates(false)
-        setBookedDates(Array.isArray(dates) ? dates : [])
-      })
-      .catch(() => {
-        setLoadingDates(false)
-        setBookedDates([])
-      })
-  }, [open, room, isMock])
-
-  useEffect(() => {
-    if (!open) return
-    Promise.resolve().then(() => {
-      setForm({
-        checkIn: searchParams?.checkIn || '',
-        checkOut: searchParams?.checkOut || '',
-        numAdults: (searchParams?.adults || 2),
-        numChildren: (searchParams?.children || 0),
-        specialRequest: ''
-      })
-      setError('')
-    })
-  }, [open, searchParams])
-
-  const selectedRooms = rooms.length > 0 ? rooms : (room ? [room] : [])
-  if (!room && selectedRooms.length === 0) return null
-
-  const roomName = selectedRooms.length > 1
-    ? `${selectedRooms.length} ${t('payment.room').toLowerCase()}`
-    : (isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`)
-  const roomType = isMock ? room.type : (room.typeName || 'Standard')
-  const roomPrice = selectedRooms.reduce((sum, item) =>
-    sum + Number(isMock ? item.price : (item.pricePerNight || item.priceDay || 0)), 0)
-  const nights = nightsBetween(form.checkIn, form.checkOut)
-
-  const total = roomPrice * nights
-
-  const handleBook = async () => {
-    if (!form.checkIn || !form.checkOut) { setError(t('rooms.validation_required')); return }
-    if (new Date(form.checkOut) < new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return }
-    if (isMock) { setError('Phòng mẫu — vui lòng tìm kiếm phòng thực trên hệ thống.'); return }
-
-    setSubmitting(true)
-    setError('')
-    try {
-      const roomIds = selectedRooms.map(item => item.roomId || item.id)
-      const booking = await createBookingApi({
-        roomId: roomIds[0],
-        roomIds,
-        checkIn: form.checkIn,
-        checkOut: form.checkOut,
-        numAdults: Number(form.numAdults),
-        numChildren: Number(form.numChildren),
-        specialRequest: form.specialRequest
-      })
-      onSuccess?.(booking)
-      navigate('/booking-history')
-    } catch (err) {
-      const data = err?.response?.data
-      const msg = data?.error || data?.message || (typeof data === 'string' ? data : t('common.error'))
-      setError(msg)
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth fullScreen={isMobileDialog} PaperProps={{ sx: { borderRadius: isMobileDialog ? 0 : 3 } }}>
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 1 }}>
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 800, color: PC }}>{t('booking_page.booking_confirm')}</Typography>
-          <Typography variant="body2" color="text.secondary">{roomName}</Typography>
-        </Box>
-        <IconButton onClick={onClose} size="small"><Close /></IconButton>
-      </DialogTitle>
-
-      <DialogContent sx={{ pt: 1 }}>
-        {/* Room summary */}
-        <Box sx={{ display: 'flex', gap: 2, mb: 2.5, p: 2, bgcolor: '#fafafa', borderRadius: 2, border: '1px solid #eee' }}>
-          <Box sx={{ flex: 1 }}>
-            <Chip label={t(roomType)} size="small" sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, mb: 0.5 }} />
-            <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{roomName}</Typography>
-            {selectedRooms.length > 1 && (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                {selectedRooms.map(item => `#${item.roomNumber}`).join(', ')}
-              </Typography>
-            )}
-            <Typography variant="body2" color="text.secondary">
-              {formatCurrency(roomPrice, 'vi')} {t('rooms.per_night')}
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Date pickers */}
-        <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale={i18n.language}>
-          <Grid container spacing={2} sx={{ mb: 2 }}>
-            <Grid item xs={6}>
-              <DatePicker
-                label={t('booking_page.check_in')}
-                value={form.checkIn ? dayjs(form.checkIn) : null}
-                onChange={newValue => {
-                  const newCheckIn = newValue ? newValue.format('YYYY-MM-DD') : ''
-                  setForm(f => ({
-                    ...f,
-                    checkIn: newCheckIn,
-                    checkOut: (f.checkOut && newCheckIn && f.checkOut < newCheckIn) ? '' : f.checkOut
-                  }))
-                  setError('')
-                }}
-                minDate={dayjs()}
-                shouldDisableDate={(date) => {
-                  const dateStr = date.format('YYYY-MM-DD')
-                  return bookedDates.includes(dateStr)
-                }}
-                loading={loadingDates}
-                slotProps={{
-                  textField: { size: 'small', fullWidth: true },
-                  day: {
-                    sx: {
-                      '&.Mui-disabled': { color: 'rgba(0, 0, 0, 0.26) !important' }
-                    }
-                  }
-                }}
-              />
-              <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block', pl: 0.5 }}>
-                {t('booking_page.checkin_time')}
-              </Typography>
-            </Grid>
-            <Grid item xs={6}>
-              <DatePicker
-                label={t('booking_page.check_out')}
-                value={form.checkOut ? dayjs(form.checkOut) : null}
-                onChange={newValue => {
-                  setForm(f => ({ ...f, checkOut: newValue ? newValue.format('YYYY-MM-DD') : '' }))
-                  setError('')
-                }}
-                minDate={form.checkIn ? dayjs(form.checkIn).subtract(1, 'day') : dayjs().subtract(1, 'day')}
-                shouldDisableDate={(date) => {
-                  const dateStr = date.format('YYYY-MM-DD')
-                  const minStr = form.checkIn || dayjs().format('YYYY-MM-DD')
-                  if (dateStr < minStr) return true
-                  if (dateStr === minStr) return false
-                  return bookedDates.includes(dateStr)
-                }}
-                loading={loadingDates}
-                slotProps={{
-                  textField: { size: 'small', fullWidth: true },
-                  day: {
-                    sx: {
-                      '&.Mui-disabled': { color: 'rgba(0, 0, 0, 0.26) !important' }
-                    }
-                  }
-                }}
-              />
-              {form.checkIn !== form.checkOut && (
-                <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block', pl: 0.5 }}>
-                  {t('booking_page.checkout_time')}
-                </Typography>
-              )}
-            </Grid>
-          </Grid>
-        </LocalizationProvider>
-
-
-        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-          <Box sx={{ flex: 1 }}>
-            <TextField fullWidth label={t('booking_page.adults')} type="number" size="small"
-              value={form.numAdults}
-              onChange={e => setForm(f => ({ ...f, numAdults: Math.max(1, parseInt(e.target.value) || 1) }))}
-              inputProps={{ min: 1 }}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#f0f7ff' } }}
-            />
-          </Box>
-          <Box sx={{ flex: 1 }}>
-            <TextField fullWidth label={t('booking_page.children')} type="number" size="small"
-              value={form.numChildren}
-              onChange={e => setForm(f => ({ ...f, numChildren: Math.max(0, parseInt(e.target.value) || 0) }))}
-              inputProps={{ min: 0 }}
-              sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#f0f7ff' } }}
-            />
-          </Box>
-        </Box>
-
-        <TextField fullWidth label={t('booking_page.special_request')} multiline rows={2} size="small"
-          value={form.specialRequest}
-          onChange={e => setForm(f => ({ ...f, specialRequest: e.target.value }))}
-          placeholder={t('booking_page.special_request_placeholder')}
-          sx={{ mb: 2, '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#f0f7ff' } }}
-        />
-
-        {/* Price summary */}
-        {form.checkIn && form.checkOut && nights > 0 && (
-          <>
-            {(() => {
-              const checkInDateTime = new Date(`${form.checkIn}T14:00:00`)
-              const refundDeadline = new Date(checkInDateTime.getTime() - 24 * 60 * 60 * 1000)
-              const isNonRefundable = new Date() > refundDeadline
-
-              return isNonRefundable && (
-                <Alert severity="warning" sx={{ mb: 2, borderRadius: 2, fontSize: '0.85rem', '& .MuiAlert-message': { fontWeight: 600 } }}>
-                  {t('booking_page.non_refundable_warning') === 'booking_page.non_refundable_warning'
-                    ? 'Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy.'
-                    : t('booking_page.non_refundable_warning')}
-                </Alert>
-              )
-            })()}
-
-            <Box sx={{ p: 2, bgcolor: PC_LIGHT, borderRadius: 2 }}>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-                <Typography variant="body2" color="text.secondary">{formatCurrency(roomPrice, i18n.language)} × {nights} {t('rooms.per_night')}</Typography>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>{formatCurrency(total, i18n.language)}</Typography>
-              </Box>
-              <Divider sx={{ my: 1 }} />
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{t('booking_page.total')}</Typography>
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>{formatCurrency(total, i18n.language)}</Typography>
-              </Box>
-            </Box>
-          </>
-        )}
-
-        {error && <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>{error}</Alert>}
-      </DialogContent>
-
-      <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onClose} sx={{ borderRadius: 2 }}>{t('common.cancel')}</Button>
-        <Button variant="contained" color="primary" onClick={handleBook} disabled={submitting}
-          sx={{ borderRadius: 2, fontWeight: 700, px: 3 }}
-          startIcon={submitting ? <CircularProgress size={16} color="inherit" /> : null}
-        >
-          {submitting ? t('booking_page.processing') : t('booking_page.booking_confirm')}
-        </Button>
-      </DialogActions>
-    </Dialog>
-  )
-}
 
 /* ─── Main ─────────────────────────────────────────────── */
 const BookingPage = () => {
@@ -745,6 +609,51 @@ const BookingPage = () => {
   const [selectedRoom, setSelectedRoom] = useState(null)
   const [selectedIsMock, setSelectedIsMock] = useState(false)
   const [selectedRoomsForOrder, setSelectedRoomsForOrder] = useState([])
+  const totalGuests = Number(params.adults || 0) + Number(params.children || 0)
+  const selectedCapacity = selectedRoomsForOrder.reduce((acc, r) => acc + (r.maxGuests || 0), 0)
+  const numSelectedRooms = selectedRoomsForOrder.length
+  // 1 child per room stays for free (does not count towards capacity limit)
+  const effectiveGuests = Number(params.adults || 0) + Math.max(0, Number(params.children || 0) - numSelectedRooms)
+  const isTotalCapacityInsufficient = searched && numSelectedRooms > 0 && selectedCapacity < effectiveGuests
+
+  const getRemainingGuests = () => {
+    let remainingAdults = Number(params.adults || 0)
+    let remainingChildren = Number(params.children || 0)
+    
+    // Sort selected rooms by capacity descending to allocate larger rooms first
+    const sortedRooms = [...selectedRoomsForOrder].sort((a, b) => (b.maxGuests || 0) - (a.maxGuests || 0))
+    
+    for (const r of sortedRooms) {
+      // 1 child per room stays for free
+      const freeChild = Math.min(remainingChildren, 1)
+      remainingChildren -= freeChild
+
+      const cap = Number(r.maxGuests || 0)
+      if (cap <= 0) continue
+      
+      const total = remainingAdults + remainingChildren
+      if (total <= 0) break
+      
+      // Proportional allocation:
+      let allocatedAdults = Math.round(cap * (remainingAdults / total))
+      allocatedAdults = Math.min(remainingAdults, allocatedAdults)
+      
+      let allocatedChildren = cap - allocatedAdults
+      allocatedChildren = Math.min(remainingChildren, allocatedChildren)
+      
+      const leftCap = cap - allocatedAdults - allocatedChildren
+      if (leftCap > 0 && remainingAdults > allocatedAdults) {
+        const extraAdults = Math.min(remainingAdults - allocatedAdults, leftCap)
+        allocatedAdults += extraAdults
+      }
+      
+      remainingAdults -= allocatedAdults
+      remainingChildren -= allocatedChildren
+    }
+    
+    return { remainingAdults, remainingChildren }
+  }
+
   const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' })
   const destScrollRef = useRef(null)
   const [destCanLeft, setDestCanLeft] = useState(false)
@@ -1128,122 +1037,12 @@ const BookingPage = () => {
         params.children
       )
       setRooms(Array.isArray(d) ? d : [])
-    } catch { setRooms([]) }
-    finally { setLoading(false) }
-  }
-
-  const selectDest = (idx) => {
-    const dest = DESTINATIONS[idx].province || DESTINATIONS[idx].name
-    setDestIdx(idx)
-    setParams(p => {
-      const newParams = { ...p, destination: dest }
-      handleSearch(newParams)
-      return newParams
-    })
-  }
-
-  /* ── Room Card ─────────────────────────────────────────── */
-  const RoomCard = ({ room, isMock, oldPrice, showBookButton = true, selectable = false, selected = false, onToggleSelect }) => {
-    const { t, i18n } = useTranslation()
-
-    // Tạo data đánh giá từ MOCK_ROOMS để tránh bị trùng nhau nếu không phải isMock
-    const numericId = parseInt(String(room.id || room.roomId || 0).replace(/\D/g, '') || 0)
-    const mockData = MOCK_ROOMS[numericId % MOCK_ROOMS.length] || MOCK_ROOMS[0]
-    const ratingValue = isMock ? room.rating : mockData.rating
-    const reviewCount = isMock ? room.reviews : mockData.reviews
-
-    return (
-      <Card
-        onClick={() => openDetail(room, isMock)}
-        sx={{
-          cursor: 'pointer',
-          position: 'relative',
-          borderRadius: 3, overflow: 'hidden', transition: 'all 0.3s',
-          boxShadow: 1,
-          border: selected ? `2px solid ${PC}` : '2px solid transparent',
-          '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
-        }}
-      >
-        {selectable && (
-          <Checkbox
-            checked={selected}
-            onClick={(e) => { e.stopPropagation(); onToggleSelect?.(room) }}
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 2,
-              bgcolor: 'rgba(255,255,255,0.9)',
-              borderRadius: '50%',
-              color: PC,
-              '&.Mui-checked': { color: PC },
-              '&:hover': { bgcolor: 'white' }
-            }}
-          />
-        )}
-        {isMock
-          ? <Box sx={{ height: 160, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
-          </Box>
-          : <CardMedia component="img" height="160"
-            image={(room.imageUrls && room.imageUrls.length > 0) ? room.imageUrls[0] : (room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600')}
-            alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
-          />
-        }
-        <CardContent sx={{ p: 2 }}>
-          <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.typeName || 'Standard')} size="small"
-            sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, fontSize: 11, mb: 1 }} />
-          <Typography variant="subtitle1" sx={{ fontWeight: 800, lineHeight: 1.2, mb: 0.5 }}>
-            {isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
-          </Typography>
-          <Typography variant="caption" color="text.secondary"
-            sx={{ display: 'flex', alignItems: 'center', gap: 0.3, mb: 1 }}>
-            <LocationOn fontSize="inherit" />
-            {isMock
-              ? (() => {
-                const key = getDestinationKey(room.location)
-                const loc = key ? t(`destinations.${key}.name`) : room.location
-                return `${loc} · ${room.bed}`
-              })()
-              : (() => {
-                const rawProv = room.province || 'Hà Nội'
-                const key = getDestinationKey(rawProv)
-                const loc = key ? t(`destinations.${key}.name`) : rawProv
-                const beds = room.beds && room.beds.length > 0
-                  ? room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ')
-                  : (room.typeName || 'Standard')
-                return `${loc} · ${beds}`
-              })()}
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 1.5 }}>
-            <Rating value={ratingValue} precision={0.1} readOnly size="small"
-              sx={{ '& .MuiRating-iconFilled': { color: PC } }} />
-            <Typography variant="caption" color="text.secondary">
-              ({reviewCount} {t('room_detail.reviews')})
-            </Typography>
-          </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
-              {oldPrice && (
-                <Typography component="span" variant="caption" sx={{ textDecoration: 'line-through', color: '#d32f2f', mr: 1, fontWeight: 500, fontSize: '0.75rem' }}>
-                  {formatCurrency(oldPrice, i18n.language)}
-                </Typography>
-              )}
-              {formatCurrency(isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0), i18n.language)}
-            </Typography>
-            {showBookButton && (
-              <Button
-                size="small" variant="contained" color="primary"
-                onClick={(e) => { e.stopPropagation(); openBooking(room, isMock) }}
-                sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
-              >
-                {t('common.book_now')}
-              </Button>
-            )}
-          </Box>
-        </CardContent>
-      </Card>
-    )
+    } catch {
+      setRooms([])
+    } finally {
+      setLoading(false)
+      fetchSections()
+    }
   }
 
   return (
@@ -1576,7 +1375,7 @@ const BookingPage = () => {
                           ) : (
                             featuredRooms.map(r => (
                               <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                                <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
+                                <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                               </Box>
                             ))
                           )
@@ -1647,7 +1446,7 @@ const BookingPage = () => {
                       ) : (
                         topRatedRooms.map(r => (
                           <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                            <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
+                            <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                           </Box>
                         ))
                       )}
@@ -1719,7 +1518,7 @@ const BookingPage = () => {
                             ) : (
                               budgetRooms.map(r => (
                                 <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                                  <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} />
+                                  <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                                 </Box>
                               ))
                             )}
@@ -1777,7 +1576,7 @@ const BookingPage = () => {
                     ) : (
                       weekendDeals.map(r => (
                         <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
-                          <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} showBookButton={false} />
+                          <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} showBookButton={false} onOpenDetail={openDetail} />
                         </Box>
                       ))
                     )}
@@ -1832,18 +1631,64 @@ const BookingPage = () => {
                     gap: 2,
                     flexWrap: 'wrap'
                   }}>
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: PC }}>
-                      Đã chọn {selectedRoomsForOrder.length} phòng
-                      {selectedRoomsForOrder.length > 0 ? `: ${selectedRoomsForOrder.map(r => `#${r.roomNumber}`).join(', ')}` : ''}
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      disabled={selectedRoomsForOrder.length === 0}
-                      onClick={openSelectedRoomsBooking}
-                      sx={{ borderRadius: 2, bgcolor: PC, color: '#fff', fontWeight: 800 }}
-                    >
-                      Đặt các phòng đã chọn
-                    </Button>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, color: PC }}>
+                        {t('booking_page.selected_rooms_count', { count: selectedRoomsForOrder.length }) === 'booking_page.selected_rooms_count'
+                          ? `Đã chọn ${selectedRoomsForOrder.length} phòng`
+                          : t('booking_page.selected_rooms_count', { count: selectedRoomsForOrder.length })}
+                        {selectedRoomsForOrder.length > 0 ? `: ${selectedRoomsForOrder.map(r => `#${r.roomNumber}`).join(', ')}` : ''}
+                      </Typography>
+                      {searched && selectedRoomsForOrder.length > 0 && (() => {
+                        const { remainingAdults, remainingChildren } = getRemainingGuests()
+                        return (
+                          <Typography 
+                            variant="caption" 
+                            sx={{ 
+                              fontWeight: 700, 
+                              color: isTotalCapacityInsufficient ? 'error.main' : 'success.main',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5,
+                              flexWrap: 'wrap'
+                            }}
+                          >
+                            {t('booking_page.selected_capacity_status', { selected: selectedCapacity + Math.min(Number(params.children || 0), numSelectedRooms), required: totalGuests }) === 'booking_page.selected_capacity_status'
+                              ? `Sức chứa đã chọn: ${selectedCapacity + Math.min(Number(params.children || 0), numSelectedRooms)} / ${totalGuests} khách`
+                              : t('booking_page.selected_capacity_status', { selected: selectedCapacity + Math.min(Number(params.children || 0), numSelectedRooms), required: totalGuests })}
+                            {isTotalCapacityInsufficient 
+                              ? ` (${t('booking_page.insufficient_capacity') || 'Chưa đủ'})` 
+                              : ` (${t('common.success') || 'Đủ sức chứa'})`}
+                            {isTotalCapacityInsufficient && (
+                              <span style={{ marginLeft: '8px', color: '#d32f2f' }}>
+                                (Còn thiếu: {remainingAdults} người lớn, {remainingChildren} trẻ em)
+                              </span>
+                            )}
+                          </Typography>
+                        )
+                      })()}
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+                      {isTotalCapacityInsufficient && (() => {
+                        const { remainingAdults, remainingChildren } = getRemainingGuests()
+                        return (
+                          <Typography variant="caption" color="error.main" sx={{ fontWeight: 600, maxWidth: 280, textAlign: { xs: 'left', sm: 'right' } }}>
+                            {t('booking_page.remaining_guests_needed', { adults: remainingAdults, children: remainingChildren }) === 'booking_page.remaining_guests_needed'
+                              ? `Còn thiếu ${remainingAdults} người lớn và ${remainingChildren} trẻ em. Vui lòng chọn thêm phòng.`
+                              : t('booking_page.remaining_guests_needed', { adults: remainingAdults, children: remainingChildren })}
+                          </Typography>
+                        )
+                      })()}
+                      <Button
+                        variant="contained"
+                        disabled={selectedRoomsForOrder.length === 0 || isTotalCapacityInsufficient}
+                        onClick={openSelectedRoomsBooking}
+                        sx={{ borderRadius: 2, bgcolor: PC, color: '#fff', fontWeight: 800 }}
+                      >
+                        {t('booking_page.book_selected_rooms') === 'booking_page.book_selected_rooms' 
+                          ? 'Đặt các phòng đã chọn' 
+                          : t('booking_page.book_selected_rooms')}
+                      </Button>
+                    </Box>
                   </Box>
                 )}
 
@@ -1866,6 +1711,10 @@ const BookingPage = () => {
                           selectable
                           selected={selectedRoomsForOrder.some(item => (item.roomId || item.id) === (r.roomId || r.id))}
                           onToggleSelect={toggleRoomSelection}
+                          onOpenDetail={openDetail}
+                          onOpenBooking={openBooking}
+                          params={params}
+                          searched={searched}
                         />
                       </Grid>
                     ))}
@@ -1896,6 +1745,8 @@ const BookingPage = () => {
         onClose={() => setDetailOpen(false)}
         onBook={(room) => openBooking(room, selectedIsMock)}
         canEdit={false}
+        isCapacityInsufficient={selectedRoom && searched && !selectedIsMock && selectedRoom.maxGuests < (Number(params.adults || 0) + Math.max(0, Number(params.children || 0) - 1))}
+        totalGuests={totalGuests}
       />
 
       {/* Booking Dialog */}

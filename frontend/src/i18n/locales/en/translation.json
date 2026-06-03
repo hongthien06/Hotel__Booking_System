@@ -368,7 +368,15 @@
     "weekend_deals_subtitle": "Save on stays from May 8 - May 10",
     "non_refundable_warning": "Because the booking time is within 24 hours prior to check-in, this booking will be non-refundable if canceled.",
     "checkin_time": "Check-in from 14:00",
-    "checkout_time": "Check-out by 12:00"
+    "checkout_time": "Check-out by 12:00",
+    "insufficient_capacity": "Insufficient capacity",
+    "insufficient_capacity_desc": "This room can host up to {{maxGuests}} guests. Your search query is for {{totalGuests}} guests. Please select multiple rooms instead.",
+    "selected_rooms_count": "Selected {{count}} rooms",
+    "selected_capacity_status": "Selected capacity: {{selected}} / {{required}} guests",
+    "insufficient_total_capacity": "Selected rooms capacity ({{selected}} guests) is less than required ({{required}} guests). Please select more rooms.",
+    "book_selected_rooms": "Book Selected Rooms",
+    "max_guests_exceeded": "Total guests exceed the maximum capacity of the selected rooms (max {{max}} guests).",
+    "remaining_guests_needed": "Still need {{adults}} adults and {{children}} children. Please select more rooms."
   },
   "login_page": {
     "welcome": "Welcome Back",
