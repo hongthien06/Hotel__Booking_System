@@ -214,17 +214,17 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         ))}
       </Grid>
 
-      <Grid container spacing={1.5} sx={{ mb: 3 }}>
+      <Box sx={{ display: 'flex', gap: 1.5, mb: 3 }}>
         {[['adults', 'booking_page.adults', 1], ['children', 'booking_page.children', 0]].map(([k, lblKey, min]) => (
-          <Grid item xs={6} key={k}>
+          <Box sx={{ flex: 1 }} key={k}>
             <Typography sx={labelSx}>{t(lblKey)}</Typography>
             <TextField fullWidth size="small" type="number" value={params[k]}
               onChange={e => onParam(k, Math.max(min, parseInt(e.target.value) || min))}
               inputProps={{ min }}
             />
-          </Grid>
+          </Box>
         ))}
-      </Grid>
+      </Box>
 
       <Typography sx={{ fontWeight: 700, color: PC, mb: 1, display: 'block' }}>
         {t('booking_page.price_per_night')}
@@ -586,24 +586,24 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
         </LocalizationProvider>
 
 
-        <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid item xs={6}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+          <Box sx={{ flex: 1 }}>
             <TextField fullWidth label={t('booking_page.adults')} type="number" size="small"
               value={form.numAdults}
               onChange={e => setForm(f => ({ ...f, numAdults: Math.max(1, parseInt(e.target.value) || 1) }))}
               inputProps={{ min: 1 }}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#f0f7ff' } }}
             />
-          </Grid>
-          <Grid item xs={6}>
+          </Box>
+          <Box sx={{ flex: 1 }}>
             <TextField fullWidth label={t('booking_page.children')} type="number" size="small"
               value={form.numChildren}
               onChange={e => setForm(f => ({ ...f, numChildren: Math.max(0, parseInt(e.target.value) || 0) }))}
               inputProps={{ min: 0 }}
               sx={{ '& .MuiOutlinedInput-root': { borderRadius: 4, bgcolor: '#f0f7ff' } }}
             />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
         <TextField fullWidth label={t('booking_page.special_request')} multiline rows={2} size="small"
           value={form.specialRequest}
