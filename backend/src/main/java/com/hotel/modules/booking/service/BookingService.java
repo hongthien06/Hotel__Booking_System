@@ -67,9 +67,12 @@ public class BookingService {
     public List<BookingDTO> getMyBookings(Long userId, LocalDate checkIn, LocalDate checkOut) {
         List<Booking> bookings = bookingRepository.findMyBookings(userId, checkIn, checkOut);
         return bookings.stream()
-                .filter(booking -> booking.getMergedIntoBooking() == null)
-                .filter(booking -> !isCancelledChildOfVisibleMultiRoomBooking(booking, bookings))
-                .map(this::toDTO).toList();
+                .map(booking -> {
+                    BookingDTO dto = toDTO(booking);
+                    findGroupedStatusForLegacyCancelledBooking(booking, bookings)
+                            .ifPresent(dto::setStatus);
+                    return dto;
+                }).toList();
     }
 
     // CHECK IN
@@ -403,7 +406,6 @@ public class BookingService {
 
         for (Booking booking : bookings) {
             if (!booking.getBookingId().equals(primary.getBookingId())) {
-                booking.setStatus(BookingStatus.CANCELLED);
                 booking.setMergedIntoBooking(primary);
                 booking.setUpdatedAt(LocalDateTime.now());
             }
@@ -535,9 +537,9 @@ public class BookingService {
         return List.of(new RoomSnapshot(booking.getRoom(), booking.getRoomPriceSnapshot()));
     }
 
-    private boolean isCancelledChildOfVisibleMultiRoomBooking(Booking booking, List<Booking> allBookings) {
+    private Optional<BookingStatus> findGroupedStatusForLegacyCancelledBooking(Booking booking, List<Booking> allBookings) {
         if (booking.getStatus() != BookingStatus.CANCELLED || booking.getRoom() == null) {
-            return false;
+            return Optional.empty();
         }
         Long roomId = booking.getRoom().getRoomId();
         return allBookings.stream()
@@ -546,8 +548,11 @@ public class BookingService {
                         && other.getStatus() != BookingStatus.REFUNDED)
                 .filter(other -> other.getCheckInDate().equals(booking.getCheckInDate())
                         && other.getCheckOutDate().equals(booking.getCheckOutDate()))
-                .anyMatch(other -> getRoomsForBooking(other).stream()
-                        .anyMatch(room -> room.getRoomId().equals(roomId)));
+                .filter(other -> getRoomsForBooking(other).size() > 1)
+                .filter(other -> getRoomsForBooking(other).stream()
+                        .anyMatch(room -> room.getRoomId().equals(roomId)))
+                .map(Booking::getStatus)
+                .findFirst();
     }
 
     private List<BookingRoomDTO> getBookingRoomDTOs(Booking booking) {
@@ -590,7 +595,9 @@ public class BookingService {
         dto.setSpecialRequest(booking.getSpecialRequest());
         dto.setRoomPriceSnapshot(booking.getRoomPriceSnapshot());
         dto.setTotalNights(booking.getTotalNights());
-        dto.setStatus(booking.getStatus());
+        dto.setStatus(booking.getMergedIntoBooking() != null
+                ? booking.getMergedIntoBooking().getStatus()
+                : booking.getStatus());
         dto.setCheckInDate(booking.getCheckInDate());
         dto.setCheckOutDate(booking.getCheckOutDate());
         dto.setActualCheckIn(booking.getActualCheckIn());

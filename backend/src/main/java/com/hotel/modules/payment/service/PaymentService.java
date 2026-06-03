@@ -2,6 +2,7 @@ package com.hotel.modules.payment.service;
 
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.booking.service.BookingService;
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
 import com.hotel.modules.invoice.dto.request.InvoiceItemRequest;
@@ -40,6 +41,7 @@ public class PaymentService implements IPaymentService {
     private final PaymentRepository paymentRepository;
     private final IInvoiceService invoiceService;
     private final BookingService bookingService;
+    private final BookingRepository bookingRepository;
     private final IMembershipService membershipService;
 
     private final IVNPayService vnPayService;
@@ -195,6 +197,7 @@ public class PaymentService implements IPaymentService {
             Booking booking = payment.getBooking();
             if (booking != null) {
                 booking.setStatus(BookingStatus.CONFIRMED);
+                confirmMergedBookings(booking);
                 autoCreateInvoice(payment, booking);
 
                 // Cập nhật hạng thành viên sau khi thanh toán thành công
@@ -216,11 +219,35 @@ public class PaymentService implements IPaymentService {
             Booking booking = payment.getBooking();
             if (booking != null) {
                 bookingService.cancelBooking(booking.getBookingId(), booking.getUser().getUserId(), SYSTEM);
+                cancelMergedBookings(booking);
             }
         }
 
         payment.setRawResponse(rawResponse);
         paymentRepository.save(payment);
+    }
+
+    private void confirmMergedBookings(Booking primaryBooking) {
+        List<Booking> mergedBookings = bookingRepository
+                .findByMergedIntoBooking_BookingId(primaryBooking.getBookingId());
+        if (mergedBookings.isEmpty()) {
+            return;
+        }
+        mergedBookings.forEach(booking -> {
+            booking.setStatus(BookingStatus.CONFIRMED);
+            booking.setUpdatedAt(LocalDateTime.now());
+        });
+        bookingRepository.saveAll(mergedBookings);
+    }
+
+    private void cancelMergedBookings(Booking primaryBooking) {
+        List<Booking> mergedBookings = bookingRepository
+                .findByMergedIntoBooking_BookingId(primaryBooking.getBookingId());
+        for (Booking booking : mergedBookings) {
+            if (booking.getStatus() == BookingStatus.PENDING) {
+                bookingService.cancelBooking(booking.getBookingId(), booking.getUser().getUserId(), SYSTEM);
+            }
+        }
     }
 
     // tạo hóa đơn

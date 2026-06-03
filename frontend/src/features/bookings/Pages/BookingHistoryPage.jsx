@@ -75,9 +75,27 @@ const BookingHistoryPage = () => {
     return diff > 0 ? Math.round(diff / 86400000) : 1
   }
 
-  const handlePayment = (booking) => {
+  const getHistoryRoom = (booking) => {
     const rooms = getBookingRooms(booking)
-    const primaryRoom = rooms[0] || {}
+    const matchedRoom = rooms.find(room => room.roomId === booking.roomId)
+    return matchedRoom || {
+      roomId: booking.roomId,
+      roomNumber: booking.roomNumber,
+      roomTypeName: booking.roomTypeName,
+      hotelName: booking.hotelName,
+      hotelAddress: booking.hotelAddress,
+      roomPriceSnapshot: booking.roomPriceSnapshot,
+      subtotal: Number(booking.roomPriceSnapshot || 0) * Number(booking.totalNights || nightsBetween(booking.checkInDate, booking.checkOutDate))
+    }
+  }
+
+  const getHistoryRoomTotal = (booking) => {
+    const historyRoom = getHistoryRoom(booking)
+    return Number(historyRoom.subtotal || 0)
+  }
+
+  const handlePayment = (booking) => {
+    const primaryRoom = getHistoryRoom(booking)
     navigate('/payment?step=1', {
       state: {
         booking,
@@ -85,7 +103,7 @@ const BookingHistoryPage = () => {
           roomId: primaryRoom.roomId || booking.roomId,
           roomNumber: primaryRoom.roomNumber || booking.roomNumber,
           typeName: primaryRoom.roomTypeName || booking.roomTypeName,
-          pricePerNight: primaryRoom.roomPriceSnapshot || booking.grandTotal / nightsBetween(booking.checkInDate, booking.checkOutDate)
+          pricePerNight: primaryRoom.roomPriceSnapshot || getHistoryRoomTotal(booking) / nightsBetween(booking.checkInDate, booking.checkOutDate)
         },
         form: {
           checkIn: booking.checkInDate,
@@ -360,8 +378,7 @@ const BookingHistoryPage = () => {
             bookings.map((booking, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={booking.bookingId || index}>
                 {(() => {
-                  const rooms = getBookingRooms(booking)
-                  const primaryRoom = rooms[0] || {}
+                  const primaryRoom = getHistoryRoom(booking)
                   return (
                 <Card sx={{
                   height: '100%',
@@ -417,31 +434,12 @@ const BookingHistoryPage = () => {
 
                   <CardContent sx={{ p: 2.5 }}>
                     <Typography variant="caption" sx={{ color: PC, fontWeight: 700, mb: 0.5, display: 'block' }}>
-                      {rooms.length > 1 ? `${rooms.length} phòng` : (primaryRoom.roomTypeName || booking.roomTypeName || 'Standard')}
+                      {primaryRoom.roomTypeName || booking.roomTypeName || 'Standard'}
                     </Typography>
                     <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1, lineHeight: 1.2, color: '#333' }}>
-                      {rooms.length > 1
-                        ? rooms.map(room => `#${room.roomNumber}`).join(', ')
-                        : `${t('booking_page.room') || 'Phòng'} ${primaryRoom.roomNumber || booking.roomNumber}`}
+                      {t('booking_page.room') || 'Phòng'} {primaryRoom.roomNumber || booking.roomNumber}
                     </Typography>
-                    {rooms.length > 1 && (
-                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, mb: 1.5 }}>
-                        {rooms.map((room, idx) => (
-                          <Box key={room.roomId || idx} sx={{ p: 1, borderRadius: 2, bgcolor: '#fafafa', border: '1px solid #eee' }}>
-                            <Typography variant="caption" sx={{ fontWeight: 800, color: '#444', display: 'block' }}>
-                              #{room.roomNumber} · {room.roomTypeName || 'Standard'}
-                            </Typography>
-                            {room.hotelName && (
-                              <Typography variant="caption" color="text.secondary" display="block">{room.hotelName}</Typography>
-                            )}
-                            {room.hotelAddress && (
-                              <Typography variant="caption" color="text.secondary" display="block">{room.hotelAddress}</Typography>
-                            )}
-                          </Box>
-                        ))}
-                      </Box>
-                    )}
-                    {rooms.length <= 1 && (primaryRoom.hotelName || primaryRoom.hotelAddress) && (
+                    {(primaryRoom.hotelName || primaryRoom.hotelAddress) && (
                       <Box sx={{ mb: 1.5 }}>
                         {primaryRoom.hotelName && (
                           <Typography variant="caption" color="text.secondary" display="block">{primaryRoom.hotelName}</Typography>
@@ -472,7 +470,7 @@ const BookingHistoryPage = () => {
 
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
                       <Typography variant="subtitle1" sx={{ fontWeight: 900, color: PC }}>
-                        {formatCurrency(booking.grandTotal)}
+                        {formatCurrency(getHistoryRoomTotal(booking))}
                       </Typography>
 
                     </Box>

@@ -88,6 +88,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     Optional<Booking> findByBookingCode(String bookingCode);
 
+    List<Booking> findByMergedIntoBooking_BookingId(Long bookingId);
+
     // ── Dashboard Queries ────────────────────
     @Query("SELECT b.status, COUNT(b) FROM Booking b GROUP BY b.status")
     List<Object[]> countByStatusGrouped();
