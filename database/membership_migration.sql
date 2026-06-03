@@ -74,7 +74,7 @@ ALTER TABLE Bookings ADD
 INSERT INTO membership_tiers (tier_code, tier_level, discount_pct, min_total_spent, min_booking_count,
                                display_name_vi, display_name_en, color_code, benefits_vi, benefits_en)
 VALUES
-('FIRST_TIME', 0, 10.00, 0,          0,  N'Khách lần đầu',       'First-Time Guest',   '#607D8B',
+('FIRST_TIME', 0, 10.00, 0,          0,  N'thành viên mới',       'First-Time Guest',   '#607D8B',
  N'["Giảm 10% hóa đơn đầu tiên"]',
  '["10% off your first booking"]'),
 

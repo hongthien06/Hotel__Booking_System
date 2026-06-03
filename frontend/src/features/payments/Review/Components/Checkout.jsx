@@ -44,8 +44,8 @@ const Checkout = () => {
 
   const pricePerNight = Number(booking?.roomPriceSnapshot || room?.pricePerNight || room?.priceDay || 0)
   const roomTotal = Number(booking?.totalAmount || pricePerNight * nights)
-  const grandTotal = Number(booking?.grandTotal || roomTotal * 1.1)
-  const taxFee = Math.round(grandTotal - roomTotal)
+  const taxFee = Math.round(roomTotal * 0.1)
+  const grandTotal = roomTotal + taxFee
 
   // Membership / group / holiday discount fields
   const holidayMultiplier = Number(booking?.holidayMultiplier || 1)

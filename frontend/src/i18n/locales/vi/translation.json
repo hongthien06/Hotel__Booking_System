@@ -554,7 +554,7 @@
     "total_bookings": "Tổng lượt đặt",
     "total_spent": "Tổng chi tiêu",
     "available": "Chưa dùng",
-    "first_booking_perk": "Ưu đãi lần đầu",
+    "first_booking_perk": "Ưu đãi thành viên mới",
     "progress_to": "Tiến độ lên hạng",
     "spent_progress": "Chi tiêu",
     "booking_progress": "Số lần đặt",
@@ -584,7 +584,7 @@
     "points_phone_missing": "Hãy cập nhật số điện thoại trong profile để tích điểm.",
     "fetch_error": "Không thể tải thông tin hạng thành viên",
     "discount_applied": "Ưu đãi đang áp dụng",
-    "first_booking_discount": "Ưu đãi khách lần đầu",
+    "first_booking_discount": "Ưu đãi thành viên mới",
     "tier_discount": "Ưu đãi thành viên",
     "group_discount": "Ưu đãi nhóm"
   },

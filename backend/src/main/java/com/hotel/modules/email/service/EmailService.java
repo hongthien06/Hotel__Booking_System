@@ -61,7 +61,7 @@ public class EmailService {
             // Hiển thị thông tin hạng thành viên thay vì voucher code
             String membershipInfo = null;
             if (booking.getIsFirstBookingDiscount() != null && booking.getIsFirstBookingDiscount()) {
-                membershipInfo = "Ưu đãi khách lần đầu (-" + booking.getMembershipDiscountPct() + "%)";
+                membershipInfo = "Ưu đãi thành viên mới (-" + booking.getMembershipDiscountPct() + "%)";
             } else if (booking.getMembershipDiscountPct() != null
                     && booking.getMembershipDiscountPct().compareTo(java.math.BigDecimal.ZERO) > 0) {
                 membershipInfo = "Ưu đãi thành viên (-" + booking.getMembershipDiscountPct() + "%)";

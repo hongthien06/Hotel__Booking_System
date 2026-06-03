@@ -25,15 +25,15 @@ BEGIN
     INSERT INTO membership_tiers (tier_code, tier_level, discount_pct, min_total_spent, min_booking_count,
                                   display_name_vi, display_name_en, color_code, benefits_vi, benefits_en)
     VALUES
-    ('FIRST_TIME', 0, 10.00, 0,        0,  N'Khách lần đầu',      N'First-Time Guest', '#607D8B',
+    ('FIRST_TIME', 0, 10.00, 0,        0,  N'thành viên mới',      N'First-Time Guest', '#607D8B',
      N'["Giảm 10% hóa đơn đầu tiên"]',
      N'["10% off your first booking"]'),
     ('SILVER',     1,  5.00, 5000000,  2,  N'Hội viên bạc',       N'Silver Member',     '#9E9E9E',
      N'["Giảm 5% mọi đặt phòng","Ưu tiên đặt phòng"]',
      N'["5% off every booking","Priority reservation"]'),
     ('GOLD',       2, 10.00, 15000000, 5,  N'Hội viên vàng',      N'Gold Member',       '#FFC107',
-     N'["Giảm 10% mọi đặt phòng","Nâng hạng phòng miễn phí","Check-in sớm"]',
-     N'["10% off every booking","Free room upgrade","Early check-in"]'),
+     N'["Giảm 10% mọi đặt phòng","Check-in sớm"]',
+     N'["10% off every booking","Early check-in"]'),
     ('DIAMOND',    3, 15.00, 30000000, 10, N'Hội viên kim cương', N'Diamond Member',    '#00BCD4',
      N'["Giảm 15% mọi đặt phòng","Nâng hạng phòng miễn phí","Dịch vụ miễn phí","Check-in/out linh hoạt"]',
      N'["15% off every booking","Free room upgrade","Complimentary services","Flexible check-in/out"]'),

@@ -22,13 +22,19 @@ const OrderSummary = () => {
   const pricePerNight = Number(booking?.roomPriceSnapshot || room?.pricePerNight || room?.priceDay || 0)
   const roomTotal = Number(booking?.totalAmount || pricePerNight * nights)
   const serviceTotal = Number(booking?.serviceTotal || 0)
-  const taxFee = Math.max(0, Number(booking?.grandTotal || roomTotal) - roomTotal - serviceTotal)
+  const taxFee = Math.round((roomTotal + serviceTotal) * 0.1)
+  
   const roomTypeName = booking?.roomTypeName || room?.roomTypeName || 'Standard'
   const roomNumber = booking?.roomNumber || room?.roomNumber || ''
 
-  const originalTotal = Number(booking?.grandTotal || roomTotal)
-  const discountAmount = voucherData ? Number(voucherData.discountAmount) : 0
-  const finalTotal = voucherData ? Number(voucherData.finalAmount) : originalTotal
+  const membershipDiscountAmt = Number(booking?.membershipDiscountAmt || 0)
+  const groupDiscountAmt = Number(booking?.groupDiscountAmt || 0)
+  const baseDiscount = membershipDiscountAmt + groupDiscountAmt
+
+  const originalTotal = roomTotal + serviceTotal + taxFee
+  const voucherDiscount = voucherData ? Number(voucherData.discountAmount) : 0
+  const discountAmount = voucherDiscount + baseDiscount
+  const finalTotal = Math.max(0, originalTotal - discountAmount)
 
   const nightUnit = t('payment.night_unit')
   const guestUnit = t('payment.guest_unit')
@@ -65,7 +71,7 @@ const OrderSummary = () => {
         <Stack direction="row" justifyContent="space-between" alignItems="center"
           sx={{ px: 2, py: 1.25, borderBottom: '0.5px solid', borderColor: 'divider', bgcolor: '#fdf2f8' }}>
           <Typography variant="caption" color="#be185d" fontWeight={500}>
-            {t('payment.discount')} ({voucherData?.voucherCode})
+            {t('payment.discount')} {voucherData?.voucherCode ? `(${voucherData.voucherCode})` : ''}
           </Typography>
           <Typography variant="caption" fontWeight={700} color="#be185d">
             − {formatVND(discountAmount)}

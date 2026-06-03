@@ -1,16 +1,31 @@
 import {
-  Box, Typography, Paper, Chip, LinearProgress, Divider, Grid,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Alert, CircularProgress, Tooltip, Stack, Card, CardContent
-} from '@mui/material'
-import {
-  EmojiEvents, TrendingUp, Groups, LocalOffer, CheckCircle,
-  Warning, Star, Diamond, WorkspacePremium, Verified
+  CheckCircle,
+  Diamond,
+  EmojiEvents,
+  Groups, LocalOffer,
+  Star,
+  TrendingUp,
+  Verified,
+  Warning,
+  WorkspacePremium
 } from '@mui/icons-material'
+import {
+  Alert,
+  Box,
+  Card, CardContent,
+  Chip,
+  CircularProgress,
+  Divider, Grid,
+  LinearProgress,
+  Paper,
+  Stack,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Typography
+} from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { getMembershipTiersApi, getMyMembershipApi, getHolidaysApi, getGroupDiscountRulesApi } from '~/shared/api/membershipApi'
-import { getMembershipTrackingPhone, getMembershipTierName } from '~/shared/utils/membership'
+import { getGroupDiscountRulesApi, getHolidaysApi, getMembershipTiersApi, getMyMembershipApi } from '~/shared/api/membershipApi'
+import { getMembershipTierName, getMembershipTrackingPhone } from '~/shared/utils/membership'
 
 // ── Tier visual config ──────────────────────────────────────────────────────
 const TIER_VISUAL = {
@@ -492,7 +507,7 @@ const MembershipPage = () => {
   const sortedTiers = [...tiers].sort((a, b) => a.tierLevel - b.tierLevel)
 
   return (
-    <Box sx={{ maxWidth: 1180, mx: 'auto', py: { xs: 3, md: 5 }, px: { xs: 2, md: 4 } }}>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', py: { xs: 3, md: 5 }, px: { xs: 2, md: 4 } }}>
       {/* Page title */}
       <Box sx={{ mb: 4, textAlign: 'center' }}>
         <Stack direction="row" alignItems="center" justifyContent="center" spacing={1.5} sx={{ mb: 1 }}>

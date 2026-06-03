@@ -739,7 +739,7 @@ GO
 INSERT INTO membership_tiers (tier_code, tier_level, discount_pct, min_total_spent, min_booking_count,
                                display_name_vi, display_name_en, color_code, benefits_vi, benefits_en)
 VALUES
-('FIRST_TIME', 0, 10.00, 0,          0,  N'Khách lần đầu',       'First-Time Guest',   '#607D8B',
+('FIRST_TIME', 0, 10.00, 0,          0,  N'thành viên mới',       'First-Time Guest',   '#607D8B',
  N'["Giảm 10% hóa đơn đầu tiên"]',
  '["10% off your first booking"]'),
 
@@ -748,8 +748,8 @@ VALUES
  '["5% off every booking","Priority reservation"]'),
 
 ('GOLD',       2, 10.00, 15000000,   5,  N'Hội viên vàng',       'Gold Member',        '#FFC107',
- N'["Giảm 10% mọi đặt phòng","Nâng hạng phòng miễn phí","Check-in sớm"]',
- '["10% off every booking","Free room upgrade","Early check-in"]'),
+ N'["Giảm 10% mọi đặt phòng","Check-in sớm"]',
+ '["10% off every booking","Early check-in"]'),
 
 ('DIAMOND',    3, 15.00, 30000000,   10, N'Hội viên kim cương',  'Diamond Member',     '#00BCD4',
  N'["Giảm 15% mọi đặt phòng","Nâng hạng phòng miễn phí","Dịch vụ miễn phí","Check-in/out linh hoạt"]',
