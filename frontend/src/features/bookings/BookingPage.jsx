@@ -733,6 +733,8 @@ const BookingPage = () => {
   const [selectedIsMock, setSelectedIsMock] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' })
   const destScrollRef = useRef(null)
+  const [destCanLeft, setDestCanLeft] = useState(false)
+  const [destCanRight, setDestCanRight] = useState(false)
   const scrollDest = (dir) => {
     if (destScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = destScrollRef.current
@@ -745,6 +747,8 @@ const BookingPage = () => {
   }
 
   const roomScrollRef = useRef(null)
+  const [roomCanLeft, setRoomCanLeft] = useState(false)
+  const [roomCanRight, setRoomCanRight] = useState(false)
   const scrollRooms = (dir) => {
     if (roomScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = roomScrollRef.current
@@ -757,6 +761,8 @@ const BookingPage = () => {
   }
 
   const typeScrollRef = useRef(null)
+  const [typeCanLeft, setTypeCanLeft] = useState(false)
+  const [typeCanRight, setTypeCanRight] = useState(false)
   const scrollTypes = (dir) => {
     if (typeScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = typeScrollRef.current
@@ -769,6 +775,8 @@ const BookingPage = () => {
   }
 
   const budgetScrollRef = useRef(null)
+  const [budgetCanLeft, setBudgetCanLeft] = useState(false)
+  const [budgetCanRight, setBudgetCanRight] = useState(false)
   const scrollBudget = (dir) => {
     if (budgetScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = budgetScrollRef.current
@@ -837,6 +845,8 @@ const BookingPage = () => {
 
 
   const recentScrollRef = useRef(null)
+  const [recentCanLeft, setRecentCanLeft] = useState(false)
+  const [recentCanRight, setRecentCanRight] = useState(false)
   const scrollRecent = (dir) => {
     if (recentScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = recentScrollRef.current
@@ -849,6 +859,8 @@ const BookingPage = () => {
   }
 
   const weekendScrollRef = useRef(null)
+  const [weekendCanLeft, setWeekendCanLeft] = useState(false)
+  const [weekendCanRight, setWeekendCanRight] = useState(false)
   const scrollWeekend = (dir) => {
     if (weekendScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = weekendScrollRef.current
@@ -861,6 +873,8 @@ const BookingPage = () => {
   }
 
   const topRatedScrollRef = useRef(null)
+  const [topRatedCanLeft, setTopRatedCanLeft] = useState(false)
+  const [topRatedCanRight, setTopRatedCanRight] = useState(false)
   const scrollTopRated = (dir) => {
     if (topRatedScrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = topRatedScrollRef.current
@@ -891,6 +905,62 @@ const BookingPage = () => {
       .then(d => setAmenities(Array.isArray(d) ? d : []))
       .catch(() => { })
   }, [])
+
+  // Update scroll button visibility on resize and attach scroll listeners
+  useEffect(() => {
+    const updateScrollState = (ref, setLeft, setRight) => {
+      const el = ref && ref.current
+      if (!el) {
+        setLeft(false)
+        setRight(false)
+        return
+      }
+      const { scrollLeft, scrollWidth, clientWidth } = el
+      setLeft(scrollLeft > 10)
+      setRight(scrollLeft + clientWidth < scrollWidth - 10)
+    }
+
+    const handleResize = () => {
+      updateScrollState(destScrollRef, setDestCanLeft, setDestCanRight)
+      updateScrollState(recentScrollRef, setRecentCanLeft, setRecentCanRight)
+      updateScrollState(typeScrollRef, setTypeCanLeft, setTypeCanRight)
+      updateScrollState(roomScrollRef, setRoomCanLeft, setRoomCanRight)
+      updateScrollState(topRatedScrollRef, setTopRatedCanLeft, setTopRatedCanRight)
+      updateScrollState(budgetScrollRef, setBudgetCanLeft, setBudgetCanRight)
+      updateScrollState(weekendScrollRef, setWeekendCanLeft, setWeekendCanRight)
+    }
+
+    const attach = (ref, setLeft, setRight) => {
+      const el = ref && ref.current
+      if (!el) return null
+      const handler = () => {
+        const { scrollLeft, scrollWidth, clientWidth } = el
+        setLeft(scrollLeft > 10)
+        setRight(scrollLeft + clientWidth < scrollWidth - 10)
+      }
+      el.addEventListener('scroll', handler)
+      handler()
+      return () => el.removeEventListener('scroll', handler)
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+
+    const cleans = [
+      attach(destScrollRef, setDestCanLeft, setDestCanRight),
+      attach(recentScrollRef, setRecentCanLeft, setRecentCanRight),
+      attach(typeScrollRef, setTypeCanLeft, setTypeCanRight),
+      attach(roomScrollRef, setRoomCanLeft, setRoomCanRight),
+      attach(topRatedScrollRef, setTopRatedCanLeft, setTopRatedCanRight),
+      attach(budgetScrollRef, setBudgetCanLeft, setBudgetCanRight),
+      attach(weekendScrollRef, setWeekendCanLeft, setWeekendCanRight),
+    ].filter(Boolean)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      cleans.forEach(c => c && c())
+    }
+  }, [destScrollRef, recentScrollRef, typeScrollRef, roomScrollRef, topRatedScrollRef, budgetScrollRef, weekendScrollRef])
 
   // Hàm bổ trợ để mở rộng loại phòng được chọn (ví dụ: "Deluxe" -> ["Deluxe King", "Deluxe Twin", ...])
   useEffect(() => {
@@ -1199,7 +1269,7 @@ const BookingPage = () => {
                       <Typography variant="body2" color="text.secondary">{t('booking_page.recent_searches_sub')}</Typography>
                     </Box>
                     <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
-                      {recentSearches.length > 4 && (
+                      {recentCanLeft && (
                         <IconButton onClick={() => scrollRecent(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1251,7 +1321,7 @@ const BookingPage = () => {
                         ))}
                       </Box>
 
-                      {recentSearches.length > 4 && (
+                      {recentCanRight && (
                         <IconButton onClick={() => scrollRecent(1)} sx={{
                           position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1270,7 +1340,7 @@ const BookingPage = () => {
                   <Typography variant="body2" color="text.secondary">{t('destinations.subtitle')}</Typography>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
-                  {DESTINATIONS.length > 5 && (
+                  {destCanLeft && (
                     <IconButton onClick={() => scrollDest(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1320,7 +1390,7 @@ const BookingPage = () => {
                     ))}
                   </Box>
 
-                  {DESTINATIONS.length > 5 && (
+                  {destCanRight && (
                     <IconButton onClick={() => scrollDest(1)} sx={{
                       position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1345,7 +1415,7 @@ const BookingPage = () => {
                   <Typography variant="body2" color="text.secondary">{t('booking_page.room_type_sub')}</Typography>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
-                  {ROOM_TYPES.length > 4 && (
+                  {typeCanLeft && (
                     <IconButton onClick={() => scrollTypes(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1385,7 +1455,7 @@ const BookingPage = () => {
                     ))}
                   </Box>
 
-                  {ROOM_TYPES.length > 4 && (
+                  {typeCanRight && (
                     <IconButton onClick={() => scrollTypes(1)} sx={{
                       position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1420,7 +1490,7 @@ const BookingPage = () => {
                   </Box>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 4, px: { xs: 3, sm: 6 } }}>
-                  {MOCK_ROOMS.length > 3 && (
+                  {roomCanLeft && (
                     <IconButton onClick={() => scrollRooms(-1)} sx={{
                       position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1459,7 +1529,7 @@ const BookingPage = () => {
                         )}
                   </Box>
 
-                  {MOCK_ROOMS.length > 3 && (
+                  {roomCanRight && (
                     <IconButton onClick={() => scrollRooms(1)} sx={{
                       position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                       zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1492,7 +1562,7 @@ const BookingPage = () => {
                     </Box>
                   </Box>
                   <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
-                    {topRatedRooms.length > 3 && (
+                    {topRatedCanLeft && (
                       <IconButton onClick={() => scrollTopRated(-1)} sx={{
                         position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                         zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1529,7 +1599,7 @@ const BookingPage = () => {
                       )}
                     </Box>
 
-                    {topRatedRooms.length > 3 && (
+                    {topRatedCanRight && (
                       <IconButton onClick={() => scrollTopRated(1)} sx={{
                         position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                         zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1564,7 +1634,7 @@ const BookingPage = () => {
                       </Box>
                     </Box>
                     <Box sx={{ position: 'relative', mb: 5, px: { xs: 3, sm: 6 } }}>
-                      {budgetRooms.length > 3 && (
+                      {budgetCanLeft && (
                         <IconButton onClick={() => scrollBudget(-1)} sx={{
                           position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1601,7 +1671,7 @@ const BookingPage = () => {
                             )}
                       </Box>
 
-                      {budgetRooms.length > 3 && (
+                      {budgetCanRight && (
                         <IconButton onClick={() => scrollBudget(1)} sx={{
                           position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                           zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1620,6 +1690,7 @@ const BookingPage = () => {
                   <Typography variant="body2" color="text.secondary">{t('booking_page.weekend_deals_subtitle')}</Typography>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 8, px: { xs: 3, sm: 6 } }}>
+                  {weekendCanLeft && (
                   <IconButton onClick={() => scrollWeekend(-1)} sx={{
                     position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
                     zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1627,6 +1698,7 @@ const BookingPage = () => {
                   }}>
                     <ChevronLeft sx={{ color: PC }} />
                   </IconButton>
+                  )}
 
                   <Box ref={weekendScrollRef} sx={{
                     display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
@@ -1657,6 +1729,7 @@ const BookingPage = () => {
                     )}
                   </Box>
 
+                  {weekendCanRight && (
                   <IconButton onClick={() => scrollWeekend(1)} sx={{
                     position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
                     zIndex: 2, bgcolor: 'white', boxShadow: 3,
@@ -1664,6 +1737,7 @@ const BookingPage = () => {
                   }}>
                     <ChevronRight sx={{ color: PC }} />
                   </IconButton>
+                  )}
                 </Box>
               </>
             ) : (
