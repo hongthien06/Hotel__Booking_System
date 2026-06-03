@@ -14,6 +14,8 @@ import BookingPage from '~/features/bookings/BookingPage'
 import RoomList from '~/features/rooms/List/RoomList'
 import BookingHistoryPage from '~/features/bookings/Pages/BookingHistoryPage'
 import MembershipPage from '~/features/membership/MembershipPage'
+import ReviewsPage from '~/features/reviews/ReviewsPage'
+import ReviewManagementPage from '~/features/admin-dashboard/ReviewManagementPage'
 
 const AppRoutes = () => {
   const isAuthenticated = !!localStorage.getItem('token');
@@ -35,6 +37,7 @@ const AppRoutes = () => {
         <Route path='/home' element={<HomePage />} />
         <Route path='/bookings' element={<BookingPage />} />
         <Route path='/rooms' element={<RoomList />} />
+        <Route path='/reviews' element={<ReviewsPage />} />
         
         {/* Các trang yêu cầu đăng nhập (Customer / Admin / Manager) */}
         <Route element={<PrivateRoute />}>
@@ -47,6 +50,7 @@ const AppRoutes = () => {
         {/* Các trang dành cho Admin và Manager */}
         <Route element={<PrivateRoute requiredRoles={['ADMIN', 'MANAGER']} />}>
           <Route path='/dashboard' element={<DashboardPage />} />
+          <Route path='/admin/reviews' element={<ReviewManagementPage />} />
         </Route>
 
         {/* Trang chỉ dành riêng cho Manager */}

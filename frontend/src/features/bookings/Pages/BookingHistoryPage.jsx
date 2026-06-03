@@ -3,7 +3,8 @@ import {
 
   ConfirmationNumber,
   History,
-  Search
+  Search,
+  RateReview
 } from '@mui/icons-material'
 import {
   Alert,
@@ -22,6 +23,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { cancelBookingApi, getMyBookingsApi } from '../../../shared/api/bookingApi'
 import { formatCurrency, formatDate } from '../../../shared/utils/formatters'
+import ReviewFormDialog from '../../reviews/ReviewFormDialog'
 
 const PC = '#c0496e' // Tương ứng với primary.dark hoặc primary.contrastText trong theme (Màu hồng đậm chủ đạo)
 const PC_LIGHT = '#fce4ec' // Tương ứng với primary.main (Màu hồng nhạt)
@@ -32,6 +34,8 @@ const BookingHistoryPage = () => {
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
+  const [selectedBookingForReview, setSelectedBookingForReview] = useState(null)
 
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
@@ -376,6 +380,27 @@ const BookingHistoryPage = () => {
                         )}
                       </Box>
                     )}
+                    {booking.status === 'CHECKED_OUT' && (
+                      <Box sx={{ mt: 2 }}>
+                        <Button
+                          fullWidth
+                          variant="outlined"
+                          size="small"
+                          startIcon={<RateReview />}
+                          onClick={() => {
+                            setSelectedBookingForReview(booking)
+                            setReviewDialogOpen(true)
+                          }}
+                          sx={{
+                            borderRadius: 2, fontSize: 11, fontWeight: 700,
+                            borderColor: PC, color: PC,
+                            '&:hover': { bgcolor: '#fdf2f8', borderColor: PC }
+                          }}
+                        >
+                          {t('reviews.write_review')}
+                        </Button>
+                      </Box>
+                    )}
                   </CardContent>
                 </Card>
               </Grid>
@@ -383,8 +408,19 @@ const BookingHistoryPage = () => {
           )}
         </Grid>
       </Box>
+
+      {/* Review Dialog */}
+      {selectedBookingForReview && (
+        <ReviewFormDialog
+          open={reviewDialogOpen}
+          onClose={() => { setReviewDialogOpen(false); setSelectedBookingForReview(null); }}
+          booking={selectedBookingForReview}
+          onReviewSubmitted={() => fetchBookings()}
+        />
+      )}
     </Box>
   )
 }
 
 export default BookingHistoryPage
+

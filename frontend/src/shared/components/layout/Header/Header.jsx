@@ -2,7 +2,7 @@ import React from 'react'
 import { Box, Typography, Button, Avatar, Tooltip, IconButton } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../../../shared/hooks/useAuth'
-import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed, History, Menu as MenuIcon, Person, EmojiEvents } from '@mui/icons-material'
+import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed, History, Menu as MenuIcon, Person, EmojiEvents, RateReview } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import LanguageSwitcher from '../../LanguageSwitcher'
 import { Menu, MenuItem, Divider } from '@mui/material'
@@ -10,12 +10,14 @@ import { Menu, MenuItem, Divider } from '@mui/material'
 const navItems = [
   { label: 'header.home', path: '/home', icon: <Home fontSize="small" /> },
   { label: 'header.bookings', path: '/bookings', icon: <EventNote fontSize="small" /> },
+  { label: 'header.reviews', path: '/reviews', icon: <RateReview fontSize="small" /> },
 ]
 
 const adminNavItems = [
   { label: 'header.bookings', path: '/bookings', icon: <EventNote fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.rooms', path: '/rooms', icon: <KingBed fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
+  { label: 'header.review_management', path: '/admin/reviews', icon: <RateReview fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.users', path: '/admin/users', icon: <Person fontSize="small" />, roles: ['MANAGER'] },
 ]
 

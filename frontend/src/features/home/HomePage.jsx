@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Box, Typography, Container, Grid, Card, CardContent,
-  Avatar, Rating, Button, Paper
+  Avatar, Rating, Button, Paper, Skeleton
 } from '@mui/material'
 import {
   KingBed, Security, SupportAgent, Star,
@@ -12,6 +12,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import heroBg from '../../assets/hotel_hero.png'
+import { getApprovedReviews } from '../../shared/api/reviewApi'
 
 const PC = '#9a1c48'
 const PC_ALPHA = 'rgba(154,28,72,0.08)'
@@ -39,7 +40,8 @@ const policyCards = [
   { icon: <VerifiedUser sx={{ fontSize: 36 }} />, title: 'home.policy.cards.safety.title', desc: 'home.policy.cards.safety.desc' },
 ]
 
-const reviews = [
+// Fallback reviews khi API chưa có dữ liệu
+const fallbackReviews = [
   { key: 'item1', avatar: 'A', rating: 5, date: '15/04/2026' },
   { key: 'item2', avatar: 'M', rating: 5, date: '10/04/2026' },
   { key: 'item3', avatar: 'P', rating: 4, date: '05/04/2026' },
@@ -65,6 +67,24 @@ const SectionHeader = ({ overline, title, subtitle }) => (
 const HomePage = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [apiReviews, setApiReviews] = useState([])
+  const [reviewsLoading, setReviewsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const data = await getApprovedReviews(0, 4)
+        setApiReviews(data.content || [])
+      } catch (err) {
+        console.error('Error fetching reviews:', err)
+      } finally {
+        setReviewsLoading(false)
+      }
+    }
+    fetchReviews()
+  }, [])
+
+  const hasApiReviews = apiReviews.length > 0
 
   return (
     <Box>
@@ -268,30 +288,82 @@ const HomePage = () => {
             title={t('home.reviews.title')}
           />
           <Grid container spacing={4}>
-            {reviews.map((r, i) => (
-              <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
-                <Card sx={{
-                  p: 3, borderRadius: 4, height: '100%',
-                  transition: 'all 0.3s ease',
-                  '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }
-                }}>
-                  <CardContent sx={{ p: 0 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <Avatar sx={{ bgcolor: PC, fontWeight: 700 }}>{r.avatar}</Avatar>
-                      <Box>
-                        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(`home.reviews.${r.key}.name`)}</Typography>
-                        <Typography variant="caption" color="text.secondary">{r.date}</Typography>
+            {reviewsLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
+                  <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 4 }} />
+                </Grid>
+              ))
+            ) : hasApiReviews ? (
+              apiReviews.map((r) => (
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={r.id}>
+                  <Card sx={{
+                    p: 3, borderRadius: 4, height: '100%',
+                    transition: 'all 0.3s ease',
+                    '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }
+                  }}>
+                    <CardContent sx={{ p: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                        <Avatar sx={{ bgcolor: PC, fontWeight: 700 }}>
+                          {r.customerName?.charAt(0)?.toUpperCase() || 'U'}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{r.customerName}</Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                    <Rating value={r.rating} readOnly size="small" sx={{ mb: 1.5 }} />
-                    <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.7 }}>
-                      "{t(`home.reviews.${r.key}.comment`)}"
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
+                      <Rating value={r.ratingOverall} readOnly size="small" sx={{ mb: 1.5 }} />
+                      {r.comment && (
+                        <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.7 }}>
+                          "{r.comment}"
+                        </Typography>
+                      )}
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))
+            ) : (
+              // Fallback to hardcoded reviews
+              fallbackReviews.map((r, i) => (
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
+                  <Card sx={{
+                    p: 3, borderRadius: 4, height: '100%',
+                    transition: 'all 0.3s ease',
+                    '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }
+                  }}>
+                    <CardContent sx={{ p: 0 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                        <Avatar sx={{ bgcolor: PC, fontWeight: 700 }}>{r.avatar}</Avatar>
+                        <Box>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(`home.reviews.${r.key}.name`)}</Typography>
+                          <Typography variant="caption" color="text.secondary">{r.date}</Typography>
+                        </Box>
+                      </Box>
+                      <Rating value={r.rating} readOnly size="small" sx={{ mb: 1.5 }} />
+                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.7 }}>
+                        "{t(`home.reviews.${r.key}.comment`)}"
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))
+            )}
           </Grid>
+          {/* See all reviews button */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/reviews')}
+              sx={{
+                borderColor: PC, color: PC, fontWeight: 700, borderRadius: 3, px: 5, py: 1.5,
+                '&:hover': { bgcolor: PC_ALPHA, borderColor: PC }
+              }}
+            >
+              {t('common.see_all')} →
+            </Button>
+          </Box>
         </Container>
       </Box>
 
@@ -336,5 +408,6 @@ const HomePage = () => {
     </Box>
   )
 }
+
 
 export default HomePage

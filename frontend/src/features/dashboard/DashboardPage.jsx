@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -15,7 +15,13 @@ import {
   Chip,
   Skeleton,
   IconButton,
-  Tooltip
+  Tooltip,
+  ToggleButton,
+  ToggleButtonGroup,
+  Select,
+  MenuItem as MuiMenuItem,
+  FormControl,
+  Fade
 } from '@mui/material';
 import {
   KingBed,
@@ -35,10 +41,22 @@ import {
   AttachMoney,
   Login,
   Logout,
-  Visibility
+  Visibility,
+  BarChart as BarChartIcon,
+  PieChart as PieChartIcon,
+  ShowChart,
+  DonutLarge,
+  Today,
+  ArrowUpward,
+  ArrowDownward
 } from '@mui/icons-material';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend,
+  PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area,
+  LineChart, Line
+} from 'recharts';
 import { useAuth } from '../../shared/hooks/useAuth';
-import { getDashboardStats } from '../../shared/api/dashboardApi';
+import { getDashboardStats, getDashboardCharts } from '../../shared/api/dashboardApi';
 import { checkInApi, checkOutApi, cancelBookingByAdminApi } from '../../shared/api/bookingApi';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
@@ -56,7 +74,17 @@ import {
   ListItemText
 } from '@mui/material';
 
-const StatCard = ({ title, value, icon, color, loading }) => (
+const CHART_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+const STATUS_COLORS = {
+  PENDING: '#f59e0b',
+  CONFIRMED: '#10b981',
+  CHECKED_IN: '#6366f1',
+  CHECKED_OUT: '#8b5cf6',
+  CANCELLED: '#ef4444',
+  REFUNDED: '#06b6d4'
+};
+
+const StatCard = ({ title, value, icon, color, loading, trend }) => (
   <Card sx={{
     height: '100%',
     borderRadius: 4,
@@ -68,7 +96,7 @@ const StatCard = ({ title, value, icon, color, loading }) => (
     <CardContent sx={{ p: 3 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <Box>
-          <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', mb: 1 }}>
+          <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 600, textTransform: 'uppercase', mb: 1, fontSize: '0.7rem' }}>
             {title}
           </Typography>
           {loading ? (
@@ -77,6 +105,18 @@ const StatCard = ({ title, value, icon, color, loading }) => (
             <Typography variant="h4" sx={{ fontWeight: 800, color: 'text.primary' }}>
               {value}
             </Typography>
+          )}
+          {trend !== undefined && !loading && (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+              {trend >= 0 ? (
+                <ArrowUpward sx={{ fontSize: 14, color: '#10b981' }} />
+              ) : (
+                <ArrowDownward sx={{ fontSize: 14, color: '#ef4444' }} />
+              )}
+              <Typography variant="caption" sx={{ fontWeight: 700, color: trend >= 0 ? '#10b981' : '#ef4444' }}>
+                {Math.abs(trend)}%
+              </Typography>
+            </Box>
           )}
         </Box>
         <Box sx={{
@@ -97,12 +137,17 @@ const DashboardPage = () => {
   const { t, i18n } = useTranslation();
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
+  const [chartData, setChartData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [chartLoading, setChartLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [activeChart, setActiveChart] = useState('revenue');
+  const [chartDays, setChartDays] = useState(7);
+  const [lastUpdated, setLastUpdated] = useState(null);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getDashboardStats();
@@ -113,7 +158,20 @@ const DashboardPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  const fetchCharts = useCallback(async () => {
+    setChartLoading(true);
+    try {
+      const data = await getDashboardCharts(chartDays);
+      setChartData(data);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Error fetching chart data:', err);
+    } finally {
+      setChartLoading(false);
+    }
+  }, [chartDays]);
 
   const handleCheckIn = async (id) => {
     try {
@@ -161,9 +219,21 @@ const DashboardPage = () => {
 
   useEffect(() => {
     fetchStats();
+    fetchCharts();
   }, []);
 
+  useEffect(() => {
+    fetchCharts();
+  }, [chartDays]);
 
+  // Auto-refresh every 30s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchStats();
+      fetchCharts();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchStats, fetchCharts]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -177,6 +247,105 @@ const DashboardPage = () => {
     }
   };
 
+  const renderChart = () => {
+    if (chartLoading) {
+      return <Skeleton variant="rectangular" height={350} sx={{ borderRadius: 3 }} />;
+    }
+    if (!chartData) return null;
+
+    switch (activeChart) {
+      case 'revenue':
+        return (
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={chartData.revenueByDay || []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 12 }} />
+              <RechartsTooltip
+                formatter={(value) => [formatCurrency(value), t('dashboard.chart_revenue')]}
+                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+              />
+              <Bar dataKey="revenue" fill="#6366f1" radius={[8, 8, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        );
+
+      case 'status':
+        return (
+          <ResponsiveContainer width="100%" height={350}>
+            <PieChart>
+              <Pie
+                data={chartData.bookingsByStatus || []}
+                cx="50%"
+                cy="50%"
+                innerRadius={80}
+                outerRadius={130}
+                paddingAngle={3}
+                dataKey="count"
+                nameKey="status"
+                label={({ status, count }) => `${status}: ${count}`}
+              >
+                {(chartData.bookingsByStatus || []).map((entry, idx) => (
+                  <Cell key={idx} fill={STATUS_COLORS[entry.status] || CHART_COLORS[idx % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+              <RechartsTooltip
+                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+              />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        );
+
+      case 'occupancy':
+        return (
+          <ResponsiveContainer width="100%" height={350}>
+            <AreaChart data={chartData.roomOccupancy || []}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <RechartsTooltip
+                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+              />
+              <Area type="monotone" dataKey="occupied" stackId="1" stroke="#ef4444" fill="#fecaca" name={t('dashboard.chart_occupied')} />
+              <Area type="monotone" dataKey="available" stackId="1" stroke="#10b981" fill="#d1fae5" name={t('dashboard.chart_available')} />
+              <Legend />
+            </AreaChart>
+          </ResponsiveContainer>
+        );
+
+      case 'roomtype':
+        return (
+          <ResponsiveContainer width="100%" height={350}>
+            <BarChart data={chartData.revenueByRoomType || []} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis type="number" tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 12 }} />
+              <YAxis dataKey="roomType" type="category" width={120} tick={{ fontSize: 12 }} />
+              <RechartsTooltip
+                formatter={(value) => [formatCurrency(value), t('dashboard.chart_revenue')]}
+                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
+              />
+              <Bar dataKey="revenue" radius={[0, 8, 8, 0]}>
+                {(chartData.revenueByRoomType || []).map((_, idx) => (
+                  <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  const chartTabs = [
+    { value: 'revenue', icon: <BarChartIcon fontSize="small" />, label: t('dashboard.chart_revenue_by_day') },
+    { value: 'status', icon: <PieChartIcon fontSize="small" />, label: t('dashboard.chart_bookings_by_status') },
+    { value: 'occupancy', icon: <ShowChart fontSize="small" />, label: t('dashboard.chart_room_occupancy') },
+    { value: 'roomtype', icon: <DonutLarge fontSize="small" />, label: t('dashboard.chart_revenue_by_room_type') },
+  ];
+
   return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
@@ -188,79 +357,123 @@ const DashboardPage = () => {
             {t('dashboard.welcome')}, <strong>{user?.fullName}</strong>. {t('dashboard.subtitle')}
           </Typography>
         </Box>
-        <Tooltip title={t('dashboard.refresh')}>
-          <IconButton onClick={fetchStats} sx={{ bgcolor: 'background.paper', boxShadow: 1 }}>
-            <Refresh />
-          </IconButton>
-        </Tooltip>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {lastUpdated && (
+            <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 600 }}>
+              {t('dashboard.last_updated')}: {lastUpdated.toLocaleTimeString(i18n.language === 'vi' ? 'vi-VN' : 'en-US')}
+            </Typography>
+          )}
+          <Tooltip title={t('dashboard.refresh')}>
+            <IconButton onClick={() => { fetchStats(); fetchCharts(); }} sx={{ bgcolor: 'background.paper', boxShadow: 1 }}>
+              <Refresh />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
 
-      <Grid container spacing={3} sx={{ mb: 5 }}>
+      {/* ── Stat Cards ── */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            title={t('dashboard.total_rooms')}
-            value={stats?.totalRooms || 0}
-            icon={<KingBed fontSize="large" />}
-            color="#3f51b5"
-            loading={loading}
-          />
+          <StatCard title={t('dashboard.total_rooms')} value={stats?.totalRooms || 0} icon={<KingBed fontSize="large" />} color="#3f51b5" loading={loading} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            title={t('dashboard.available')}
-            value={stats?.availableRooms || 0}
-            icon={<TrendingUp fontSize="large" />}
-            color="#4caf50"
-            loading={loading}
-          />
+          <StatCard title={t('dashboard.available')} value={stats?.availableRooms || 0} icon={<TrendingUp fontSize="large" />} color="#4caf50" loading={loading} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            title={t('dashboard.occupied')}
-            value={stats?.occupiedRooms || 0}
-            icon={<MeetingRoom fontSize="large" />}
-            color="#f44336"
-            loading={loading}
-          />
+          <StatCard title={t('dashboard.occupied')} value={stats?.occupiedRooms || 0} icon={<MeetingRoom fontSize="large" />} color="#f44336" loading={loading} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            title={t('dashboard.maintenance')}
-            value={stats?.maintenanceRooms || 0}
-            icon={<Handyman fontSize="large" />}
-            color="#9e9e9e"
-            loading={loading}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            title={t('dashboard.inactive')}
-            value={stats?.inactiveRooms || 0}
-            icon={<Block fontSize="large" />}
-            color="#000000"
-            loading={loading}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            title={t('dashboard.total_bookings')}
-            value={stats?.totalBookings || 0}
-            icon={<EventNote fontSize="large" />}
-            color="#ff9800"
-            loading={loading}
-          />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard
-            title={t('dashboard.total_revenue')}
-            value={formatCurrency(stats?.totalRevenue || 0)}
-            icon={<AccountBalanceWallet fontSize="large" />}
-            color="#e91e63"
-            loading={loading}
-          />
+          <StatCard title={t('dashboard.total_revenue')} value={formatCurrency(stats?.totalRevenue || 0)} icon={<AccountBalanceWallet fontSize="large" />} color="#e91e63" loading={loading} />
         </Grid>
       </Grid>
 
+      {/* ── Today Stats ── */}
+      {chartData && (
+        <Fade in>
+          <Grid container spacing={2} sx={{ mb: 5 }}>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <Paper sx={{ p: 2.5, borderRadius: 3, textAlign: 'center', borderLeft: '4px solid #6366f1' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                  {t('dashboard.today_revenue')}
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 900, color: '#6366f1', mt: 0.5 }}>
+                  {formatCurrency(chartData.todayRevenue || 0)}
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <Paper sx={{ p: 2.5, borderRadius: 3, textAlign: 'center', borderLeft: '4px solid #f59e0b' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                  {t('dashboard.today_bookings')}
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 900, color: '#f59e0b', mt: 0.5 }}>
+                  {chartData.todayBookings || 0}
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <Paper sx={{ p: 2.5, borderRadius: 3, textAlign: 'center', borderLeft: '4px solid #10b981' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                  {t('dashboard.today_checkins')}
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 900, color: '#10b981', mt: 0.5 }}>
+                  {chartData.todayCheckIns || 0}
+                </Typography>
+              </Paper>
+            </Grid>
+            <Grid size={{ xs: 6, sm: 3 }}>
+              <Paper sx={{ p: 2.5, borderRadius: 3, textAlign: 'center', borderLeft: '4px solid #ef4444' }}>
+                <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                  {t('dashboard.occupancy_rate')}
+                </Typography>
+                <Typography variant="h5" sx={{ fontWeight: 900, color: '#ef4444', mt: 0.5 }}>
+                  {chartData.occupancyRate || 0}%
+                </Typography>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Fade>
+      )}
+
+      {/* ── Charts Section ── */}
+      <Paper sx={{ p: 3, borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.05)', mb: 5 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 800 }}>
+            {t('dashboard.charts_title')}
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <FormControl size="small">
+              <Select
+                value={chartDays}
+                onChange={(e) => setChartDays(e.target.value)}
+                sx={{ borderRadius: 2, fontWeight: 600, minWidth: 120 }}
+              >
+                <MuiMenuItem value={7}>{t('dashboard.chart_7_days')}</MuiMenuItem>
+                <MuiMenuItem value={30}>{t('dashboard.chart_30_days')}</MuiMenuItem>
+                <MuiMenuItem value={90}>{t('dashboard.chart_90_days')}</MuiMenuItem>
+              </Select>
+            </FormControl>
+            <ToggleButtonGroup
+              value={activeChart}
+              exclusive
+              onChange={(e, v) => v && setActiveChart(v)}
+              size="small"
+              sx={{ '& .MuiToggleButton-root': { borderRadius: 2, px: 1.5, textTransform: 'none', fontWeight: 600 } }}
+            >
+              {chartTabs.map(tab => (
+                <ToggleButton key={tab.value} value={tab.value}>
+                  <Tooltip title={tab.label}>{tab.icon}</Tooltip>
+                </ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+          </Box>
+        </Box>
+        <Box sx={{ minHeight: 350 }}>
+          {renderChart()}
+        </Box>
+      </Paper>
+
+      {/* ── Recent Bookings Table ── */}
       <Typography variant="h5" sx={{ fontWeight: 800, mb: 3, color: 'primary.contrastText' }}>
         {t('dashboard.recent_bookings')}
       </Typography>
@@ -282,7 +495,7 @@ const DashboardPage = () => {
             {loading ? (
               [...Array(5)].map((_, i) => (
                 <TableRow key={i}>
-                  {[...Array(6)].map((_, j) => (
+                  {[...Array(7)].map((_, j) => (
                     <TableCell key={j}><Skeleton /></TableCell>
                   ))}
                 </TableRow>
@@ -309,47 +522,31 @@ const DashboardPage = () => {
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
                       {booking.status === 'CONFIRMED' && (
                         <Tooltip title={t('dashboard.check_in') || 'Check-in'}>
-                          <IconButton
-                            color="success"
-                            size="small"
-                            onClick={() => handleCheckIn(booking.id)}
-                            sx={{ bgcolor: 'success.lighter', '&:hover': { bgcolor: 'success.light' } }}
-                          >
+                          <IconButton color="success" size="small" onClick={() => handleCheckIn(booking.id)}
+                            sx={{ bgcolor: 'success.lighter', '&:hover': { bgcolor: 'success.light' } }}>
                             <Login fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}
                       {booking.status === 'CHECKED_IN' && (
                         <Tooltip title={t('dashboard.check_out') || 'Check-out'}>
-                          <IconButton
-                            color="warning"
-                            size="small"
-                            onClick={() => handleCheckOut(booking.id)}
-                            sx={{ bgcolor: 'warning.lighter', '&:hover': { bgcolor: 'warning.light' } }}
-                          >
+                          <IconButton color="warning" size="small" onClick={() => handleCheckOut(booking.id)}
+                            sx={{ bgcolor: 'warning.lighter', '&:hover': { bgcolor: 'warning.light' } }}>
                             <Logout fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}
                       {(booking.status === 'PENDING' || booking.status === 'CONFIRMED') && (
                         <Tooltip title={t('dashboard.cancel') || 'Cancel Booking'}>
-                          <IconButton
-                            color="error"
-                            size="small"
-                            onClick={() => handleCancel(booking.id)}
-                            sx={{ bgcolor: 'error.lighter', '&:hover': { bgcolor: 'error.light' } }}
-                          >
+                          <IconButton color="error" size="small" onClick={() => handleCancel(booking.id)}
+                            sx={{ bgcolor: 'error.lighter', '&:hover': { bgcolor: 'error.light' } }}>
                             <Block fontSize="small" />
                           </IconButton>
                         </Tooltip>
                       )}
                       <Tooltip title={t('common.details')}>
-                        <IconButton
-                          color="primary"
-                          size="small"
-                          onClick={() => handleOpenDetails(booking)}
-                          sx={{ bgcolor: 'primary.lighter', '&:hover': { bgcolor: 'primary.light' } }}
-                        >
+                        <IconButton color="primary" size="small" onClick={() => handleOpenDetails(booking)}
+                          sx={{ bgcolor: 'primary.lighter', '&:hover': { bgcolor: 'primary.light' } }}>
                           <Visibility fontSize="small" />
                         </IconButton>
                       </Tooltip>
@@ -386,35 +583,19 @@ const DashboardPage = () => {
             <List sx={{ py: 1 }}>
               <ListItem>
                 <ListItemIcon><Person color="primary" /></ListItemIcon>
-                <ListItemText
-                  primary={t('dashboard.customer')}
-                  secondary={selectedBooking.customerName}
-                  primaryTypographyProps={{ fontWeight: 600 }}
-                />
+                <ListItemText primary={t('dashboard.customer')} secondary={selectedBooking.customerName} primaryTypographyProps={{ fontWeight: 600 }} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><Room color="primary" /></ListItemIcon>
-                <ListItemText
-                  primary={t('dashboard.room_number')}
-                  secondary={selectedBooking.roomNumber}
-                  primaryTypographyProps={{ fontWeight: 600 }}
-                />
+                <ListItemText primary={t('dashboard.room_number')} secondary={selectedBooking.roomNumber} primaryTypographyProps={{ fontWeight: 600 }} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><CalendarToday color="primary" /></ListItemIcon>
-                <ListItemText
-                  primary={t('dashboard.date')}
-                  secondary={new Date(selectedBooking.bookingDate).toLocaleString()}
-                  primaryTypographyProps={{ fontWeight: 600 }}
-                />
+                <ListItemText primary={t('dashboard.date')} secondary={new Date(selectedBooking.bookingDate).toLocaleString()} primaryTypographyProps={{ fontWeight: 600 }} />
               </ListItem>
               <ListItem>
                 <ListItemIcon><AttachMoney color="primary" /></ListItemIcon>
-                <ListItemText
-                  primary={t('dashboard.amount')}
-                  secondary={formatCurrency(selectedBooking.amount)}
-                  primaryTypographyProps={{ fontWeight: 600, color: 'primary.main' }}
-                />
+                <ListItemText primary={t('dashboard.amount')} secondary={formatCurrency(selectedBooking.amount)} primaryTypographyProps={{ fontWeight: 600, color: 'primary.main' }} />
               </ListItem>
               <ListItem>
                 <ListItemIcon>
@@ -423,12 +604,7 @@ const DashboardPage = () => {
                 <ListItemText
                   primary={t('dashboard.status')}
                   secondary={
-                    <Chip
-                      label={selectedBooking.status}
-                      color={getStatusColor(selectedBooking.status)}
-                      size="small"
-                      sx={{ fontWeight: 600, mt: 0.5 }}
-                    />
+                    <Chip label={selectedBooking.status} color={getStatusColor(selectedBooking.status)} size="small" sx={{ fontWeight: 600, mt: 0.5 }} />
                   }
                   primaryTypographyProps={{ fontWeight: 600 }}
                 />

@@ -1,5 +1,6 @@
 package com.hotel.modules.dashboard.controller;
 
+import com.hotel.modules.dashboard.dto.DashboardChartDTO;
 import com.hotel.modules.dashboard.dto.DashboardStatsDTO;
 import com.hotel.modules.dashboard.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -24,4 +26,11 @@ public class DashboardController {
     public ResponseEntity<DashboardStatsDTO> getStats() {
         return ResponseEntity.ok(dashboardService.getStats());
     }
+
+    @Operation(summary = "Lấy dữ liệu biểu đồ Dashboard", description = "Doanh thu, booking, công suất phòng theo ngày")
+    @GetMapping("/charts")
+    public ResponseEntity<DashboardChartDTO> getCharts(@RequestParam(defaultValue = "7") int days) {
+        return ResponseEntity.ok(dashboardService.getChartData(days));
+    }
 }
+
