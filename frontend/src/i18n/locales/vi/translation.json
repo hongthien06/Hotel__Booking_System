@@ -219,7 +219,10 @@
     "pw_not_match": "Mật khẩu xác nhận không khớp!",
     "pw_too_short": "Mật khẩu mới phải có ít nhất 6 ký tự!",
     "pw_success": "Đổi mật khẩu thành công!",
-    "pw_old_wrong": "Mật khẩu cũ không chính xác."
+    "pw_old_wrong": "Mật khẩu cũ không chính xác.",
+    "view_membership_details": "Xem chi tiết hạng thành viên",
+    "membership_invite_title": "Tham gia thành viên",
+    "membership_invite_desc": "Đặt phòng đầu tiên để nhận ngay ưu đãi giảm giá hạng thành viên!"
   },
   "bookings_history": {
     "title": "Tìm theo ngày nhận, trả",

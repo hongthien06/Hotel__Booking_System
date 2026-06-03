@@ -219,7 +219,10 @@
     "pw_not_match": "Confirm password does not match!",
     "pw_too_short": "New password must be at least 6 characters!",
     "pw_success": "Password changed successfully!",
-    "pw_old_wrong": "Old password is incorrect."
+    "pw_old_wrong": "Old password is incorrect.",
+    "view_membership_details": "View membership details",
+    "membership_invite_title": "Join Membership",
+    "membership_invite_desc": "Make your first booking to unlock membership discounts!"
   },
   "bookings_history": {
     "title": "Search by check-in/out date",

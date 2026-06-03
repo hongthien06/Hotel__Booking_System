@@ -9,7 +9,18 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '~': path.resolve(__dirname, './src')
+      '~': path.resolve(__dirname, './src'),
+      'es-toolkit/compat/get': path.resolve(__dirname, './src/shims/es-toolkit/compat/get.js'),
+      'es-toolkit/compat/uniqBy': path.resolve(__dirname, './src/shims/es-toolkit/compat/uniqBy.js'),
+      'es-toolkit/compat/sortBy': path.resolve(__dirname, './src/shims/es-toolkit/compat/sortBy.js'),
+      'es-toolkit/compat/isPlainObject': path.resolve(__dirname, './src/shims/es-toolkit/compat/isPlainObject.js'),
+      'es-toolkit/compat/range': path.resolve(__dirname, './src/shims/es-toolkit/compat/range.js'),
+      'es-toolkit/compat/last': path.resolve(__dirname, './src/shims/es-toolkit/compat/last.js'),
+      'es-toolkit/compat/maxBy': path.resolve(__dirname, './src/shims/es-toolkit/compat/maxBy.js'),
+      'es-toolkit/compat/minBy': path.resolve(__dirname, './src/shims/es-toolkit/compat/minBy.js'),
+      'es-toolkit/compat/omit': path.resolve(__dirname, './src/shims/es-toolkit/compat/omit.js'),
+      'es-toolkit/compat/sumBy': path.resolve(__dirname, './src/shims/es-toolkit/compat/sumBy.js'),
+      'es-toolkit/compat/throttle': path.resolve(__dirname, './src/shims/es-toolkit/compat/throttle.js')
     }
   },
   server: {
