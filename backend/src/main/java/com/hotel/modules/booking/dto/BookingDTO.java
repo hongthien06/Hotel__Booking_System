@@ -36,6 +36,7 @@ public class BookingDTO {
     private BigDecimal grandTotal;     // Tổng cộng (Room + Service) trước giảm giá
     private BigDecimal discountAmount; // Tổng giảm giá (membership + group)
     private BigDecimal finalAmount;    // Thực trả = grandTotal - discountAmount
+    private List<BookingRoomDTO> rooms;
     private List<BookingServiceResponse> bookingServices;
 
     // ── Price breakdown chi tiết ────────────────────────────────────────

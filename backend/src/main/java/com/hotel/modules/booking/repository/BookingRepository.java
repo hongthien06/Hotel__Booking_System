@@ -32,7 +32,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findByStatus(BookingStatus status);
 
-    @Query("SELECT b FROM Booking b WHERE b.room.roomId = :roomId AND b.status IN ('PENDING', 'CONFIRMED', 'CHECKED_IN')")
+    @Query("""
+    SELECT DISTINCT b FROM Booking b
+    LEFT JOIN b.bookingRooms br
+    WHERE (b.room.roomId = :roomId OR br.room.roomId = :roomId)
+    AND b.status IN ('PENDING', 'CONFIRMED', 'CHECKED_IN')
+""")
     List<Booking> findActiveBookingsByRoomId(@Param("roomId") Long roomId);
 
     // Kiểm tra trùng lịch
@@ -62,6 +67,19 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     );
 
     @Query("""
+    SELECT DISTINCT b FROM Booking b
+    LEFT JOIN FETCH b.bookingRooms br
+    LEFT JOIN FETCH br.room r
+    WHERE b.status NOT IN ('CANCELLED', 'REFUNDED')
+    AND b.checkInDate < :checkOut
+    AND b.checkOutDate > :checkIn
+""")
+    List<Booking> findActiveBookingsInRange(
+            @Param("checkIn") LocalDate checkIn,
+            @Param("checkOut") LocalDate checkOut
+    );
+
+    @Query("""
     SELECT b FROM Booking b
     WHERE b.status = 'PENDING'
     AND b.expiresAt < :now
@@ -83,4 +101,3 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.status = :status AND b.checkOutDate = :date")
     long countByStatusAndCheckOutDate(@Param("status") BookingStatus status, @Param("date") LocalDate date);
 }
-

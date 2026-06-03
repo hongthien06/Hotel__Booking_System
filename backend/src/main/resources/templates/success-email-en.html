@@ -183,6 +183,10 @@
       <p class="section-title">Booking Details</p>
       <div class="info-card">
         <div class="info-row">
+          <span class="info-label">Room(s)</span>
+          <span class="info-value" th:text="${booking.roomCode}">101</span>
+        </div>
+        <div class="info-row">
           <span class="info-label">Check-in</span>
           <span class="info-value">[[${booking.dateCheckin}]] · [[${booking.timeCheckin}]]</span>
         </div>

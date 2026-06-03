@@ -4,7 +4,9 @@ import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.auth.repository.UserRepository;
 import com.hotel.modules.booking.dto.BookingDTO;
 import com.hotel.modules.booking.dto.BookingRequest;
+import com.hotel.modules.booking.dto.BookingRoomDTO;
 import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.booking.entity.BookingRoom;
 import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.entity.CancelActor;
 import com.hotel.modules.booking.repository.BookingRepository;
@@ -25,8 +27,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -57,8 +65,11 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public List<BookingDTO> getMyBookings(Long userId, LocalDate checkIn, LocalDate checkOut) {
-        return bookingRepository.findMyBookings(userId, checkIn, checkOut)
-                .stream().map(this::toDTO).toList();
+        List<Booking> bookings = bookingRepository.findMyBookings(userId, checkIn, checkOut);
+        return bookings.stream()
+                .filter(booking -> booking.getMergedIntoBooking() == null)
+                .filter(booking -> !isCancelledChildOfVisibleMultiRoomBooking(booking, bookings))
+                .map(this::toDTO).toList();
     }
 
     // CHECK IN
@@ -74,10 +85,10 @@ public class BookingService {
         }
         booking.setStatus(BookingStatus.CHECKED_IN);
         booking.setActualCheckIn(LocalDateTime.now());
-        Room room = booking.getRoom();
-        room.setStatus(RoomStatus.OCCUPIED);
+        List<Room> rooms = getRoomsForBooking(booking);
+        rooms.forEach(room -> room.setStatus(RoomStatus.OCCUPIED));
         bookingRepository.save(booking);
-        roomRepository.save(room);
+        roomRepository.saveAll(rooms);
         return toDTO(booking);
     }
 
@@ -85,7 +96,9 @@ public class BookingService {
     public List<Long> getCheckedInRoomIds() {
         return bookingRepository.findAll().stream()
                 .filter(b -> b.getStatus() == BookingStatus.CHECKED_IN)
-                .map(b -> b.getRoom().getRoomId()).toList();
+                .flatMap(b -> getRoomsForBooking(b).stream())
+                .map(Room::getRoomId)
+                .distinct().toList();
     }
 
     // CHECK OUT
@@ -98,10 +111,10 @@ public class BookingService {
         }
         booking.setStatus(BookingStatus.CHECKED_OUT);
         booking.setActualCheckout(LocalDateTime.now());
-        Room room = booking.getRoom();
-        room.setStatus(RoomStatus.AVAILABLE);
+        List<Room> rooms = getRoomsForBooking(booking);
+        rooms.forEach(room -> room.setStatus(RoomStatus.AVAILABLE));
         bookingRepository.save(booking);
-        roomRepository.save(room);
+        roomRepository.saveAll(rooms);
         return toDTO(booking);
     }
 
@@ -109,12 +122,18 @@ public class BookingService {
     public List<Long> getCheckedOutRoomIds() {
         return bookingRepository.findAll().stream()
                 .filter(b -> b.getStatus() == BookingStatus.CHECKED_OUT)
-                .map(b -> b.getRoom().getRoomId()).toList();
+                .flatMap(b -> getRoomsForBooking(b).stream())
+                .map(Room::getRoomId)
+                .distinct().toList();
     }
 
     @Transactional(readOnly = true)
     public List<Long> getOccupiedRoomIds(LocalDate checkIn, LocalDate checkOut) {
-        return bookingRepository.findOccupiedRoomIds(checkIn, checkOut);
+        return bookingRepository.findActiveBookingsInRange(checkIn, checkOut).stream()
+                .flatMap(b -> getRoomsForBooking(b).stream())
+                .map(Room::getRoomId)
+                .distinct()
+                .toList();
     }
 
     // Tạo Booking với tính toán giảm giá đầy đủ
@@ -126,17 +145,26 @@ public class BookingService {
             throw new RuntimeException("Ngày checkout phải sau ngày checkin");
         }
 
-        // 2. Kiểm tra phòng AVAILABLE
-        Room room = roomRepository.findById(request.getRoomId())
-                .orElseThrow(() -> new RuntimeException("Phòng không tồn tại"));
-        if (room.getStatus() != RoomStatus.AVAILABLE) {
-            throw new RuntimeException("Phòng không khả dụng");
+        // 2. Gom danh sách phòng trong cùng một đơn
+        List<Long> roomIds = normalizeRoomIds(request);
+        if (roomIds.isEmpty()) {
+            throw new RuntimeException("Vui lòng chọn ít nhất một phòng");
         }
+        List<Room> rooms = roomIds.stream()
+                .map(roomId -> roomRepository.findById(roomId)
+                        .orElseThrow(() -> new RuntimeException("Phòng không tồn tại: " + roomId)))
+                .toList();
 
-        // 3. Kiểm tra trùng lịch
+        // 3. Kiểm tra phòng AVAILABLE và trùng lịch
         List<Long> occupiedRoomIds = getOccupiedRoomIds(request.getCheckIn(), request.getCheckOut());
-        if (occupiedRoomIds.contains(request.getRoomId())) {
-            throw new RuntimeException("Phòng đã được đặt trong khoảng thời gian này");
+        for (Room room : rooms) {
+            if (room.getStatus() != RoomStatus.AVAILABLE) {
+                throw new RuntimeException("Phòng " + room.getRoomNumber() + " không khả dụng");
+            }
+            if (occupiedRoomIds.contains(room.getRoomId())) {
+                throw new RuntimeException("Phòng " + room.getRoomNumber()
+                        + " đã được đặt trong khoảng thời gian này");
+            }
         }
 
         // 4. Lấy user
@@ -147,29 +175,32 @@ public class BookingService {
         short totalNights = (short) Math.max(1,
                 ChronoUnit.DAYS.between(request.getCheckIn(), request.getCheckOut()));
 
-        // 6. Kiểm tra sức chứa
-        int maxGuests = room.getRoomType().getMaxGuests() != null
-                ? room.getRoomType().getMaxGuests() : 2;
+        // 6. Kiểm tra sức chứa theo tổng số phòng trong đơn
+        int maxGuests = rooms.stream()
+                .mapToInt(room -> room.getRoomType().getMaxGuests() != null
+                        ? room.getRoomType().getMaxGuests() : 2)
+                .sum();
         int totalGuests = request.getNumAdults() + request.getNumChildren();
         if (totalGuests > maxGuests) {
             throw new RuntimeException("Tổng số khách (" + totalGuests
-                    + ") vượt quá sức chứa phòng (" + maxGuests + ")");
+                    + ") vượt quá sức chứa các phòng đã chọn (" + maxGuests + ")");
         }
 
-        // 7. Tính giá phòng cơ bản
-        BigDecimal basePrice = room.getRoomType().getPricePerNight();
-
-        // 8. Kiểm tra kỳ lễ
+        // 7. Kiểm tra kỳ lễ
         Optional<HolidayPeriod> holidayOpt = holidayService.findHolidayForDate(request.getCheckIn());
         BigDecimal holidayMultiplier = holidayOpt
                 .map(HolidayPeriod::getPriceMultiplier)
                 .orElse(BigDecimal.ONE);
 
-        // Giá sau điều chỉnh lễ
-        BigDecimal adjustedRoomPrice = basePrice.multiply(holidayMultiplier)
-                .setScale(2, RoundingMode.HALF_UP);
+        List<BigDecimal> adjustedRoomPrices = rooms.stream()
+                .map(room -> room.getRoomType().getPricePerNight()
+                        .multiply(holidayMultiplier)
+                        .setScale(2, RoundingMode.HALF_UP))
+                .toList();
+        BigDecimal adjustedNightlyTotal = adjustedRoomPrices.stream()
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-        // 9. Tính giảm giá thành viên
+        // 8. Tính giảm giá thành viên
         boolean isFirstBooking = false;
         BigDecimal membershipDiscountPct;
 
@@ -181,14 +212,14 @@ public class BookingService {
             membershipDiscountPct = membershipService.getCurrentTierDiscountPct(userId);
         }
 
-        // 10. Tính giảm giá nhóm (≥ 4 khách)
+        // 9. Tính giảm giá nhóm (≥ 4 khách) theo tổng khách của đơn
         BigDecimal groupDiscountPct = BigDecimal.ZERO;
         if (totalGuests >= 4) {
             groupDiscountPct = holidayService.getGroupDiscountPct(totalGuests);
         }
 
-        // 11. Tính tiền
-        BigDecimal roomTotal = adjustedRoomPrice.multiply(BigDecimal.valueOf(totalNights));
+        // 10. Tính tiền trên toàn bộ phòng trong đơn
+        BigDecimal roomTotal = adjustedNightlyTotal.multiply(BigDecimal.valueOf(totalNights));
 
         BigDecimal membershipDiscountAmt = roomTotal
                 .multiply(membershipDiscountPct)
@@ -204,17 +235,17 @@ public class BookingService {
             totalDiscount = roomTotal;
         }
 
-        // 12. Tạo booking — lưu trước để lấy bookingId
+        // 11. Tạo booking — lưu trước để lấy bookingId
         Booking booking = new Booking();
         booking.setBookingCode(UUID.randomUUID().toString().replace("-", "").substring(0, 20));
         booking.setUser(user);
-        booking.setRoom(room);
+        booking.setRoom(rooms.get(0));
         booking.setCheckInDate(request.getCheckIn());
         booking.setCheckOutDate(request.getCheckOut());
         booking.setNumAdults(request.getNumAdults());
         booking.setNumChildren(request.getNumChildren());
         booking.setSpecialRequest(request.getSpecialRequest());
-        booking.setRoomPriceSnapshot(adjustedRoomPrice);  // snapshot giá đã tính lễ
+        booking.setRoomPriceSnapshot(adjustedNightlyTotal);  // tổng snapshot/đêm của cả đơn
         booking.setTotalNights(totalNights);
         booking.setStatus(BookingStatus.PENDING);
         booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
@@ -232,11 +263,154 @@ public class BookingService {
         booking.setGuestCount(totalGuests);
         booking.setDiscountAmount(totalDiscount);
 
+        for (int i = 0; i < rooms.size(); i++) {
+            BookingRoom bookingRoom = new BookingRoom();
+            bookingRoom.setBooking(booking);
+            bookingRoom.setRoom(rooms.get(i));
+            bookingRoom.setRoomPriceSnapshot(adjustedRoomPrices.get(i));
+            bookingRoom.setSortOrder(i);
+            booking.getBookingRooms().add(bookingRoom);
+        }
+
         Booking saved = bookingRepository.saveAndFlush(booking);
         saved.setBookingCode(generateBookingCode(request.getCheckIn(), saved.getBookingId()));
         bookingRepository.save(saved);
 
         return toDTO(saved);
+    }
+
+    @Transactional
+    public BookingDTO mergePendingBookings(List<Long> bookingIds, Long userId) {
+        if (bookingIds == null || bookingIds.isEmpty()) {
+            throw new RuntimeException("Vui lòng chọn ít nhất một booking để thanh toán");
+        }
+
+        List<Long> distinctIds = bookingIds.stream()
+                .filter(id -> id != null && id > 0)
+                .distinct()
+                .toList();
+        if (distinctIds.isEmpty()) {
+            throw new RuntimeException("Danh sách booking không hợp lệ");
+        }
+
+        List<Booking> bookings = bookingRepository.findAllById(distinctIds).stream()
+                .sorted(Comparator.comparing(Booking::getBookingId))
+                .toList();
+        if (bookings.size() != distinctIds.size()) {
+            throw new RuntimeException("Một số booking không tồn tại");
+        }
+
+        Booking primary = bookings.get(0);
+        for (Booking booking : bookings) {
+            if (booking.getUser() == null || !booking.getUser().getUserId().equals(userId)) {
+                throw new RuntimeException("Bạn không có quyền thanh toán một trong các booking đã chọn");
+            }
+            if (booking.getStatus() != BookingStatus.PENDING) {
+                throw new RuntimeException("Chỉ có thể gom các booking đang chờ thanh toán");
+            }
+            if (!booking.getCheckInDate().equals(primary.getCheckInDate())
+                    || !booking.getCheckOutDate().equals(primary.getCheckOutDate())) {
+                throw new RuntimeException("Chỉ có thể gom các phòng có cùng ngày nhận và trả phòng");
+            }
+        }
+
+        Map<Long, RoomSnapshot> snapshots = new LinkedHashMap<>();
+        for (Booking booking : bookings) {
+            for (RoomSnapshot snapshot : getRoomSnapshots(booking)) {
+                snapshots.putIfAbsent(snapshot.room().getRoomId(), snapshot);
+            }
+        }
+        if (snapshots.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy phòng để gom booking");
+        }
+
+        int adults = bookings.stream().mapToInt(b -> b.getNumAdults() != null ? b.getNumAdults() : 0).sum();
+        int children = bookings.stream().mapToInt(b -> b.getNumChildren() != null ? b.getNumChildren() : 0).sum();
+        if (adults > Byte.MAX_VALUE || children > Byte.MAX_VALUE) {
+            throw new RuntimeException("Số lượng khách vượt quá giới hạn cho một đơn");
+        }
+        int totalGuests = adults + children;
+        int maxGuests = snapshots.values().stream()
+                .map(RoomSnapshot::room)
+                .mapToInt(room -> room.getRoomType().getMaxGuests() != null
+                        ? room.getRoomType().getMaxGuests() : 2)
+                .sum();
+        if (totalGuests > maxGuests) {
+            throw new RuntimeException("Tổng số khách (" + totalGuests
+                    + ") vượt quá sức chứa các phòng đã chọn (" + maxGuests + ")");
+        }
+
+        BigDecimal nightlyTotal = snapshots.values().stream()
+                .map(RoomSnapshot::priceSnapshot)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal roomTotal = nightlyTotal.multiply(BigDecimal.valueOf(primary.getTotalNights()));
+
+        BigDecimal membershipDiscountPct = primary.getMembershipDiscountPct() != null
+                ? primary.getMembershipDiscountPct() : BigDecimal.ZERO;
+        BigDecimal membershipDiscountAmt = roomTotal.multiply(membershipDiscountPct)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+        BigDecimal groupDiscountPct = totalGuests >= 4
+                ? holidayService.getGroupDiscountPct(totalGuests)
+                : BigDecimal.ZERO;
+        BigDecimal groupDiscountAmt = roomTotal.multiply(groupDiscountPct)
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+        BigDecimal totalDiscount = membershipDiscountAmt.add(groupDiscountAmt);
+        if (totalDiscount.compareTo(roomTotal) > 0) {
+            totalDiscount = roomTotal;
+        }
+
+        primary.setRoom(snapshots.values().iterator().next().room());
+        primary.setRoomPriceSnapshot(nightlyTotal);
+        primary.setNumAdults((byte) adults);
+        primary.setNumChildren((byte) children);
+        primary.setGuestCount(totalGuests);
+        primary.setMembershipDiscountAmt(membershipDiscountAmt);
+        primary.setGroupDiscountPct(groupDiscountPct);
+        primary.setGroupDiscountAmt(groupDiscountAmt);
+        primary.setDiscountAmount(totalDiscount);
+        primary.setUpdatedAt(LocalDateTime.now());
+
+        Set<Long> primaryRoomIds = primary.getBookingRooms() != null
+                ? primary.getBookingRooms().stream()
+                        .map(br -> br.getRoom().getRoomId())
+                        .collect(java.util.stream.Collectors.toSet())
+                : new LinkedHashSet<>();
+
+        if (primary.getBookingRooms() == null || primary.getBookingRooms().isEmpty()) {
+            BookingRoom bookingRoom = new BookingRoom();
+            bookingRoom.setBooking(primary);
+            bookingRoom.setRoom(primary.getRoom());
+            bookingRoom.setRoomPriceSnapshot(primary.getRoomPriceSnapshot());
+            bookingRoom.setSortOrder(0);
+            primary.getBookingRooms().add(bookingRoom);
+            primaryRoomIds.add(primary.getRoom().getRoomId());
+        }
+
+        int sortOrder = primary.getBookingRooms().size();
+        for (RoomSnapshot snapshot : snapshots.values()) {
+            if (primaryRoomIds.contains(snapshot.room().getRoomId())) {
+                continue;
+            }
+            BookingRoom bookingRoom = new BookingRoom();
+            bookingRoom.setBooking(primary);
+            bookingRoom.setRoom(snapshot.room());
+            bookingRoom.setRoomPriceSnapshot(snapshot.priceSnapshot());
+            bookingRoom.setSortOrder(sortOrder++);
+            primary.getBookingRooms().add(bookingRoom);
+        }
+
+        for (Booking booking : bookings) {
+            if (!booking.getBookingId().equals(primary.getBookingId())) {
+                booking.setStatus(BookingStatus.CANCELLED);
+                booking.setMergedIntoBooking(primary);
+                booking.setUpdatedAt(LocalDateTime.now());
+            }
+        }
+
+        bookingRepository.saveAll(bookings);
+        return toDTO(primary);
     }
 
     // Cancel booking
@@ -281,11 +455,11 @@ public class BookingService {
             default -> throw new RuntimeException("cancelledBy không hợp lệ");
         }
 
-        Room room = booking.getRoom();
-        if (room.getStatus() == RoomStatus.OCCUPIED) {
-            room.setStatus(RoomStatus.AVAILABLE);
-            roomRepository.save(room);
-        }
+        List<Room> rooms = getRoomsForBooking(booking);
+        rooms.stream()
+                .filter(room -> room.getStatus() == RoomStatus.OCCUPIED)
+                .forEach(room -> room.setStatus(RoomStatus.AVAILABLE));
+        roomRepository.saveAll(rooms);
         booking.setUpdatedAt(LocalDateTime.now());
         bookingRepository.save(booking);
         return toDTO(booking);
@@ -317,6 +491,93 @@ public class BookingService {
     private String generateBookingCode(LocalDate checkIn, Long bookingId) {
         String datePart = checkIn.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         return String.format("HB%s-%04d", datePart, bookingId);
+    }
+
+    public BigDecimal calculateRoomTotal(Booking booking) {
+        return getBookingRoomDTOs(booking).stream()
+                .map(BookingRoomDTO::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private List<Long> normalizeRoomIds(BookingRequest request) {
+        Set<Long> ids = new LinkedHashSet<>();
+        if (request.getRoomIds() != null) {
+            request.getRoomIds().stream()
+                    .filter(id -> id != null && id > 0)
+                    .forEach(ids::add);
+        }
+        if (ids.isEmpty() && request.getRoomId() != null) {
+            ids.add(request.getRoomId());
+        }
+        return new ArrayList<>(ids);
+    }
+
+    private List<Room> getRoomsForBooking(Booking booking) {
+        if (booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()) {
+            return booking.getBookingRooms().stream()
+                    .map(BookingRoom::getRoom)
+                    .filter(room -> room != null)
+                    .distinct()
+                    .toList();
+        }
+        return booking.getRoom() != null ? List.of(booking.getRoom()) : List.of();
+    }
+
+    private List<RoomSnapshot> getRoomSnapshots(Booking booking) {
+        if (booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()) {
+            return booking.getBookingRooms().stream()
+                    .map(br -> new RoomSnapshot(br.getRoom(), br.getRoomPriceSnapshot()))
+                    .toList();
+        }
+        if (booking.getRoom() == null) {
+            return List.of();
+        }
+        return List.of(new RoomSnapshot(booking.getRoom(), booking.getRoomPriceSnapshot()));
+    }
+
+    private boolean isCancelledChildOfVisibleMultiRoomBooking(Booking booking, List<Booking> allBookings) {
+        if (booking.getStatus() != BookingStatus.CANCELLED || booking.getRoom() == null) {
+            return false;
+        }
+        Long roomId = booking.getRoom().getRoomId();
+        return allBookings.stream()
+                .filter(other -> !other.getBookingId().equals(booking.getBookingId()))
+                .filter(other -> other.getStatus() != BookingStatus.CANCELLED
+                        && other.getStatus() != BookingStatus.REFUNDED)
+                .filter(other -> other.getCheckInDate().equals(booking.getCheckInDate())
+                        && other.getCheckOutDate().equals(booking.getCheckOutDate()))
+                .anyMatch(other -> getRoomsForBooking(other).stream()
+                        .anyMatch(room -> room.getRoomId().equals(roomId)));
+    }
+
+    private List<BookingRoomDTO> getBookingRoomDTOs(Booking booking) {
+        if (booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()) {
+            return booking.getBookingRooms().stream()
+                    .map(br -> toBookingRoomDTO(br.getRoom(), booking, br.getRoomPriceSnapshot()))
+                    .toList();
+        }
+        if (booking.getRoom() == null) {
+            return List.of();
+        }
+        return List.of(toBookingRoomDTO(booking.getRoom(), booking, booking.getRoomPriceSnapshot()));
+    }
+
+    private BookingRoomDTO toBookingRoomDTO(Room room, Booking booking, BigDecimal priceSnapshot) {
+        BookingRoomDTO dto = new BookingRoomDTO();
+        dto.setRoomId(room.getRoomId());
+        dto.setRoomNumber(room.getRoomNumber());
+        dto.setRoomPriceSnapshot(priceSnapshot != null ? priceSnapshot : BigDecimal.ZERO);
+        dto.setTotalNights(booking.getTotalNights());
+        dto.setSubtotal(dto.getRoomPriceSnapshot()
+                .multiply(BigDecimal.valueOf(booking.getTotalNights() != null ? booking.getTotalNights() : 0)));
+        if (room.getRoomType() != null) {
+            dto.setRoomTypeName(room.getRoomType().getTypeName());
+        }
+        if (room.getHotel() != null) {
+            dto.setHotelName(room.getHotel().getHotelName());
+            dto.setHotelAddress(room.getHotel().getAddress());
+        }
+        return dto;
     }
 
     private BookingDTO toDTO(Booking booking) {
@@ -356,12 +617,13 @@ public class BookingService {
             }
         }
 
+        List<BookingRoomDTO> bookingRooms = getBookingRoomDTOs(booking);
+        dto.setRooms(bookingRooms);
+
         // Tiền phòng (đã nhân holiday multiplier qua snapshot)
-        BigDecimal roomTotal = BigDecimal.ZERO;
-        if (booking.getRoomPriceSnapshot() != null && booking.getTotalNights() != null) {
-            roomTotal = booking.getRoomPriceSnapshot()
-                    .multiply(BigDecimal.valueOf(booking.getTotalNights()));
-        }
+        BigDecimal roomTotal = bookingRooms.stream()
+                .map(BookingRoomDTO::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         dto.setTotalAmount(roomTotal);
 
         // Dịch vụ
@@ -423,4 +685,6 @@ public class BookingService {
 
         return dto;
     }
+
+    private record RoomSnapshot(Room room, BigDecimal priceSnapshot) {}
 }

@@ -9,6 +9,11 @@ export const createBookingApi = async (bookingData) => {
   return response.data;
 };
 
+export const mergePendingBookingsApi = async (bookingIds) => {
+  const response = await axiosInstance.post(`${API_URL}/merge-pending`, { bookingIds });
+  return response.data;
+};
+
 export const getMyBookingsApi = async (checkIn, checkOut) => {
   const params = {};
   if (checkIn) params.checkIn = checkIn;

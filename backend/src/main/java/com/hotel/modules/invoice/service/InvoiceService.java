@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.booking.dto.BookingRoomDTO;
 import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.invoice.dto.request.InvoiceCreateRequest;
 import com.hotel.modules.invoice.dto.request.InvoiceItemRequest;
@@ -23,6 +24,7 @@ import com.hotel.modules.invoice.repository.InvoiceItemRepository;
 import com.hotel.modules.invoice.repository.InvoiceRepository;
 import com.hotel.modules.payment.entity.Payment;
 import com.hotel.modules.payment.repository.PaymentRepository;
+import com.hotel.modules.rooms.entity.Room;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -216,6 +218,7 @@ public class InvoiceService implements IInvoiceService {
                 com.hotel.modules.booking.entity.Booking booking = invoice.getBooking();
                 String holidayName = (booking.getHolidayPeriod() != null)
                                 ? booking.getHolidayPeriod().getNameVi() : null;
+                List<BookingRoomDTO> rooms = getBookingRooms(booking);
                 return InvoiceResponse.builder()
                                 .id(invoice.getId())
                                 .bookingId(booking.getBookingId())
@@ -226,7 +229,9 @@ public class InvoiceService implements IInvoiceService {
                                 .checkOutDate(booking.getCheckOutDate())
                                 .totalNight(booking.getTotalNights())
                                 .numGuests((byte) (booking.getNumAdults() + booking.getNumChildren()))
-                                .address(booking.getRoom().getHotel().getAddress())
+                                .roomCount(rooms.size())
+                                .address(rooms.isEmpty() ? null : rooms.get(0).getHotelAddress())
+                                .rooms(rooms)
                                 .membershipDiscountPct(booking.getMembershipDiscountPct())
                                 .isFirstBookingDiscount(booking.getIsFirstBookingDiscount())
                                 .holidayMultiplier(booking.getHolidayMultiplier())
@@ -242,6 +247,42 @@ public class InvoiceService implements IInvoiceService {
                                 .notes(invoice.getNotes())
                                 .items(items.stream().map(this::toItemResponse).collect(Collectors.toList()))
                                 .build();
+        }
+
+        private List<BookingRoomDTO> getBookingRooms(Booking booking) {
+                if (booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()) {
+                        return booking.getBookingRooms().stream()
+                                        .map(br -> toBookingRoomResponse(
+                                                        br.getRoom(),
+                                                        booking,
+                                                        br.getRoomPriceSnapshot()))
+                                        .collect(Collectors.toList());
+                }
+                if (booking.getRoom() == null) {
+                        return List.of();
+                }
+                return List.of(toBookingRoomResponse(
+                                booking.getRoom(),
+                                booking,
+                                booking.getRoomPriceSnapshot()));
+        }
+
+        private BookingRoomDTO toBookingRoomResponse(Room room, Booking booking, BigDecimal priceSnapshot) {
+                BookingRoomDTO dto = new BookingRoomDTO();
+                dto.setRoomId(room.getRoomId());
+                dto.setRoomNumber(room.getRoomNumber());
+                dto.setRoomPriceSnapshot(priceSnapshot != null ? priceSnapshot : BigDecimal.ZERO);
+                dto.setTotalNights(booking.getTotalNights());
+                dto.setSubtotal(dto.getRoomPriceSnapshot()
+                                .multiply(BigDecimal.valueOf(booking.getTotalNights() != null ? booking.getTotalNights() : 0)));
+                if (room.getRoomType() != null) {
+                        dto.setRoomTypeName(room.getRoomType().getTypeName());
+                }
+                if (room.getHotel() != null) {
+                        dto.setHotelName(room.getHotel().getHotelName());
+                        dto.setHotelAddress(room.getHotel().getAddress());
+                }
+                return dto;
         }
 
 }

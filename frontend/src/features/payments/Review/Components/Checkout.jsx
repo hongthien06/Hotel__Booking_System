@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useBookingContext } from '../../_id'
+import { getBookingTotals } from '../../utils/bookingTotals'
 
 const InfoRow = ({ label, value, bold, valueColor, sub }) => (
   <Box>
@@ -34,6 +35,7 @@ const Checkout = () => {
   const { t } = useTranslation()
   const [openPrice, setOpenPrice] = useState(true)
   const { room, booking, form } = useBookingContext() || {}
+  const totals = getBookingTotals(booking, room)
 
   const nights = booking?.totalNights ?? (form
     ? Math.max(1, Math.round((new Date(form.checkOut) - new Date(form.checkIn)) / 86400000))
@@ -42,10 +44,9 @@ const Checkout = () => {
   const numChildren = booking?.numChildren ?? form?.numChildren ?? 0
   const totalPeople = Number(numAdults) + Number(numChildren)
 
-  const pricePerNight = Number(booking?.roomPriceSnapshot || room?.pricePerNight || room?.priceDay || 0)
-  const roomTotal = Number(booking?.totalAmount || pricePerNight * nights)
-  const taxFee = Math.round(roomTotal * 0.1)
-  const grandTotal = roomTotal + taxFee
+  const roomTotal = totals.roomTotal
+  const taxFee = totals.taxFee
+  const grandTotal = totals.originalTotal
 
   // Membership / group / holiday discount fields
   const holidayMultiplier = Number(booking?.holidayMultiplier || 1)
@@ -55,11 +56,8 @@ const Checkout = () => {
   const groupDiscountAmt = Number(booking?.groupDiscountAmt || 0)
   const groupDiscountPct = Number(booking?.groupDiscountPct || 0)
   const isFirstBooking = booking?.isFirstBookingDiscount
-  const totalDiscount = membershipDiscountAmt + groupDiscountAmt
-  const finalAmount = Number(booking?.finalAmount || grandTotal - totalDiscount)
-
-  const roomTypeName = booking?.roomTypeName || room?.roomTypeName || 'Standard'
-  const roomNumber = booking?.roomNumber || room?.roomNumber || ''
+  const totalDiscount = Number(booking?.discountAmount || membershipDiscountAmt + groupDiscountAmt)
+  const finalAmount = Math.max(0, grandTotal - totalDiscount)
 
   const nightUnit = t('payment.night_unit')
   const guestUnit = t('payment.guest_unit')
@@ -106,8 +104,16 @@ const Checkout = () => {
               <InfoRow
                 label={t('payment.room_price')}
                 value={formatVND(roomTotal)}
-                sub={`(${nights} ${nightUnit}) ${roomTypeName}${roomNumber ? ` – ${t('payment.room')} ` + roomNumber : ''} × ${formatVND(pricePerNight)}/${nightUnit}`}
+                sub={`${totals.rooms.length} ${t('payment.room').toLowerCase()} · (${nights} ${nightUnit})`}
               />
+              {totals.rooms.map(item => (
+                <InfoRow
+                  key={item.roomId}
+                  label={`${t('payment.room')} ${item.roomNumber}`}
+                  value={formatVND(item.subtotal)}
+                  sub={`${item.roomTypeName || 'Standard'} · ${item.hotelName || ''}${item.hotelAddress ? ` · ${item.hotelAddress}` : ''} · ${formatVND(item.roomPriceSnapshot)}/${nightUnit}`}
+                />
+              ))}
 
               {/* Holiday multiplier badge */}
               {holidayMultiplier > 1 && (

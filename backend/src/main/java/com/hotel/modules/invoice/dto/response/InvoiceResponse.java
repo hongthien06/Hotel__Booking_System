@@ -3,6 +3,8 @@ package com.hotel.modules.invoice.dto.response;
 import lombok.Builder;
 import lombok.Data;
 
+import com.hotel.modules.booking.dto.BookingRoomDTO;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +24,9 @@ public class InvoiceResponse {
     private LocalDate checkOutDate;
     private Short totalNight;
     private Byte numGuests;
+    private Integer roomCount;
     private String address;
+    private List<BookingRoomDTO> rooms;
 
     private String membershipTierName;   // hạng thành viên áp dụng
     private BigDecimal membershipDiscountPct;

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import static com.hotel.modules.booking.entity.CancelActor.SYSTEM;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -54,6 +55,7 @@ public class PaymentService implements IPaymentService {
                     + " đã không còn ở trạng thái PENDING (hiện tại: " + booking.getStatus()
                     + "). Vui lòng tạo booking mới để thanh toán.");
         }
+        BigDecimal payableAmount = calculatePayableAmount(booking);
 
         // Xử lý retry: nếu đã có payment cho booking này thì tái sử dụng record cũ
         // (DB có unique constraint booking_id trên bảng Payments)
@@ -65,7 +67,7 @@ public class PaymentService implements IPaymentService {
             // PENDING hết hạn hoặc FAILED → tạo transactionId mới để gateway chấp nhận
             payment.setTransactionId(generateTransactionId());
             payment.setGateway(request.getGateway());
-            payment.setAmount(request.getAmount());
+            payment.setAmount(payableAmount);
             payment.setStatus(PaymentStatus.PENDING);
             payment.setIpAddress(ipAddress);
             payment.setLanguage(request.getLanguage() != null ? request.getLanguage() : "vi");
@@ -73,7 +75,7 @@ public class PaymentService implements IPaymentService {
         } else {
             payment = Payment.builder()
                     .booking(booking)
-                    .amount(request.getAmount())
+                    .amount(payableAmount)
                     .transactionId(generateTransactionId())
                     .gateway(request.getGateway())
                     .status(PaymentStatus.PENDING)
@@ -133,6 +135,26 @@ public class PaymentService implements IPaymentService {
                 .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         String uuid = UUID.randomUUID().toString().substring(0, 8);
         return "TXN_" + time + "_" + uuid;
+    }
+
+    private BigDecimal calculatePayableAmount(Booking booking) {
+        BigDecimal roomTotal = bookingService.calculateRoomTotal(booking);
+        BigDecimal serviceTotal = BigDecimal.ZERO;
+        if (booking.getBookingServices() != null) {
+            serviceTotal = booking.getBookingServices().stream()
+                    .map(bs -> bs.getSubtotal() != null ? bs.getSubtotal()
+                            : (bs.getUnitPriceSnap() != null && bs.getQuantity() != null
+                                    ? bs.getUnitPriceSnap().multiply(BigDecimal.valueOf(bs.getQuantity()))
+                                    : BigDecimal.ZERO))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+        BigDecimal subtotal = roomTotal.add(serviceTotal);
+        BigDecimal tax = subtotal.multiply(new BigDecimal("10.00"))
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal discount = booking.getDiscountAmount() != null
+                ? booking.getDiscountAmount() : BigDecimal.ZERO;
+        BigDecimal payable = subtotal.add(tax).subtract(discount);
+        return payable.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
     }
 
     @Override
@@ -210,16 +232,36 @@ public class PaymentService implements IPaymentService {
                 return;
             }
 
-            // line item: phòng
-            Room room = booking.getRoom();
-            InvoiceItemRequest roomItem = new InvoiceItemRequest();
-            roomItem.setItemType("ROOM");
-            roomItem.setDescription("Phòng " + room.getRoomNumber()
-                    + " x " + booking.getTotalNights() + " đêm");
-            roomItem.setQuantity(booking.getTotalNights());
-            roomItem.setUnitPrice(booking.getRoomPriceSnapshot());
-
-            List<InvoiceItemRequest> items = new java.util.ArrayList<>(List.of(roomItem));
+            // line items: phòng
+            List<InvoiceItemRequest> items = new java.util.ArrayList<>();
+            if (booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()) {
+                booking.getBookingRooms().forEach(br -> {
+                    Room room = br.getRoom();
+                    InvoiceItemRequest roomItem = new InvoiceItemRequest();
+                    roomItem.setItemType("ROOM");
+                    String roomType = room.getRoomType() != null ? room.getRoomType().getTypeName() : "Phòng";
+                    String hotelName = room.getHotel() != null ? room.getHotel().getHotelName() : "";
+                    String hotelAddress = room.getHotel() != null ? room.getHotel().getAddress() : "";
+                    roomItem.setDescription(roomType + " - Phòng " + room.getRoomNumber()
+                            + " - " + hotelName + " - " + hotelAddress
+                            + " x " + booking.getTotalNights() + " đêm");
+                    roomItem.setQuantity(booking.getTotalNights());
+                    roomItem.setUnitPrice(br.getRoomPriceSnapshot());
+                    items.add(roomItem);
+                });
+            } else {
+                Room room = booking.getRoom();
+                InvoiceItemRequest roomItem = new InvoiceItemRequest();
+                roomItem.setItemType("ROOM");
+                String hotelName = room.getHotel() != null ? room.getHotel().getHotelName() : "";
+                String hotelAddress = room.getHotel() != null ? room.getHotel().getAddress() : "";
+                roomItem.setDescription("Phòng " + room.getRoomNumber()
+                        + " - " + hotelName + " - " + hotelAddress
+                        + " x " + booking.getTotalNights() + " đêm");
+                roomItem.setQuantity(booking.getTotalNights());
+                roomItem.setUnitPrice(booking.getRoomPriceSnapshot());
+                items.add(roomItem);
+            }
 
             // line items: dịch vụ thêm
             for (com.hotel.modules.booking_services.entity.BookingService bs : booking.getBookingServices()) {

@@ -16,6 +16,7 @@ public class EmailRequest {
     private String customerName;
     private String customerPhone;
     private String codeBooking;
+    private String roomCode;
     private String dateBooking;
     private String dateCheckin;
     private String timeCheckin;

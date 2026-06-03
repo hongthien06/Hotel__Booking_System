@@ -185,6 +185,10 @@
       <p class="section-title">Thông tin đặt phòng</p>
       <div class="info-card">
         <div class="info-row">
+          <span class="info-label">Phòng</span>
+          <span class="info-value" th:text="${booking.roomCode}">101</span>
+        </div>
+        <div class="info-row">
           <span class="info-label">Nhận phòng</span>
           <span class="info-value">[[${booking.dateCheckin}]] · [[${booking.timeCheckin}]]</span>
         </div>

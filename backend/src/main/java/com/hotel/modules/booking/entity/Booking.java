@@ -37,6 +37,11 @@ public class Booking {
     @JoinColumn(name = "room_id", nullable = false)
     private Room room;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<BookingRoom> bookingRooms = new ArrayList<>();
+
     // check_in_date DATE NOT NULL
     @Column(name = "check_in_date", nullable = false)
     private LocalDate checkInDate; // check_in_date — Ngày dự kiến (khách chọn)
@@ -117,6 +122,11 @@ public class Booking {
     // total discount = membershipDiscountAmt + groupDiscountAmt (kept for invoice compat)
     @Column(name = "discount_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal discountAmount = BigDecimal.ZERO;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "merged_into_booking_id")
+    private Booking mergedIntoBooking;
 
     @JsonIgnore
     @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)

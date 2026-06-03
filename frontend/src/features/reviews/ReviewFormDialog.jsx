@@ -20,6 +20,9 @@ const ReviewFormDialog = ({ open, onClose, booking, onReviewSubmitted }) => {
     comment: ''
   })
   const [loading, setLoading] = useState(false)
+  const roomLabel = Array.isArray(booking?.rooms) && booking.rooms.length > 0
+    ? booking.rooms.map(room => `#${room.roomNumber}`).join(', ')
+    : booking?.roomNumber
 
   const handleSubmit = async () => {
     if (!form.ratingOverall) {
@@ -71,7 +74,7 @@ const ReviewFormDialog = ({ open, onClose, booking, onReviewSubmitted }) => {
               {t('reviews.write_review')}
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.9 }}>
-              {t('reviews.room')} {booking?.roomNumber} · {booking?.bookingCode}
+              {t('reviews.room')} {roomLabel} · {booking?.bookingCode}
             </Typography>
           </Box>
         </Box>

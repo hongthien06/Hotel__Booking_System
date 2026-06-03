@@ -8,17 +8,16 @@ import { useBookingContext } from '../../_id'
 import Discount from './Discount/Discount'
 import Brand from './Info/Brand'
 import PaymentMethod from './Info/PaymentMethod'
+import { getBookingTotals } from '../../utils/bookingTotals'
 
 const Info = () => {
   const [selectedMethod, setSelectedMethod] = useState('VNPAY')
-  const { booking, voucherData } = useBookingContext() || {}
+  const { booking, room, voucherData } = useBookingContext() || {}
   const { t, i18n } = useTranslation()
 
   const handleNext = async () => {
     const bookingCode = booking?.bookingCode
-    const amount = voucherData
-      ? Number(voucherData.finalAmount)
-      : Number(booking?.grandTotal || booking?.totalAmount || 0)
+    const amount = getBookingTotals(booking, room, voucherData).finalTotal
 
     const payload = {
       bookingCode,

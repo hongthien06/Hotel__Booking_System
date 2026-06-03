@@ -52,6 +52,7 @@ public class SecurityConfig {
                         .requestMatchers("/files/**").hasAnyRole("ADMIN", "MANAGER")
                         .requestMatchers("/bookings/my-bookings").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.POST, "/bookings").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
+                        .requestMatchers(HttpMethod.POST, "/bookings/merge-pending").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
                         .requestMatchers(HttpMethod.PUT, "/bookings/*/cancel").hasAnyRole("CUSTOMER", "ADMIN", "MANAGER")
                         .requestMatchers("/bookings/occupied-rooms").permitAll()
                         .requestMatchers(GET, "/bookings/room/*/booked-dates").permitAll()

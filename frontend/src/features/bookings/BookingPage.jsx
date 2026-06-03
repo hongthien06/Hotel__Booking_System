@@ -405,8 +405,9 @@ const OffersSection = ({ membership, lang, onOpenMembership }) => {
 }
 
 /* ─── BookingDialog ────────────────────────────────────── */
-const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess }) => {
+const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, onSuccess }) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const theme = useTheme()
   const isMobileDialog = useMediaQuery(theme.breakpoints.down('sm'))
   const [form, setForm] = useState({
@@ -458,11 +459,15 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
     })
   }, [open, searchParams])
 
-  if (!room) return null
+  const selectedRooms = rooms.length > 0 ? rooms : (room ? [room] : [])
+  if (!room && selectedRooms.length === 0) return null
 
-  const roomName = isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`
+  const roomName = selectedRooms.length > 1
+    ? `${selectedRooms.length} ${t('payment.room').toLowerCase()}`
+    : (isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`)
   const roomType = isMock ? room.type : (room.typeName || 'Standard')
-  const roomPrice = isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0)
+  const roomPrice = selectedRooms.reduce((sum, item) =>
+    sum + Number(isMock ? item.price : (item.pricePerNight || item.priceDay || 0)), 0)
   const nights = nightsBetween(form.checkIn, form.checkOut)
 
   const total = roomPrice * nights
@@ -475,15 +480,18 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
     setSubmitting(true)
     setError('')
     try {
-      await createBookingApi({
-        roomId: room.roomId || room.id,
+      const roomIds = selectedRooms.map(item => item.roomId || item.id)
+      const booking = await createBookingApi({
+        roomId: roomIds[0],
+        roomIds,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
         numAdults: Number(form.numAdults),
         numChildren: Number(form.numChildren),
         specialRequest: form.specialRequest
       })
-      onSuccess()
+      onSuccess?.(booking)
+      navigate('/booking-history')
     } catch (err) {
       const data = err?.response?.data
       const msg = data?.error || data?.message || (typeof data === 'string' ? data : t('common.error'))
@@ -509,6 +517,11 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
           <Box sx={{ flex: 1 }}>
             <Chip label={t(roomType)} size="small" sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, mb: 0.5 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{roomName}</Typography>
+            {selectedRooms.length > 1 && (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                {selectedRooms.map(item => `#${item.roomNumber}`).join(', ')}
+              </Typography>
+            )}
             <Typography variant="body2" color="text.secondary">
               {formatCurrency(roomPrice, 'vi')} {t('rooms.per_night')}
             </Typography>
@@ -731,6 +744,7 @@ const BookingPage = () => {
   const [detailOpen, setDetailOpen] = useState(false)
   const [selectedRoom, setSelectedRoom] = useState(null)
   const [selectedIsMock, setSelectedIsMock] = useState(false)
+  const [selectedRoomsForOrder, setSelectedRoomsForOrder] = useState([])
   const [snackbar, setSnackbar] = useState({ open: false, msg: '', severity: 'success' })
   const destScrollRef = useRef(null)
   const [destCanLeft, setDestCanLeft] = useState(false)
@@ -1057,9 +1071,29 @@ const BookingPage = () => {
       setLoginPromptOpen(true)
       return
     }
+    setSelectedRoomsForOrder([])
     setSelectedRoom(room)
     setSelectedIsMock(isMock)
     setDialogOpen(true)
+  }
+  const toggleRoomSelection = (room) => {
+    const id = room.roomId || room.id
+    setSelectedRoomsForOrder(prev =>
+      prev.some(item => (item.roomId || item.id) === id)
+        ? prev.filter(item => (item.roomId || item.id) !== id)
+        : [...prev, room]
+    )
+  }
+  const openSelectedRoomsBooking = () => {
+    if (!isAuthenticated) {
+      setLoginPromptOpen(true)
+      return
+    }
+    if (selectedRoomsForOrder.length === 0) return
+    setSelectedRoom(selectedRoomsForOrder[0])
+    setSelectedIsMock(false)
+    setDialogOpen(true)
+    setDetailOpen(false)
   }
 
   const openDetail = (room, isMock) => {
@@ -1070,6 +1104,7 @@ const BookingPage = () => {
 
   const handleBookingSuccess = () => {
     setDialogOpen(false)
+    setSelectedRoomsForOrder([])
     setSnackbar({ open: true, msg: t('booking_page.booking_success'), severity: 'success' })
     // refresh section lists after a booking — availability / deals may change
     fetchSections()
@@ -1108,7 +1143,7 @@ const BookingPage = () => {
   }
 
   /* ── Room Card ─────────────────────────────────────────── */
-  const RoomCard = ({ room, isMock, oldPrice, showBookButton = true }) => {
+  const RoomCard = ({ room, isMock, oldPrice, showBookButton = true, selectable = false, selected = false, onToggleSelect }) => {
     const { t, i18n } = useTranslation()
 
     // Tạo data đánh giá từ MOCK_ROOMS để tránh bị trùng nhau nếu không phải isMock
@@ -1122,11 +1157,30 @@ const BookingPage = () => {
         onClick={() => openDetail(room, isMock)}
         sx={{
           cursor: 'pointer',
+          position: 'relative',
           borderRadius: 3, overflow: 'hidden', transition: 'all 0.3s',
           boxShadow: 1,
+          border: selected ? `2px solid ${PC}` : '2px solid transparent',
           '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
         }}
       >
+        {selectable && (
+          <Checkbox
+            checked={selected}
+            onClick={(e) => { e.stopPropagation(); onToggleSelect?.(room) }}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 2,
+              bgcolor: 'rgba(255,255,255,0.9)',
+              borderRadius: '50%',
+              color: PC,
+              '&.Mui-checked': { color: PC },
+              '&:hover': { bgcolor: 'white' }
+            }}
+          />
+        )}
         {isMock
           ? <Box sx={{ height: 160, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
@@ -1765,6 +1819,33 @@ const BookingPage = () => {
                     {t('booking_page.back_to_home')}
                   </Button>
                 </Box>
+                {rooms.length > 0 && (
+                  <Box sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 2,
+                    p: 2,
+                    borderRadius: 3,
+                    bgcolor: '#fff',
+                    border: '1px solid #f3d1dc',
+                    gap: 2,
+                    flexWrap: 'wrap'
+                  }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700, color: PC }}>
+                      Đã chọn {selectedRoomsForOrder.length} phòng
+                      {selectedRoomsForOrder.length > 0 ? `: ${selectedRoomsForOrder.map(r => `#${r.roomNumber}`).join(', ')}` : ''}
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      disabled={selectedRoomsForOrder.length === 0}
+                      onClick={openSelectedRoomsBooking}
+                      sx={{ borderRadius: 2, bgcolor: PC, color: '#fff', fontWeight: 800 }}
+                    >
+                      Đặt các phòng đã chọn
+                    </Button>
+                  </Box>
+                )}
 
                 {loading ? (
                   <Grid container spacing={3}>
@@ -1778,7 +1859,14 @@ const BookingPage = () => {
                   <Grid container spacing={3}>
                     {rooms.map(r => (
                       <Grid item xs={12} sm={6} md={3} key={r.id || r.roomId}>
-                        <RoomCard room={r} isMock={false} showBookButton={false} />
+                        <RoomCard
+                          room={r}
+                          isMock={false}
+                          showBookButton
+                          selectable
+                          selected={selectedRoomsForOrder.some(item => (item.roomId || item.id) === (r.roomId || r.id))}
+                          onToggleSelect={toggleRoomSelection}
+                        />
                       </Grid>
                     ))}
                   </Grid>
@@ -1814,6 +1902,7 @@ const BookingPage = () => {
       <BookingDialog
         open={dialogOpen}
         room={selectedRoom}
+        rooms={selectedRoomsForOrder.length > 0 ? selectedRoomsForOrder : []}
         isMock={selectedIsMock}
         searchParams={params}
         onClose={() => setDialogOpen(false)}

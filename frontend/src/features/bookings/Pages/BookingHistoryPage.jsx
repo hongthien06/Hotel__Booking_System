@@ -11,6 +11,7 @@ import {
   Box,
   Button,
   Card, CardContent, CardMedia,
+  Checkbox,
   Divider,
   Grid,
   IconButton,
@@ -21,8 +22,9 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { cancelBookingApi, getMyBookingsApi } from '../../../shared/api/bookingApi'
+import { cancelBookingApi, getMyBookingsApi, mergePendingBookingsApi } from '../../../shared/api/bookingApi'
 import { formatCurrency, formatDate } from '../../../shared/utils/formatters'
+import { getBookingRooms } from '../../payments/utils/bookingTotals'
 import ReviewFormDialog from '../../reviews/ReviewFormDialog'
 
 const PC = '#c0496e' // Tương ứng với primary.dark hoặc primary.contrastText trong theme (Màu hồng đậm chủ đạo)
@@ -36,6 +38,8 @@ const BookingHistoryPage = () => {
   const [error, setError] = useState('')
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
   const [selectedBookingForReview, setSelectedBookingForReview] = useState(null)
+  const [selectedPendingIds, setSelectedPendingIds] = useState([])
+  const [mergingPayment, setMergingPayment] = useState(false)
 
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
@@ -72,14 +76,16 @@ const BookingHistoryPage = () => {
   }
 
   const handlePayment = (booking) => {
+    const rooms = getBookingRooms(booking)
+    const primaryRoom = rooms[0] || {}
     navigate('/payment?step=1', {
       state: {
         booking,
         room: {
-          roomId: booking.roomId,
-          roomNumber: booking.roomNumber,
-          typeName: booking.roomTypeName,
-          pricePerNight: booking.grandTotal / nightsBetween(booking.checkInDate, booking.checkOutDate)
+          roomId: primaryRoom.roomId || booking.roomId,
+          roomNumber: primaryRoom.roomNumber || booking.roomNumber,
+          typeName: primaryRoom.roomTypeName || booking.roomTypeName,
+          pricePerNight: primaryRoom.roomPriceSnapshot || booking.grandTotal / nightsBetween(booking.checkInDate, booking.checkOutDate)
         },
         form: {
           checkIn: booking.checkInDate,
@@ -91,6 +97,45 @@ const BookingHistoryPage = () => {
     })
   }
 
+  const togglePendingBooking = (bookingId) => {
+    setSelectedPendingIds(prev =>
+      prev.includes(bookingId)
+        ? prev.filter(id => id !== bookingId)
+        : [...prev, bookingId]
+    )
+  }
+
+  const handleSelectedPayment = async () => {
+    if (selectedPendingIds.length === 0) return
+    setMergingPayment(true)
+    try {
+      if (selectedPendingIds.length === 1) {
+        const booking = bookings.find(item => item.bookingId === selectedPendingIds[0])
+        if (booking) handlePayment(booking)
+        return
+      }
+      const mergedBooking = await mergePendingBookingsApi(selectedPendingIds)
+      setSelectedPendingIds([])
+      navigate('/payment?step=1', {
+        state: {
+          booking: mergedBooking,
+          room: mergedBooking.rooms?.[0],
+          form: {
+            checkIn: mergedBooking.checkInDate,
+            checkOut: mergedBooking.checkOutDate,
+            numAdults: mergedBooking.numAdults || 2,
+            numChildren: mergedBooking.numChildren || 0
+          }
+        }
+      })
+    } catch (err) {
+      const msg = err.response?.data?.message || err.response?.data?.error || 'Không thể gom các booking đã chọn'
+      alert(msg)
+    } finally {
+      setMergingPayment(false)
+    }
+  }
+
   useEffect(() => {
     fetchBookings()
   }, [])
@@ -98,6 +143,12 @@ const BookingHistoryPage = () => {
   const handleSearch = () => {
     fetchBookings()
   }
+
+  useEffect(() => {
+    setSelectedPendingIds(prev =>
+      prev.filter(id => bookings.some(booking => booking.bookingId === id && booking.status === 'PENDING'))
+    )
+  }, [bookings])
 
 
 
@@ -258,6 +309,34 @@ const BookingHistoryPage = () => {
         {/* Results Grid - Centered items */}
         {error && <Alert severity="error" sx={{ mb: 4, borderRadius: 2 }}>{error}</Alert>}
 
+        {bookings.some(booking => booking.status === 'PENDING') && (
+          <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 3,
+            p: 2,
+            borderRadius: 3,
+            bgcolor: '#fff',
+            border: `1px solid ${PC_LIGHT}`,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.05)',
+            gap: 2,
+            flexWrap: 'wrap'
+          }}>
+            <Typography sx={{ color: PC, fontWeight: 800 }}>
+              Đã chọn {selectedPendingIds.length} phòng chờ thanh toán
+            </Typography>
+            <Button
+              variant="contained"
+              disabled={selectedPendingIds.length === 0 || mergingPayment}
+              onClick={handleSelectedPayment}
+              sx={{ borderRadius: 2, bgcolor: PC, color: '#fff', fontWeight: 800, px: 3 }}
+            >
+              {mergingPayment ? 'Đang xử lý...' : 'Thanh toán các phòng đã chọn'}
+            </Button>
+          </Box>
+        )}
+
         <Grid container spacing={3} justifyContent="center">
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
@@ -280,6 +359,10 @@ const BookingHistoryPage = () => {
           ) : (
             bookings.map((booking, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={booking.bookingId || index}>
+                {(() => {
+                  const rooms = getBookingRooms(booking)
+                  const primaryRoom = rooms[0] || {}
+                  return (
                 <Card sx={{
                   height: '100%',
                   bgcolor: '#fff',
@@ -292,6 +375,23 @@ const BookingHistoryPage = () => {
                     boxShadow: '0 12px 30px rgba(0,0,0,0.1)'
                   }
                 }}>
+                  {booking.status === 'PENDING' && (
+                    <Checkbox
+                      checked={selectedPendingIds.includes(booking.bookingId)}
+                      onClick={(e) => { e.stopPropagation(); togglePendingBooking(booking.bookingId) }}
+                      sx={{
+                        position: 'absolute',
+                        top: 12,
+                        left: 12,
+                        zIndex: 3,
+                        bgcolor: 'rgba(255,255,255,0.95)',
+                        borderRadius: '50%',
+                        color: PC,
+                        '&.Mui-checked': { color: PC },
+                        '&:hover': { bgcolor: '#fff' }
+                      }}
+                    />
+                  )}
                   {/* Status Overlay */}
                   <Box sx={{
                     position: 'absolute',
@@ -317,11 +417,40 @@ const BookingHistoryPage = () => {
 
                   <CardContent sx={{ p: 2.5 }}>
                     <Typography variant="caption" sx={{ color: PC, fontWeight: 700, mb: 0.5, display: 'block' }}>
-                      {booking.roomTypeName || 'Standard'}
+                      {rooms.length > 1 ? `${rooms.length} phòng` : (primaryRoom.roomTypeName || booking.roomTypeName || 'Standard')}
                     </Typography>
                     <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1, lineHeight: 1.2, color: '#333' }}>
-                      {t('booking_page.room') || 'Phòng'} {booking.roomNumber}
+                      {rooms.length > 1
+                        ? rooms.map(room => `#${room.roomNumber}`).join(', ')
+                        : `${t('booking_page.room') || 'Phòng'} ${primaryRoom.roomNumber || booking.roomNumber}`}
                     </Typography>
+                    {rooms.length > 1 && (
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75, mb: 1.5 }}>
+                        {rooms.map((room, idx) => (
+                          <Box key={room.roomId || idx} sx={{ p: 1, borderRadius: 2, bgcolor: '#fafafa', border: '1px solid #eee' }}>
+                            <Typography variant="caption" sx={{ fontWeight: 800, color: '#444', display: 'block' }}>
+                              #{room.roomNumber} · {room.roomTypeName || 'Standard'}
+                            </Typography>
+                            {room.hotelName && (
+                              <Typography variant="caption" color="text.secondary" display="block">{room.hotelName}</Typography>
+                            )}
+                            {room.hotelAddress && (
+                              <Typography variant="caption" color="text.secondary" display="block">{room.hotelAddress}</Typography>
+                            )}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                    {rooms.length <= 1 && (primaryRoom.hotelName || primaryRoom.hotelAddress) && (
+                      <Box sx={{ mb: 1.5 }}>
+                        {primaryRoom.hotelName && (
+                          <Typography variant="caption" color="text.secondary" display="block">{primaryRoom.hotelName}</Typography>
+                        )}
+                        {primaryRoom.hotelAddress && (
+                          <Typography variant="caption" color="text.secondary" display="block">{primaryRoom.hotelAddress}</Typography>
+                        )}
+                      </Box>
+                    )}
 
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2, color: '#888' }}>
                       <ConfirmationNumber sx={{ fontSize: 14 }} />
@@ -403,6 +532,8 @@ const BookingHistoryPage = () => {
                     )}
                   </CardContent>
                 </Card>
+                  )
+                })()}
               </Grid>
             ))
           )}
@@ -423,4 +554,3 @@ const BookingHistoryPage = () => {
 }
 
 export default BookingHistoryPage
-

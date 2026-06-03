@@ -2,6 +2,7 @@ package com.hotel.modules.booking.controller;
 
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.booking.dto.BookingRequest;
+import com.hotel.modules.booking.dto.MergeBookingsRequest;
 import com.hotel.modules.booking.service.BookingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -76,6 +77,14 @@ public class BookingController {
         Long userId = ((User) userDetails).getUserId();
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bookingService.createBooking(request, userId));
+    }
+
+    @PostMapping("/merge-pending")
+    public ResponseEntity<?> mergePendingBookings(
+            @RequestBody MergeBookingsRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        Long userId = ((User) userDetails).getUserId();
+        return ResponseEntity.ok(bookingService.mergePendingBookings(request.getBookingIds(), userId));
     }
 
     // User hủy

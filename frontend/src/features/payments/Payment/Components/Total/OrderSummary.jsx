@@ -5,6 +5,7 @@ import {
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import { useBookingContext } from '../../../_id'
+import { getBookingTotals } from '../../../utils/bookingTotals'
 
 const formatVND = (n) =>
   new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
@@ -12,6 +13,7 @@ const formatVND = (n) =>
 const OrderSummary = () => {
   const { t } = useTranslation()
   const { booking, room, form, voucherData } = useBookingContext() || {}
+  const totals = getBookingTotals(booking, room, voucherData)
 
   const bookingCode = booking?.bookingCode || '—'
   const nights = booking?.totalNights ?? (form
@@ -19,22 +21,13 @@ const OrderSummary = () => {
     : 1)
   const numAdults = booking?.numAdults ?? form?.numAdults ?? 2
   const numChildren = booking?.numChildren ?? form?.numChildren ?? 0
-  const pricePerNight = Number(booking?.roomPriceSnapshot || room?.pricePerNight || room?.priceDay || 0)
-  const roomTotal = Number(booking?.totalAmount || pricePerNight * nights)
-  const serviceTotal = Number(booking?.serviceTotal || 0)
-  const taxFee = Math.round((roomTotal + serviceTotal) * 0.1)
-  
-  const roomTypeName = booking?.roomTypeName || room?.roomTypeName || 'Standard'
-  const roomNumber = booking?.roomNumber || room?.roomNumber || ''
+  const roomTotal = totals.roomTotal
+  const serviceTotal = totals.serviceTotal
+  const taxFee = totals.taxFee
 
-  const membershipDiscountAmt = Number(booking?.membershipDiscountAmt || 0)
-  const groupDiscountAmt = Number(booking?.groupDiscountAmt || 0)
-  const baseDiscount = membershipDiscountAmt + groupDiscountAmt
-
-  const originalTotal = roomTotal + serviceTotal + taxFee
-  const voucherDiscount = voucherData ? Number(voucherData.discountAmount) : 0
-  const discountAmount = voucherDiscount + baseDiscount
-  const finalTotal = Math.max(0, originalTotal - discountAmount)
+  const originalTotal = totals.originalTotal
+  const discountAmount = totals.discountAmount
+  const finalTotal = totals.finalTotal
 
   const nightUnit = t('payment.night_unit')
   const guestUnit = t('payment.guest_unit')
@@ -44,8 +37,13 @@ const OrderSummary = () => {
     {
       label: `${t('payment.room_fee')} (${nights} ${nightUnit})`,
       value: formatVND(roomTotal),
-      sub: `${roomTypeName}${roomNumber ? ` – ${t('payment.room')} ` + roomNumber : ''} · ${formatVND(pricePerNight)}/${nightUnit}`
+      sub: `${totals.rooms.length} ${t('payment.room').toLowerCase()}`
     },
+    ...totals.rooms.map(item => ({
+      label: `${t('payment.room')} ${item.roomNumber}`,
+      value: formatVND(item.subtotal),
+      sub: `${item.roomTypeName || 'Standard'} · ${item.hotelName || ''}${item.hotelAddress ? ` · ${item.hotelAddress}` : ''} · ${formatVND(item.roomPriceSnapshot)}/${nightUnit}`
+    })),
     {
       label: t('payment.guests_label'),
       value: `${numAdults} ${t('payment.adults_label')}${numChildren > 0 ? `, ${numChildren} ${t('payment.children_label')}` : ''}`

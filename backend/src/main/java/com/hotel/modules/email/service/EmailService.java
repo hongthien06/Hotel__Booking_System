@@ -2,6 +2,7 @@ package com.hotel.modules.email.service;
 
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.booking.entity.BookingRoom;
 import com.hotel.modules.email.dto.EmailRequest;
 import com.hotel.modules.rooms.entity.Room;
 import jakarta.mail.MessagingException;
@@ -57,6 +58,13 @@ public class EmailService {
                 return;
             }
             Long priceBooking = booking.getRoomPriceSnapshot().longValue() * booking.getTotalNights();
+            String roomNumbers = booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()
+                    ? booking.getBookingRooms().stream()
+                            .map(BookingRoom::getRoom)
+                            .map(Room::getRoomNumber)
+                            .reduce((a, b) -> a + ", " + b)
+                            .orElse(room.getRoomNumber())
+                    : room.getRoomNumber();
             Long discount = booking.getDiscountAmount() != null ? booking.getDiscountAmount().longValue() : 0L;
             // Hiển thị thông tin hạng thành viên thay vì voucher code
             String membershipInfo = null;
@@ -76,6 +84,7 @@ public class EmailService {
                     .customerName(user.getFullName())
                     .customerPhone(user.getPhone())
                     .codeBooking(booking.getBookingCode())
+                    .roomCode(roomNumbers)
                     .dateBooking(booking.getCreatedAt().toLocalDate().toString())
                     .dateCheckin(booking.getCheckInDate().toString())
                     .timeCheckin("14:00")

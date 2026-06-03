@@ -5,6 +5,7 @@ import {
 } from '@mui/material'
 import { Close } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { createBookingApi, getBookedDatesApi } from '../../../shared/api/bookingApi'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -33,8 +34,9 @@ const formatCurrency = (n, lang) => {
   return formatCurrencyShared(n, currency);
 }
 
-const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess }) => {
+const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, onSuccess }) => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const theme = useTheme()
   const isMobileDialog = useMediaQuery(theme.breakpoints.down('sm'))
   const [form, setForm] = useState(() => {
@@ -92,11 +94,15 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
     })
   }, [open, searchParams])
 
-  if (!room) return null
+  const selectedRooms = rooms.length > 0 ? rooms : (room ? [room] : [])
+  if (!room && selectedRooms.length === 0) return null
 
-  const roomName = isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`
+  const roomName = selectedRooms.length > 1
+    ? `${selectedRooms.length} ${t('payment.room').toLowerCase()}`
+    : (isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`)
   const roomType = isMock ? room.type : (room.typeName || 'Standard')
-  const roomPrice = isMock ? room.price : Number(room.pricePerNight || room.priceDay || 0)
+  const roomPrice = selectedRooms.reduce((sum, item) =>
+    sum + Number(isMock ? item.price : (item.pricePerNight || item.priceDay || 0)), 0)
   const nights = nightsBetween(form.checkIn, form.checkOut)
 
   const total = roomPrice * nights
@@ -107,7 +113,7 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
     if (new Date(form.checkOut) < new Date(form.checkIn)) { setError(t('rooms.check_out_after_check_in')); return }
 
     // Kiểm tra sức chứa tối đa (maxGuests)
-    const maxGuests = room.maxGuests || 99
+    const maxGuests = selectedRooms.reduce((sum, item) => sum + Number(item.maxGuests || 0), 0) || 99
     if (Number(form.numAdults) + Number(form.numChildren) > maxGuests) {
       setError(t('booking_page.max_guests_exceeded', { max: maxGuests }))
       return
@@ -118,15 +124,18 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
     setSubmitting(true)
     setError('')
     try {
-      await createBookingApi({
-        roomId: room.roomId || room.id,
+      const roomIds = selectedRooms.map(item => item.roomId || item.id)
+      const booking = await createBookingApi({
+        roomId: roomIds[0],
+        roomIds,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
         numAdults: Number(form.numAdults),
         numChildren: Number(form.numChildren),
         specialRequest: form.specialRequest
       })
-      onSuccess()
+      onSuccess?.(booking)
+      navigate('/booking-history')
     } catch (err) {
       const data = err?.response?.data
       const msg = data?.error || data?.message || (typeof data === 'string' ? data : t('common.error'))
@@ -152,6 +161,11 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
           <Box sx={{ flex: 1 }}>
             <Chip label={t(roomType)} size="small" sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, mb: 0.5 }} />
             <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{roomName}</Typography>
+            {selectedRooms.length > 1 && (
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                {selectedRooms.map(item => `#${item.roomNumber}`).join(', ')}
+              </Typography>
+            )}
             <Typography variant="body2" color="text.secondary">
               {formatCurrency(roomPrice, 'vi')} {t('rooms.per_night')}
             </Typography>
@@ -304,4 +318,3 @@ const BookingDialog = ({ open, room, isMock, searchParams, onClose, onSuccess })
 }
 
 export default BookingDialog
-

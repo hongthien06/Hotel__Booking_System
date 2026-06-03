@@ -10,10 +10,12 @@ const formatVND = (n) =>
 
 const InvoiceMain = ({ invoiceData }) => {
   const { t } = useTranslation()
+  const rooms = Array.isArray(invoiceData?.rooms) && invoiceData.rooms.length > 0
+    ? invoiceData.rooms
+    : []
+  const roomItems = (invoiceData?.items || []).filter(item => item.itemType === 'ROOM')
 
   const roomInfoFields = [
-    { k: t('payment.room_name'), v: invoiceData?.items?.[0]?.description || 'Standard' },
-    { k: t('payment.address_label'), v: invoiceData?.address },
     { k: t('payment.num_guests_info'), v: invoiceData?.numGuests },
     { k: t('payment.checkin_date'), v: invoiceData?.checkInDate },
     { k: t('payment.checkout_date'), v: invoiceData?.checkOutDate }
@@ -32,6 +34,31 @@ const InvoiceMain = ({ invoiceData }) => {
           </Box>
         ))}
       </Box>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
+        {(rooms.length > 0 ? rooms : roomItems.map((item, index) => ({
+          roomId: index,
+          roomNumber: item.description,
+          roomTypeName: '',
+          hotelAddress: invoiceData?.address,
+          subtotal: item.lineTotal,
+          roomPriceSnapshot: item.unitPrice
+        }))).map((room, index) => (
+          <Box key={room.roomId || index} sx={{ border: '0.5px solid', borderColor: 'divider', borderRadius: '8px', p: 1.25 }}>
+            <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
+              {t('payment.room')} {room.roomNumber} {room.roomTypeName ? `· ${room.roomTypeName}` : ''}
+            </Typography>
+            {room.hotelName && (
+              <Typography sx={{ fontSize: 11, color: 'text.secondary', mt: 0.25 }}>{room.hotelName}</Typography>
+            )}
+            {room.hotelAddress && (
+              <Typography sx={{ fontSize: 11, color: 'text.secondary', mt: 0.25 }}>{room.hotelAddress}</Typography>
+            )}
+            <Typography sx={{ fontSize: 11, color: 'text.secondary', mt: 0.5 }}>
+              {formatVND(room.roomPriceSnapshot)} × {invoiceData?.totalNight} {t('payment.night_unit')} = {formatVND(room.subtotal)}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
 
       <Divider sx={{ my: 1.5 }} />
       <Typography sx={{ fontSize: 11, fontWeight: 500, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.5, mb: 1 }}>
@@ -44,7 +71,7 @@ const InvoiceMain = ({ invoiceData }) => {
           <Box>
             <Typography fontSize={13}>{t('payment.rental_fee')}</Typography>
             <Typography variant="caption" color="text.secondary">
-              {invoiceData?.items?.length} {t('payment.room').toLowerCase()} · {invoiceData?.totalNight} {t('payment.night_unit')}
+              {(invoiceData?.roomCount || roomItems.length || 1)} {t('payment.room').toLowerCase()} · {invoiceData?.totalNight} {t('payment.night_unit')}
             </Typography>
           </Box>
           <Typography fontSize={13} fontWeight={500}>
@@ -89,7 +116,7 @@ const InvoiceMain = ({ invoiceData }) => {
         <Box>
           <Typography fontWeight={500} fontSize={13}>{t('payment.total_amount')}</Typography>
           <Typography variant="caption" color="text.secondary">
-            {invoiceData?.items?.length} {t('payment.room').toLowerCase()} · {invoiceData?.totalNight} {t('payment.night_unit')}
+            {(invoiceData?.roomCount || roomItems.length || 1)} {t('payment.room').toLowerCase()} · {invoiceData?.totalNight} {t('payment.night_unit')}
           </Typography>
         </Box>
         <Typography sx={{ fontSize: 22, fontWeight: 500, color: '#D4537E' }}>

@@ -35,9 +35,15 @@ public class BookingExpiryScheduler {
         for (Booking booking : expired) {
             booking.setStatus(BookingStatus.CANCELLED);
             booking.setUpdatedAt(LocalDateTime.now());
+            String roomNumbers = booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()
+                    ? booking.getBookingRooms().stream()
+                            .map(br -> br.getRoom().getRoomNumber())
+                            .reduce((a, b) -> a + ", " + b)
+                            .orElse(booking.getRoom().getRoomNumber())
+                    : booking.getRoom().getRoomNumber();
             log.info("[Scheduler] Hủy booking #{} - phòng {} - hết hạn lúc {}",
                     booking.getBookingId(),
-                    booking.getRoom().getRoomNumber(),
+                    roomNumbers,
                     booking.getExpiresAt());
         }
 

@@ -1,6 +1,8 @@
 package com.hotel.modules.voucher.service;
 
 import com.hotel.modules.auth.entity.User;
+import com.hotel.modules.booking.entity.Booking;
+import com.hotel.modules.booking.repository.BookingRepository;
 import com.hotel.modules.voucher.dto.request.ApplyVoucherRequest;
 import com.hotel.modules.voucher.dto.request.VoucherCreateRequest;
 import com.hotel.modules.voucher.dto.request.VoucherUpdateRequest;
@@ -9,7 +11,9 @@ import com.hotel.modules.voucher.dto.response.VoucherResponse;
 import com.hotel.modules.voucher.entity.DiscountType;
 import com.hotel.modules.voucher.entity.Voucher;
 import com.hotel.modules.voucher.entity.VoucherStatus;
+import com.hotel.modules.voucher.entity.VoucherUsage;
 import com.hotel.modules.voucher.repository.VoucherRepository;
+import com.hotel.modules.voucher.repository.VoucherUsageRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +34,8 @@ import java.util.stream.Collectors;
 public class VoucherService implements IVoucherService {
 
     private final VoucherRepository voucherRepository;
+    private final VoucherUsageRepository voucherUsageRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
     @Transactional
@@ -128,16 +135,84 @@ public class VoucherService implements IVoucherService {
     @Override
     @Transactional
     public ApplyVoucherResponse applyVoucher(ApplyVoucherRequest request, User currentUser) {
-        throw new UnsupportedOperationException(
-                "Hệ thống voucher đã được thay thế bởi hệ thống hạng thành viên. " +
-                "Giảm giá được áp dụng tự động khi tạo booking.");
+        Booking booking = bookingRepository.findById(request.getBookingId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy booking #" + request.getBookingId()));
+        if (booking.getUser() == null || !booking.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new IllegalStateException("Bạn không có quyền áp voucher cho booking này");
+        }
+        if (voucherUsageRepository.existsByBooking_BookingId(booking.getBookingId())) {
+            throw new IllegalStateException("Booking này đã áp dụng voucher");
+        }
+
+        Voucher voucher = voucherRepository.findByCodeIgnoreCase(request.getVoucherCode())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Không tìm thấy voucher với mã: " + request.getVoucherCode()));
+        validateVoucher(voucher, currentUser);
+
+        BigDecimal subtotal = calculateSubtotal(booking);
+        BigDecimal taxAmount = subtotal.multiply(new BigDecimal("10.00"))
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal baseDiscount = getAutomaticDiscount(booking);
+        BigDecimal originalAmount = subtotal.add(taxAmount).subtract(baseDiscount).max(BigDecimal.ZERO);
+        if (originalAmount.compareTo(voucher.getMinOrderAmount()) < 0) {
+            throw new IllegalStateException("Đơn hàng chưa đạt giá trị tối thiểu để dùng voucher");
+        }
+
+        BigDecimal discountAmount = calculateVoucherDiscount(voucher, originalAmount);
+        if (discountAmount.compareTo(originalAmount) > 0) {
+            discountAmount = originalAmount;
+        }
+
+        VoucherUsage usage = VoucherUsage.builder()
+                .voucher(voucher)
+                .booking(booking)
+                .user(currentUser)
+                .discountAmount(discountAmount)
+                .build();
+        voucherUsageRepository.save(usage);
+
+        voucher.setUsedCount(voucher.getUsedCount() + 1);
+        voucher.setUpdatedAt(LocalDateTime.now());
+        voucherRepository.save(voucher);
+
+        booking.setDiscountAmount(baseDiscount.add(discountAmount));
+        bookingRepository.save(booking);
+
+        return ApplyVoucherResponse.builder()
+                .bookingId(booking.getBookingId())
+                .voucherCode(voucher.getCode())
+                .discountType(voucher.getDiscountType())
+                .discountValue(voucher.getDiscountValue())
+                .originalAmount(originalAmount)
+                .discountAmount(discountAmount)
+                .finalAmount(originalAmount.subtract(discountAmount).max(BigDecimal.ZERO))
+                .build();
     }
 
     @Override
     @Transactional
     public void removeVoucher(Long bookingId, User currentUser) {
-        throw new UnsupportedOperationException(
-                "Hệ thống voucher đã được thay thế bởi hệ thống hạng thành viên.");
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy booking #" + bookingId));
+        if (booking.getUser() == null || !booking.getUser().getUserId().equals(currentUser.getUserId())) {
+            throw new IllegalStateException("Bạn không có quyền gỡ voucher của booking này");
+        }
+        VoucherUsage usage = voucherUsageRepository.findByBooking_BookingId(bookingId)
+                .orElse(null);
+        if (usage == null) {
+            booking.setDiscountAmount(getAutomaticDiscount(booking));
+            bookingRepository.save(booking);
+            return;
+        }
+        Voucher voucher = usage.getVoucher();
+        voucher.setUsedCount(Math.max(0, voucher.getUsedCount() - 1));
+        voucher.setUpdatedAt(LocalDateTime.now());
+        voucherRepository.save(voucher);
+        voucherUsageRepository.delete(usage);
+
+        booking.setDiscountAmount(getAutomaticDiscount(booking));
+        bookingRepository.save(booking);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -146,6 +221,73 @@ public class VoucherService implements IVoucherService {
         return voucherRepository.findById(voucherId)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Không tìm thấy voucher với id=" + voucherId));
+    }
+
+    private void validateVoucher(Voucher voucher, User user) {
+        LocalDateTime now = LocalDateTime.now();
+        if (voucher.getStatus() != VoucherStatus.ACTIVE) {
+            throw new IllegalStateException("Voucher không còn hoạt động");
+        }
+        if (voucher.getStartDate() != null && now.isBefore(voucher.getStartDate())) {
+            throw new IllegalStateException("Voucher chưa đến thời gian sử dụng");
+        }
+        if (voucher.getEndDate() != null && now.isAfter(voucher.getEndDate())) {
+            throw new IllegalStateException("Voucher đã hết hạn");
+        }
+        if (voucher.getUsageLimit() != null && voucher.getUsedCount() >= voucher.getUsageLimit()) {
+            throw new IllegalStateException("Voucher đã hết lượt sử dụng");
+        }
+        int usedByUser = voucherUsageRepository
+                .countByVoucher_VoucherIdAndUser_UserId(voucher.getVoucherId(), user.getUserId());
+        if (usedByUser >= voucher.getUsageLimitPerUser()) {
+            throw new IllegalStateException("Bạn đã dùng hết lượt voucher này");
+        }
+    }
+
+    private BigDecimal calculateVoucherDiscount(Voucher voucher, BigDecimal amount) {
+        BigDecimal discount;
+        if (voucher.getDiscountType() == DiscountType.PERCENTAGE) {
+            discount = amount.multiply(voucher.getDiscountValue())
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+            if (voucher.getMaxDiscountAmount() != null
+                    && discount.compareTo(voucher.getMaxDiscountAmount()) > 0) {
+                discount = voucher.getMaxDiscountAmount();
+            }
+        } else {
+            discount = voucher.getDiscountValue();
+        }
+        return discount.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal calculateSubtotal(Booking booking) {
+        BigDecimal roomTotal;
+        if (booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()) {
+            roomTotal = booking.getBookingRooms().stream()
+                    .map(br -> br.getRoomPriceSnapshot()
+                            .multiply(BigDecimal.valueOf(booking.getTotalNights())))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        } else {
+            roomTotal = booking.getRoomPriceSnapshot()
+                    .multiply(BigDecimal.valueOf(booking.getTotalNights()));
+        }
+        BigDecimal serviceTotal = BigDecimal.ZERO;
+        if (booking.getBookingServices() != null) {
+            serviceTotal = booking.getBookingServices().stream()
+                    .map(bs -> bs.getSubtotal() != null ? bs.getSubtotal()
+                            : (bs.getUnitPriceSnap() != null && bs.getQuantity() != null
+                                    ? bs.getUnitPriceSnap().multiply(BigDecimal.valueOf(bs.getQuantity()))
+                                    : BigDecimal.ZERO))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+        return roomTotal.add(serviceTotal);
+    }
+
+    private BigDecimal getAutomaticDiscount(Booking booking) {
+        BigDecimal membership = booking.getMembershipDiscountAmt() != null
+                ? booking.getMembershipDiscountAmt() : BigDecimal.ZERO;
+        BigDecimal group = booking.getGroupDiscountAmt() != null
+                ? booking.getGroupDiscountAmt() : BigDecimal.ZERO;
+        return membership.add(group);
     }
 
     private VoucherResponse toResponse(Voucher v) {

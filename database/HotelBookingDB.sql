@@ -257,14 +257,32 @@ CREATE TABLE Bookings (
     group_discount_pct        DECIMAL(5,2)  NOT NULL DEFAULT 0,
     group_discount_amt        DECIMAL(18,2) NOT NULL DEFAULT 0,
     guest_count               INT           NOT NULL DEFAULT 1,
+    merged_into_booking_id    BIGINT        NULL,
 
     CONSTRAINT PK_Bookings          PRIMARY KEY (booking_id),
     CONSTRAINT FK_Bookings_User     FOREIGN KEY (user_id)    REFERENCES Users(user_id),
     CONSTRAINT FK_Bookings_Room     FOREIGN KEY (room_id)    REFERENCES Rooms(room_id),
     CONSTRAINT FK_Bookings_Voucher  FOREIGN KEY (voucher_id) REFERENCES vouchers(voucher_id),
     CONSTRAINT FK_Bookings_Holiday  FOREIGN KEY (holiday_period_id) REFERENCES holiday_periods(holiday_id),
+    CONSTRAINT FK_Bookings_MergedInto FOREIGN KEY (merged_into_booking_id) REFERENCES Bookings(booking_id),
     CONSTRAINT UQ_Bookings_Code     UNIQUE (booking_code)
 );
+
+CREATE TABLE BookingRooms (
+    booking_room_id     BIGINT NOT NULL IDENTITY(1,1),
+    booking_id          BIGINT NOT NULL,
+    room_id             BIGINT NOT NULL,
+    room_price_snapshot DECIMAL(18,2) NOT NULL,
+    sort_order          INT NOT NULL DEFAULT 0,
+
+    CONSTRAINT PK_BookingRooms PRIMARY KEY (booking_room_id),
+    CONSTRAINT FK_BookingRooms_Booking FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id) ON DELETE CASCADE,
+    CONSTRAINT FK_BookingRooms_Room FOREIGN KEY (room_id) REFERENCES Rooms(room_id),
+    CONSTRAINT UQ_BookingRooms_BookingRoom UNIQUE (booking_id, room_id)
+);
+
+CREATE INDEX IX_BookingRooms_Room ON BookingRooms(room_id);
+CREATE INDEX IX_BookingRooms_Booking ON BookingRooms(booking_id);
 
 CREATE TABLE customer_memberships (
     membership_id          BIGINT PRIMARY KEY IDENTITY(1,1),
