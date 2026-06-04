@@ -343,6 +343,8 @@
     "featured_rooms": "Phòng nổi bật",
     "featured_rooms_sub": "Các lựa chọn hàng đầu với vị trí đẹp và tiện nghi xuất sắc.",
     "no_rooms_found": "Không tìm thấy phòng trống trong thời gian này. Vui lòng thử ngày khác!",
+    "no_rooms_found_sub": "Rất tiếc, hiện tại không có phòng nào phù hợp với nhu cầu của bạn.",
+    "try_suggestions": "Bạn có thể thử thay đổi ngày lưu trú hoặc điều chỉnh bộ lọc để tìm thêm lựa chọn.",
     "booking_success": "Đặt phòng thành công. Hãy vào lịch sử để thanh toán",
     "booking_confirm": "Xác nhận đặt phòng",
     "special_request": "Yêu cầu đặc biệt (tuỳ chọn)",

@@ -340,6 +340,8 @@
     "available_rooms": "Available Rooms",
     "featured_rooms": "Featured Rooms",
     "no_rooms_found": "No available rooms found for this period. Please try another date!",
+    "no_rooms_found_sub": "Sorry, there are no rooms matching your criteria at the moment.",
+    "try_suggestions": "You can try changing dates or adjusting filters to find more options.",
     "booking_success": "Booking successful. Please go to history to make payment.",
     "booking_confirm": "Confirm Booking",
     "special_request": "Special Request (optional)",

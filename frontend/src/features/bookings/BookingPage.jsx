@@ -1724,21 +1724,26 @@ const BookingPage = () => {
                     ))}
                   </Grid>
                 ) : (
-                  <Box sx={{ textAlign: 'center', py: 8 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
-                      <Box component="img" src={imgNoResults} alt={t('booking_page.no_rooms_found') || 'Không tìm thấy phòng'} sx={{ maxWidth: { xs: 280, sm: 520 }, width: '100%', height: 'auto' }} />
-                    </Box>
-                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                      {t('booking_page.no_rooms_found')}
-                    </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      <Button variant="contained" onClick={handleClearSearch} sx={{ bgcolor: PC, borderRadius: 2 }}>
-                        {t('booking_page.back_to_home')}
-                      </Button>
-                    </Box>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+                    <Card sx={{ width: '100%', p: 0, display: 'flex', gap: 2, alignItems: 'stretch', mx: 'auto', borderRadius: 3, boxShadow: 1, overflow: 'hidden', minHeight: { xs: 'calc(120px + 3cm)', sm: 'calc(160px + 3cm)' } }}>
+                      <Box component="img" src={imgNoResults} alt={t('booking_page.no_rooms_found') || 'Không tìm thấy phòng'}
+                        sx={{ width: { xs: 120, sm: 280 }, height: '100%', objectFit: 'cover', flexShrink: 0, display: 'block' }}
+                      />
+                      <Box sx={{ textAlign: 'left', flex: 1, p: 2.5, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <Typography variant="h6" sx={{ fontWeight: 800, color: PC }}>
+                          {t('booking_page.no_rooms_found') || 'Không tìm thấy phòng phù hợp'}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                          {t('booking_page.no_rooms_found_sub') || 'Rất tiếc, hiện tại không có phòng nào phù hợp với nhu cầu của bạn.'}
+                        </Typography>
+                        <Divider sx={{ my: 1 }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {t('booking_page.try_suggestions') || 'Bạn có thể thử thay đổi ngày lưu trú hoặc điều chỉnh bộ lọc để tìm thêm lựa chọn.'}
+                        </Typography>
+                      </Box>
+                    </Card>
                   </Box>
                 )}
-                )
               </Box>
             )}
 
