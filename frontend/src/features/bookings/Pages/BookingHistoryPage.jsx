@@ -1,15 +1,19 @@
 /* eslint-disable indent */
 import {
-
   ConfirmationNumber,
   History,
   Search,
-  RateReview
+  RateReview,
+  CheckCircle,
+  HourglassEmpty,
+  Cancel,
+  Replay
 } from '@mui/icons-material'
 import {
   Alert,
   Box,
   Button,
+  Chip,
   Card, CardContent, CardMedia,
   Checkbox,
   Divider,
@@ -29,6 +33,18 @@ import ReviewFormDialog from '../../reviews/ReviewFormDialog'
 
 const PC = '#c0496e' // Tương ứng với primary.dark hoặc primary.contrastText trong theme (Màu hồng đậm chủ đạo)
 const PC_LIGHT = '#fce4ec' // Tương ứng với primary.main (Màu hồng nhạt)
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'CONFIRMED': return '#4caf50'
+    case 'PENDING': return '#ff9800'
+    case 'CANCELLED': return '#f44336'
+    case 'REFUNDED': return '#03a9f4'
+    case 'CHECKED_IN': return '#c0496e'
+    case 'CHECKED_OUT': return '#607d8b'
+    default: return '#757575'
+  }
+}
 
 const BookingHistoryPage = () => {
   const { t, i18n } = useTranslation()
@@ -170,17 +186,7 @@ const BookingHistoryPage = () => {
 
 
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'CONFIRMED': return '#4caf50'
-      case 'PENDING': return '#ff9800'
-      case 'CANCELLED': return '#f44336'
-      case 'REFUNDED': return '#03a9f4' // Light Blue cho Hoàn tiền
-      case 'CHECKED_IN': return '#c0496e'
-      case 'CHECKED_OUT': return '#607d8b' // Blue Grey cho Checkout
-      default: return '#757575'
-    }
-  }
+  
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#fff', color: '#333', pb: 8 }}> {/* bgcolor: '#fff' tương ứng với action.inputBg */}
@@ -355,7 +361,7 @@ const BookingHistoryPage = () => {
           </Box>
         )}
 
-        <Grid container spacing={3} justifyContent="center">
+        <Grid container spacing={3} justifyContent="flex-start">
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
@@ -364,15 +370,18 @@ const BookingHistoryPage = () => {
             ))
           ) : bookings.length === 0 ? (
             <Grid size={{ xs: 12 }}>
-              <Box sx={{ textAlign: 'center', py: 12, bgcolor: '#fafafa', borderRadius: 4, border: '1px dashed #ddd' }}>
-                <History sx={{ fontSize: 64, color: '#ddd', mb: 2 }} />
-                <Typography variant="h6" color="text.secondary">
-                  {t('bookings_history.no_data') || 'Bạn chưa có lịch sử đặt phòng nào.'}
-                </Typography>
-                <Button variant="outlined" sx={{ mt: 3, borderRadius: 2, color: PC, borderColor: PC }} href="/booking">
-                  {t('common.book_now') || 'Đặt ngay'}
-                </Button>
-              </Box>
+                <Box sx={{ textAlign: 'center', py: 12, bgcolor: '#fafafa', borderRadius: 4, border: '1px dashed #ddd', '@keyframes pulse': { '0%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.06)' }, '100%': { transform: 'scale(1)' } } }}>
+                  <History className="historyIcon" sx={{ fontSize: 72, color: '#ddd', mb: 2, animation: 'pulse 2.5s ease-in-out infinite' }} />
+                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
+                    {t('bookings_history.no_data') || 'Bạn chưa có lịch sử đặt phòng nào.'}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                    {t('bookings_history.empty_cta') || 'Khi bạn hoàn tất đặt phòng, hoá đơn và lịch sử sẽ xuất hiện ở đây.'}
+                  </Typography>
+                  <Button variant="outlined" sx={{ mt: 1, borderRadius: 2, color: PC, borderColor: PC }} href="/booking">
+                    {t('common.book_now') || 'Đặt ngay'}
+                  </Button>
+                </Box>
             </Grid>
           ) : (
             bookings.map((booking, index) => (
@@ -413,20 +422,7 @@ const BookingHistoryPage = () => {
                     />
                   )}
                   {/* Status Overlay */}
-                  <Box sx={{
-                    position: 'absolute',
-                    top: 12, right: 12,
-                    zIndex: 2,
-                    bgcolor: getStatusColor(booking.status),
-                    color: '#fff',
-                    px: 1, py: 0.3,
-                    borderRadius: 1,
-                    fontSize: 10,
-                    fontWeight: 800,
-                    textTransform: 'uppercase'
-                  }}>
-                    {booking.status}
-                  </Box>
+                  <StatusChip status={booking.status} />
 
                   <CardMedia
                     component="img"
@@ -551,6 +547,35 @@ const BookingHistoryPage = () => {
           onReviewSubmitted={() => fetchBookings()}
         />
       )}
+    </Box>
+  )
+}
+
+// Small helper to render a status chip with icon
+const StatusChip = ({ status }) => {
+  const iconMap = {
+    CONFIRMED: <CheckCircle sx={{ fontSize: 16 }} />,
+    PENDING: <HourglassEmpty sx={{ fontSize: 16 }} />,
+    CANCELLED: <Cancel sx={{ fontSize: 16 }} />,
+    REFUNDED: <Replay sx={{ fontSize: 16 }} />,
+    CHECKED_IN: <CheckCircle sx={{ fontSize: 16 }} />
+  }
+  const color = getStatusColor(status)
+  return (
+    <Box sx={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
+      <Chip
+        icon={iconMap[status] || <History sx={{ fontSize: 16 }} />}
+        label={status}
+        size="small"
+        sx={{
+          bgcolor: color,
+          color: '#fff',
+          fontWeight: 800,
+          textTransform: 'uppercase',
+          px: 1,
+          py: 0.25,
+        }}
+      />
     </Box>
   )
 }
