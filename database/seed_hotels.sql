@@ -169,3 +169,32 @@ BEGIN
     SET @TypeID = @TypeID + 1;
 END
 GO
+
+-- Seed high-quality room images based on room type names
+UPDATE r
+SET r.image_urls = 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=800,https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800'
+FROM Rooms r
+INNER JOIN RoomTypes rt ON r.type_id = rt.type_id
+WHERE rt.type_name LIKE N'%Suite%' 
+   OR rt.type_name LIKE N'%President%' 
+   OR rt.type_name LIKE N'%Royal%' 
+   OR rt.type_name LIKE N'%Villa%' 
+   OR rt.type_name LIKE N'%Căn hộ%' 
+   OR rt.type_name LIKE N'%Penthouse%';
+
+UPDATE r
+SET r.image_urls = 'https://images.unsplash.com/photo-1590490360182-c33d57733427?w=800,https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=800'
+FROM Rooms r
+INNER JOIN RoomTypes rt ON r.type_id = rt.type_id
+WHERE (rt.type_name LIKE N'%Deluxe%' 
+    OR rt.type_name LIKE N'%Executive%' 
+    OR rt.type_name LIKE N'%Premium%' 
+    OR rt.type_name LIKE N'%Superior%')
+  AND r.image_urls IS NULL;
+
+UPDATE r
+SET r.image_urls = 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=800,https://images.unsplash.com/photo-1598928506311-c55ded91a20c?w=800'
+FROM Rooms r
+INNER JOIN RoomTypes rt ON r.type_id = rt.type_id
+WHERE r.image_urls IS NULL;
+GO
