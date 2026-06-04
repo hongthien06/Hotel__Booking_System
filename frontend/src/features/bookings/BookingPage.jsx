@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import imgHCM from '../../assets/TP_HCM.png'
+import imgNoResults from '../../assets/KhongthayKQ.png'
 import imgHaNoi from '../../assets/HA_NOI.jpg'
 import imgDaLat from '../../assets/DA_LAT.webp'
 import imgDaNang from '../../assets/DA_NANG.jpg'
@@ -1723,17 +1724,21 @@ const BookingPage = () => {
                     ))}
                   </Grid>
                 ) : (
-                  <Box sx={{ textAlign: 'center', py: 10 }}>
-                    <Alert severity="info" sx={{ borderRadius: 3, display: 'inline-flex', px: 5 }}>
+                  <Box sx={{ textAlign: 'center', py: 8 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                      <Box component="img" src={imgNoResults} alt={t('booking_page.no_rooms_found') || 'Không tìm thấy phòng'} sx={{ maxWidth: { xs: 280, sm: 520 }, width: '100%', height: 'auto' }} />
+                    </Box>
+                    <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
                       {t('booking_page.no_rooms_found')}
-                    </Alert>
-                    <Box sx={{ mt: 3 }}>
+                    </Typography>
+                    <Box sx={{ mt: 1 }}>
                       <Button variant="contained" onClick={handleClearSearch} sx={{ bgcolor: PC, borderRadius: 2 }}>
                         {t('booking_page.back_to_home')}
                       </Button>
                     </Box>
                   </Box>
                 )}
+                )
               </Box>
             )}
 
