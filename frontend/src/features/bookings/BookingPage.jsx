@@ -173,7 +173,10 @@ const RoomCard = ({
         borderRadius: 3, overflow: 'hidden', transition: 'all 0.3s',
         boxShadow: 1,
         border: selected ? `2px solid ${PC}` : '2px solid transparent',
-        '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' }
+        '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' },
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
       }}
     >
       {selectable && (
@@ -204,7 +207,7 @@ const RoomCard = ({
           alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
         />
       }
-      <CardContent sx={{ p: 2 }}>
+      <CardContent sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
           <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.typeName || 'Standard')} size="small"
             sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, fontSize: 11 }} />
@@ -242,7 +245,7 @@ const RoomCard = ({
             ({reviewCount} {t('room_detail.reviews')})
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 'auto' }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 800, color: PC }}>
             {oldPrice && (
               <Typography component="span" variant="caption" sx={{ textDecoration: 'line-through', color: '#d32f2f', mr: 1, fontWeight: 500, fontSize: '0.75rem' }}>
@@ -1374,7 +1377,7 @@ const BookingPage = () => {
                             </Box>
                           ) : (
                             featuredRooms.map(r => (
-                              <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                              <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
                                 <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                               </Box>
                             ))
@@ -1445,7 +1448,7 @@ const BookingPage = () => {
                         </Box>
                       ) : (
                         topRatedRooms.map(r => (
-                          <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                          <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
                             <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                           </Box>
                         ))
@@ -1517,7 +1520,7 @@ const BookingPage = () => {
                               </Box>
                             ) : (
                               budgetRooms.map(r => (
-                                <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                                <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
                                   <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                                 </Box>
                               ))
@@ -1575,7 +1578,7 @@ const BookingPage = () => {
                       </Box>
                     ) : (
                       weekendDeals.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' } }}>
+                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
                           <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} showBookButton={false} onOpenDetail={openDetail} />
                         </Box>
                       ))
@@ -1695,7 +1698,7 @@ const BookingPage = () => {
                 {loading ? (
                   <Grid container spacing={3}>
                         {[...Array(4)].map((_, i) => (
-                      <Grid item xs={12} sm={6} md={3} key={i}>
+                      <Grid item xs={12} sm={6} md={3} key={i} sx={{ display: 'flex' }}>
                         <RoomCardSkeleton />
                       </Grid>
                     ))}
@@ -1703,7 +1706,7 @@ const BookingPage = () => {
                 ) : rooms.length > 0 ? (
                   <Grid container spacing={3}>
                     {rooms.map(r => (
-                      <Grid item xs={12} sm={6} md={3} key={r.id || r.roomId}>
+                      <Grid item xs={12} sm={6} md={3} key={r.id || r.roomId} sx={{ display: 'flex' }}>
                         <RoomCard
                           room={r}
                           isMock={false}
