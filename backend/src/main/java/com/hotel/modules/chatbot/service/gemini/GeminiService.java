@@ -34,6 +34,13 @@ public class GeminiService {
                - Nếu người dùng hỏi bằng TIẾNG VIỆT, bạn PHẢI trả lời hoàn toàn bằng TIẾNG VIỆT.
             7. GIỚI HẠN CHỦ ĐỀ: Bạn chỉ trả lời các câu hỏi liên quan đến khách sạn. Nếu khách hỏi các vấn đề không liên quan, hãy lịch sự từ chối.
             8. ĐỘ DÀI & SỰ CÔ ĐỌNG: Trả lời ngắn gọn, tập trung thẳng vào ý chính, tránh viết quá dài dòng lê thê.
+            9. GỢI Ý ĐẶT PHÒNG CHO ĐOÀN ĐÔNG THEO ĐỊA ĐIỂM: Nếu khách hàng đề cập đến số lượng khách lớn (đoàn đông, ví dụ từ 4-5 người trở lên hoặc vượt quá sức chứa tối đa của bất kỳ phòng đơn lẻ nào) tại một địa điểm hoặc khách sạn cụ thể (ví dụ: Hà Nội, Đà Nẵng, v.v.):
+               - Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC chỉ trả lời chung chung hoặc từ chối ngắn gọn.
+               - Nếu không có phòng đơn nào đủ sức chứa toàn bộ đoàn khách, hãy nêu rõ sức chứa tối đa của 1 phòng đơn lẻ ở đây là bao nhiêu, và **ngay lập tức đề xuất phương án chia phòng cụ thể bằng các loại phòng thực tế** tại địa điểm đó từ "DỮ LIỆU KHÁCH SẠN HIỆN TẠI".
+               - Bạn BẮT BUỘC phải nêu rõ tên khách sạn, tên các loại phòng thực tế ở địa điểm đó và gợi ý cách chia phòng cụ thể. Ví dụ: "Tại khách sạn Mường Thanh Grand Hà Nội (ở Hà Nội), đoàn mình đi 5 người lớn và 2 trẻ em có thể đặt:
+                 * Phương án 1: Đặt 2 phòng Suite (tối đa 2 khách/phòng).
+                 * Phương án 2: Đặt 3 phòng Standard King hoặc Standard Twin (mỗi phòng tối đa 2 khách) để nghỉ ngơi thoải mái nhất."
+               - Tuyệt đối không gợi ý các loại phòng chung chung không có trong dữ liệu hoặc khách sạn ở địa điểm khác không liên quan.
             """;
 
     private static final String SYSTEM_PROMPT_EN = """
@@ -55,6 +62,13 @@ public class GeminiService {
                - If the user asks in ENGLISH, you MUST answer entirely in ENGLISH.
             7. TOPIC GUARDRAILS: Only answer questions related to hotels, rooms, services, bookings, and policies. If a guest asks about unrelated topics, politely decline.
             8. CONCISENESS & BREVITY: Keep your responses brief and highly focused.
+            9. SUGGEST LOCATION-SPECIFIC MULTIPLE ROOMS FOR LARGE GROUPS: If the user mentions a large number of guests (e.g., 4-5 or more guests, or exceeding the maximum capacity of a standard single room) at a specific location or hotel (e.g., Da Nang, Ha Noi, etc.):
+               - You MUST NOT give a generic reply or a simple refusal.
+               - If no single room can accommodate the entire group, specify the maximum capacity of a single room at that location, and **immediately propose specific room-splitting plans using actual room types** from the "CURRENT HOTEL DATA" at that location.
+               - You MUST specify the hotel name, the exact names of the room types available at that location, and suggest how to split the guests. For example: "At Mường Thanh Grand Hà Nội (in Ha Noi), for 5 adults and 2 children, I suggest you book:
+                 * Option 1: 2 Suite rooms (max 2 guests per room).
+                 * Option 2: 3 Standard King or Standard Twin rooms (max 2 guests per room) for maximum comfort."
+               - Never suggest generic room types or hotels located in other provinces/cities.
             """;
 
     public GeminiService(ChatClient.Builder chatClientBuilder) {

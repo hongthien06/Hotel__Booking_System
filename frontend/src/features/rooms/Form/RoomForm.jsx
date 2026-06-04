@@ -133,18 +133,16 @@ const RoomForm = ({ open, onClose, onSubmit, editRoom, loading }) => {
 
   useEffect(() => {
     if (!open) return;
-    fetch("/api/v1/hotels")
-      .then(r => r.json())
-      .then(data => setAllHotels(Array.isArray(data) ? data : []))
+    axiosInstance.get(`${BASE_URL}/hotels`)
+      .then(res => setAllHotels(Array.isArray(res.data) ? res.data : []))
       .catch(() => setAllHotels([]));
   }, [open]);
 
   useEffect(() => {
     if (!selectedBranch) { setRoomTypes([]); setSelectedRoomType(null); return; }
-    fetch(`/api/v1/room-types/hotel/${selectedBranch.hotelId}`)
-      .then(r => r.json())
-      .then(data => {
-        const types = Array.isArray(data) ? data : [];
+    axiosInstance.get(`${BASE_URL}/room-types/hotel/${selectedBranch.hotelId}`)
+      .then(res => {
+        const types = Array.isArray(res.data) ? res.data : [];
         setRoomTypes(types);
         if (isEdit && form.typeId) {
           const cur = types.find(t => t.typeId === form.typeId);
