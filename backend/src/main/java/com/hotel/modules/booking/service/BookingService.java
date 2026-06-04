@@ -83,8 +83,24 @@ public class BookingService {
         if (booking.getStatus() != BookingStatus.CONFIRMED) {
             throw new RuntimeException("Booking không ở trạng thái check-in được");
         }
-        if (LocalDateTime.now().isBefore(booking.getCheckInDate().atStartOfDay())) {
-            throw new RuntimeException("Chưa đến thời gian check-in");
+        // Special rules for same-day (checkIn == checkOut) bookings:
+        // - Check-in allowed starting at 14:00 of the check-in date
+        // - Check-in must occur before the same-day checkout limit (before 23:59)
+        if (booking.getCheckInDate() != null && booking.getCheckOutDate() != null
+                && booking.getCheckInDate().isEqual(booking.getCheckOutDate())) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime checkInAt = booking.getCheckInDate().atTime(14, 0);
+            LocalDateTime checkoutLimit = booking.getCheckInDate().atTime(23, 59);
+            if (now.isBefore(checkInAt)) {
+                throw new RuntimeException("Chưa đến thời gian check-in (14:00)");
+            }
+            if (now.isAfter(checkoutLimit)) {
+                throw new RuntimeException("Đã quá giờ trả phòng");
+            }
+        } else {
+            if (LocalDateTime.now().isBefore(booking.getCheckInDate().atStartOfDay())) {
+                throw new RuntimeException("Chưa đến thời gian check-in");
+            }
         }
         booking.setStatus(BookingStatus.CHECKED_IN);
         booking.setActualCheckIn(LocalDateTime.now());
@@ -112,6 +128,16 @@ public class BookingService {
         if (booking.getStatus() != BookingStatus.CHECKED_IN) {
             throw new RuntimeException("Booking không ở trạng thái check-out được");
         }
+        // For same-day bookings ensure checkout time is after 14:00 and before 23:59
+        if (booking.getCheckInDate() != null && booking.getCheckOutDate() != null
+                && booking.getCheckInDate().isEqual(booking.getCheckOutDate())) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime checkInAt = booking.getCheckInDate().atTime(14, 0);
+            LocalDateTime checkoutLimit = booking.getCheckInDate().atTime(23, 59);
+            if (now.isBefore(checkInAt) || now.isAfter(checkoutLimit)) {
+                throw new RuntimeException("Không thể trả phòng ở thời điểm này; same-day phải trả trong khoảng 14:00 - 23:59");
+            }
+        }
         booking.setStatus(BookingStatus.CHECKED_OUT);
         booking.setActualCheckout(LocalDateTime.now());
         List<Room> rooms = getRoomsForBooking(booking);
@@ -132,11 +158,19 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public List<Long> getOccupiedRoomIds(LocalDate checkIn, LocalDate checkOut) {
-        return bookingRepository.findActiveBookingsInRange(checkIn, checkOut).stream()
+        LocalDate effCheckOut = checkOut.isEqual(checkIn) ? checkOut.plusDays(1) : checkOut;
+        return bookingRepository.findActiveBookingsInRange(checkIn, effCheckOut).stream()
                 .flatMap(b -> getRoomsForBooking(b).stream())
                 .map(Room::getRoomId)
                 .distinct()
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isRoomConflicting(Long roomId, LocalDate checkIn, LocalDate checkOut) {
+        // treat same-day as a single-night interval
+        LocalDate effCheckOut = checkOut.isEqual(checkIn) ? checkOut.plusDays(1) : checkOut;
+        return bookingRepository.existsConflictBooking(roomId, checkIn, effCheckOut);
     }
 
     // Tạo Booking với tính toán giảm giá đầy đủ
@@ -147,6 +181,13 @@ public class BookingService {
         if (request.getCheckOut().isBefore(request.getCheckIn())) {
             throw new RuntimeException("Ngày checkout phải sau ngày checkin");
         }
+
+        // If checkIn == checkOut treat as a single-night booking for conflict checks
+        LocalDate effectiveCheckOutForConflict = request.getCheckOut().isEqual(request.getCheckIn())
+                ? request.getCheckOut().plusDays(1)
+                : request.getCheckOut();
+
+        // same-day bookings: no narrow booking window enforced here
 
         // 2. Gom danh sách phòng trong cùng một đơn
         List<Long> roomIds = normalizeRoomIds(request);
@@ -159,7 +200,7 @@ public class BookingService {
                 .toList();
 
         // 3. Kiểm tra phòng AVAILABLE và trùng lịch
-        List<Long> occupiedRoomIds = getOccupiedRoomIds(request.getCheckIn(), request.getCheckOut());
+        List<Long> occupiedRoomIds = getOccupiedRoomIds(request.getCheckIn(), effectiveCheckOutForConflict);
         for (Room room : rooms) {
             if (room.getStatus() != RoomStatus.AVAILABLE) {
                 throw new RuntimeException("Phòng " + room.getRoomNumber() + " không khả dụng");
@@ -257,6 +298,17 @@ public class BookingService {
         booking.setExpiresAt(LocalDateTime.now().plusMinutes(15));
         booking.setCreatedAt(LocalDateTime.now());
         booking.setUpdatedAt(LocalDateTime.now());
+
+        // expected checkout time (optional) — useful for SAME_DAY preparation
+        if (request.getExpectedCheckoutTime() != null) {
+            booking.setExpectedCheckoutTime(request.getExpectedCheckoutTime());
+        }
+        // set booking_type for same-day bookings
+        if (request.getCheckIn().isEqual(request.getCheckOut())) {
+            booking.setBookingType("SAME_DAY");
+        } else {
+            booking.setBookingType("OVERNIGHT");
+        }
 
         // Discount fields
         booking.setMembershipDiscountPct(membershipDiscountPct);
@@ -488,10 +540,14 @@ public class BookingService {
     public List<String> getBookedDatesByRoomId(Long roomId) {
         List<Booking> activeBookings = bookingRepository.findActiveBookingsByRoomId(roomId);
         return activeBookings.stream()
-                .flatMap(b -> b.getCheckInDate()
-                        .datesUntil(b.getCheckOutDate())
-                        .map(LocalDate::toString))
-                .distinct().toList();
+            .flatMap(b -> {
+                if (b.getCheckInDate() != null && b.getCheckOutDate() != null
+                    && b.getCheckInDate().isEqual(b.getCheckOutDate())) {
+                return java.util.stream.Stream.of(b.getCheckInDate().toString());
+                }
+                return b.getCheckInDate().datesUntil(b.getCheckOutDate()).map(LocalDate::toString);
+            })
+            .distinct().toList();
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────

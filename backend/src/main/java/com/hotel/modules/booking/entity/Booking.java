@@ -123,6 +123,12 @@ public class Booking {
     @Column(name = "discount_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
+    @Column(name = "booking_type", nullable = false, length = 20)
+    private String bookingType = "OVERNIGHT";
+
+    @Column(name = "expected_checkout_time")
+    private java.time.LocalTime expectedCheckoutTime;
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "merged_into_booking_id")

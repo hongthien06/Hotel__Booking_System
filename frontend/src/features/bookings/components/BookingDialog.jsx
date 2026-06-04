@@ -45,6 +45,7 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
     return {
       checkIn,
       checkOut,
+      expectedCheckoutTime: '',
       numAdults: searchParams?.adults || 2,
       numChildren: searchParams?.children || 0,
       specialRequest: ''
@@ -137,6 +138,7 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
         roomIds,
         checkIn: form.checkIn,
         checkOut: form.checkOut,
+          expectedCheckoutTime: form.expectedCheckoutTime || null,
         numAdults: Number(form.numAdults),
         numChildren: Number(form.numChildren),
         specialRequest: form.specialRequest
@@ -242,6 +244,18 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
                   }
                 }}
               />
+              {form.checkIn && form.checkOut && form.checkIn === form.checkOut && (
+                <TextField
+                  label={t('booking_page.expected_checkout_time_label')}
+                  type="time"
+                  size="small"
+                  value={form.expectedCheckoutTime}
+                  onChange={e => setForm(f => ({ ...f, expectedCheckoutTime: e.target.value }))}
+                  inputProps={{ step: 300 }}
+                  sx={{ mt: 1 }}
+                  fullWidth
+                />
+              )}
               {form.checkIn !== form.checkOut && (
                 <Typography variant="caption" sx={{ color: 'text.secondary', mt: 0.5, display: 'block', pl: 0.5 }}>
                   {t('booking_page.checkout_time')}
@@ -250,6 +264,12 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
             </Grid>
           </Grid>
         </LocalizationProvider>
+
+        {form.checkIn && form.checkOut && form.checkIn === form.checkOut && (
+          <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
+            {t('booking_page.same_day_checkout_notice')}
+          </Alert>
+        )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, px: 0.5 }}>
           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>

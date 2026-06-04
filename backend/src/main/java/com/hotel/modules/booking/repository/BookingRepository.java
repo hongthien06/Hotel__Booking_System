@@ -45,8 +45,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     SELECT COUNT(b) > 0 FROM Booking b
     WHERE b.room.roomId = :roomId
     AND b.status NOT IN ('CANCELLED', 'REFUNDED')
-    AND b.checkInDate < :checkOut
-    AND b.checkOutDate > :checkIn
+        AND (
+            (b.checkInDate < :checkOut AND b.checkOutDate > :checkIn)
+            OR (b.checkInDate = b.checkOutDate AND b.checkInDate = :checkIn)
+        )
 """)
     boolean existsConflictBooking(
             @Param("roomId") Long roomId,
@@ -58,8 +60,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("""
     SELECT b.room.roomId FROM Booking b
     WHERE b.status NOT IN ('CANCELLED', 'REFUNDED')
-    AND b.checkInDate < :checkOut
-    AND b.checkOutDate > :checkIn
+        AND (
+            (b.checkInDate < :checkOut AND b.checkOutDate > :checkIn)
+            OR (b.checkInDate = b.checkOutDate AND b.checkInDate = :checkIn)
+        )
 """)
     List<Long> findOccupiedRoomIds(
             @Param("checkIn") LocalDate checkIn,
@@ -71,8 +75,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     LEFT JOIN FETCH b.bookingRooms br
     LEFT JOIN FETCH br.room r
     WHERE b.status NOT IN ('CANCELLED', 'REFUNDED')
-    AND b.checkInDate < :checkOut
-    AND b.checkOutDate > :checkIn
+        AND (
+            (b.checkInDate < :checkOut AND b.checkOutDate > :checkIn)
+            OR (b.checkInDate = b.checkOutDate AND b.checkInDate = :checkIn)
+        )
 """)
     List<Booking> findActiveBookingsInRange(
             @Param("checkIn") LocalDate checkIn,

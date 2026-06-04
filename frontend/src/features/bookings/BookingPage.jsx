@@ -33,6 +33,7 @@ import 'dayjs/locale/vi'
 import { useTranslation } from 'react-i18next'
 import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward, EmojiEvents, Phone } from '@mui/icons-material'
 import { getRoomsApi, getAvailableRoomsApi, getFeaturedRoomsApi, getTopRatedRoomsApi, getWeekendDealsApi, getBudgetRoomsApi } from '../../shared/api/roomApi'
+import { getOccupiedRoomsApi } from '../../shared/api/bookingApi'
 import { getAmenitiesApi } from '../../shared/api/amenityApi'
 import { createBookingApi, getBookedDatesApi } from '../../shared/api/bookingApi'
 import { getMyMembershipApi } from '../../shared/api/membershipApi'
@@ -152,6 +153,8 @@ const RoomCard = ({
   onOpenBooking,
   params = {},
   searched = false
+  ,
+  isUnavailable = false
 }) => {
   const { t, i18n } = useTranslation()
 
@@ -184,6 +187,7 @@ const RoomCard = ({
         <Checkbox
           checked={selected}
           onClick={(e) => { e.stopPropagation(); onToggleSelect?.(room) }}
+          disabled={isUnavailable}
           sx={{
             position: 'absolute',
             top: 8,
@@ -258,7 +262,7 @@ const RoomCard = ({
           {showBookButton && (
             <Button
               size="small" variant="contained" color="primary"
-              disabled={isCapacityInsufficient}
+              disabled={isCapacityInsufficient || isUnavailable}
               onClick={(e) => { e.stopPropagation(); onOpenBooking?.(room, isMock) }}
               sx={{ borderRadius: 2, fontSize: 11, px: 1.5 }}
             >
@@ -570,6 +574,7 @@ const BookingPage = () => {
   const [budgetList, setBudgetList] = useState([])
   const [sectionsLoading, setSectionsLoading] = useState(false)
   const isFetchingSectionsRef = useRef(false)
+  const [occupiedRoomIds, setOccupiedRoomIds] = useState([])
 
   const fetchSections = async (limit = 10) => {
     if (isFetchingSectionsRef.current) return
@@ -958,6 +963,13 @@ const BookingPage = () => {
         searchParams.children
       )
       setRooms(Array.isArray(d) ? d : [])
+      // fetch occupied room ids for selected range to disable selection in UI
+      try {
+        const occ = await getOccupiedRoomsApi(searchParams.checkIn, searchParams.checkOut)
+        setOccupiedRoomIds(Array.isArray(occ) ? occ : [])
+      } catch (err) {
+        setOccupiedRoomIds([])
+      }
     } catch { setRooms([]) }
     finally {
       setLoading(false)
@@ -1003,6 +1015,12 @@ const BookingPage = () => {
       return
     }
     if (selectedRoomsForOrder.length === 0) return
+    // Prevent booking if any selected room is already occupied for the chosen dates
+    const conflict = selectedRoomsForOrder.some(r => occupiedRoomIds.includes((r.roomId || r.id)))
+    if (conflict) {
+      setSnackbar({ open: true, msg: t('booking_page.conflict_selected_rooms') || 'Một số phòng đã có đặt trong ngày. Vui lòng bỏ chọn các phòng xung đột.', severity: 'error' })
+      return
+    }
     setSelectedRoom(selectedRoomsForOrder[0])
     setSelectedIsMock(false)
     setDialogOpen(true)
@@ -1719,6 +1737,7 @@ const BookingPage = () => {
                           onOpenBooking={openBooking}
                           params={params}
                           searched={searched}
+                          isUnavailable={occupiedRoomIds.includes((r.roomId || r.id))}
                         />
                       </Grid>
                     ))}

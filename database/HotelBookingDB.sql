@@ -794,3 +794,25 @@ VALUES
 (N'Lễ Quốc Khánh 2026', 'National Day 2026', '2026-09-02', '2026-09-03', 1.50),
 (N'Giáng Sinh & Năm Mới 2026-2027', 'Christmas & New Year 2026-2027', '2026-12-24', '2027-01-02', 1.50);
 GO
+
+ALTER TABLE Bookings ADD
+    booking_type           VARCHAR(20)  NOT NULL DEFAULT 'OVERNIGHT',
+    -- 'OVERNIGHT' = qua đêm bình thường
+    -- 'SAME_DAY'  = nhận trả trong ngày
+
+    expected_checkout_time TIME         NULL;
+    -- Giờ trả phòng mong muốn (chỉ dùng khi SAME_DAY)
+
+CREATE TABLE BookingRooms (
+    booking_room_id     BIGINT NOT NULL IDENTITY(1,1),
+    booking_id          BIGINT NOT NULL,
+    room_id             BIGINT NOT NULL,
+    room_price_snapshot DECIMAL(18,2) NOT NULL,
+    sort_order          INT NOT NULL DEFAULT 0,
+    CONSTRAINT PK_BookingRooms PRIMARY KEY (booking_room_id),
+    CONSTRAINT FK_BookingRooms_Booking FOREIGN KEY (booking_id) REFERENCES Bookings(booking_id) ON DELETE CASCADE,
+    CONSTRAINT FK_BookingRooms_Room FOREIGN KEY (room_id) REFERENCES Rooms(room_id),
+    CONSTRAINT UQ_BookingRooms_BookingRoom UNIQUE (booking_id, room_id)
+);
+CREATE INDEX IX_BookingRooms_Room ON BookingRooms(room_id);
+CREATE INDEX IX_BookingRooms_Booking ON BookingRooms(booking_id);

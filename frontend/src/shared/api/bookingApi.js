@@ -46,3 +46,11 @@ export const getBookedDatesApi = async (roomId) => {
   const response = await axiosInstance.get(`${API_URL}/room/${roomId}/booked-dates`);
   return response.data;
 };
+
+export const getOccupiedRoomsApi = async (checkIn, checkOut) => {
+  const params = {};
+  if (checkIn) params.checkIn = checkIn;
+  if (checkOut) params.checkOut = checkOut;
+  const response = await axiosInstance.get(`${API_URL}/occupied-rooms`, { params });
+  return response.data;
+};

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static com.hotel.modules.booking.entity.CancelActor.ADMIN;
 import static com.hotel.modules.booking.entity.CancelActor.USER;
@@ -105,6 +106,14 @@ public class BookingController {
     @GetMapping("/room/{roomId}/booked-dates")
     public ResponseEntity<List<String>> getBookedDates(@PathVariable Long roomId) {
         return ResponseEntity.ok(bookingService.getBookedDatesByRoomId(roomId));
+    }
+
+    @GetMapping("/room/{roomId}/conflict")
+    public ResponseEntity<?> checkRoomConflict(@PathVariable Long roomId,
+                                               @RequestParam LocalDate checkIn,
+                                               @RequestParam LocalDate checkOut) {
+        boolean conflict = bookingService.isRoomConflicting(roomId, checkIn, checkOut);
+        return ResponseEntity.ok(Map.of("conflict", conflict));
     }
 
 }
