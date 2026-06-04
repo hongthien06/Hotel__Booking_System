@@ -70,6 +70,9 @@ public class SecurityConfig {
                         .requestMatchers("/holidays/**", "/api/v1/holidays/**").hasAnyRole("ADMIN", "MANAGER")
                         // Reviews: public endpoints
                         .requestMatchers(GET, "/reviews/approved/**", "/reviews/approved").permitAll()
+                        // Reviews: customer endpoints
+                        .requestMatchers(GET, "/reviews/my").authenticated()
+                        .requestMatchers(GET, "/reviews/check/*").authenticated()
                         // Reviews: customer create
                         .requestMatchers(HttpMethod.POST, "/reviews").authenticated()
                         // Reviews: admin manage

@@ -27,6 +27,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { cancelBookingApi, getMyBookingsApi, mergePendingBookingsApi } from '../../../shared/api/bookingApi'
+import { checkReviewExists } from '../../../shared/api/reviewApi'
 import { formatCurrency, formatDate } from '../../../shared/utils/formatters'
 import { getBookingRooms } from '../../payments/utils/bookingTotals'
 import ReviewFormDialog from '../../reviews/ReviewFormDialog'
@@ -56,6 +57,7 @@ const BookingHistoryPage = () => {
   const [selectedBookingForReview, setSelectedBookingForReview] = useState(null)
   const [selectedPendingIds, setSelectedPendingIds] = useState([])
   const [mergingPayment, setMergingPayment] = useState(false)
+  const [reviewedBookings, setReviewedBookings] = useState({})
 
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
@@ -65,7 +67,23 @@ const BookingHistoryPage = () => {
     setError('')
     try {
       const data = await getMyBookingsApi(checkIn, checkOut)
-      setBookings(Array.isArray(data) ? data : [])
+      const list = Array.isArray(data) ? data : []
+      setBookings(list)
+
+      // Kiểm tra trạng thái review cho các booking CHECKED_OUT
+      const checkedOutBookings = list.filter(b => b.status === 'CHECKED_OUT')
+      const reviewChecks = {}
+      await Promise.all(
+        checkedOutBookings.map(async (b) => {
+          try {
+            const result = await checkReviewExists(b.bookingId)
+            reviewChecks[b.bookingId] = result.reviewed
+          } catch {
+            reviewChecks[b.bookingId] = false
+          }
+        })
+      )
+      setReviewedBookings(prev => ({ ...prev, ...reviewChecks }))
     } catch (err) {
       setError(t('bookings_history.fetch_error') || 'Lỗi khi tải dữ liệu')
       console.error(err)
@@ -509,23 +527,40 @@ const BookingHistoryPage = () => {
                     )}
                     {booking.status === 'CHECKED_OUT' && (
                       <Box sx={{ mt: 2 }}>
-                        <Button
-                          fullWidth
-                          variant="outlined"
-                          size="small"
-                          startIcon={<RateReview />}
-                          onClick={() => {
-                            setSelectedBookingForReview(booking)
-                            setReviewDialogOpen(true)
-                          }}
-                          sx={{
-                            borderRadius: 2, fontSize: 11, fontWeight: 700,
-                            borderColor: PC, color: PC,
-                            '&:hover': { bgcolor: '#fdf2f8', borderColor: PC }
-                          }}
-                        >
-                          {t('reviews.write_review')}
-                        </Button>
+                        {reviewedBookings[booking.bookingId] ? (
+                          <Button
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            disabled
+                            startIcon={<CheckCircle />}
+                            sx={{
+                              borderRadius: 2, fontSize: 11, fontWeight: 700,
+                              borderColor: '#4caf50', color: '#4caf50',
+                              '&.Mui-disabled': { borderColor: '#c8e6c9', color: '#81c784' }
+                            }}
+                          >
+                            {t('reviews.already_reviewed') || 'Đã đánh giá'}
+                          </Button>
+                        ) : (
+                          <Button
+                            fullWidth
+                            variant="outlined"
+                            size="small"
+                            startIcon={<RateReview />}
+                            onClick={() => {
+                              setSelectedBookingForReview(booking)
+                              setReviewDialogOpen(true)
+                            }}
+                            sx={{
+                              borderRadius: 2, fontSize: 11, fontWeight: 700,
+                              borderColor: PC, color: PC,
+                              '&:hover': { bgcolor: '#fdf2f8', borderColor: PC }
+                            }}
+                          >
+                            {t('reviews.write_review')}
+                          </Button>
+                        )}
                       </Box>
                     )}
                   </CardContent>

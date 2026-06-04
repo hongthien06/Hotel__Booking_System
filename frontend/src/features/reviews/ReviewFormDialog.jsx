@@ -33,7 +33,12 @@ const ReviewFormDialog = ({ open, onClose, booking, onReviewSubmitted }) => {
     try {
       await createReview({
         bookingId: booking.bookingId,
-        ...form
+        ratingOverall: Math.round(form.ratingOverall),
+        ratingClean: Math.round(form.ratingClean),
+        ratingService: Math.round(form.ratingService),
+        ratingLocation: Math.round(form.ratingLocation),
+        ratingValue: Math.round(form.ratingValue),
+        comment: form.comment
       })
       toast.success(t('reviews.submit_success'))
       onReviewSubmitted?.()

@@ -20,8 +20,12 @@ export default defineConfig({
       'es-toolkit/compat/minBy': path.resolve(__dirname, './src/shims/es-toolkit/compat/minBy.js'),
       'es-toolkit/compat/omit': path.resolve(__dirname, './src/shims/es-toolkit/compat/omit.js'),
       'es-toolkit/compat/sumBy': path.resolve(__dirname, './src/shims/es-toolkit/compat/sumBy.js'),
-      'es-toolkit/compat/throttle': path.resolve(__dirname, './src/shims/es-toolkit/compat/throttle.js')
+      'es-toolkit/compat/throttle': path.resolve(__dirname, './src/shims/es-toolkit/compat/throttle.js'),
+      'es-toolkit/compat/isUnsafeProperty': path.resolve(__dirname, './src/shims/es-toolkit/compat/isUnsafeProperty.js')
     }
+  },
+  optimizeDeps: {
+    include: ['recharts']
   },
   server: {
     port: 3000,

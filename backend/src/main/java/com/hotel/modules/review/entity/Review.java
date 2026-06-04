@@ -33,19 +33,19 @@ public class Review {
     private Room room;
 
     @Column(name = "rating_overall", nullable = false)
-    private Byte ratingOverall;
+    private Integer ratingOverall;
 
     @Column(name = "rating_clean")
-    private Byte ratingClean;
+    private Integer ratingClean;
 
     @Column(name = "rating_service")
-    private Byte ratingService;
+    private Integer ratingService;
 
     @Column(name = "rating_location")
-    private Byte ratingLocation;
+    private Integer ratingLocation;
 
     @Column(name = "rating_value")
-    private Byte ratingValue;
+    private Integer ratingValue;
 
     @Column(name = "comment", columnDefinition = "NVARCHAR(MAX)")
     private String comment;

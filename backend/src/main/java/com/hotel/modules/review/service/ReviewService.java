@@ -74,6 +74,20 @@ public class ReviewService {
     }
 
     /**
+     * Customer: xem review của mình
+     */
+    public Page<ReviewResponseDTO> getMyReviews(Long userId, Pageable pageable) {
+        return reviewRepository.findByUserId(userId, pageable).map(this::toResponseDTO);
+    }
+
+    /**
+     * Kiểm tra booking đã có review chưa
+     */
+    public boolean existsByBookingId(Long bookingId) {
+        return reviewRepository.existsByBookingBookingId(bookingId);
+    }
+
+    /**
      * Admin: xem tất cả review
      */
     public Page<ReviewResponseDTO> getAllReviews(Pageable pageable) {

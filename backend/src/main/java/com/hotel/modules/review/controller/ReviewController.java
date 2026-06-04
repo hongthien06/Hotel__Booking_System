@@ -43,6 +43,24 @@ public class ReviewController {
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))));
     }
 
+    @Operation(summary = "Xem đánh giá của tôi", description = "Customer xem đánh giá của mình")
+    @GetMapping("/my")
+    public ResponseEntity<Page<ReviewResponseDTO>> getMyReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(reviewService.getMyReviews(user.getUserId(),
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"))));
+    }
+
+    @Operation(summary = "Kiểm tra đã đánh giá booking chưa", description = "Customer kiểm tra booking đã có review chưa")
+    @GetMapping("/check/{bookingId}")
+    public ResponseEntity<Map<String, Boolean>> checkReviewExists(
+            @PathVariable Long bookingId) {
+        boolean exists = reviewService.existsByBookingId(bookingId);
+        return ResponseEntity.ok(Map.of("reviewed", exists));
+    }
+
     @Operation(summary = "Thống kê đánh giá", description = "Public: lấy thống kê đánh giá (average rating, total)")
     @GetMapping("/approved/stats")
     public ResponseEntity<Map<String, Object>> getReviewStats() {

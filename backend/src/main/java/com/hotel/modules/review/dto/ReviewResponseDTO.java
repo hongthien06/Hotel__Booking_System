@@ -19,11 +19,11 @@ public class ReviewResponseDTO {
     private String customerAvatar;
     private String roomNumber;
     private String hotelName;
-    private Byte ratingOverall;
-    private Byte ratingClean;
-    private Byte ratingService;
-    private Byte ratingLocation;
-    private Byte ratingValue;
+    private Integer ratingOverall;
+    private Integer ratingClean;
+    private Integer ratingService;
+    private Integer ratingLocation;
+    private Integer ratingValue;
     private String comment;
     private Boolean isApproved;
     private String adminReply;

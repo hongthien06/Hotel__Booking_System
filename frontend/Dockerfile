@@ -32,45 +32,43 @@ RUN rm /etc/nginx/conf.d/default.conf
 
 # Nginx config tối giản (reverse proxy + SPA fallback)
 # Lưu thẳng vào image, không cần file bên ngoài
-RUN cat > /etc/nginx/conf.d/hbms.conf << 'EOF'
-server {
-listen 80;
-root /usr/share/nginx/html;
-index index.html;
-
-# Gzip
-gzip on;
-gzip_types text/plain text/css application/javascript application/json;
-
-# Health check
-location /health {
-return 200 "OK";
-add_header Content-Type text/plain;
-}
-
-# Cache static assets (Vite đã hash tên file)
-location ~* \.(js|css|png|jpg|jpeg|svg|ico|woff2)$ {
-expires 1y;
-add_header Cache-Control "public, immutable";
-}
-
-# Proxy API requests to backend
-location /api {
-proxy_pass http://backend:8080;
-proxy_set_header Host $host;
-proxy_set_header X-Real-IP $remote_addr;
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-proxy_set_header X-Forwarded-Proto $scheme;
-proxy_set_header Origin "";
-}
-
-# SPA fallback: Mọi route → index.html (React Router xử lý)
-location / {
-try_files $uri $uri/ /index.html;
-add_header Cache-Control "no-store";
-}
-}
-EOF
+RUN printf 'server {\n\
+    listen 80;\n\
+    root /usr/share/nginx/html;\n\
+    index index.html;\n\
+\n\
+    # Gzip\n\
+    gzip on;\n\
+    gzip_types text/plain text/css application/javascript application/json;\n\
+\n\
+    # Health check\n\
+    location /health {\n\
+        return 200 "OK";\n\
+        add_header Content-Type text/plain;\n\
+    }\n\
+\n\
+    # Cache static assets (Vite hash ten file)\n\
+    location ~* \\.(js|css|png|jpg|jpeg|svg|ico|woff2)$ {\n\
+        expires 1y;\n\
+        add_header Cache-Control "public, immutable";\n\
+    }\n\
+\n\
+    # Proxy API requests to backend\n\
+    location /api {\n\
+        proxy_pass http://backend:8080;\n\
+        proxy_set_header Host $host;\n\
+        proxy_set_header X-Real-IP $remote_addr;\n\
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n\
+        proxy_set_header X-Forwarded-Proto $scheme;\n\
+        proxy_set_header Origin "";\n\
+    }\n\
+\n\
+    # SPA fallback: route -> index.html (React Router xu ly)\n\
+    location / {\n\
+        try_files $uri $uri/ /index.html;\n\
+        add_header Cache-Control "no-store";\n\
+    }\n\
+}\n' > /etc/nginx/conf.d/hbms.conf
 
 # Copy static files từ stage builder
 COPY --from=builder /app/dist /usr/share/nginx/html

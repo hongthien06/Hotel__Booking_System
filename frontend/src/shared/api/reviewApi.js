@@ -46,3 +46,8 @@ export const deleteReview = async (id) => {
   const response = await axiosInstance.delete(`${API_URL}/${id}`)
   return response.data
 }
+
+export const checkReviewExists = async (bookingId) => {
+  const response = await axiosInstance.get(`${API_URL}/check/${bookingId}`)
+  return response.data
+}

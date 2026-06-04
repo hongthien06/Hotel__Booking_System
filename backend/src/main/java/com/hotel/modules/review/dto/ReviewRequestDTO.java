@@ -19,19 +19,19 @@ public class ReviewRequestDTO {
     @NotNull(message = "Đánh giá tổng thể không được để trống")
     @Min(value = 1, message = "Đánh giá tối thiểu là 1")
     @Max(value = 5, message = "Đánh giá tối đa là 5")
-    private Byte ratingOverall;
+    private Integer ratingOverall;
 
     @Min(1) @Max(5)
-    private Byte ratingClean;
+    private Integer ratingClean;
 
     @Min(1) @Max(5)
-    private Byte ratingService;
+    private Integer ratingService;
 
     @Min(1) @Max(5)
-    private Byte ratingLocation;
+    private Integer ratingLocation;
 
     @Min(1) @Max(5)
-    private Byte ratingValue;
+    private Integer ratingValue;
 
     private String comment;
 }
