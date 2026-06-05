@@ -14,6 +14,7 @@ import com.hotel.modules.rooms.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ public class DashboardService {
     private final UserRepository userRepository;
     private final PaymentRepository paymentRepository;
 
+    @Transactional(readOnly = true)
     public DashboardStatsDTO getStats() {
         try {
             long totalRooms = roomRepository.count();
@@ -174,10 +176,22 @@ public class DashboardService {
             amount = booking.getRoomPriceSnapshot().multiply(new BigDecimal(booking.getTotalNights())).doubleValue();
         }
 
+        // Gom tất cả số phòng từ BookingRooms (đơn đôi/đa phòng)
+        String roomNumber;
+        if (booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()) {
+            roomNumber = booking.getBookingRooms().stream()
+                    .filter(br -> br.getRoom() != null)
+                    .sorted(java.util.Comparator.comparingInt(br -> br.getSortOrder() != null ? br.getSortOrder() : 0))
+                    .map(br -> br.getRoom().getRoomNumber())
+                    .collect(java.util.stream.Collectors.joining(" & "));
+        } else {
+            roomNumber = booking.getRoom() != null ? booking.getRoom().getRoomNumber() : "N/A";
+        }
+
         return RecentBookingDTO.builder()
                 .id(booking.getBookingId())
                 .customerName(booking.getUser() != null ? booking.getUser().getFullName() : "N/A")
-                .roomNumber(booking.getRoom() != null ? booking.getRoom().getRoomNumber() : "N/A")
+                .roomNumber(roomNumber)
                 .bookingDate(booking.getCreatedAt())
                 .amount(amount)
                 .status(booking.getStatus().name())
