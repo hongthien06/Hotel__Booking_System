@@ -231,10 +231,16 @@
     "check_out": "CHECK OUT",
     "check_in_short": "In",
     "check_out_short": "Out",
-    "no_data": "No booking data available.",
+    "no_data": "You don't have any bookings yet.",
+    "empty_cta": "Book now to not miss out on great deals!",
     "fetch_error": "Error fetching booking history",
     "confirm_cancel": "Are you sure you want to cancel this booking?",
-    "cancel_error": "Error cancelling booking"
+    "cancel_error": "Error cancelling booking",
+    "showing_results": "Showing {{count}} results",
+    "sort_newest": "Newest first",
+    "sort_oldest": "Oldest first",
+    "sort_price_desc": "Price: High to Low",
+    "sort_price_asc": "Price: Low to High"
   },
   "destinations": {
     "title": "Popular Destinations",
