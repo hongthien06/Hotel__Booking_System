@@ -15,11 +15,13 @@ import {
 } from '@mui/icons-material'
 import {
   Alert,
+  Backdrop,
   Box,
   Button,
   Chip,
   Card, CardContent, CardMedia,
   Checkbox,
+  CircularProgress,
   Divider,
   Grid,
   IconButton,
@@ -34,6 +36,8 @@ import { useNavigate } from 'react-router-dom'
 import { cancelBookingApi, getMyBookingsApi, mergePendingBookingsApi } from '../../../shared/api/bookingApi'
 import { getMyMembershipApi } from '../../../shared/api/membershipApi'
 import { checkReviewExists } from '../../../shared/api/reviewApi'
+import { getRoomByIdApi } from '../../../shared/api/roomApi'
+import RoomDetail from '../../rooms/Details/RoomDetail'
 import { formatCurrency, formatDate } from '../../../shared/utils/formatters'
 import { getBookingRooms } from '../../payments/utils/bookingTotals'
 import ReviewFormDialog from '../../reviews/ReviewFormDialog'
@@ -73,6 +77,35 @@ const BookingHistoryPage = () => {
   const [destination, setDestination] = useState('')
   const [statusFilter, setStatusFilter] = useState('ALL')
   const [sortBy, setSortBy] = useState('newest')
+  const [selectedRoom, setSelectedRoom] = useState(null)
+  const [roomDetailOpen, setRoomDetailOpen] = useState(false)
+  const [loadingRoom, setLoadingRoom] = useState(false)
+
+  const handleCardClick = async (booking) => {
+    const primaryRoom = getHistoryRoom(booking)
+    if (!primaryRoom.roomId) return
+    setLoadingRoom(true)
+    try {
+      const roomData = await getRoomByIdApi(primaryRoom.roomId)
+      setSelectedRoom(roomData)
+      setRoomDetailOpen(true)
+    } catch (err) {
+      console.error('Failed to fetch room details:', err)
+      // Fallback
+      setSelectedRoom({
+        id: primaryRoom.roomId,
+        roomNumber: primaryRoom.roomNumber,
+        typeName: primaryRoom.roomTypeName,
+        hotelName: primaryRoom.hotelName,
+        address: primaryRoom.hotelAddress,
+        pricePerNight: primaryRoom.roomPriceSnapshot,
+        status: booking.status === 'CHECKED_OUT' ? 'AVAILABLE' : 'OCCUPIED'
+      })
+      setRoomDetailOpen(true)
+    } finally {
+      setLoadingRoom(false)
+    }
+  }
 
   const fetchBookings = async () => {
     setLoading(true)
@@ -296,10 +329,10 @@ const BookingHistoryPage = () => {
         bgcolor: '#fdf2f8', // Màu nền nhẹ của Header Banner, tương tự primary.main với độ mờ cao
         borderBottom: '1px solid #fce4ec' // Màu viền tương ứng primary.main
       }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, letterSpacing: 1, textTransform: 'uppercase', color: PC }}>
+        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1.5, letterSpacing: 1.2, textTransform: 'uppercase', color: PC, fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' } }}>
           {t('header.bookings_history') || 'LỊCH SỬ ĐẶT PHÒNG'}
         </Typography>
-        <Typography variant="body2" sx={{ color: '#666', mb: 5 }}>
+        <Typography sx={{ color: 'text.secondary', mb: 5, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, fontWeight: 500 }}>
           {t('bookings_history.subtitle', 'Quản lý các chuyến đi và lịch sử đặt phòng của bạn')}
         </Typography>
 
@@ -439,7 +472,7 @@ const BookingHistoryPage = () => {
         </Box>
 
         {/* Status Filter Chips */}
-        <Box sx={{ display: 'flex', gap: 1.5, mb: 6, flexWrap: 'wrap' }}>
+        <Box sx={{ display: 'flex', gap: 1.5, mb: 2.5, flexWrap: 'wrap' }}>
           {[
             { label: 'Tất cả', count: counts.ALL, value: 'ALL' },
             { label: 'Sắp tới', count: counts.UPCOMING, value: 'UPCOMING' },
@@ -610,18 +643,22 @@ const BookingHistoryPage = () => {
                   const roomNumbersStr = allRooms.map(r => r.roomNumber).filter(Boolean).join(', ')
                   const roomTypesStr = allRooms.map(r => r.roomTypeName || 'Standard').filter((v, i, a) => a.indexOf(v) === i).join(' + ')
                   return (
-                <Card sx={{
-                  height: '100%',
-                  bgcolor: '#fff',
-                  borderRadius: 3,
-                  border: '1px solid #eee',
-                  transition: 'all 0.3s',
-                  position: 'relative',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 12px 30px rgba(0,0,0,0.1)'
-                  }
-                }}>
+                <Card 
+                  onClick={() => handleCardClick(booking)}
+                  sx={{
+                    height: '100%',
+                    bgcolor: '#fff',
+                    borderRadius: 3,
+                    border: '1px solid #eee',
+                    transition: 'all 0.3s',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.1)'
+                    }
+                  }}
+                >
                   {booking.status === 'PENDING' && (
                     <Checkbox
                       checked={selectedPendingIds.includes(booking.bookingId)}
@@ -700,7 +737,7 @@ const BookingHistoryPage = () => {
                           variant="outlined"
                           color="error"
                           size="small"
-                          onClick={() => handleCancel(booking.bookingId)}
+                          onClick={(e) => { e.stopPropagation(); handleCancel(booking.bookingId); }}
                           sx={{ borderRadius: 2, fontSize: 11, fontWeight: 700 }}
                         >
                           {t('common.cancel')}
@@ -710,7 +747,7 @@ const BookingHistoryPage = () => {
                             fullWidth
                             variant="contained"
                             size="small"
-                            onClick={() => handlePayment(booking)}
+                            onClick={(e) => { e.stopPropagation(); handlePayment(booking); }}
                             sx={{
                               borderRadius: 2,
                               fontSize: 11,
@@ -748,7 +785,8 @@ const BookingHistoryPage = () => {
                             variant="outlined"
                             size="small"
                             startIcon={<RateReview />}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation()
                               setSelectedBookingForReview(booking)
                               setReviewDialogOpen(true)
                             }}
@@ -782,6 +820,23 @@ const BookingHistoryPage = () => {
           onReviewSubmitted={() => fetchBookings()}
         />
       )}
+
+      {/* Room Detail Dialog */}
+      {selectedRoom && (
+        <RoomDetail
+          open={roomDetailOpen}
+          room={selectedRoom}
+          onClose={() => { setRoomDetailOpen(false); setSelectedRoom(null); }}
+          onBook={() => navigate('/booking')}
+          canEdit={false}
+          bookButtonText={t('common.rebook') || 'Đặt lại'}
+        />
+      )}
+
+      {/* Backdrop loading overlay */}
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loadingRoom}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   )
 }

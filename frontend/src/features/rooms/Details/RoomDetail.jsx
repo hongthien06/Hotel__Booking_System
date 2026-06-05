@@ -21,7 +21,7 @@ const InfoRow = ({ label, value, icon }) => (
   </Box>
 )
 
-const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook, isCapacityInsufficient = false, totalGuests = 0 }) => {
+const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook, isCapacityInsufficient = false, totalGuests = 0, bookButtonText }) => {
   const { t, i18n } = useTranslation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
@@ -243,7 +243,7 @@ const RoomDetail = ({ room, open, onClose, onEdit, canEdit, onBook, isCapacityIn
               '&:active': { bgcolor: 'primary.dark', color: 'primary.contrastTextHover' }
             }}
           >
-            {isCapacityInsufficient ? t('booking_page.insufficient_capacity') : t('common.book_now')}
+            {isCapacityInsufficient ? t('booking_page.insufficient_capacity') : (bookButtonText || t('common.book_now'))}
           </Button>
         )}
         <Button
