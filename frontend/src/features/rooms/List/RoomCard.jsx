@@ -47,7 +47,7 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
       }}
     >
       {/* Image */}
-      <Box sx={{ position: 'relative', height: 140, overflow: 'hidden' }}>
+      <Box sx={{ position: 'relative', height: { xs: 140, sm: 180 }, overflow: 'hidden' }}>
         {room.imageUrls && room.imageUrls.length > 0 ? (
           <CardMedia
             component="img"

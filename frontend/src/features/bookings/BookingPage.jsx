@@ -180,7 +180,9 @@ const RoomCard = ({
         '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' },
         display: 'flex',
         flexDirection: 'column',
-        height: '100%'
+        height: '100%',
+        width: '100%',
+        flex: 1
       }}
     >
       {selectable && (
@@ -202,14 +204,15 @@ const RoomCard = ({
         />
       )}
       {isMock
-        ? <Box sx={{ height: 160, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        ? <Box sx={{ height: 180, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
         </Box>
         : <CardMedia
           component="img"
-          height="160"
+          height="180"
           image={(room.imageUrls && room.imageUrls.length > 0) ? room.imageUrls[0] : (room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600')}
           alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
+          sx={{ objectFit: 'cover' }}
         />
       }
       <CardContent sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
@@ -1376,14 +1379,14 @@ const BookingPage = () => {
                   )}
 
                   <Box ref={roomScrollRef} sx={{
-                    display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
+                    display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                     scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
                         {(loading || sectionsLoading) ? (
                           [...Array(4)].map((_, i) => (
-                            <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0 }}>
+                            <Box key={i} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
                               <RoomCardSkeleton />
                             </Box>
                           ))
@@ -1396,7 +1399,7 @@ const BookingPage = () => {
                             </Box>
                           ) : (
                             featuredRooms.map(r => (
-                              <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
+                              <Box key={r.id || r.roomId} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
                                 <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                               </Box>
                             ))
@@ -1448,14 +1451,14 @@ const BookingPage = () => {
                     )}
 
                     <Box ref={topRatedScrollRef} sx={{
-                      display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
+                      display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
                       justifyContent: 'flex-start',
                       scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                       scrollSnapType: { xs: 'none', md: 'x mandatory' }
                     }}>
                       {(sectionsLoading) ? (
                         [...Array(4)].map((_, i) => (
-                          <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0 }}>
+                          <Box key={i} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
                             <RoomCardSkeleton />
                           </Box>
                         ))
@@ -1467,7 +1470,7 @@ const BookingPage = () => {
                         </Box>
                       ) : (
                         topRatedRooms.map(r => (
-                          <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
+                          <Box key={r.id || r.roomId} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
                             <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                           </Box>
                         ))
@@ -1520,14 +1523,14 @@ const BookingPage = () => {
                       )}
 
                       <Box ref={budgetScrollRef} sx={{
-                        display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
+                        display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                         scrollSnapType: { xs: 'none', md: 'x mandatory' }
                       }}>
                             {(sectionsLoading) ? (
                               [...Array(4)].map((_, i) => (
-                                  <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0 }}>
+                                  <Box key={i} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
                                     <RoomCardSkeleton />
                                   </Box>
                                 ))
@@ -1539,7 +1542,7 @@ const BookingPage = () => {
                               </Box>
                             ) : (
                               budgetRooms.map(r => (
-                                <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
+                                <Box key={r.id || r.roomId} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
                                   <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                                 </Box>
                               ))
@@ -1576,14 +1579,14 @@ const BookingPage = () => {
                   )}
 
                   <Box ref={weekendScrollRef} sx={{
-                    display: 'flex', gap: 3, overflowX: 'auto', pb: 2, pt: 1,
+                    display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
                     scrollSnapType: { xs: 'none', md: 'x mandatory' }
                   }}>
                     {(sectionsLoading) ? (
                       [...Array(4)].map((_, i) => (
-                        <Box key={i} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0 }}>
+                        <Box key={i} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
                           <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
                           <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
                           <Skeleton width="50%" height={18} />
@@ -1597,7 +1600,7 @@ const BookingPage = () => {
                       </Box>
                     ) : (
                       weekendDeals.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: { xs: '72vw', sm: 'calc((100% - 72px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
+                        <Box key={r.id || r.roomId} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
                           <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} showBookButton={false} onOpenDetail={openDetail} />
                         </Box>
                       ))
