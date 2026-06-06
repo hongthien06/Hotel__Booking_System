@@ -1,0 +1,121 @@
+name: hbms
+
+networks:
+  hbms-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data-final:
+  backend-logs:
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hbms-sqlserver
+    hostname: sqlserver
+    networks:
+      - hbms-network
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SQL_SA_PASSWORD}"
+      MSSQL_PID: "Developer"
+      MSSQL_COLLATION: "Vietnamese_CI_AS"
+    volumes:
+      - sqlserver-data-final:/var/opt/mssql
+    restart: unless-stopped
+
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: hbms-db-init
+    networks:
+      - hbms-network
+    volumes:
+      - ../database/HotelBookingDB.sql:/HotelBookingDB.sql:ro
+    env_file:
+      - ../.env
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        echo 'Đợi SQL Server...';
+        for i in {1..60}; do
+          /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q 'SELECT 1' -No -C && break;
+          echo 'Thử lại sau 2s...';
+          sleep 2;
+        done;
+        echo 'Kiểm tra trạng thái database...';
+        DB_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q "SET NOCOUNT ON; IF DB_ID('HotelBookingDB') IS NOT NULL SELECT 1 ELSE SELECT 0" -h -1 -No -C | tr -d '[:space:]' | grep -o '1' || echo '0');
+        INIT_NEEDED="1";
+        if [ "$$DB_EXISTS" == "1" ]; then
+          TABLE_EXISTS=$$(/opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -Q "SET NOCOUNT ON; IF OBJECT_ID('HotelBookingDB.dbo.Users', 'U') IS NOT NULL SELECT 1 ELSE SELECT 0" -h -1 -No -C | tr -d '[:space:]' | grep -o '1' || echo '0');
+          if [ "$$TABLE_EXISTS" == "1" ]; then
+            INIT_NEEDED="0";
+          fi;
+        fi;
+        if [ "$$INIT_NEEDED" == "1" ]; then
+          echo 'Đang nạp SQL khởi tạo...';
+          /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -i /HotelBookingDB.sql -No -C;
+        else
+          echo 'Dữ liệu đã tồn tại, bỏ qua bước khởi tạo để bảo toàn dữ liệu.';
+        fi;
+        echo 'Xong!';
+    depends_on:
+      - sqlserver
+
+  backend:
+    image: ${DOCKERHUB_USERNAME}/booking-backend:${IMAGE_TAG:-latest}
+    container_name: hbms-backend
+    hostname: backend
+    env_file:
+      - ../.env
+    networks:
+      - hbms-network
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqlserver:1433;databaseName=HotelBookingDB;encrypt=false;trustServerCertificate=true"
+      SPRING_DATASOURCE_USERNAME: "sa"
+      SPRING_DATASOURCE_PASSWORD: "${SQL_SA_PASSWORD}"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      RETURN_URL: "${RETURN_URL}"
+      SPRING_JPA_SHOW_SQL: "false"
+      APP_JWT_SECRET: "${JWT_SECRET_KEY}"
+      APP_JWT_EXPIRATION: "900000"
+      APP_JWT_REFRESH_EXPIRATION: "604800000"
+      APP_CORS_ALLOWED_ORIGINS: "${APP_CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost,https://static4j.app,https://www.static4j.app}"
+      APP_FRONTEND_URL: "${APP_FRONTEND_URL:-https://static4j.app}"
+      SPRING_MAIL_HOST: "${MAIL_HOST}"
+      SPRING_MAIL_PORT: "${MAIL_PORT}"
+      SPRING_MAIL_USERNAME: "${MAIL_USERNAME}"
+      SPRING_MAIL_PASSWORD: "${MAIL_PASSWORD}"
+      APP_VNPAY_TMN_CODE: "${VNPAY_TMN_CODE}"
+      APP_VNPAY_HASH_SECRET: "${VNPAY_HASH_SECRET}"
+      APP_MOMO_PARTNER_CODE: "${MOMO_PARTNER_CODE}"
+      APP_MOMO_ACCESS_KEY: "${MOMO_ACCESS_KEY}"
+      APP_MOMO_SECRET_KEY: "${MOMO_SECRET_KEY}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+      CLOUDINARY_CLOUD_NAME: "${CLOUDINARY_CLOUD_NAME}"
+      CLOUDINARY_API_KEY: "${CLOUDINARY_API_KEY}"
+      CLOUDINARY_API_SECRET: "${CLOUDINARY_API_SECRET}"
+      SPRING_PROFILES_ACTIVE: "docker"
+      JAVA_OPTS: "-Xms256m -Xmx512m -XX:+UseContainerSupport"
+    volumes:
+      - backend-logs:/app/logs
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  frontend:
+    image: ${DOCKERHUB_USERNAME}/booking-frontend:${IMAGE_TAG:-latest}
+    container_name: hbms-frontend
+    hostname: frontend
+    networks:
+      - hbms-network
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
