@@ -169,8 +169,8 @@ const BookingHistoryPage = () => {
   }
 
   const getHistoryRoomTotal = (booking) => {
-    const historyRoom = getHistoryRoom(booking)
-    return Number(historyRoom.subtotal || 0)
+    const rooms = getBookingRooms(booking)
+    return rooms.reduce((sum, r) => sum + (Number(r.roomPriceSnapshot || 0) * Number(booking.totalNights || nightsBetween(booking.checkInDate, booking.checkOutDate) || 1)), 0)
   }
 
   const handlePayment = (booking) => {
@@ -724,9 +724,12 @@ const BookingHistoryPage = () => {
                       </Grid>
                     </Grid>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                      <Typography variant="subtitle1" sx={{ fontWeight: 900, color: PC }}>
-                        {formatCurrency(booking.finalAmount || booking.totalAmount || getHistoryRoomTotal(booking))}
+                    <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="subtitle1" sx={{ fontWeight: 900, color: PC, lineHeight: 1.2 }}>
+                        {formatCurrency(getHistoryRoomTotal(booking))}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: '#4caf50', fontWeight: 600 }}>
+                        ({t('bookings_history.original_price') || 'Giá gốc'})
                       </Typography>
                     </Box>
 
