@@ -86,11 +86,11 @@ const BED_TYPES = [
   { key: 'QUEEN', label: 'rooms.bed_queen' }
 ]
 const BED_TYPE_LABELS = (t) => ({
-  'SINGLE': t('rooms.bed_single') || 'Giường Đơn',
-  'DOUBLE': t('rooms.bed_double') || 'Giường Đôi',
-  'TRIPLE': t('rooms.bed_triple') || 'Giường Ba',
-  'KING': t('rooms.bed_king') || 'Giường King',
-  'QUEEN': t('rooms.bed_queen') || 'Giường Queen'
+  'SINGLE': t('rooms.bed_single'),
+  'DOUBLE': t('rooms.bed_double'),
+  'TRIPLE': t('rooms.bed_triple'),
+  'KING': t('rooms.bed_king'),
+  'QUEEN': t('rooms.bed_queen')
 })
 const formatCurrency = (n, lang) => {
   const currency = lang ? (lang === 'vi' ? 'VND' : 'USD') : null;
@@ -425,7 +425,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
       {amenities && amenities.length > 0 && (
         <Box>
           <Typography sx={{ ...labelSx, color: PC, mb: 1 }}>
-            {t('booking_page.amenities') || 'Tiện ích khách sạn'}
+            {t('booking_page.amenities')}
           </Typography>
           <FormGroup sx={{ mb: 1 }}>
             {amenities.map(a => (
@@ -1018,7 +1018,7 @@ const BookingPage = () => {
     // Prevent booking if any selected room is already occupied for the chosen dates
     const conflict = selectedRoomsForOrder.some(r => occupiedRoomIds.includes((r.roomId || r.id)))
     if (conflict) {
-      setSnackbar({ open: true, msg: t('booking_page.conflict_selected_rooms') || 'Một số phòng đã có đặt trong ngày. Vui lòng bỏ chọn các phòng xung đột.', severity: 'error' })
+      setSnackbar({ open: true, msg: t('booking_page.conflict_selected_rooms'), severity: 'error' })
       return
     }
     setSelectedRoom(selectedRoomsForOrder[0])
@@ -1360,7 +1360,7 @@ const BookingPage = () => {
                         '&:hover': { bgcolor: PC_LIGHT }
                       }}
                     >
-                      {t('common.see_all') || 'Xem tất cả'}
+                      {t('common.see_all')}
                     </Button>
                   </Box>
                 </Box>
@@ -1391,7 +1391,7 @@ const BookingPage = () => {
                           featuredRooms.length === 0 ? (
                             <Box sx={{ width: '100%', py: 6, textAlign: 'center' }}>
                               <Alert severity="info" sx={{ borderRadius: 3, display: 'inline-flex', px: 4 }}>
-                                {t('booking_page.no_featured_rooms') || 'Không có phòng nổi bật.'}
+                                {t('booking_page.no_featured_rooms')}
                               </Alert>
                             </Box>
                           ) : (
@@ -1432,7 +1432,7 @@ const BookingPage = () => {
                           '&:hover': { bgcolor: PC_LIGHT }
                         }}
                       >
-                        {t('common.see_all') || 'Xem tất cả'}
+                        {t('common.see_all')}
                       </Button>
                     </Box>
                   </Box>
@@ -1462,7 +1462,7 @@ const BookingPage = () => {
                       ) : topRatedRooms.length === 0 ? (
                         <Box sx={{ width: '100%', py: 6, textAlign: 'center' }}>
                           <Alert severity="info" sx={{ borderRadius: 3, display: 'inline-flex', px: 4 }}>
-                            {t('booking_page.no_top_rated') || 'Không có phòng được đánh giá cao.'}
+                            {t('booking_page.no_top_rated')}
                           </Alert>
                         </Box>
                       ) : (
@@ -1534,7 +1534,7 @@ const BookingPage = () => {
                             ) : budgetRooms.length === 0 ? (
                               <Box sx={{ width: '100%', py: 6, textAlign: 'center' }}>
                                 <Alert severity="info" sx={{ borderRadius: 3, display: 'inline-flex', px: 4 }}>
-                                  {t('booking_page.no_budget_rooms') || 'Không có phòng phù hợp về ngân sách.'}
+                                  {t('booking_page.no_budget_rooms')}
                                 </Alert>
                               </Box>
                             ) : (
@@ -1655,9 +1655,7 @@ const BookingPage = () => {
                   }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                       <Typography variant="body2" sx={{ fontWeight: 700, color: PC }}>
-                        {t('booking_page.selected_rooms_count', { count: selectedRoomsForOrder.length }) === 'booking_page.selected_rooms_count'
-                          ? `Đã chọn ${selectedRoomsForOrder.length} phòng`
-                          : t('booking_page.selected_rooms_count', { count: selectedRoomsForOrder.length })}
+                        {t('booking_page.selected_rooms_count', { count: selectedRoomsForOrder.length })}
                         {selectedRoomsForOrder.length > 0 ? `: ${selectedRoomsForOrder.map(r => `#${r.roomNumber}`).join(', ')}` : ''}
                       </Typography>
                       {searched && selectedRoomsForOrder.length > 0 && (() => {
@@ -1674,15 +1672,13 @@ const BookingPage = () => {
                               flexWrap: 'wrap'
                             }}
                           >
-                            {t('booking_page.selected_capacity_status', { selected: selectedCapacity + Math.min(Number(params.children || 0), numSelectedRooms), required: totalGuests }) === 'booking_page.selected_capacity_status'
-                              ? `Sức chứa đã chọn: ${selectedCapacity + Math.min(Number(params.children || 0), numSelectedRooms)} / ${totalGuests} khách`
-                              : t('booking_page.selected_capacity_status', { selected: selectedCapacity + Math.min(Number(params.children || 0), numSelectedRooms), required: totalGuests })}
+                            {t('booking_page.selected_capacity_status', { selected: selectedCapacity + Math.min(Number(params.children || 0), numSelectedRooms), required: totalGuests })}
                             {isTotalCapacityInsufficient 
-                              ? ` (${t('booking_page.insufficient_capacity') || 'Chưa đủ'})` 
-                              : ` (${t('common.success') || 'Đủ sức chứa'})`}
+                              ? ` (${t('booking_page.insufficient_capacity')})` 
+                              : ` (${t('common.success')})`}
                             {isTotalCapacityInsufficient && (
                               <span style={{ marginLeft: '8px', color: '#d32f2f' }}>
-                                (Còn thiếu: {remainingAdults} người lớn, {remainingChildren} trẻ em)
+                                ({t('booking_page.missing_guests_short', { adults: remainingAdults, children: remainingChildren })})
                               </span>
                             )}
                           </Typography>
@@ -1694,9 +1690,7 @@ const BookingPage = () => {
                         const { remainingAdults, remainingChildren } = getRemainingGuests()
                         return (
                           <Typography variant="caption" color="error.main" sx={{ fontWeight: 600, maxWidth: 280, textAlign: { xs: 'left', sm: 'right' } }}>
-                            {t('booking_page.remaining_guests_needed', { adults: remainingAdults, children: remainingChildren }) === 'booking_page.remaining_guests_needed'
-                              ? `Còn thiếu ${remainingAdults} người lớn và ${remainingChildren} trẻ em. Vui lòng chọn thêm phòng.`
-                              : t('booking_page.remaining_guests_needed', { adults: remainingAdults, children: remainingChildren })}
+                            {t('booking_page.remaining_guests_needed', { adults: remainingAdults, children: remainingChildren })}
                           </Typography>
                         )
                       })()}
@@ -1706,9 +1700,7 @@ const BookingPage = () => {
                         onClick={openSelectedRoomsBooking}
                         sx={{ borderRadius: 2, bgcolor: PC, color: '#fff', fontWeight: 800 }}
                       >
-                        {t('booking_page.book_selected_rooms') === 'booking_page.book_selected_rooms' 
-                          ? 'Đặt các phòng đã chọn' 
-                          : t('booking_page.book_selected_rooms')}
+                        {t('booking_page.book_selected_rooms')}
                       </Button>
                     </Box>
                   </Box>
@@ -1745,7 +1737,7 @@ const BookingPage = () => {
                 ) : (
                   <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
                     <Card sx={{ width: '100%', p: 0, display: 'flex', gap: 2, alignItems: 'stretch', mx: 'auto', borderRadius: 3, boxShadow: 1, overflow: 'hidden', minHeight: { xs: 'calc(120px + 3cm)', sm: 'calc(160px + 3cm)' } }}>
-                      <Box component="img" src={imgNoResults} alt={t('booking_page.no_rooms_found') || 'Không tìm thấy phòng'}
+                      <Box component="img" src={imgNoResults} alt={t('booking_page.no_rooms_found')}
                         sx={{ width: { xs: 120, sm: 280 }, height: '100%', objectFit: 'cover', flexShrink: 0, display: 'block' }}
                       />
                       <Box sx={{ textAlign: 'left', flex: 1, p: 2.5, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>

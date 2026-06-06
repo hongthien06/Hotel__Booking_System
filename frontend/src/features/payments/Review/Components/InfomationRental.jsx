@@ -24,7 +24,7 @@ const InfomationRental = () => {
   ]
 
   const primaryRoom = rooms[0] || {}
-  const roomNumber = rooms.length > 1 ? `${rooms.length} phòng` : (primaryRoom.roomNumber || '—')
+  const roomNumber = rooms.length > 1 ? `${rooms.length} ${t('booking_page.room').toLowerCase()}` : (primaryRoom.roomNumber || '—')
   const roomType = rooms.length > 1 ? 'Multi-room' : (primaryRoom.roomTypeName || room?.roomTypeName || 'Standard')
   const province = room?.province || 'Việt Nam'
   const bedType = room?.bedType || ''

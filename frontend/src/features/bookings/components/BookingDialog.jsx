@@ -127,7 +127,7 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
       return
     }
 
-    if (isMock) { setError('Phòng mẫu — vui lòng tìm kiếm phòng thực trên hệ thống.'); return }
+    if (isMock) { setError(t('booking_page.mock_room_error', 'Phòng mẫu — vui lòng tìm kiếm phòng thực trên hệ thống.')); return }
 
     setSubmitting(true)
     setError('')
@@ -273,10 +273,10 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, px: 0.5 }}>
           <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 600 }}>
-            {t('booking_page.num_guests') || 'Số khách'}
+            {t('booking_page.num_guests')}
           </Typography>
           <Typography variant="caption" sx={{ fontWeight: 700, color: isCapacityExceeded ? 'error.main' : 'success.main' }}>
-            Sức chứa tối đa: {maxGuests} khách
+            {t('booking_page.max_capacity_info', { maxGuests })}
           </Typography>
         </Box>
 
@@ -315,21 +315,13 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
         {isCapacityExceeded && (
           <Alert severity="error" sx={{ mb: 2, borderRadius: 2, '& .MuiAlert-message': { width: '100%' } }}>
             <Typography variant="body2" sx={{ fontWeight: 700, mb: 0.5 }}>
-              {t('booking_page.max_guests_exceeded', { max: maxGuests }) === 'booking_page.max_guests_exceeded'
-                ? `Tổng số khách quy đổi (${effectiveGuests} người) vượt quá sức chứa tối đa của các phòng đã chọn (tối đa ${maxGuests} khách).`
-                : t('booking_page.max_guests_exceeded', { max: maxGuests })}
+              {t('booking_page.max_guests_exceeded', { max: maxGuests })}
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5, lineHeight: 1.4 }}>
               {selectedRooms.length === 1 ? (
-                <>
-                  Gợi ý: Phòng <strong>{roomName}</strong> chỉ chứa tối đa <strong>{maxGuests} khách</strong> (miễn phí tối đa 1 trẻ em đi kèm). 
-                  Bạn có thể giảm số lượng khách hoặc quay lại trang tìm kiếm phòng, chọn đồng thời nhiều phòng để phù hợp với đoàn khách <strong>{totalGuests} người</strong>.
-                </>
+                <>{t('booking_page.hint_single_room', { roomName, maxGuests, totalGuests })}</>
               ) : (
-                <>
-                  Gợi ý: Tổng sức chứa của các phòng đã chọn là <strong>{maxGuests} khách</strong>. 
-                  Bạn có thể chọn thêm phòng hoặc giảm số lượng khách để phù hợp với giới hạn sức chứa (mỗi phòng được đi kèm 1 trẻ em miễn phí).
-                </>
+                <>{t('booking_page.hint_multiple_rooms', { maxGuests })}</>
               )}
             </Typography>
           </Alert>
@@ -345,9 +337,7 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
 
               return isNonRefundable && (
                 <Alert severity="warning" sx={{ mb: 2, borderRadius: 2, fontSize: '0.85rem', '& .MuiAlert-message': { fontWeight: 600 } }}>
-                  {t('booking_page.non_refundable_warning') === 'booking_page.non_refundable_warning'
-                    ? 'Vì thời gian đặt đã nằm trong khoảng 24h trước check-in, đơn này sẽ không được hoàn tiền nếu hủy.'
-                    : t('booking_page.non_refundable_warning')}
+                  {t('booking_page.non_refundable_warning')}
                 </Alert>
               )
             })()}

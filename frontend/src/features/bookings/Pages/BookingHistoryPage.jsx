@@ -130,7 +130,7 @@ const BookingHistoryPage = () => {
       )
       setReviewedBookings(prev => ({ ...prev, ...reviewChecks }))
     } catch (err) {
-      setError(t('bookings_history.fetch_error') || 'Lỗi khi tải dữ liệu')
+      setError(t('bookings_history.fetch_error'))
       console.error(err)
     } finally {
       setLoading(false)
@@ -330,7 +330,7 @@ const BookingHistoryPage = () => {
         borderBottom: '1px solid #fce4ec' // Màu viền tương ứng primary.main
       }}>
         <Typography variant="h3" sx={{ fontWeight: 800, mb: 1.5, letterSpacing: 1.2, textTransform: 'uppercase', color: PC, fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' } }}>
-          {t('header.bookings_history') || 'LỊCH SỬ ĐẶT PHÒNG'}
+          {t('header.bookings_history')}
         </Typography>
         <Typography sx={{ color: 'text.secondary', mb: 5, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, fontWeight: 500 }}>
           {t('bookings_history.subtitle', 'Quản lý các chuyến đi và lịch sử đặt phòng của bạn')}
@@ -565,10 +565,10 @@ const BookingHistoryPage = () => {
             size="small"
             sx={{ minWidth: 200 }}
           >
-            <MenuItem value="newest">{t('bookings_history.sort_newest') || 'Mới nhất trước'}</MenuItem>
-            <MenuItem value="oldest">{t('bookings_history.sort_oldest') || 'Cũ nhất trước'}</MenuItem>
-            <MenuItem value="price_desc">{t('bookings_history.sort_price_desc') || 'Giá cao → thấp'}</MenuItem>
-            <MenuItem value="price_asc">{t('bookings_history.sort_price_asc') || 'Giá thấp → cao'}</MenuItem>
+            <MenuItem value="newest">{t('bookings_history.sort_newest')}</MenuItem>
+            <MenuItem value="oldest">{t('bookings_history.sort_oldest')}</MenuItem>
+            <MenuItem value="price_desc">{t('bookings_history.sort_price_desc')}</MenuItem>
+            <MenuItem value="price_asc">{t('bookings_history.sort_price_asc')}</MenuItem>
           </TextField>
         </Box>
 
@@ -614,20 +614,20 @@ const BookingHistoryPage = () => {
             <Grid size={{ xs: 12 }}>
               <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                 <Card sx={{ width: '100%', p: 0, display: 'flex', gap: 2, alignItems: 'stretch', mx: 'auto', borderRadius: 3, boxShadow: 1, overflow: 'hidden', minHeight: { xs: 'calc(120px + 3cm)', sm: 'calc(160px + 3cm)' } }}>
-                  <Box component="img" src={imgNoResults} alt={t('bookings_history.no_data') || 'Không có dữ liệu đặt phòng'}
+                  <Box component="img" src={imgNoResults} alt={t('bookings_history.no_data')}
                     sx={{ width: { xs: 120, sm: 280 }, height: '100%', objectFit: 'cover', flexShrink: 0, display: 'block' }}
                   />
                   <Box sx={{ textAlign: 'left', flex: 1, p: 2.5, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <Typography variant="h6" sx={{ fontWeight: 800, color: PC }}>
-                      {t('bookings_history.no_data') || 'Bạn chưa có lịch sử đặt phòng nào.'}
+                      {t('bookings_history.no_data')}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      {t('bookings_history.empty_cta') || 'Hãy thực hiện đặt ngay để không bỏ lỡ các ưu đãi nhé!'}
+                      {t('bookings_history.empty_cta')}
                     </Typography>
                     <Divider sx={{ my: 1 }} />
                     <Box sx={{ mt: 1 }}>
                       <Button variant="outlined" sx={{ borderRadius: 2, color: PC, borderColor: PC }} href="/booking">
-                        {t('common.book_now') || 'Đặt ngay'}
+                        {t('common.book_now')}
                       </Button>
                     </Box>
                   </Box>
@@ -692,8 +692,8 @@ const BookingHistoryPage = () => {
                     </Typography>
                     <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1, lineHeight: 1.2, color: '#333' }}>
                       {allRooms.length > 1 
-                        ? `${t('booking_page.room') || 'Phòng'} ${roomNumbersStr}`
-                        : `${t('booking_page.room') || 'Phòng'} ${primaryRoom.roomNumber || booking.roomNumber}`}
+                        ? `${t('booking_page.room')} ${roomNumbersStr}`
+                        : `${t('booking_page.room')} ${primaryRoom.roomNumber || booking.roomNumber}`}
                     </Typography>
                     {(primaryRoom.hotelName || primaryRoom.hotelAddress) && (
                       <Box sx={{ mb: 1.5 }}>
@@ -715,11 +715,11 @@ const BookingHistoryPage = () => {
 
                     <Grid container spacing={1} sx={{ mb: 2 }}>
                       <Grid size={{ xs: 6 }}>
-                        <Typography sx={{ color: '#999', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>{t('bookings_history.check_in_short') || 'In'}</Typography>
+                        <Typography sx={{ color: '#999', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>{t('bookings_history.check_in_short')}</Typography>
                         <Typography sx={{ fontWeight: 700, fontSize: 13, color: '#444' }}>{formatDate(booking.checkInDate)}</Typography>
                       </Grid>
                       <Grid size={{ xs: 6 }}>
-                        <Typography sx={{ color: '#999', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>{t('bookings_history.check_out_short') || 'Out'}</Typography>
+                        <Typography sx={{ color: '#999', fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}>{t('bookings_history.check_out_short')}</Typography>
                         <Typography sx={{ fontWeight: 700, fontSize: 13, color: '#444' }}>{formatDate(booking.checkOutDate)}</Typography>
                       </Grid>
                     </Grid>
@@ -777,7 +777,7 @@ const BookingHistoryPage = () => {
                               '&.Mui-disabled': { borderColor: '#c8e6c9', color: '#81c784' }
                             }}
                           >
-                            {t('reviews.already_reviewed') || 'Đã đánh giá'}
+                            {t('reviews.already_reviewed')}
                           </Button>
                         ) : (
                           <Button
@@ -829,7 +829,7 @@ const BookingHistoryPage = () => {
           onClose={() => { setRoomDetailOpen(false); setSelectedRoom(null); }}
           onBook={() => navigate('/booking')}
           canEdit={false}
-          bookButtonText={t('common.rebook') || 'Đặt lại'}
+          bookButtonText={t('common.rebook')}
         />
       )}
 

@@ -386,7 +386,15 @@
     "insufficient_total_capacity": "Selected rooms capacity ({{selected}} guests) is less than required ({{required}} guests). Please select more rooms.",
     "book_selected_rooms": "Book Selected Rooms",
     "max_guests_exceeded": "Total guests exceed the maximum capacity of the selected rooms (max {{max}} guests).",
-    "remaining_guests_needed": "Still need {{adults}} adults and {{children}} children. Please select more rooms."
+    "remaining_guests_needed": "Still need {{adults}} adults and {{children}} children. Please select more rooms.",
+    "missing_guests_short": "Missing: {{adults}} adults, {{children}} children",
+    "max_capacity_info": "Maximum capacity: {{maxGuests}} guests",
+    "no_featured_rooms": "No featured rooms found.",
+    "no_top_rated": "No top rated rooms found.",
+    "no_budget_rooms": "No budget-friendly rooms found.",
+    "mock_room_error": "Sample room — please search for real rooms on the system.",
+    "hint_single_room": "Hint: Room {{roomName}} can accommodate up to {{maxGuests}} guests (1 child stays free). You can reduce the number of guests or go back to search and select multiple rooms to fit your group of {{totalGuests}} guests.",
+    "hint_multiple_rooms": "Hint: Total capacity of selected rooms is {{maxGuests}} guests. You can select more rooms or reduce the number of guests to fit the capacity limits (1 child per room stays free)."
   },
   "login_page": {
     "welcome": "Welcome Back",
