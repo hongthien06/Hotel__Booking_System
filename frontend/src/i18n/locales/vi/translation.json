@@ -21,7 +21,8 @@
     "see_all": "Xem tất cả",
     "pay_now": "Thanh toán",
     "booking_details": "Chi tiết đơn đặt phòng",
-    "close": "Đóng"
+    "close": "Đóng",
+    "rebook": "Đặt lại"
   },
   "header": {
     "home": "Trang chủ",
@@ -231,10 +232,16 @@
     "check_out": "TRẢ PHÒNG",
     "check_in_short": "Nhận",
     "check_out_short": "Trả",
-    "no_data": "Không có dữ liệu đặt phòng nào.",
+    "no_data": "Bạn chưa có đơn đặt phòng nào.",
+    "empty_cta": "Hãy thực hiện đặt ngay để không bỏ lỡ các ưu đãi nhé!",
     "fetch_error": "Lỗi khi lấy lịch sử đặt phòng",
     "confirm_cancel": "Bạn có chắc chắn muốn hủy đặt phòng này?",
-    "cancel_error": "Lỗi khi hủy đặt phòng"
+    "cancel_error": "Lỗi khi hủy đặt phòng",
+    "showing_results": "Hiển thị {{count}} kết quả",
+    "sort_newest": "Mới nhất trước",
+    "sort_oldest": "Cũ nhất trước",
+    "sort_price_desc": "Giá cao → thấp",
+    "sort_price_asc": "Giá thấp → cao"
   },
   "destinations": {
     "title": "Điểm đến phổ biến",

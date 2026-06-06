@@ -7,18 +7,25 @@ import {
   CheckCircle,
   HourglassEmpty,
   Cancel,
-  Replay
+  Replay,
+  InsertInvitation,
+  DarkMode,
+  AccountBalanceWallet,
+  Star
 } from '@mui/icons-material'
 import {
   Alert,
+  Backdrop,
   Box,
   Button,
   Chip,
   Card, CardContent, CardMedia,
   Checkbox,
+  CircularProgress,
   Divider,
   Grid,
   IconButton,
+  MenuItem,
   Skeleton,
   TextField,
   Typography
@@ -27,10 +34,14 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { cancelBookingApi, getMyBookingsApi, mergePendingBookingsApi } from '../../../shared/api/bookingApi'
+import { getMyMembershipApi } from '../../../shared/api/membershipApi'
 import { checkReviewExists } from '../../../shared/api/reviewApi'
+import { getRoomByIdApi } from '../../../shared/api/roomApi'
+import RoomDetail from '../../rooms/Details/RoomDetail'
 import { formatCurrency, formatDate } from '../../../shared/utils/formatters'
 import { getBookingRooms } from '../../payments/utils/bookingTotals'
 import ReviewFormDialog from '../../reviews/ReviewFormDialog'
+import imgNoResults from '../../../assets/KhongthayKQ.png'
 
 const PC = '#c0496e' // Tương ứng với primary.dark hoặc primary.contrastText trong theme (Màu hồng đậm chủ đạo)
 const PC_LIGHT = '#fce4ec' // Tương ứng với primary.main (Màu hồng nhạt)
@@ -51,6 +62,7 @@ const BookingHistoryPage = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [bookings, setBookings] = useState([])
+  const [membership, setMembership] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
@@ -61,6 +73,39 @@ const BookingHistoryPage = () => {
 
   const [checkIn, setCheckIn] = useState('')
   const [checkOut, setCheckOut] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [destination, setDestination] = useState('')
+  const [statusFilter, setStatusFilter] = useState('ALL')
+  const [sortBy, setSortBy] = useState('newest')
+  const [selectedRoom, setSelectedRoom] = useState(null)
+  const [roomDetailOpen, setRoomDetailOpen] = useState(false)
+  const [loadingRoom, setLoadingRoom] = useState(false)
+
+  const handleCardClick = async (booking) => {
+    const primaryRoom = getHistoryRoom(booking)
+    if (!primaryRoom.roomId) return
+    setLoadingRoom(true)
+    try {
+      const roomData = await getRoomByIdApi(primaryRoom.roomId)
+      setSelectedRoom(roomData)
+      setRoomDetailOpen(true)
+    } catch (err) {
+      console.error('Failed to fetch room details:', err)
+      // Fallback
+      setSelectedRoom({
+        id: primaryRoom.roomId,
+        roomNumber: primaryRoom.roomNumber,
+        typeName: primaryRoom.roomTypeName,
+        hotelName: primaryRoom.hotelName,
+        address: primaryRoom.hotelAddress,
+        pricePerNight: primaryRoom.roomPriceSnapshot,
+        status: booking.status === 'CHECKED_OUT' ? 'AVAILABLE' : 'OCCUPIED'
+      })
+      setRoomDetailOpen(true)
+    } finally {
+      setLoadingRoom(false)
+    }
+  }
 
   const fetchBookings = async () => {
     setLoading(true)
@@ -190,11 +235,80 @@ const BookingHistoryPage = () => {
 
   useEffect(() => {
     fetchBookings()
+    getMyMembershipApi().then(setMembership).catch(() => {})
   }, [])
+
+  const formatMillions = (value) => {
+    if (!value) return '0'
+    if (value >= 1000000) {
+      return (value / 1000000).toFixed(1).replace('.0', '') + 'M'
+    }
+    return new Intl.NumberFormat('vi-VN').format(value)
+  }
+
+  const totalBookings = membership?.bookingCount || bookings.length || 0
+  const totalSpent = membership?.totalSpent || bookings.reduce((sum, b) => sum + (b.status !== 'CANCELLED' && b.status !== 'REFUNDED' ? b.totalAmount || 0 : 0), 0)
+  const totalNights = bookings.reduce((sum, b) => sum + (b.status !== 'CANCELLED' && b.status !== 'REFUNDED' ? Number(b.totalNights || 1) : 0), 0)
+  const memberPoints = membership?.points || Math.floor(totalSpent / 100000)
 
   const handleSearch = () => {
     fetchBookings()
   }
+
+  const preFilteredBookings = bookings.filter(b => {
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase()
+      const str = JSON.stringify(b).toLowerCase()
+      if (!str.includes(term)) return false
+    }
+    if (destination) {
+      const str = JSON.stringify(b).toLowerCase()
+      if (!str.includes(destination.toLowerCase())) return false
+    }
+    return true
+  })
+
+  const counts = {
+    ALL: preFilteredBookings.length,
+    UPCOMING: preFilteredBookings.filter(b => ['CONFIRMED', 'PENDING', 'CHECKED_IN'].includes(b.status)).length,
+    COMPLETED: preFilteredBookings.filter(b => b.status === 'CHECKED_OUT').length,
+    CANCELLED: preFilteredBookings.filter(b => ['CANCELLED', 'REFUNDED'].includes(b.status)).length,
+  }
+
+  const filteredBookings = preFilteredBookings.filter(b => {
+    if (statusFilter === 'UPCOMING') return ['CONFIRMED', 'PENDING', 'CHECKED_IN'].includes(b.status)
+    if (statusFilter === 'COMPLETED') return b.status === 'CHECKED_OUT'
+    if (statusFilter === 'CANCELLED') return ['CANCELLED', 'REFUNDED'].includes(b.status)
+    return true
+  })
+
+  const getBookingPrice = (b) => Number(b.finalAmount || b.totalAmount || getHistoryRoomTotal(b) || 0)
+
+  const sortedBookings = [...filteredBookings].sort((a, b) => {
+    if (sortBy === 'newest') {
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0)
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0)
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateB - dateA
+      }
+      return (b.bookingId || 0) - (a.bookingId || 0)
+    }
+    if (sortBy === 'oldest') {
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0)
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0)
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateA - dateB
+      }
+      return (a.bookingId || 0) - (b.bookingId || 0)
+    }
+    if (sortBy === 'price_desc') {
+      return getBookingPrice(b) - getBookingPrice(a)
+    }
+    if (sortBy === 'price_asc') {
+      return getBookingPrice(a) - getBookingPrice(b)
+    }
+    return 0
+  })
 
   useEffect(() => {
     setSelectedPendingIds(prev =>
@@ -215,143 +329,253 @@ const BookingHistoryPage = () => {
         bgcolor: '#fdf2f8', // Màu nền nhẹ của Header Banner, tương tự primary.main với độ mờ cao
         borderBottom: '1px solid #fce4ec' // Màu viền tương ứng primary.main
       }}>
-        <Typography variant="h4" sx={{ fontWeight: 800, mb: 1, letterSpacing: 1, textTransform: 'uppercase', color: PC }}>
+        <Typography variant="h3" sx={{ fontWeight: 800, mb: 1.5, letterSpacing: 1.2, textTransform: 'uppercase', color: PC, fontSize: { xs: '1.8rem', sm: '2.2rem', md: '2.5rem' } }}>
           {t('header.bookings_history') || 'LỊCH SỬ ĐẶT PHÒNG'}
         </Typography>
-        <Typography variant="body2" sx={{ color: '#666' }}>
+        <Typography sx={{ color: 'text.secondary', mb: 5, fontSize: { xs: '0.95rem', sm: '1.05rem', md: '1.15rem' }, fontWeight: 500 }}>
           {t('bookings_history.subtitle', 'Quản lý các chuyến đi và lịch sử đặt phòng của bạn')}
         </Typography>
+
+        {/* Stats Cards */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          gap: 2, 
+          flexWrap: 'wrap', 
+          maxWidth: 1000, 
+          mx: 'auto', 
+          px: 3 
+        }}>
+          {/* Card 1 */}
+          <Box sx={{ flex: 1, minWidth: 200, bgcolor: 'background.paper', borderRadius: 3, p: 2.5, textAlign: 'left', border: '1px solid', borderColor: 'primary.main', boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <InsertInvitation sx={{ color: 'primary.dark', fontSize: 20 }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Tổng đặt phòng</Typography>
+            </Box>
+            <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{totalBookings}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>kể từ khi tham gia</Typography>
+          </Box>
+
+          {/* Card 2 */}
+          <Box sx={{ flex: 1, minWidth: 200, bgcolor: 'background.paper', borderRadius: 3, p: 2.5, textAlign: 'left', border: '1px solid', borderColor: 'primary.main', boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <DarkMode sx={{ color: 'primary.dark', fontSize: 20 }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Tổng số đêm</Typography>
+            </Box>
+            <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{totalNights}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>đêm đã lưu trú</Typography>
+          </Box>
+
+          {/* Card 3 */}
+          <Box sx={{ flex: 1, minWidth: 200, bgcolor: 'background.paper', borderRadius: 3, p: 2.5, textAlign: 'left', border: '1px solid', borderColor: 'primary.main', boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <AccountBalanceWallet sx={{ color: 'primary.dark', fontSize: 20 }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Tổng chi tiêu</Typography>
+            </Box>
+            <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{formatMillions(totalSpent)}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>đồng</Typography>
+          </Box>
+
+          {/* Card 4 */}
+          <Box sx={{ flex: 1, minWidth: 200, bgcolor: 'background.paper', borderRadius: 3, p: 2.5, textAlign: 'left', border: '1px solid', borderColor: 'primary.main', boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+              <Star sx={{ color: 'primary.dark', fontSize: 20 }} />
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Điểm thành viên</Typography>
+            </Box>
+            <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{new Intl.NumberFormat('vi-VN').format(memberPoints)}</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>điểm tích lũy</Typography>
+          </Box>
+        </Box>
       </Box>
 
-      <Box sx={{ maxWidth: 1320, mx: 'auto', px: 3, mt: -4 }}>
+      <Box sx={{ maxWidth: 1320, mx: 'auto', px: 3, mt: -5 }}>
+        {/* Horizontal Filter Bar */}
+        <Box sx={{
+          bgcolor: 'background.paper',
+          borderRadius: 3,
+          py: 'calc(12px + 0.25cm)',
+          px: 2,
+          mb: 3,
+          border: '1px solid',
+          borderColor: 'primary.main',
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          gap: 1.5,
+          alignItems: 'center',
+          boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)'
+        }}>
+          {/* Search text field */}
+          <TextField
+            placeholder="Tìm theo tên khách sạn, mã đặt phòng..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            InputProps={{
+              startAdornment: <Search sx={{ color: 'primary.dark', mr: 1, fontSize: 20 }} />
+            }}
+            size="small"
+            sx={{ flex: 2.5, width: '100%' }}
+          />
+          {/* Check in */}
+          <TextField
+            type="date"
+            value={checkIn}
+            onChange={(e) => setCheckIn(e.target.value)}
+            size="small"
+            sx={{ flex: 1, width: '100%' }}
+          />
+          {/* Check out */}
+          <TextField
+            type="date"
+            value={checkOut}
+            onChange={(e) => setCheckOut(e.target.value)}
+            size="small"
+            sx={{ flex: 1, width: '100%' }}
+          />
+          {/* Destination */}
+          <TextField
+            select
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+            SelectProps={{ native: true }}
+            size="small"
+            sx={{ flex: 1.5, width: '100%' }}
+          >
+            <option value="">Tất cả địa điểm</option>
+            <option value="HCM">Hồ Chí Minh</option>
+            <option value="HANOI">Hà Nội</option>
+            <option value="VUNG_TAU">Vũng Tàu</option>
+            <option value="DA_LAT">Đà Lạt</option>
+            <option value="DA_NANG">Đà Nẵng</option>
+            <option value="NHA_TRANG">Nha Trang</option>
+            <option value="PHU_QUOC">Phú Quốc</option>
+            <option value="SAPA">Sapa</option>
+            <option value="HUE">Huế</option>
+            <option value="CAT_BA">Cát Bà</option>
+          </TextField>
+          {/* Search button */}
+          <Button
+            variant="contained"
+            onClick={handleSearch}
+            startIcon={<Search />}
+            sx={{
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 600,
+              py: { xs: 1, md: 0.75 },
+              px: 3,
+              width: { xs: '100%', md: 'auto' },
+              height: 40
+            }}
+          >
+            Tìm kiếm
+          </Button>
+        </Box>
 
-        {/* Horizontal Filter Bar - Aligned with Grid Edges */}
-        <Box sx={{ px: 1.5, mb: 6 }}>
-          <Box sx={{
-            display: 'flex',
-            alignItems: 'stretch',
-            bgcolor: PC,
-            borderRadius: 3,
-            border: `2px solid ${PC}`, // Thinner outer border
-            overflow: 'hidden',
-            flexWrap: { xs: 'wrap', md: 'nowrap' },
-            p: 0.3,
-            gap: 0.3, // Thinner separators (gap)
-            boxShadow: '0 8px 25px rgba(0,0,0,0.08)'
-          }}>
-            {/* Destination Segment - Thinner Border */}
-            <Box sx={{
-              display: 'flex',
-              alignItems: 'center',
-              px: 3, py: 1.2,
-              flex: 1.5,
-              bgcolor: '#fff',
-              borderRadius: 2,
-              border: `1px solid ${PC}` // Thinner inner border
-            }}>
-              <Box sx={{ width: '100%' }}>
-                <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>
-                  {t('booking_page.destination')}
-                </Typography>
-                <TextField
-                  select
-                  fullWidth
-                  variant="standard"
-                  defaultValue=""
-                  SelectProps={{
-                    native: true,
-                    disableUnderline: true,
-                    sx: { color: '#333', fontSize: 14, fontWeight: 600, py: 0 }
-                  }}
-                >
-                  <option value="">{t('booking_page.anywhere') || 'Địa điểm bất kỳ'}</option>
-                  <option value="HCM">{t('destinations.hcm.name')}</option>
-                  <option value="HANOI">{t('destinations.hanoi.name')}</option>
-                  <option value="VUNG_TAU">{t('destinations.vungtau.name')}</option>
-                  <option value="DA_LAT">{t('destinations.dalat.name')}</option>
-                  <option value="DA_NANG">{t('destinations.danang.name')}</option>
-                  <option value="NHA_TRANG">{t('destinations.nhatrang.name')}</option>
-                  <option value="PHU_QUOC">{t('destinations.phuquoc.name')}</option>
-                  <option value="SAPA">{t('destinations.sapa.name')}</option>
-                  <option value="HUE">{t('destinations.hue.name')}</option>
-                  <option value="CAT_BA">{t('destinations.catba.name')}</option>
-                </TextField>
-              </Box>
-            </Box>
-
-            {/* Combined Date Range Segment - Thinner Border */}
-            <Box sx={{
-              display: 'flex',
-              alignItems: 'center',
-              px: 3, py: 1.2,
-              flex: 2,
-              bgcolor: '#fff',
-              borderRadius: 2,
-              border: `1px solid ${PC}` // Thinner inner border
-            }}>
-              <Box sx={{ display: 'flex', width: '100%', gap: 2 }}>
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>{t('bookings_history.check_in') || 'Nhận phòng'}</Typography>
-                  <TextField
-                    type="date"
-                    variant="standard"
-                    value={checkIn}
-                    onChange={(e) => setCheckIn(e.target.value)}
-                    InputProps={{
-                      disableUnderline: true,
-                      sx: { color: '#333', fontSize: 14, fontWeight: 600 }
-                    }}
-                    fullWidth
-                  />
-                </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', pt: 2, color: '#ccc' }}>
-                  <Typography sx={{ fontWeight: 300 }}>—</Typography>
-                </Box>
-                <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ color: '#888', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', mb: 0.5 }}>{t('bookings_history.check_out') || 'Trả phòng'}</Typography>
-                  <TextField
-                    type="date"
-                    variant="standard"
-                    value={checkOut}
-                    onChange={(e) => setCheckOut(e.target.value)}
-                    InputProps={{
-                      disableUnderline: true,
-                      sx: { color: '#333', fontSize: 14, fontWeight: 600 }
-                    }}
-                    fullWidth
-                  />
-                </Box>
-              </Box>
-            </Box>
-
-            {/* Search Button Segment - Matched with BookingPage Theme */}
-            <Box sx={{ flex: 0.8, display: 'flex' }}>
-              <Button
-                onClick={handleSearch}
-                variant="contained"
-                startIcon={<Search />}
+        {/* Status Filter Chips */}
+        <Box sx={{ display: 'flex', gap: 1.5, mb: 2.5, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Tất cả', count: counts.ALL, value: 'ALL' },
+            { label: 'Sắp tới', count: counts.UPCOMING, value: 'UPCOMING' },
+            { label: 'Đã ở', count: counts.COMPLETED, value: 'COMPLETED' },
+            { label: 'Đã hủy', count: counts.CANCELLED, value: 'CANCELLED' }
+          ].map(chip => {
+            const isActive = statusFilter === chip.value
+            return (
+              <Box
+                key={chip.value}
+                onClick={() => setStatusFilter(chip.value)}
                 sx={{
-                  width: '100%',
-                  borderRadius: 2,
-                  bgcolor: PC,
-                  color: '#fff',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  textTransform: 'none',
-                  '&:hover': { bgcolor: '#a0365a' },
-                  minWidth: { md: '180px' }
+                  display: 'flex', alignItems: 'center', gap: 1,
+                  px: 2, py: 0.75,
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  border: '1px solid',
+                  borderColor: isActive ? 'primary.dark' : 'action.inputBorder',
+                  bgcolor: isActive ? 'primary.dark' : 'background.paper',
+                  color: isActive ? '#fff' : 'text.primary',
+                  transition: 'all 0.2s',
+                  boxShadow: isActive ? '0 4px 12px rgba(192, 40, 96, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.02)',
+                  '&:hover': {
+                    bgcolor: isActive ? 'primary.dark' : 'primary.main',
+                    borderColor: 'primary.dark',
+                    color: isActive ? '#fff' : 'primary.contrastText'
+                  }
                 }}
               >
-                {t('common.search') || 'Tìm kiếm'}
-              </Button>
-            </Box>
-          </Box>
+                <Typography sx={{ fontSize: 14, fontWeight: isActive ? 600 : 500 }}>{chip.label}</Typography>
+                <Box sx={{
+                  px: 1, py: 0.25,
+                  borderRadius: 4,
+                  bgcolor: isActive ? 'rgba(255,255,255,0.2)' : 'action.inputBg',
+                  color: isActive ? '#fff' : 'primary.contrastText',
+                  fontSize: 12, fontWeight: 700
+                }}>
+                  {chip.count}
+                </Box>
+              </Box>
+            )
+          })}
+        </Box>
+
+        {/* Results count & Sort Bar */}
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4,
+          flexWrap: 'wrap',
+          gap: 2
+        }}>
+          <Typography sx={{ color: 'text.secondary', fontSize: 14, fontWeight: 600, maxWidth: 150, lineHeight: 1.2 }}>
+            {t('bookings_history.showing_results', { count: sortedBookings.length }) || `Hiển thị ${sortedBookings.length} kết quả`}
+          </Typography>
+          <TextField
+            select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            SelectProps={{
+              MenuProps: {
+                PaperProps: {
+                  sx: {
+                    bgcolor: 'background.paper',
+                    borderRadius: 3,
+                    boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+                    border: '1px solid',
+                    borderColor: 'action.inputBorder',
+                    '& .MuiMenuItem-root': {
+                      fontSize: 14,
+                      color: 'text.primary',
+                      py: 1,
+                      '&:hover': {
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText'
+                      },
+                      '&.Mui-selected': {
+                        bgcolor: 'primary.dark',
+                        color: '#fff',
+                        '&:hover': {
+                          bgcolor: 'primary.dark'
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }}
+            size="small"
+            sx={{ minWidth: 200 }}
+          >
+            <MenuItem value="newest">{t('bookings_history.sort_newest') || 'Mới nhất trước'}</MenuItem>
+            <MenuItem value="oldest">{t('bookings_history.sort_oldest') || 'Cũ nhất trước'}</MenuItem>
+            <MenuItem value="price_desc">{t('bookings_history.sort_price_desc') || 'Giá cao → thấp'}</MenuItem>
+            <MenuItem value="price_asc">{t('bookings_history.sort_price_asc') || 'Giá thấp → cao'}</MenuItem>
+          </TextField>
         </Box>
 
         {/* Results Grid - Centered items */}
         {error && <Alert severity="error" sx={{ mb: 4, borderRadius: 2 }}>{error}</Alert>}
 
-        {bookings.some(booking => booking.status === 'PENDING') && (
+        {sortedBookings.some(booking => booking.status === 'PENDING') && (
           <Box sx={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -386,23 +610,32 @@ const BookingHistoryPage = () => {
                 <Skeleton variant="rectangular" height={320} sx={{ borderRadius: 3 }} />
               </Grid>
             ))
-          ) : bookings.length === 0 ? (
+          ) : sortedBookings.length === 0 ? (
             <Grid size={{ xs: 12 }}>
-                <Box sx={{ textAlign: 'center', py: 12, bgcolor: '#fafafa', borderRadius: 4, border: '1px dashed #ddd', '@keyframes pulse': { '0%': { transform: 'scale(1)' }, '50%': { transform: 'scale(1.06)' }, '100%': { transform: 'scale(1)' } } }}>
-                  <History className="historyIcon" sx={{ fontSize: 72, color: '#ddd', mb: 2, animation: 'pulse 2.5s ease-in-out infinite' }} />
-                  <Typography variant="h6" color="text.secondary" sx={{ mb: 2 }}>
-                    {t('bookings_history.no_data') || 'Bạn chưa có lịch sử đặt phòng nào.'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                    {t('bookings_history.empty_cta') || 'Khi bạn hoàn tất đặt phòng, hoá đơn và lịch sử sẽ xuất hiện ở đây.'}
-                  </Typography>
-                  <Button variant="outlined" sx={{ mt: 1, borderRadius: 2, color: PC, borderColor: PC }} href="/booking">
-                    {t('common.book_now') || 'Đặt ngay'}
-                  </Button>
-                </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                <Card sx={{ width: '100%', p: 0, display: 'flex', gap: 2, alignItems: 'stretch', mx: 'auto', borderRadius: 3, boxShadow: 1, overflow: 'hidden', minHeight: { xs: 'calc(120px + 3cm)', sm: 'calc(160px + 3cm)' } }}>
+                  <Box component="img" src={imgNoResults} alt={t('bookings_history.no_data') || 'Không có dữ liệu đặt phòng'}
+                    sx={{ width: { xs: 120, sm: 280 }, height: '100%', objectFit: 'cover', flexShrink: 0, display: 'block' }}
+                  />
+                  <Box sx={{ textAlign: 'left', flex: 1, p: 2.5, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <Typography variant="h6" sx={{ fontWeight: 800, color: PC }}>
+                      {t('bookings_history.no_data') || 'Bạn chưa có lịch sử đặt phòng nào.'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                      {t('bookings_history.empty_cta') || 'Hãy thực hiện đặt ngay để không bỏ lỡ các ưu đãi nhé!'}
+                    </Typography>
+                    <Divider sx={{ my: 1 }} />
+                    <Box sx={{ mt: 1 }}>
+                      <Button variant="outlined" sx={{ borderRadius: 2, color: PC, borderColor: PC }} href="/booking">
+                        {t('common.book_now') || 'Đặt ngay'}
+                      </Button>
+                    </Box>
+                  </Box>
+                </Card>
+              </Box>
             </Grid>
           ) : (
-            bookings.map((booking, index) => (
+            sortedBookings.map((booking, index) => (
               <Grid size={{ xs: 12, sm: 6, md: 3 }} key={booking.bookingId || index}>
                 {(() => {
                   const primaryRoom = getHistoryRoom(booking)
@@ -410,18 +643,22 @@ const BookingHistoryPage = () => {
                   const roomNumbersStr = allRooms.map(r => r.roomNumber).filter(Boolean).join(', ')
                   const roomTypesStr = allRooms.map(r => r.roomTypeName || 'Standard').filter((v, i, a) => a.indexOf(v) === i).join(' + ')
                   return (
-                <Card sx={{
-                  height: '100%',
-                  bgcolor: '#fff',
-                  borderRadius: 3,
-                  border: '1px solid #eee',
-                  transition: 'all 0.3s',
-                  position: 'relative',
-                  '&:hover': {
-                    transform: 'translateY(-8px)',
-                    boxShadow: '0 12px 30px rgba(0,0,0,0.1)'
-                  }
-                }}>
+                <Card 
+                  onClick={() => handleCardClick(booking)}
+                  sx={{
+                    height: '100%',
+                    bgcolor: '#fff',
+                    borderRadius: 3,
+                    border: '1px solid #eee',
+                    transition: 'all 0.3s',
+                    position: 'relative',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.1)'
+                    }
+                  }}
+                >
                   {booking.status === 'PENDING' && (
                     <Checkbox
                       checked={selectedPendingIds.includes(booking.bookingId)}
@@ -500,7 +737,7 @@ const BookingHistoryPage = () => {
                           variant="outlined"
                           color="error"
                           size="small"
-                          onClick={() => handleCancel(booking.bookingId)}
+                          onClick={(e) => { e.stopPropagation(); handleCancel(booking.bookingId); }}
                           sx={{ borderRadius: 2, fontSize: 11, fontWeight: 700 }}
                         >
                           {t('common.cancel')}
@@ -510,7 +747,7 @@ const BookingHistoryPage = () => {
                             fullWidth
                             variant="contained"
                             size="small"
-                            onClick={() => handlePayment(booking)}
+                            onClick={(e) => { e.stopPropagation(); handlePayment(booking); }}
                             sx={{
                               borderRadius: 2,
                               fontSize: 11,
@@ -548,7 +785,8 @@ const BookingHistoryPage = () => {
                             variant="outlined"
                             size="small"
                             startIcon={<RateReview />}
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation()
                               setSelectedBookingForReview(booking)
                               setReviewDialogOpen(true)
                             }}
@@ -582,6 +820,23 @@ const BookingHistoryPage = () => {
           onReviewSubmitted={() => fetchBookings()}
         />
       )}
+
+      {/* Room Detail Dialog */}
+      {selectedRoom && (
+        <RoomDetail
+          open={roomDetailOpen}
+          room={selectedRoom}
+          onClose={() => { setRoomDetailOpen(false); setSelectedRoom(null); }}
+          onBook={() => navigate('/booking')}
+          canEdit={false}
+          bookButtonText={t('common.rebook') || 'Đặt lại'}
+        />
+      )}
+
+      {/* Backdrop loading overlay */}
+      <Backdrop sx={{ color: '#fff', zIndex: (theme) => theme.zIndex.drawer + 1 }} open={loadingRoom}>
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   )
 }
