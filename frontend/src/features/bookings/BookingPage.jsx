@@ -1157,17 +1157,17 @@ const BookingPage = () => {
                         </IconButton>
                       )}
 
-                      <Box ref={recentScrollRef} sx={{
-                        display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
-                        justifyContent: 'flex-start',
-                        scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                        scrollSnapType: { xs: 'none', md: 'x mandatory' }
-                      }}>
+                        <Box ref={recentScrollRef} sx={{
+                          display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
+                          justifyContent: 'flex-start',
+                          scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
+                          scrollSnapType: 'x mandatory'
+                        }}>
                         {recentSearches.map((s, i) => (
                           <Card key={i} onClick={() => handleRecentSearchClick(s)} sx={{
                             cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                            width: { xs: '58vw', sm: 'calc((100% - 48px) / 4)' }, p: 2,
-                            scrollSnapAlign: { xs: 'none', md: 'start' }, boxShadow: 1,
+                            width: '200px', p: 2,
+                            scrollSnapAlign: 'start', scrollSnapStop: 'always', boxShadow: 1,
                             border: '1px solid #eee',
                             transition: 'all 0.2s',
                             minHeight: 100, // Cố định chiều cao tối thiểu
@@ -1233,15 +1233,15 @@ const BookingPage = () => {
                     display: 'flex', gap: 2.5, overflowX: 'auto', pb: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: { xs: 'none', md: 'x mandatory' }
+                    scrollSnapType: 'x mandatory'
                   }}>
                     {DESTINATIONS.map((d, i) => (
                       <Card key={d.key} onClick={() => selectDest(i)} sx={{
                         cursor: 'pointer', borderRadius: 3, flexShrink: 0,
-                        width: { xs: '44vw', sm: 'calc((100% - 60px) / 4)' }, height: { xs: 160, sm: 216 },
+                        width: '220px', height: { xs: 160, sm: 216 },
                         position: 'relative', overflow: 'hidden',
-                        scrollSnapAlign: { xs: 'none', md: 'start' },
-                        scrollSnapStop: { xs: 'none', md: 'always' },
+                        scrollSnapAlign: 'start',
+                        scrollSnapStop: 'always',
                         border: destIdx === i ? `3px solid ${PC}` : '3px solid transparent',
                         transition: 'all 0.2s',
                         boxShadow: destIdx === i ? `0 0 0 3px ${PC}44` : 1
@@ -1307,14 +1307,14 @@ const BookingPage = () => {
                     display: 'flex', gap: 2, overflowX: 'auto', pb: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: { xs: 'none', md: 'x mandatory' }
+                    scrollSnapType: 'x mandatory'
                   }}>
                     {ROOM_TYPES.map((type) => (
                       <Card key={type.key} onClick={() => handleTypeClick(type.key)} sx={{
                         cursor: 'pointer', borderRadius: 4, flexShrink: 0,
-                        width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, height: { xs: 140, sm: 180 },
+                        width: '200px', height: { xs: 140, sm: 180 },
                         position: 'relative', overflow: 'hidden',
-                        scrollSnapAlign: { xs: 'none', md: 'start' },
+                        scrollSnapAlign: 'start',
                         boxShadow: 1,
                         border: roomTypes.includes(type.key) ? `3px solid ${PC}` : '3px solid transparent',
                         transition: 'all 0.2s'
@@ -1382,11 +1382,11 @@ const BookingPage = () => {
                     display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: { xs: 'none', md: 'x mandatory' }
+                    scrollSnapType: 'x mandatory'
                   }}>
                         {(loading || sectionsLoading) ? (
                           [...Array(4)].map((_, i) => (
-                            <Box key={i} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
+                            <Box key={i} sx={{ width: '240px', flexShrink: 0 }}>
                               <RoomCardSkeleton />
                             </Box>
                           ))
@@ -1399,7 +1399,7 @@ const BookingPage = () => {
                             </Box>
                           ) : (
                             featuredRooms.map(r => (
-                              <Box key={r.id || r.roomId} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
+                              <Box key={r.id || r.roomId} sx={{ width: '240px', flexShrink: 0, scrollSnapAlign: 'start', scrollSnapStop: 'always', display: 'flex', alignItems: 'stretch' }}>
                                 <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                               </Box>
                             ))
@@ -1454,11 +1454,11 @@ const BookingPage = () => {
                       display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
                       justifyContent: 'flex-start',
                       scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                      scrollSnapType: { xs: 'none', md: 'x mandatory' }
+                      scrollSnapType: 'x mandatory'
                     }}>
                       {(sectionsLoading) ? (
                         [...Array(4)].map((_, i) => (
-                          <Box key={i} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
+                          <Box key={i} sx={{ width: '240px', flexShrink: 0 }}>
                             <RoomCardSkeleton />
                           </Box>
                         ))
@@ -1470,7 +1470,7 @@ const BookingPage = () => {
                         </Box>
                       ) : (
                         topRatedRooms.map(r => (
-                          <Box key={r.id || r.roomId} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
+                          <Box key={r.id || r.roomId} sx={{ width: '240px', flexShrink: 0, scrollSnapAlign: 'start', scrollSnapStop: 'always', display: 'flex', alignItems: 'stretch' }}>
                             <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                           </Box>
                         ))
@@ -1526,11 +1526,11 @@ const BookingPage = () => {
                         display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
                         justifyContent: 'flex-start',
                         scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                        scrollSnapType: { xs: 'none', md: 'x mandatory' }
+                        scrollSnapType: 'x mandatory'
                       }}>
                             {(sectionsLoading) ? (
                               [...Array(4)].map((_, i) => (
-                                  <Box key={i} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
+                                  <Box key={i} sx={{ width: '240px', flexShrink: 0 }}>
                                     <RoomCardSkeleton />
                                   </Box>
                                 ))
@@ -1542,7 +1542,7 @@ const BookingPage = () => {
                               </Box>
                             ) : (
                               budgetRooms.map(r => (
-                                <Box key={r.id || r.roomId} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
+                                <Box key={r.id || r.roomId} sx={{ width: '240px', flexShrink: 0, scrollSnapAlign: 'start', scrollSnapStop: 'always', display: 'flex', alignItems: 'stretch' }}>
                                   <RoomCard room={r} isMock={rooms.length === 0} showBookButton={false} onOpenDetail={openDetail} />
                                 </Box>
                               ))
@@ -1582,11 +1582,11 @@ const BookingPage = () => {
                     display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
                     justifyContent: 'flex-start',
                     scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: { xs: 'none', md: 'x mandatory' }
+                    scrollSnapType: 'x mandatory'
                   }}>
                     {(sectionsLoading) ? (
                       [...Array(4)].map((_, i) => (
-                        <Box key={i} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
+                        <Box key={i} sx={{ width: '240px', flexShrink: 0 }}>
                           <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
                           <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
                           <Skeleton width="50%" height={18} />
@@ -1600,7 +1600,7 @@ const BookingPage = () => {
                       </Box>
                     ) : (
                       weekendDeals.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: { xs: '44vw', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'none', md: 'start' }, display: 'flex', alignItems: 'stretch' }}>
+                        <Box key={r.id || r.roomId} sx={{ width: '240px', flexShrink: 0, scrollSnapAlign: 'start', scrollSnapStop: 'always', display: 'flex', alignItems: 'stretch' }}>
                           <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} showBookButton={false} onOpenDetail={openDetail} />
                         </Box>
                       ))
