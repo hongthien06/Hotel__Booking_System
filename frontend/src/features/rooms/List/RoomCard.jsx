@@ -2,7 +2,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Card, CardContent, CardMedia, Box, Typography,
-  IconButton, Tooltip, Skeleton
+  IconButton, Tooltip, Skeleton, Checkbox
 } from '@mui/material'
 import { Edit, People, SquareFoot, KingBed, Delete } from '@mui/icons-material'
 import RoomStatus from '../RoomStatus'
@@ -15,7 +15,7 @@ const MetaItem = ({ icon, text }) => (
   </Box>
 )
 
-const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
+const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit, selectable = false, selected = false, onToggleSelect }) => {
   const { t } = useTranslation()
   const price = room.pricePerNight ? formatCurrency(room.pricePerNight) : '—'
 
@@ -48,6 +48,21 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
     >
       {/* Image */}
       <Box sx={{ position: 'relative', height: { xs: 140, sm: 180 }, overflow: 'hidden' }}>
+        {selectable && (
+          <Checkbox
+            checked={selected}
+            onClick={(e) => { e.stopPropagation(); onToggleSelect?.(room) }}
+            sx={{
+              position: 'absolute', top: 8, right: 8, zIndex: 10,
+              bgcolor: 'rgba(255,255,255,0.9)',
+              borderRadius: '50%',
+              color: 'primary.main',
+              padding: '6px',
+              '&.Mui-checked': { color: 'primary.main' },
+              '&:hover': { bgcolor: 'white' }
+            }}
+          />
+        )}
         {room.imageUrls && room.imageUrls.length > 0 ? (
           <CardMedia
             component="img"
@@ -82,7 +97,7 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
         {/* Action buttons */}
         {canEdit && (
           <Box sx={{
-            position: 'absolute', top: 6, right: 6,
+            position: 'absolute', top: 6, right: selectable ? 44 : 6,
             display: 'flex', flexDirection: 'column', gap: 0.5,
             opacity: 0,
             transition: 'opacity 0.2s',
@@ -153,41 +168,44 @@ const RoomCard = ({ room, onClick, onEdit, onDelete, canEdit }) => {
           </Box>
         </Box>
 
-        {/* Meta */}
-        <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: amenities.length ? 1.5 : 0 }}>
-          {room.maxGuests && (
-            <MetaItem
-              icon={<People />}
-              text={`${room.maxGuests} ${t('rooms.guests') || 'khách'}`}
-            />
-          )}
-          {room.areaSqm && <MetaItem icon={<SquareFoot />} text={`${room.areaSqm}m²`} />}
-          {room.beds && room.beds.length > 0 && (
-            <MetaItem icon={<KingBed />} text={room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ')} />
-          )}
-        </Box>
-
-        {/* Amenities */}
-        {amenities.length > 0 && (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {amenities.slice(0, 3).map((a, i) => (
-              <Box key={i} sx={{
-                px: 1, py: 0.25,
-                bgcolor: 'background.default',
-                border: '1px solid', borderColor: 'divider',
-                borderRadius: 2,
-                fontSize: '0.65rem', fontWeight: 600, color: 'text.secondary'
-              }}>
-                {a}
-              </Box>
-            ))}
-            {amenities.length > 3 && (
-              <Typography variant="caption" color="text.disabled" sx={{ alignSelf: 'center' }}>
-                +{amenities.length - 3}
-              </Typography>
+        {/* Bottom Section (Meta & Amenities) aligned to bottom */}
+        <Box sx={{ mt: 'auto' }}>
+          {/* Meta */}
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: amenities.length ? 1.5 : 0 }}>
+            {room.maxGuests && (
+              <MetaItem
+                icon={<People />}
+                text={`${room.maxGuests} ${t('rooms.guests') || 'khách'}`}
+              />
+            )}
+            {room.areaSqm && <MetaItem icon={<SquareFoot />} text={`${room.areaSqm}m²`} />}
+            {room.beds && room.beds.length > 0 && (
+              <MetaItem icon={<KingBed />} text={room.beds.map(b => `${b.quantity} ${b.bedType}`).join(' + ')} />
             )}
           </Box>
-        )}
+
+          {/* Amenities */}
+          {amenities.length > 0 && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {amenities.slice(0, 3).map((a, i) => (
+                <Box key={i} sx={{
+                  px: 1, py: 0.25,
+                  bgcolor: 'background.default',
+                  border: '1px solid', borderColor: 'divider',
+                  borderRadius: 2,
+                  fontSize: '0.65rem', fontWeight: 600, color: 'text.secondary'
+                }}>
+                  {a}
+                </Box>
+              ))}
+              {amenities.length > 3 && (
+                <Typography variant="caption" color="text.disabled" sx={{ alignSelf: 'center' }}>
+                  +{amenities.length - 3}
+                </Typography>
+              )}
+            </Box>
+          )}
+        </Box>
       </CardContent>
     </Card>
   )

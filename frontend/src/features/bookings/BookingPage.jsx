@@ -39,7 +39,7 @@ import { createBookingApi, getBookedDatesApi } from '../../shared/api/bookingApi
 import { getMyMembershipApi } from '../../shared/api/membershipApi'
 import { useAuth } from '../../shared/hooks/useAuth'
 import LoginPromptModal from '../../shared/components/modals/LoginPromptModal'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import RoomDetail from '../rooms/Details/RoomDetail'
 import BookingDialog from './components/BookingDialog'
 import i18n from 'i18next'
@@ -562,6 +562,7 @@ const BookingPage = () => {
   const { t } = useTranslation()
   const currentLang = i18n.language || 'vi'
   const navigate = useNavigate()
+  const location = useLocation()
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
@@ -618,10 +619,12 @@ const BookingPage = () => {
   const [minPrice, setMinPrice] = useState(undefined)
   const [maxPrice, setMaxPrice] = useState(undefined)
   const [params, setParams] = useState(() => ({
-    destination: '',
+    destination: location.state?.destination || '',
+    hotelName: location.state?.hotelName || '',
     checkIn: dayjs().format('YYYY-MM-DD'),
     checkOut: dayjs().add(1, 'day').format('YYYY-MM-DD'),
-    adults: 2, children: 0
+    adults: location.state?.adults ?? 2,
+    children: location.state?.children ?? 0
   }))
 
   // Dialog state
@@ -939,7 +942,13 @@ const BookingPage = () => {
   }
 
   const onParam = (k, v) => {
-    setParams(p => ({ ...p, [k]: v }))
+    setParams(p => {
+      const newP = { ...p, [k]: v }
+      if (k === 'destination') {
+        newP.hotelName = '' // Clear hotel filter if destination changes manually
+      }
+      return newP
+    })
     if (k === 'destination') {
       const idx = DESTINATIONS.findIndex(d => (d.province || d.name) === v)
       setDestIdx(idx)
@@ -975,7 +984,11 @@ const BookingPage = () => {
         searchParams.adults,
         searchParams.children
       )
-      setRooms(Array.isArray(d) ? d : [])
+      let fetched = Array.isArray(d) ? d : []
+      if (searchParams.hotelName) {
+        fetched = fetched.filter(r => r.hotelName === searchParams.hotelName)
+      }
+      setRooms(fetched)
       // fetch occupied room ids for selected range to disable selection in UI
       try {
         const occ = await getOccupiedRoomsApi(searchParams.checkIn, searchParams.checkOut)
@@ -990,6 +1003,27 @@ const BookingPage = () => {
       fetchSections()
     }
   }
+
+  // Handle auto search from location state
+  useEffect(() => {
+    if (location.state?.autoSearch && location.state?.destination) {
+      // Find index of destination
+      const idx = DESTINATIONS.findIndex(d => (d.province || d.name) === location.state.destination)
+      if (idx !== -1) setDestIdx(idx)
+      
+      const newParams = {
+        ...params,
+        destination: location.state.destination,
+        hotelName: location.state.hotelName || '',
+        adults: location.state.adults ?? params.adults,
+        children: location.state.children ?? params.children
+      }
+      setParams(newParams)
+      handleSearch(newParams)
+      // Clear state so it doesn't run again if we refresh
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state])
 
   const handleClearSearch = () => {
     setSearched(false)
@@ -1653,6 +1687,15 @@ const BookingPage = () => {
                     {t('booking_page.back_to_home')}
                   </Button>
                 </Box>
+                {params.hotelName && (
+                  <Alert severity="info" sx={{ mb: 3, borderRadius: 3 }} onClose={() => {
+                    const newParams = { ...params, hotelName: '' }
+                    setParams(newParams)
+                    handleSearch(newParams)
+                  }}>
+                    Khách sạn: <strong>{params.hotelName}</strong>
+                  </Alert>
+                )}
                 {rooms.length > 0 && (
                   <Box sx={{
                     display: 'flex',

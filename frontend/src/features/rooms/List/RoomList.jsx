@@ -18,6 +18,7 @@ import RoomStatus, { STATUS_CONFIG } from '../RoomStatus'
 import BookingDialog from '../../bookings/components/BookingDialog'
 import LoginPromptModal from '../../../shared/components/modals/LoginPromptModal'
 import { useNavigate } from 'react-router-dom'
+import { formatCurrency } from '../../../shared/utils/formatters'
 
 const BASE_URL = import.meta.env.VITE_API_URL || '/api/v1'
 const createRoomApi = (data) => axiosInstance.post(`${BASE_URL}/rooms`, data).then(r => r.data)
@@ -105,6 +106,7 @@ const RoomList = () => {
   const [openAmenityModal, setOpenAmenityModal] = useState(false)
   const [amenities, setAmenities] = useState([])
   const [newAmenity, setNewAmenity] = useState({ amenityName: '', description: '', iconClass: 'star' })
+  const [selectedRoomsForOrder, setSelectedRoomsForOrder] = useState([])
 
   const showToast = (msg, severity = 'success') =>
     setToast({ open: true, msg, severity })
@@ -174,6 +176,8 @@ const RoomList = () => {
     list.sort((a, b) => {
       if (sortBy === 'price') return (a.pricePerNight || 0) - (b.pricePerNight || 0)
       if (sortBy === 'priceDesc') return (b.pricePerNight || 0) - (a.pricePerNight || 0)
+      if (sortBy === 'capacity') return (a.maxGuests || 0) - (b.maxGuests || 0)
+      if (sortBy === 'capacityDesc') return (b.maxGuests || 0) - (a.maxGuests || 0)
       return String(a.roomNumber).localeCompare(String(b.roomNumber), undefined, { numeric: true })
     })
     return list
@@ -183,6 +187,13 @@ const RoomList = () => {
   const handleCardClick = (room) => { setSelectedRoom(room); setDetailOpen(true) }
   const handleEditClick = (room) => { setEditRoom(room); setFormOpen(true); setDetailOpen(false) }
   const handleAddClick = () => { setEditRoom(null); setFormOpen(true) }
+  const handleToggleSelectRoom = (room) => {
+    setSelectedRoomsForOrder(prev => {
+      const isSelected = prev.find(r => (r.roomId || r.id) === (room.roomId || room.id))
+      if (isSelected) return prev.filter(r => (r.roomId || r.id) !== (room.roomId || room.id))
+      return [...prev, room]
+    })
+  }
 
   const handleBookClick = (room) => {
     if (!isAuthenticated) {
@@ -192,6 +203,15 @@ const RoomList = () => {
     setSelectedRoom(room)
     setBookingDialogOpen(true)
     setDetailOpen(false)
+  }
+
+  const handleBookMultiple = () => {
+    if (!isAuthenticated) {
+      setLoginPromptOpen(true)
+      return
+    }
+    setSelectedRoom(selectedRoomsForOrder[0])
+    setBookingDialogOpen(true)
   }
 
   const handleFormSubmit = async (payload) => {
@@ -365,6 +385,8 @@ const RoomList = () => {
           <MenuItem value="roomNumber">{t('rooms.sort_room_number')}</MenuItem>
           <MenuItem value="price">{t('rooms.sort_price_asc')}</MenuItem>
           <MenuItem value="priceDesc">{t('rooms.sort_price_desc')}</MenuItem>
+          <MenuItem value="capacity">{t('rooms.sort_capacity_asc')}</MenuItem>
+          <MenuItem value="capacityDesc">{t('rooms.sort_capacity_desc')}</MenuItem>
         </TextField>
 
         <Tooltip title={t('common.reload')}>
@@ -425,6 +447,9 @@ const RoomList = () => {
                   onEdit={handleEditClick}
                   onDelete={handleDeleteClick}
                   canEdit={canEdit}
+                  selectable={!canEdit}
+                  selected={selectedRoomsForOrder.some(r => (r.roomId || r.id) === (room.roomId || room.id))}
+                  onToggleSelect={handleToggleSelectRoom}
                 />
               </Box>
             ))
@@ -593,14 +618,45 @@ const RoomList = () => {
       <BookingDialog
         open={bookingDialogOpen}
         room={selectedRoom}
+        rooms={selectedRoomsForOrder.length > 0 ? selectedRoomsForOrder : []}
         isMock={false}
         searchParams={defaultSearchParams}
         onClose={() => setBookingDialogOpen(false)}
         onSuccess={() => {
           setBookingDialogOpen(false)
+          setSelectedRoomsForOrder([])
           showToast(t('booking_page.booking_success'), 'success')
         }}
       />
+
+      {/* Multiple Selection Floating Bar */}
+      {selectedRoomsForOrder.length > 0 && (
+        <Paper elevation={8} sx={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'center', gap: 3, p: 2, borderRadius: 4,
+          bgcolor: 'white', zIndex: 1100, border: '2px solid #c0496e'
+        }}>
+          <Box>
+            <Typography variant="body2" color="text.secondary" fontWeight={600}>
+              {t('booking_page.selected_rooms_count', { count: selectedRoomsForOrder.length })}
+            </Typography>
+            <Typography variant="h6" fontWeight={800} color="#c0496e">
+              {formatCurrency(selectedRoomsForOrder.reduce((sum, item) => sum + Number(item.pricePerNight || item.priceDay || 0), 0))} {t('rooms.per_night')}
+            </Typography>
+          </Box>
+          <Button variant="contained" size="large" onClick={handleBookMultiple}
+            sx={{
+              bgcolor: '#c0496e', color: 'white', borderRadius: 2, fontWeight: 700, px: 4,
+              '&:hover': { bgcolor: '#9a3a58' }
+            }}
+          >
+            {t('booking_page.book_selected_rooms')}
+          </Button>
+          <IconButton size="small" onClick={() => setSelectedRoomsForOrder([])} sx={{ position: 'absolute', top: -12, right: -12, bgcolor: 'white', border: '1px solid #ccc', '&:hover': { bgcolor: '#f5f5f5' } }}>
+            <Close fontSize="small" />
+          </IconButton>
+        </Paper>
+      )}
 
       {/* Login Prompt Modal */}
       <LoginPromptModal

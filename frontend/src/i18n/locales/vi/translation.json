@@ -393,7 +393,9 @@
     "no_budget_rooms": "Không có phòng phù hợp về ngân sách.",
     "mock_room_error": "Phòng mẫu — vui lòng tìm kiếm phòng thực trên hệ thống.",
     "hint_single_room": "Gợi ý: Phòng {{roomName}} chỉ chứa tối đa {{maxGuests}} khách (miễn phí tối đa 1 trẻ em đi kèm). Bạn có thể giảm số lượng khách hoặc quay lại trang tìm kiếm phòng, chọn đồng thời nhiều phòng để phù hợp với đoàn khách {{totalGuests}} người.",
-    "hint_multiple_rooms": "Gợi ý: Tổng sức chứa của các phòng đã chọn là {{maxGuests}} khách. Bạn có thể chọn thêm phòng hoặc giảm số lượng khách để phù hợp với giới hạn sức chứa (mỗi phòng được đi kèm 1 trẻ em miễn phí)."
+    "hint_multiple_rooms": "Gợi ý: Tổng sức chứa của các phòng đã chọn là {{maxGuests}} khách. Bạn có thể chọn thêm phòng hoặc giảm số lượng khách để phù hợp với giới hạn sức chứa (mỗi phòng được đi kèm 1 trẻ em miễn phí).",
+    "action_find_larger_room": "Tìm phòng lớn hơn",
+    "action_book_multiple": "Chọn thêm phòng"
   },
   "login_page": {
     "welcome": "Chào mừng trở lại",
@@ -483,6 +485,8 @@
     "sort_room_number": "Sắp xếp: Mã phòng",
     "sort_price_asc": "Giá: Thấp → Cao",
     "sort_price_desc": "Giá: Cao → Thấp",
+    "sort_capacity_asc": "Sức chứa: Ít → Nhiều",
+    "sort_capacity_desc": "Sức chứa: Nhiều → Ít",
     "floor_number": "Tầng {{floor}}",
     "guests": "khách",
     "per_night": "/đêm",

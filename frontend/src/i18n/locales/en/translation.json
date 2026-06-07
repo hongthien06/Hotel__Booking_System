@@ -394,7 +394,9 @@
     "no_budget_rooms": "No budget-friendly rooms found.",
     "mock_room_error": "Sample room — please search for real rooms on the system.",
     "hint_single_room": "Hint: Room {{roomName}} can accommodate up to {{maxGuests}} guests (1 child stays free). You can reduce the number of guests or go back to search and select multiple rooms to fit your group of {{totalGuests}} guests.",
-    "hint_multiple_rooms": "Hint: Total capacity of selected rooms is {{maxGuests}} guests. You can select more rooms or reduce the number of guests to fit the capacity limits (1 child per room stays free)."
+    "hint_multiple_rooms": "Hint: Total capacity of selected rooms is {{maxGuests}} guests. You can select more rooms or reduce the number of guests to fit the capacity limits (1 child per room stays free).",
+    "action_find_larger_room": "Find a larger room",
+    "action_book_multiple": "Book multiple rooms"
   },
   "login_page": {
     "welcome": "Welcome Back",
@@ -484,6 +486,8 @@
     "sort_room_number": "Sort: Room Number",
     "sort_price_asc": "Price: Low to High",
     "sort_price_desc": "Price: High to Low",
+    "sort_capacity_asc": "Capacity: Low to High",
+    "sort_capacity_desc": "Capacity: High to Low",
     "floor_number": "Floor {{floor}}",
     "guests": "guests",
     "per_night": "/night",

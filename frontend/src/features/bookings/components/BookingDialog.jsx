@@ -324,6 +324,33 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
                 <>{t('booking_page.hint_multiple_rooms', { maxGuests })}</>
               )}
             </Typography>
+            
+            <Box sx={{ mt: 1.5, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => {
+                  onClose()
+                  const targetLoc = selectedRooms[0]?.province || selectedRooms[0]?.location || ''
+                  const targetHotel = selectedRooms[0]?.hotelName || ''
+                  navigate('/bookings', { 
+                    state: { 
+                      destination: targetLoc, 
+                      hotelName: targetHotel, 
+                      adults: form.numAdults,
+                      children: form.numChildren,
+                      autoSearch: true 
+                    } 
+                  })
+                }}
+                sx={{
+                  bgcolor: '#c0496e', color: 'white', borderRadius: 2, boxShadow: 'none',
+                  '&:hover': { bgcolor: '#9a3a58', boxShadow: 'none' }
+                }}
+              >
+                {t('booking_page.action_find_suitable_rooms', 'Tìm thêm phòng phù hợp')}
+              </Button>
+            </Box>
           </Alert>
         )}
 
