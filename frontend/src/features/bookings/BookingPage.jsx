@@ -31,7 +31,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs'
 import 'dayjs/locale/vi'
 import { useTranslation } from 'react-i18next'
-import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward, EmojiEvents, Phone } from '@mui/icons-material'
+import { Search, LocationOn, ChevronLeft, ChevronRight, Close, FilterList, ArrowForward, EmojiEvents, Phone, Hotel as HotelIcon } from '@mui/icons-material'
 import { getRoomsApi, getAvailableRoomsApi, getFeaturedRoomsApi, getTopRatedRoomsApi, getWeekendDealsApi, getBudgetRoomsApi } from '../../shared/api/roomApi'
 import { getOccupiedRoomsApi } from '../../shared/api/bookingApi'
 import { getAmenitiesApi } from '../../shared/api/amenityApi'
@@ -180,9 +180,8 @@ const RoomCard = ({
         '&:hover': { transform: 'translateY(-6px)', boxShadow: '0 12px 30px rgba(0,0,0,0.13)' },
         display: 'flex',
         flexDirection: 'column',
-        height: '100%',
+        height: { xs: 360, md: 400 },
         width: '100%',
-        flex: 1
       }}
     >
       {selectable && (
@@ -203,19 +202,30 @@ const RoomCard = ({
           }}
         />
       )}
-      {isMock
-        ? <Box sx={{ height: 180, bgcolor: room.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
-        </Box>
-        : <CardMedia
-          component="img"
-          height="180"
-          image={(room.imageUrls && room.imageUrls.length > 0) ? room.imageUrls[0] : (room.image || 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?w=600')}
-          alt={isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`}
-          sx={{ objectFit: 'cover' }}
-        />
-      }
-      <CardContent sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ position: 'relative', height: { xs: 140, md: 180 }, overflow: 'hidden', flexShrink: 0, bgcolor: 'grey.100' }}>
+        {isMock ? (
+          <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography sx={{ fontSize: 64 }}>{room.emoji}</Typography>
+          </Box>
+        ) : (
+          (() => {
+            const src = (room.imageUrls && room.imageUrls.length > 0) ? room.imageUrls[0] : (room.image || room.imageUrl || room.img || room.imageUrlSmall)
+            return src ? (
+              <CardMedia
+                component="img"
+                image={src}
+                alt={room.roomName || room.name || (isMock ? room.name : `${t('booking_page.room')} ${room.roomNumber}`)}
+                sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+            ) : (
+              <Box sx={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <HotelIcon sx={{ fontSize: 48, color: 'grey.400' }} />
+              </Box>
+            )
+          })()
+        )}
+      </Box>
+      <CardContent sx={{ p: 2, display: 'flex', flexDirection: 'column', flex: 1 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
           <Chip label={isMock ? t(`room_types.${room.type.toLowerCase()}`) : t(room.typeName || 'Standard')} size="small"
             sx={{ bgcolor: PC_LIGHT, color: PC, fontWeight: 700, fontSize: 11 }} />
@@ -1135,7 +1145,7 @@ const BookingPage = () => {
         </Box>
 
         <Box sx={{ px: { xs: 1.5, sm: 3 }, py: 2, pb: 8 }}>
-          <Box sx={{ maxWidth: 1280, mx: 'auto' }}>
+          <Box sx={{ width: '100%', maxWidth: '100%', mx: 'auto' }}>
 
             {!searched ? (
               <>
@@ -1710,33 +1720,30 @@ const BookingPage = () => {
                 )}
 
                 {loading ? (
-                  <Grid container spacing={3}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2 }}>
                         {[...Array(4)].map((_, i) => (
-                      <Grid item xs={12} sm={6} md={3} key={i} sx={{ display: 'flex' }}>
-                        <RoomCardSkeleton />
-                      </Grid>
+                      <RoomCardSkeleton key={i} />
                     ))}
-                  </Grid>
+                  </Box>
                 ) : rooms.length > 0 ? (
-                  <Grid container spacing={3}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 3 }}>
                     {rooms.map(r => (
-                      <Grid item xs={12} sm={6} md={3} key={r.id || r.roomId} sx={{ display: 'flex' }}>
-                        <RoomCard
-                          room={r}
-                          isMock={false}
-                          showBookButton
-                          selectable
-                          selected={selectedRoomsForOrder.some(item => (item.roomId || item.id) === (r.roomId || r.id))}
-                          onToggleSelect={toggleRoomSelection}
-                          onOpenDetail={openDetail}
-                          onOpenBooking={openBooking}
-                          params={params}
-                          searched={searched}
-                          isUnavailable={occupiedRoomIds.includes((r.roomId || r.id))}
-                        />
-                      </Grid>
+                      <RoomCard
+                        key={r.id || r.roomId}
+                        room={r}
+                        isMock={false}
+                        showBookButton
+                        selectable
+                        selected={selectedRoomsForOrder.some(item => (item.roomId || item.id) === (r.roomId || r.id))}
+                        onToggleSelect={toggleRoomSelection}
+                        onOpenDetail={openDetail}
+                        onOpenBooking={openBooking}
+                        params={params}
+                        searched={searched}
+                        isUnavailable={occupiedRoomIds.includes((r.roomId || r.id))}
+                      />
                     ))}
-                  </Grid>
+                  </Box>
                 ) : (
                   <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
                     <Card sx={{ width: '100%', p: 0, display: 'flex', gap: 2, alignItems: 'stretch', mx: 'auto', borderRadius: 3, boxShadow: 1, overflow: 'hidden', minHeight: { xs: 'calc(120px + 3cm)', sm: 'calc(160px + 3cm)' } }}>
