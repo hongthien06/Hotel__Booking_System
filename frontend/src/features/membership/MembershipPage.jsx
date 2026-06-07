@@ -79,12 +79,8 @@ const CurrentTierCard = ({ membership, tiers, t, lang }) => {
   const isVIP = tier.tierCode === 'VIP'
   const nextTier = membership.nextTier
   const spentToNext = Number(membership.spentToNextTier || 0)
-  const bookingsToNext = Number(membership.bookingsToNextTier || 0)
   const spentProgress = nextTier
     ? Math.min(100, Math.max(5, 100 - (spentToNext / (Number(nextTier.minTotalSpent) || 1)) * 100))
-    : 100
-  const bookingProgress = nextTier && bookingsToNext > 0
-    ? Math.min(100, Math.max(5, (membership.bookingCount / (membership.bookingCount + bookingsToNext)) * 100))
     : 100
 
   const tierName = getMembershipTierName(tier, lang)
@@ -139,25 +135,19 @@ const CurrentTierCard = ({ membership, tiers, t, lang }) => {
       {/* Stats row */}
       <Box sx={{ px: 4, py: 3, bgcolor: v.bg }}>
         <Grid container spacing={3} sx={{ mb: 3 }}>
-          <Grid size={{ xs: 6, md: 3 }}>
-            <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h5" fontWeight={800} color={v.textColor}>{membership.bookingCount ?? 0}</Typography>
-              <Typography variant="caption" color="text.secondary">{t('membership.total_bookings')}</Typography>
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 12, sm: 4 }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h5" fontWeight={800} color={v.textColor}>{fmtVND(membership.totalSpent)}</Typography>
               <Typography variant="caption" color="text.secondary">{t('membership.total_spent')}</Typography>
             </Box>
           </Grid>
-          <Grid size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, sm: 4 }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h5" fontWeight={800} color={v.textColor}>{tier.discountPct ?? 0}%</Typography>
               <Typography variant="caption" color="text.secondary">{t('membership.discount_rate')}</Typography>
             </Box>
           </Grid>
-          <Grid size={{ xs: 6, md: 3 }}>
+          <Grid size={{ xs: 6, sm: 4 }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h5" fontWeight={800} color={v.textColor}>
                 {membership.isFirstBookingUsed ? '✓' : t('membership.available')}
@@ -183,42 +173,21 @@ const CurrentTierCard = ({ membership, tiers, t, lang }) => {
             <Typography variant="subtitle2" fontWeight={700} color={v.textColor} sx={{ mb: 2 }}>
               {t('membership.progress_to')} {nextTierName}
             </Typography>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <Box sx={{ mb: 0.5, display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="caption" color="text.secondary">{t('membership.spent_progress')}</Typography>
-                  <Typography variant="caption" fontWeight={700} color={v.textColor}>
-                    {fmtVND(spentToNext)} {t('membership.more')}
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={Math.max(5, spentProgress)}
-                  sx={{
-                    height: 8, borderRadius: 4,
-                    bgcolor: `${v.border}`,
-                    '& .MuiLinearProgress-bar': { background: v.gradient, borderRadius: 4 }
-                  }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6 }}>
-                <Box sx={{ mb: 0.5, display: 'flex', justifyContent: 'space-between' }}>
-                  <Typography variant="caption" color="text.secondary">{t('membership.booking_progress')}</Typography>
-                  <Typography variant="caption" fontWeight={700} color={v.textColor}>
-                    {bookingsToNext} {t('membership.bookings_more')}
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={Math.max(5, bookingProgress)}
-                  sx={{
-                    height: 8, borderRadius: 4,
-                    bgcolor: `${v.border}`,
-                    '& .MuiLinearProgress-bar': { background: v.gradient, borderRadius: 4 }
-                  }}
-                />
-              </Grid>
-            </Grid>
+            <Box sx={{ mb: 0.5, display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="caption" color="text.secondary">{t('membership.spent_progress')}</Typography>
+              <Typography variant="caption" fontWeight={700} color={v.textColor}>
+                {fmtVND(spentToNext)} {t('membership.more')}
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={Math.max(5, spentProgress)}
+              sx={{
+                height: 8, borderRadius: 4,
+                bgcolor: `${v.border}`,
+                '& .MuiLinearProgress-bar': { background: v.gradient, borderRadius: 4 }
+              }}
+            />
             <Typography variant="caption" color="text.secondary" sx={{ mt: 1.5, display: 'block' }}>
               * {t('membership.upgrade_note')}
             </Typography>
@@ -311,10 +280,6 @@ const TierCard = ({ tier, isActive, lang, t }) => {
                 <Box sx={{ display: 'flex', gap: 0.75 }}>
                   <CheckCircle sx={{ fontSize: 14, color: v.textColor, mt: 0.25, flexShrink: 0 }} />
                   <Typography variant="caption" color="text.secondary">{t('membership.spending_requirement', { amount: fmtVND(tier.minTotalSpent) })}</Typography>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 0.75 }}>
-                  <CheckCircle sx={{ fontSize: 14, color: v.textColor, mt: 0.25, flexShrink: 0 }} />
-                  <Typography variant="caption" color="text.secondary">{t('membership.booking_requirement', { count: tier.minBookingCount })}</Typography>
                 </Box>
               </>
             )}
@@ -419,7 +384,6 @@ const ComparisonTable = ({ tiers, currentCode, t, lang }) => {
               <TableCell sx={{ fontWeight: 700 }}>{t('membership.tier')}</TableCell>
               <TableCell align="center" sx={{ fontWeight: 700 }}>{t('membership.discount')}</TableCell>
               <TableCell align="center" sx={{ fontWeight: 700 }}>{t('membership.min_spent')}</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700 }}>{t('membership.min_bookings')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -452,11 +416,6 @@ const ComparisonTable = ({ tiers, currentCode, t, lang }) => {
                   <TableCell align="center">
                     <Typography variant="body2">
                       {tier.tierCode === 'FIRST_TIME' ? '—' : fmtVND(tier.minTotalSpent)}
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="center">
-                    <Typography variant="body2">
-                      {tier.tierCode === 'FIRST_TIME' ? t('membership.once_only') : `≥ ${tier.minBookingCount}`}
                     </Typography>
                   </TableCell>
                 </TableRow>

@@ -278,12 +278,8 @@ const ProfilePage = () => {
               const isVIP = tier.tierCode === 'VIP'
               const nextTier = membership.nextTier
               const spentToNext = Number(membership.spentToNextTier || 0)
-              const bookingsToNext = Number(membership.bookingsToNextTier || 0)
               const spentProgress = nextTier
                 ? Math.min(100, Math.max(5, 100 - (spentToNext / (Number(nextTier.minTotalSpent) || 1)) * 100))
-                : 100
-              const bookingProgress = nextTier && bookingsToNext > 0
-                ? Math.min(100, Math.max(5, (membership.bookingCount / (membership.bookingCount + bookingsToNext)) * 100))
                 : 100
               const nextTierName = nextTier ? getMembershipTierName(nextTier, i18n.language) : null
 
@@ -317,13 +313,13 @@ const ProfilePage = () => {
                     />
                   </Box>
 
-                  {/* Stats */}
-                  <Box sx={{ px: 2, py: 2, bgcolor: v.bg }}>
-                    <Grid container spacing={1} sx={{ mb: 2 }}>
+                    {/* Stats */}
+                    <Box sx={{ px: 2, py: 2, bgcolor: v.bg }}>
+                      <Grid container spacing={1} sx={{ mb: 2 }}>
                       <Grid size={{ xs: 4 }}>
                         <Box sx={{ textAlign: 'center' }}>
-                          <Typography variant="h6" sx={{ fontWeight: 900, color: v.textColor }}>{membership.bookingCount ?? 0}</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.total_bookings')}</Typography>
+                          <Typography variant="subtitle2" sx={{ fontWeight: 900, color: v.textColor, fontSize: '0.75rem' }}>{fmtVND(membership.totalSpent)}</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.total_spent')}</Typography>
                         </Box>
                       </Grid>
                       <Grid size={{ xs: 4 }}>
@@ -334,8 +330,10 @@ const ProfilePage = () => {
                       </Grid>
                       <Grid size={{ xs: 4 }}>
                         <Box sx={{ textAlign: 'center' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 900, color: v.textColor, fontSize: '0.75rem' }}>{fmtVND(membership.totalSpent)}</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.total_spent')}</Typography>
+                          <Typography variant="h6" sx={{ fontWeight: 900, color: v.textColor }}>
+                            {membership.isFirstBookingUsed ? '✓' : t('membership.available')}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.first_booking_perk')}</Typography>
                         </Box>
                       </Grid>
                     </Grid>
@@ -353,16 +351,6 @@ const ProfilePage = () => {
                           </Box>
                           <LinearProgress
                             variant="determinate" value={spentProgress}
-                            sx={{ height: 6, borderRadius: 3, bgcolor: v.border, '& .MuiLinearProgress-bar': { background: v.gradient, borderRadius: 3 } }}
-                          />
-                        </Box>
-                        <Box>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-                            <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>{t('membership.booking_progress')}</Typography>
-                            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: v.textColor }}>{bookingsToNext} {t('membership.bookings_more')}</Typography>
-                          </Box>
-                          <LinearProgress
-                            variant="determinate" value={bookingProgress}
                             sx={{ height: 6, borderRadius: 3, bgcolor: v.border, '& .MuiLinearProgress-bar': { background: v.gradient, borderRadius: 3 } }}
                           />
                         </Box>

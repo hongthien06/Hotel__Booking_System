@@ -78,19 +78,19 @@ VALUES
  N'["Giảm 10% hóa đơn đầu tiên"]',
  '["10% off your first booking"]'),
 
-('SILVER',     1,  5.00, 5000000,    2,  N'Hội viên bạc',        'Silver Member',      '#9E9E9E',
+('SILVER',     1,  5.00, 5000000,    0,  N'Hội viên bạc',        'Silver Member',      '#9E9E9E',
  N'["Giảm 5% mọi đặt phòng","Ưu tiên đặt phòng"]',
  '["5% off every booking","Priority reservation"]'),
 
-('GOLD',       2, 10.00, 15000000,   5,  N'Hội viên vàng',       'Gold Member',        '#FFC107',
+('GOLD',       2, 10.00, 15000000,   0,  N'Hội viên vàng',       'Gold Member',        '#FFC107',
  N'["Giảm 10% mọi đặt phòng","Nâng hạng phòng miễn phí","Check-in sớm"]',
  '["10% off every booking","Free room upgrade","Early check-in"]'),
 
-('DIAMOND',    3, 15.00, 30000000,   10, N'Hội viên kim cương',  'Diamond Member',     '#00BCD4',
+('DIAMOND',    3, 15.00, 30000000,   0,  N'Hội viên kim cương',  'Diamond Member',     '#00BCD4',
  N'["Giảm 15% mọi đặt phòng","Nâng hạng phòng miễn phí","Dịch vụ miễn phí","Check-in/out linh hoạt"]',
  '["15% off every booking","Free room upgrade","Complimentary services","Flexible check-in/out"]'),
 
-('VIP',        4, 20.00, 60000000,   20, N'Hội viên VIP',        'VIP Member',         '#9C27B0',
+('VIP',        4, 20.00, 60000000,   0,  N'Hội viên VIP',        'VIP Member',         '#9C27B0',
  N'["Giảm 20% mọi đặt phòng","Phòng hạng cao nhất","Dịch vụ cá nhân hóa","Đón tiếp sân bay","Ưu đãi sinh nhật đặc biệt"]',
  '["20% off every booking","Premier room class","Personalized butler service","Airport transfer","Special birthday perks"]');
 

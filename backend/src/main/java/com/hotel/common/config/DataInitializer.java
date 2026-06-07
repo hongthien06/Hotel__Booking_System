@@ -55,10 +55,13 @@ public class DataInitializer implements CommandLineRunner {
         // ── Membership tiers ───────────────────────────────────────────────────────
 
         private void seedMembershipTiers() {
-                // Force sync GOLD tier benefits in case they were already seeded
-                membershipTierRepository.findByTierCode("GOLD").ifPresent(tier -> {
-                        tier.setBenefitsVi("[\"Giảm 10% mọi đặt phòng\",\"Check-in sớm\"]");
-                        tier.setBenefitsEn("[\"10% off every booking\",\"Early check-in\"]");
+                // Force sync membership requirements in case tiers were already seeded
+                membershipTierRepository.findAll().forEach(tier -> {
+                        tier.setMinBookingCount(0);
+                        if ("GOLD".equals(tier.getTierCode())) {
+                                tier.setBenefitsVi("[\"Giảm 10% mọi đặt phòng\",\"Check-in sớm\"]");
+                                tier.setBenefitsEn("[\"10% off every booking\",\"Early check-in\"]");
+                        }
                         membershipTierRepository.save(tier);
                 });
 
@@ -83,7 +86,7 @@ public class DataInitializer implements CommandLineRunner {
                                 .tierLevel(1)
                                 .discountPct(new BigDecimal("5.00"))
                                 .minTotalSpent(new BigDecimal("5000000"))
-                                .minBookingCount(2)
+                                .minBookingCount(0)
                                 .displayNameVi("Hội viên Bạc")
                                 .displayNameEn("Silver Member")
                                 .colorCode("#9E9E9E")
@@ -96,7 +99,7 @@ public class DataInitializer implements CommandLineRunner {
                                 .tierLevel(2)
                                 .discountPct(new BigDecimal("10.00"))
                                 .minTotalSpent(new BigDecimal("15000000"))
-                                .minBookingCount(5)
+                                .minBookingCount(0)
                                 .displayNameVi("Hội viên Vàng")
                                 .displayNameEn("Gold Member")
                                 .colorCode("#FFC107")
@@ -109,7 +112,7 @@ public class DataInitializer implements CommandLineRunner {
                                 .tierLevel(3)
                                 .discountPct(new BigDecimal("15.00"))
                                 .minTotalSpent(new BigDecimal("30000000"))
-                                .minBookingCount(10)
+                                .minBookingCount(0)
                                 .displayNameVi("Hội viên Kim Cương")
                                 .displayNameEn("Diamond Member")
                                 .colorCode("#00BCD4")
@@ -122,7 +125,7 @@ public class DataInitializer implements CommandLineRunner {
                                 .tierLevel(4)
                                 .discountPct(new BigDecimal("20.00"))
                                 .minTotalSpent(new BigDecimal("60000000"))
-                                .minBookingCount(20)
+                                .minBookingCount(0)
                                 .displayNameVi("Hội viên VIP")
                                 .displayNameEn("VIP Member")
                                 .colorCode("#9C27B0")

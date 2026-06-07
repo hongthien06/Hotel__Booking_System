@@ -160,8 +160,7 @@ public class MembershipService implements IMembershipService {
         cm.setIsFirstBookingUsed(true);
         cm.setUpdatedAt(LocalDateTime.now());
 
-        List<MembershipTier> eligible = tierRepository
-                .findEligibleTiers(cm.getTotalSpent(), cm.getBookingCount());
+        List<MembershipTier> eligible = tierRepository.findEligibleTiers(cm.getTotalSpent());
 
         if (!eligible.isEmpty()) {
             MembershipTier best = eligible.get(0);
@@ -198,16 +197,12 @@ public class MembershipService implements IMembershipService {
 
         MembershipTierResponse nextTierResp = null;
         BigDecimal spentToNext = null;
-        Integer bookingsToNext = null;
-
         for (MembershipTier tier : allTiers) {
             if (tier.getTierLevel() > cm.getTier().getTierLevel()
                     && !FIRST_TIME_CODE.equals(tier.getTierCode())) {
                 nextTierResp = toTierResponse(tier);
                 BigDecimal spentGap = tier.getMinTotalSpent().subtract(cm.getTotalSpent());
                 spentToNext = spentGap.compareTo(BigDecimal.ZERO) > 0 ? spentGap : BigDecimal.ZERO;
-                int bookingGap = tier.getMinBookingCount() - cm.getBookingCount();
-                bookingsToNext = Math.max(bookingGap, 0);
                 break;
             }
         }
@@ -226,7 +221,7 @@ public class MembershipService implements IMembershipService {
                 .createdAt(cm.getCreatedAt())
                 .nextTier(nextTierResp)
                 .spentToNextTier(spentToNext)
-                .bookingsToNextTier(bookingsToNext)
+                .bookingsToNextTier(null)
                 .build();
     }
 
