@@ -28,9 +28,10 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
       getMyBookingsApi()
         .then(async (data) => {
           const list = Array.isArray(data) ? data : []
+          const checkedInList = list.filter(b => b.status === 'CHECKED_IN' || b.status === 'CHECKED_OUT')
           const unreviewed = []
           await Promise.all(
-            list.map(async (b) => {
+            checkedInList.map(async (b) => {
               try {
                 const res = await checkReviewExists(b.bookingId)
                 if (!res.reviewed) {
@@ -70,10 +71,11 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
           <Box sx={{ py: 3, textAlign: 'center' }}>
             <Typography variant="body1" color="text.secondary">
               Bạn không có đơn đặt phòng nào chưa được đánh giá.{' '}
-              <Typography
+              <Box
                 component="span"
-                variant="body1"
-                onClick={() => {
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
                   onClose()
                   navigate('/bookings')
                 }}
@@ -86,7 +88,7 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
                 }}
               >
                 Đặt phòng ngay
-              </Typography>
+              </Box>
             </Typography>
           </Box>
         ) : (
