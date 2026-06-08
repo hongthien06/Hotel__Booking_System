@@ -358,40 +358,40 @@ const BookingHistoryPage = () => {
           <Box sx={{ flex: 1, minWidth: 200, bgcolor: 'background.paper', borderRadius: 3, p: 2.5, textAlign: 'left', border: '1px solid', borderColor: 'primary.main', boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
               <InsertInvitation sx={{ color: 'primary.dark', fontSize: 20 }} />
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Tổng đặt phòng</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>{t('bookings_history.total_bookings')}</Typography>
             </Box>
             <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{totalBookings}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>kể từ khi tham gia</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>{t('bookings_history.since_joined')}</Typography>
           </Box>
 
           {/* Card 2 */}
           <Box sx={{ flex: 1, minWidth: 200, bgcolor: 'background.paper', borderRadius: 3, p: 2.5, textAlign: 'left', border: '1px solid', borderColor: 'primary.main', boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
               <DarkMode sx={{ color: 'primary.dark', fontSize: 20 }} />
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Tổng số đêm</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>{t('bookings_history.total_nights')}</Typography>
             </Box>
             <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{totalNights}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>đêm đã lưu trú</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>{t('bookings_history.nights_stayed')}</Typography>
           </Box>
 
           {/* Card 3 */}
           <Box sx={{ flex: 1, minWidth: 200, bgcolor: 'background.paper', borderRadius: 3, p: 2.5, textAlign: 'left', border: '1px solid', borderColor: 'primary.main', boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
               <AccountBalanceWallet sx={{ color: 'primary.dark', fontSize: 20 }} />
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Tổng chi tiêu</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>{t('bookings_history.total_spent_label')}</Typography>
             </Box>
             <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{formatMillions(totalSpent)}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>đồng</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>{t('bookings_history.currency_unit')}</Typography>
           </Box>
 
           {/* Card 4 */}
           <Box sx={{ flex: 1, minWidth: 200, bgcolor: 'background.paper', borderRadius: 3, p: 2.5, textAlign: 'left', border: '1px solid', borderColor: 'primary.main', boxShadow: '0 8px 24px rgba(160, 27, 76, 0.05)' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
               <Star sx={{ color: 'primary.dark', fontSize: 20 }} />
-              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>Điểm thành viên</Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>{t('bookings_history.membership_points')}</Typography>
             </Box>
             <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{new Intl.NumberFormat('vi-VN').format(memberPoints)}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>điểm tích lũy</Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>{t('bookings_history.points_label')}</Typography>
           </Box>
         </Box>
       </Box>
@@ -414,7 +414,7 @@ const BookingHistoryPage = () => {
         }}>
           {/* Search text field */}
           <TextField
-            placeholder="Tìm theo tên khách sạn, mã đặt phòng..."
+            placeholder={t('bookings_history.search_placeholder', 'Tìm theo tên khách sạn, mã đặt phòng...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             InputProps={{
@@ -448,7 +448,7 @@ const BookingHistoryPage = () => {
             size="small"
             sx={{ flex: 1.5, width: '100%' }}
           >
-            <option value="">Tất cả địa điểm</option>
+            <option value="">{t('bookings_history.all_locations', 'Tất cả địa điểm')}</option>
             <option value="HCM">Hồ Chí Minh</option>
             <option value="HANOI">Hà Nội</option>
             <option value="VUNG_TAU">Vũng Tàu</option>
@@ -475,17 +475,17 @@ const BookingHistoryPage = () => {
               height: 40
             }}
           >
-            Tìm kiếm
+            {t('bookings_history.search_button', 'Tìm kiếm')}
           </Button>
         </Box>
 
         {/* Status Filter Chips */}
         <Box sx={{ display: 'flex', gap: 1.5, mb: 2.5, flexWrap: 'wrap' }}>
           {[
-            { label: 'Tất cả', count: counts.ALL, value: 'ALL' },
-            { label: 'Sắp tới', count: counts.UPCOMING, value: 'UPCOMING' },
-            { label: 'Đã ở', count: counts.COMPLETED, value: 'COMPLETED' },
-            { label: 'Đã hủy', count: counts.CANCELLED, value: 'CANCELLED' }
+            { label: t('bookings_history.filter_all', 'Tất cả'), count: counts.ALL, value: 'ALL' },
+            { label: t('bookings_history.filter_upcoming', 'Sắp tới'), count: counts.UPCOMING, value: 'UPCOMING' },
+            { label: t('bookings_history.filter_completed', 'Đã ở'), count: counts.COMPLETED, value: 'COMPLETED' },
+            { label: t('bookings_history.filter_cancelled', 'Đã hủy'), count: counts.CANCELLED, value: 'CANCELLED' }
           ].map(chip => {
             const isActive = statusFilter === chip.value
             return (
@@ -778,13 +778,15 @@ const BookingHistoryPage = () => {
                         {reviewedBookings[booking.bookingId] ? (
                           <Button
                             fullWidth
-                            variant="outlined"
+                            variant="contained"
                             size="small"
                             disabled
-                            startIcon={<CheckCircle />}
                             sx={{
-                              borderRadius: 2, fontSize: 11, fontWeight: 700,
-                              borderColor: '#4caf50', color: '#4caf50',
+                              borderRadius: 2,
+                              fontSize: 11,
+                              fontWeight: 700,
+                              bgcolor: PC_LIGHT,
+                              color: PC,
                               '&.Mui-disabled': { borderColor: '#c8e6c9', color: '#81c784' }
                             }}
                           >
