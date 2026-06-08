@@ -822,6 +822,7 @@
     "delete_confirm": "Bạn có chắc chắn muốn xóa đánh giá này?",
     "delete_success": "Đã xóa đánh giá!",
     "delete_error": "Lỗi khi xóa đánh giá",
-    "fetch_error": "Không thể tải đánh giá"
+    "fetch_error": "Không thể tải đánh giá",
+    "already_reviewed": "Đã đánh giá"
   }
 }

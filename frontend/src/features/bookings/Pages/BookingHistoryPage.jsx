@@ -634,7 +634,7 @@ const BookingHistoryPage = () => {
                     </Typography>
                     <Divider sx={{ my: 1 }} />
                     <Box sx={{ mt: 1 }}>
-                      <Button variant="outlined" sx={{ borderRadius: 2, color: PC, borderColor: PC }} href="/booking">
+                      <Button variant="outlined" sx={{ borderRadius: 2, color: PC, borderColor: PC }} href="/bookings">
                         {t('common.book_now')}
                       </Button>
                     </Box>
@@ -773,7 +773,7 @@ const BookingHistoryPage = () => {
                         )}
                       </Box>
                     )}
-                    {true && (
+                    {(booking.status === 'CHECKED_IN' || booking.status === 'CHECKED_OUT') && (
                       <Box sx={{ mt: 2 }}>
                         {reviewedBookings[booking.bookingId] ? (
                           <Button
@@ -840,7 +840,7 @@ const BookingHistoryPage = () => {
           open={roomDetailOpen}
           room={selectedRoom}
           onClose={() => { setRoomDetailOpen(false); setSelectedRoom(null); }}
-          onBook={() => navigate('/booking')}
+          onBook={(room) => navigate('/bookings', { state: { autoBookRoom: room } })}
           canEdit={false}
           bookButtonText={t('common.rebook')}
         />

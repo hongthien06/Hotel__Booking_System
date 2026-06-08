@@ -1039,6 +1039,25 @@ const BookingPage = () => {
     }
   }, [location.state])
 
+  // Handle auto book from location state
+  useEffect(() => {
+    if (location.state?.autoBookRoom) {
+      const roomToBook = location.state.autoBookRoom
+      setSelectedRoom(roomToBook)
+      setSelectedIsMock(false)
+      setSelectedRoomsForOrder([])
+      setDialogOpen(true)
+      if (roomToBook.province || roomToBook.location) {
+        setParams(p => ({
+          ...p,
+          destination: roomToBook.province || roomToBook.location || ''
+        }))
+      }
+      // Clear state so it doesn't run again if we refresh
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state])
+
   const handleClearSearch = () => {
     setSearched(false)
     // Optionally reset rooms to all rooms, or just let them be

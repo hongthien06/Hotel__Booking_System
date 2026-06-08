@@ -44,6 +44,11 @@ public class ReviewService {
             booking = bookingRepository.findById(dto.getBookingId())
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy booking!"));
 
+            // Kiểm tra đã thanh toán và nhận phòng (check-in) chưa
+            if (booking.getStatus() != BookingStatus.CHECKED_IN && booking.getStatus() != BookingStatus.CHECKED_OUT) {
+                throw new RuntimeException("Bạn chỉ có thể đánh giá sau khi đã nhận phòng (check-in)!");
+            }
+
             // Kiểm tra đã review chưa
             if (reviewRepository.existsByBookingBookingId(dto.getBookingId())) {
                 throw new RuntimeException("Booking này đã được đánh giá rồi!");
