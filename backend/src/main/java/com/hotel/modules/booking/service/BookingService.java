@@ -76,6 +76,7 @@ public class BookingService {
     }
 
     // CHECK IN
+    // CHECK IN
     @Transactional
     public BookingDTO checkIn(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
@@ -86,9 +87,12 @@ public class BookingService {
         // Special rules for same-day (checkIn == checkOut) bookings:
         // - Check-in allowed starting at 14:00 of the check-in date
         // - Check-in must occur before the same-day checkout limit (before 23:59)
+        java.time.ZoneId zone = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
+        LocalDate today = LocalDate.now(zone);
+        LocalDateTime now = LocalDateTime.now(zone);
+
         if (booking.getCheckInDate() != null && booking.getCheckOutDate() != null
                 && booking.getCheckInDate().isEqual(booking.getCheckOutDate())) {
-            LocalDateTime now = LocalDateTime.now();
             LocalDateTime checkInAt = booking.getCheckInDate().atTime(14, 0);
             LocalDateTime checkoutLimit = booking.getCheckInDate().atTime(23, 59);
             if (now.isBefore(checkInAt)) {
@@ -98,12 +102,12 @@ public class BookingService {
                 throw new RuntimeException("Đã quá giờ trả phòng");
             }
         } else {
-            if (LocalDateTime.now().isBefore(booking.getCheckInDate().atStartOfDay())) {
+            if (today.isBefore(booking.getCheckInDate())) {
                 throw new RuntimeException("Chưa đến thời gian check-in");
             }
         }
         booking.setStatus(BookingStatus.CHECKED_IN);
-        booking.setActualCheckIn(LocalDateTime.now());
+        booking.setActualCheckIn(now);
         List<Room> rooms = getRoomsForBooking(booking);
         rooms.forEach(room -> room.setStatus(RoomStatus.OCCUPIED));
         bookingRepository.save(booking);
@@ -128,10 +132,12 @@ public class BookingService {
         if (booking.getStatus() != BookingStatus.CHECKED_IN) {
             throw new RuntimeException("Booking không ở trạng thái check-out được");
         }
+        java.time.ZoneId zone = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
+        LocalDateTime now = LocalDateTime.now(zone);
+
         // For same-day bookings ensure checkout time is after 14:00 and before 23:59
         if (booking.getCheckInDate() != null && booking.getCheckOutDate() != null
                 && booking.getCheckInDate().isEqual(booking.getCheckOutDate())) {
-            LocalDateTime now = LocalDateTime.now();
             LocalDateTime checkInAt = booking.getCheckInDate().atTime(14, 0);
             LocalDateTime checkoutLimit = booking.getCheckInDate().atTime(23, 59);
             if (now.isBefore(checkInAt) || now.isAfter(checkoutLimit)) {
@@ -139,7 +145,7 @@ public class BookingService {
             }
         }
         booking.setStatus(BookingStatus.CHECKED_OUT);
-        booking.setActualCheckout(LocalDateTime.now());
+        booking.setActualCheckout(now);
         List<Room> rooms = getRoomsForBooking(booking);
         rooms.forEach(room -> room.setStatus(RoomStatus.AVAILABLE));
         bookingRepository.save(booking);

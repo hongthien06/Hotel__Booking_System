@@ -1443,7 +1443,7 @@ const BookingPage = () => {
                         },
                         '&:active': {
                           bgcolor: 'primary.dark',
-                          color: 'primary.contrastTextHover'
+                          color: 'primary.contrastTextHzover'
                         }
                       }}
                     >

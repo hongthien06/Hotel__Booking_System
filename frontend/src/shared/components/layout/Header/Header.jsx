@@ -222,7 +222,10 @@ const Header = () => {
               bgcolor: 'primary.contrastText', color: 'primary.contrastTextHover',
               borderRadius: 2,
               px: 3,
-              '&:hover': { bgcolor: 'primary.dark' }
+              '&:hover': {
+                bgcolor: 'primary.dark',
+                color: 'primary.contrastTextHover'
+              }
             }}
           >
             {t("header.login")}

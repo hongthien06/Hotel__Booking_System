@@ -151,6 +151,7 @@ const LoginPage = () => {
               '&:hover': {
                 transform: 'translateY(-1px)',
                 bgcolor: 'primary.dark',
+                color: 'primary.contrastTextHover',
                 boxShadow: '0 6px 20px rgba(231, 78, 134, 0.4)'
               }
             }}

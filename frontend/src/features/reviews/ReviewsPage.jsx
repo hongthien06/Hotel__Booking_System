@@ -7,7 +7,7 @@ import {
 } from '@mui/material'
 import { Star, FormatQuote, ThumbUp } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { getApprovedReviews, getReviewStats, checkReviewExists } from '../../shared/api/reviewApi'
 import { getMyBookingsApi } from '../../shared/api/bookingApi'
 import { useAuth } from '../../shared/hooks/useAuth'
@@ -72,13 +72,9 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
             <Typography variant="body1" color="text.secondary">
               Bạn không có đơn đặt phòng nào chưa được đánh giá.{' '}
               <Box
-                component="span"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  onClose()
-                  navigate('/bookings')
-                }}
+                component={Link}
+                to="/bookings"
+                onClick={onClose}
                 sx={{
                   color: '#9a1c48',
                   cursor: 'pointer',
@@ -227,13 +223,10 @@ const ReviewsPage = () => {
             variant="contained"
             onClick={handleWriteReviewClick}
             sx={{
-              bgcolor: 'white',
-              color: PC,
               fontWeight: 700,
               borderRadius: 3,
               px: 4,
               py: 1.2,
-              '&:hover': { bgcolor: '#f3f4f6' },
               boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
               textTransform: 'none'
             }}
@@ -308,11 +301,13 @@ const ReviewsPage = () => {
               <Grid size={{ xs: 12, sm: 6 }} key={review.reviewId}>
                 <Card sx={{
                   height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
                   borderRadius: 4,
                   transition: 'all 0.3s ease',
                   '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 12px 30px rgba(0,0,0,0.08)' }
                 }}>
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent sx={{ p: 3, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                       <Avatar sx={{ bgcolor: PC, fontWeight: 700, width: 48, height: 48 }}>
                         {review.customerName?.charAt(0)?.toUpperCase() || 'U'}
@@ -335,25 +330,26 @@ const ReviewsPage = () => {
                       </Typography>
                     )}
 
-                    {/* Sub-ratings */}
-                    <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
-                      {review.ratingClean && <Chip size="small" label={`🧹 ${review.ratingClean}/5`} variant="outlined" />}
-                      {review.ratingService && <Chip size="small" label={`🤝 ${review.ratingService}/5`} variant="outlined" />}
-                      {review.ratingLocation && <Chip size="small" label={`📍 ${review.ratingLocation}/5`} variant="outlined" />}
-                      {review.ratingValue && <Chip size="small" label={`💰 ${review.ratingValue}/5`} variant="outlined" />}
-                    </Box>
-
-                    {/* Admin reply */}
-                    {review.adminReply && (
-                      <Box sx={{ bgcolor: '#f8f9fa', borderRadius: 2, p: 2, borderLeft: `3px solid ${PC}` }}>
-                        <Typography variant="caption" sx={{ fontWeight: 800, color: PC, display: 'block', mb: 0.5 }}>
-                          {t('reviews.hotel_reply')}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {review.adminReply}
-                        </Typography>
+                    {/* Sub-ratings & Admin reply aligned to the bottom */}
+                    <Box sx={{ mt: 'auto' }}>
+                      <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: review.adminReply ? 2 : 0 }}>
+                        {review.ratingClean && <Chip size="small" label={`🧹 ${review.ratingClean}/5`} variant="outlined" />}
+                        {review.ratingService && <Chip size="small" label={`🤝 ${review.ratingService}/5`} variant="outlined" />}
+                        {review.ratingLocation && <Chip size="small" label={`📍 ${review.ratingLocation}/5`} variant="outlined" />}
+                        {review.ratingValue && <Chip size="small" label={`💰 ${review.ratingValue}/5`} variant="outlined" />}
                       </Box>
-                    )}
+
+                      {review.adminReply && (
+                        <Box sx={{ bgcolor: '#f8f9fa', borderRadius: 2, p: 2, borderLeft: `3px solid ${PC}` }}>
+                          <Typography variant="caption" sx={{ fontWeight: 800, color: PC, display: 'block', mb: 0.5 }}>
+                            {t('reviews.hotel_reply')}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {review.adminReply}
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>

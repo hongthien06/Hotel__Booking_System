@@ -90,7 +90,15 @@
     "today_revenue": "Today's Revenue",
     "today_bookings": "Today's Bookings",
     "today_checkins": "Today's Check-ins",
-    "occupancy_rate": "Occupancy Rate"
+    "occupancy_rate": "Occupancy Rate",
+    "status_labels": {
+      "PENDING": "Pending",
+      "CONFIRMED": "Confirmed",
+      "CHECKED_IN": "Checked In",
+      "CHECKED_OUT": "Checked Out",
+      "CANCELLED": "Cancelled",
+      "REFUNDED": "Refunded"
+    }
   },
   "home": {
     "hero": {

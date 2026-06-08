@@ -170,10 +170,33 @@ public class DashboardService {
     }
 
     private RecentBookingDTO mapToRecentBookingDTO(Booking booking) {
-        // Calculate amount for this booking
+        // Calculate amount for this booking (from payment table if available, fallback to final calculated amount)
         double amount = 0.0;
-        if (booking.getRoomPriceSnapshot() != null && booking.getTotalNights() != null) {
-            amount = booking.getRoomPriceSnapshot().multiply(new BigDecimal(booking.getTotalNights())).doubleValue();
+        java.util.Optional<com.hotel.modules.payment.entity.Payment> paymentOpt =
+                paymentRepository.findByBookingId(booking.getBookingId());
+        if (paymentOpt.isPresent()) {
+            amount = paymentOpt.get().getAmount() != null ? paymentOpt.get().getAmount().doubleValue() : 0.0;
+        } else {
+            BigDecimal roomTotal = BigDecimal.ZERO;
+            if (booking.getRoomPriceSnapshot() != null && booking.getTotalNights() != null) {
+                roomTotal = booking.getRoomPriceSnapshot().multiply(new BigDecimal(booking.getTotalNights()));
+            }
+            BigDecimal serviceTotal = BigDecimal.ZERO;
+            if (booking.getBookingServices() != null) {
+                serviceTotal = booking.getBookingServices().stream()
+                        .map(bs -> bs.getSubtotal() != null ? bs.getSubtotal()
+                                : (bs.getUnitPriceSnap() != null && bs.getQuantity() != null
+                                    ? bs.getUnitPriceSnap().multiply(BigDecimal.valueOf(bs.getQuantity()))
+                                    : BigDecimal.ZERO))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add);
+            }
+            BigDecimal discountAmt = booking.getDiscountAmount() != null ? booking.getDiscountAmount() : BigDecimal.ZERO;
+            BigDecimal subtotal = roomTotal.add(serviceTotal);
+            BigDecimal tax = com.hotel.common.utils.TaxUtil.calculateVat(subtotal);
+            amount = subtotal.add(tax).subtract(discountAmt).doubleValue();
+            if (amount < 0.0) {
+                amount = 0.0;
+            }
         }
 
         // Gom tất cả số phòng từ BookingRooms (đơn đôi/đa phòng)

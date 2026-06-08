@@ -53,7 +53,7 @@ import {
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend,
   PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area,
-  LineChart, Line
+  LineChart, Line, LabelList
 } from 'recharts';
 import { useAuth } from '../../shared/hooks/useAuth';
 import { getDashboardStats, getDashboardCharts } from '../../shared/api/dashboardApi';
@@ -76,12 +76,12 @@ import {
 
 const CHART_COLORS = ['#6366f1', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 const STATUS_COLORS = {
-  PENDING: '#f59e0b',
-  CONFIRMED: '#10b981',
-  CHECKED_IN: '#6366f1',
-  CHECKED_OUT: '#8b5cf6',
-  CANCELLED: '#ef4444',
-  REFUNDED: '#06b6d4'
+  PENDING: '#fb923c',
+  CONFIRMED: '#34d399',
+  CHECKED_IN: '#818cf8',
+  CHECKED_OUT: '#c084fc',
+  CANCELLED: '#f87171',
+  REFUNDED: '#22d3ee'
 };
 
 const StatCard = ({ title, value, icon, color, loading, trend }) => (
@@ -180,7 +180,8 @@ const DashboardPage = () => {
       fetchStats();
     } catch (err) {
       console.error('Check-in error:', err);
-      toast.error(t('dashboard.checkin_error') || 'Failed to check-in.');
+      const serverMsg = err.response?.data?.error || err.response?.data?.message;
+      toast.error(serverMsg || t('dashboard.checkin_error') || 'Failed to check-in.');
     }
   };
 
@@ -191,7 +192,8 @@ const DashboardPage = () => {
       fetchStats();
     } catch (err) {
       console.error('Check-out error:', err);
-      toast.error(t('dashboard.checkout_error') || 'Failed to check-out.');
+      const serverMsg = err.response?.data?.error || err.response?.data?.message;
+      toast.error(serverMsg || t('dashboard.checkout_error') || 'Failed to check-out.');
     }
   };
 
@@ -203,7 +205,8 @@ const DashboardPage = () => {
       fetchStats();
     } catch (err) {
       console.error('Cancel error:', err);
-      toast.error(t('dashboard.cancel_error') || 'Failed to cancel booking.');
+      const serverMsg = err.response?.data?.error || err.response?.data?.message;
+      toast.error(serverMsg || t('dashboard.cancel_error') || 'Failed to cancel booking.');
     }
   };
 
@@ -257,16 +260,29 @@ const DashboardPage = () => {
       case 'revenue':
         return (
           <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={chartData.revenueByDay || []}>
+            <AreaChart data={chartData.revenueByDay || []} margin={{ top: 20, right: 10, left: 10, bottom: 15 }}>
+              <defs>
+                <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.4}/>
+                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0}/>
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-              <YAxis tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 12 }} />
+              <XAxis dataKey="date" interval={0} tick={{ fontSize: 10, angle: -45, textAnchor: 'end' }} height={55} />
+              <YAxis
+                domain={[0, 100000000]}
+                ticks={[0, 20000000, 40000000, 60000000, 80000000, 100000000]}
+                tickFormatter={(v) => `${(v / 1000000).toFixed(0)}M`}
+                tick={{ fontSize: 12 }}
+              />
               <RechartsTooltip
                 formatter={(value) => [formatCurrency(value), t('dashboard.chart_revenue')]}
                 contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
               />
-              <Bar dataKey="revenue" fill="#6366f1" radius={[8, 8, 0, 0]} />
-            </BarChart>
+              <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#revenueGrad)">
+                <LabelList dataKey="revenue" position="top" formatter={(v) => formatCurrency(v)} style={{ fontSize: 10, fontWeight: 700, fill: '#555' }} />
+              </Area>
+            </AreaChart>
           </ResponsiveContainer>
         );
 
@@ -278,21 +294,25 @@ const DashboardPage = () => {
                 data={chartData.bookingsByStatus || []}
                 cx="50%"
                 cy="50%"
-                innerRadius={80}
                 outerRadius={130}
-                paddingAngle={3}
+                stroke="none"
                 dataKey="count"
                 nameKey="status"
-                label={({ status, count }) => `${status}: ${count}`}
+                label={({ status, count, percent }) => {
+                  const labelStatus = t(`dashboard.status_labels.${status}`) || status;
+                  const percentStr = percent ? ` (${(percent * 100).toFixed(0)}%)` : '';
+                  return `${labelStatus}: ${count}${percentStr}`;
+                }}
               >
                 {(chartData.bookingsByStatus || []).map((entry, idx) => (
                   <Cell key={idx} fill={STATUS_COLORS[entry.status] || CHART_COLORS[idx % CHART_COLORS.length]} />
                 ))}
               </Pie>
               <RechartsTooltip
+                formatter={(value, name) => [value, t(`dashboard.status_labels.${name}`) || name]}
                 contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
               />
-              <Legend />
+              <Legend formatter={(value) => t(`dashboard.status_labels.${value}`) || value} />
             </PieChart>
           </ResponsiveContainer>
         );
@@ -300,39 +320,25 @@ const DashboardPage = () => {
       case 'occupancy':
         return (
           <ResponsiveContainer width="100%" height={350}>
-            <AreaChart data={chartData.roomOccupancy || []}>
+            <BarChart data={chartData.roomOccupancy || []} margin={{ top: 20, right: 10, left: 10, bottom: 15 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+              <XAxis dataKey="date" interval={0} tick={{ fontSize: 10, angle: -45, textAnchor: 'end' }} height={55} />
               <YAxis tick={{ fontSize: 12 }} />
               <RechartsTooltip
                 contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
               />
-              <Area type="monotone" dataKey="occupied" stackId="1" stroke="#ef4444" fill="#fecaca" name={t('dashboard.chart_occupied')} />
-              <Area type="monotone" dataKey="available" stackId="1" stroke="#10b981" fill="#d1fae5" name={t('dashboard.chart_available')} />
-              <Legend />
-            </AreaChart>
-          </ResponsiveContainer>
-        );
-
-      case 'roomtype':
-        return (
-          <ResponsiveContainer width="100%" height={350}>
-            <BarChart data={chartData.revenueByRoomType || []} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis type="number" tickFormatter={(v) => `${(v / 1000000).toFixed(1)}M`} tick={{ fontSize: 12 }} />
-              <YAxis dataKey="roomType" type="category" width={120} tick={{ fontSize: 12 }} />
-              <RechartsTooltip
-                formatter={(value) => [formatCurrency(value), t('dashboard.chart_revenue')]}
-                contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}
-              />
-              <Bar dataKey="revenue" radius={[0, 8, 8, 0]}>
-                {(chartData.revenueByRoomType || []).map((_, idx) => (
-                  <Cell key={idx} fill={CHART_COLORS[idx % CHART_COLORS.length]} />
-                ))}
+              <Bar dataKey="occupied" stackId="1" fill="#ef4444" name={t('dashboard.chart_occupied')}>
+                <LabelList dataKey="occupied" position="top" formatter={(v) => v > 0 ? v : ''} style={{ fontSize: 10, fontWeight: 700, fill: '#555' }} />
               </Bar>
+              <Bar dataKey="available" stackId="1" fill="#10b981" radius={[8, 8, 0, 0]} name={t('dashboard.chart_available')}>
+                <LabelList dataKey="available" position="top" formatter={(v) => v > 0 ? v : ''} style={{ fontSize: 10, fontWeight: 700, fill: '#555' }} />
+              </Bar>
+              <Legend />
             </BarChart>
           </ResponsiveContainer>
         );
+
+
 
       default:
         return null;
@@ -340,10 +346,9 @@ const DashboardPage = () => {
   };
 
   const chartTabs = [
-    { value: 'revenue', icon: <BarChartIcon fontSize="small" />, label: t('dashboard.chart_revenue_by_day') },
+    { value: 'revenue', icon: <ShowChart fontSize="small" />, label: t('dashboard.chart_revenue_by_day') },
     { value: 'status', icon: <PieChartIcon fontSize="small" />, label: t('dashboard.chart_bookings_by_status') },
-    { value: 'occupancy', icon: <ShowChart fontSize="small" />, label: t('dashboard.chart_room_occupancy') },
-    { value: 'roomtype', icon: <DonutLarge fontSize="small" />, label: t('dashboard.chart_revenue_by_room_type') },
+    { value: 'occupancy', icon: <BarChartIcon fontSize="small" />, label: t('dashboard.chart_room_occupancy') },
   ];
 
   return (
@@ -438,8 +443,8 @@ const DashboardPage = () => {
       {/* ── Charts Section ── */}
       <Paper sx={{ p: 3, borderRadius: 4, boxShadow: '0 8px 32px rgba(0,0,0,0.05)', mb: 5 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 800 }}>
-            {t('dashboard.charts_title')}
+          <Typography variant="h6" sx={{ fontWeight: 800, color: 'text.primary' }}>
+            {chartTabs.find(tab => tab.value === activeChart)?.label}
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <FormControl size="small">
@@ -450,7 +455,6 @@ const DashboardPage = () => {
               >
                 <MuiMenuItem value={7}>{t('dashboard.chart_7_days')}</MuiMenuItem>
                 <MuiMenuItem value={30}>{t('dashboard.chart_30_days')}</MuiMenuItem>
-                <MuiMenuItem value={90}>{t('dashboard.chart_90_days')}</MuiMenuItem>
               </Select>
             </FormControl>
             <ToggleButtonGroup
@@ -512,7 +516,7 @@ const DashboardPage = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={booking.status}
+                      label={t(`dashboard.status_labels.${booking.status}`) || booking.status}
                       color={getStatusColor(booking.status)}
                       size="small"
                       sx={{ fontWeight: 600, borderRadius: 1.5 }}
@@ -604,7 +608,7 @@ const DashboardPage = () => {
                 <ListItemText
                   primary={t('dashboard.status')}
                   secondary={
-                    <Chip label={selectedBooking.status} color={getStatusColor(selectedBooking.status)} size="small" sx={{ fontWeight: 600, mt: 0.5 }} />
+                    <Chip label={t(`dashboard.status_labels.${selectedBooking.status}`) || selectedBooking.status} color={getStatusColor(selectedBooking.status)} size="small" sx={{ fontWeight: 600, mt: 0.5 }} />
                   }
                   primaryTypographyProps={{ fontWeight: 600 }}
                 />
