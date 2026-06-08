@@ -241,7 +241,8 @@
     "sort_newest": "Mới nhất trước",
     "sort_oldest": "Cũ nhất trước",
     "sort_price_desc": "Giá cao → thấp",
-    "sort_price_asc": "Giá thấp → cao"
+    "sort_price_asc": "Giá thấp → cao",
+    "original_price": "Giá gốc"
   },
   "destinations": {
     "title": "Điểm đến phổ biến",

@@ -150,8 +150,14 @@ const BookingHistoryPage = () => {
   }
 
   const nightsBetween = (a, b) => {
-    const diff = new Date(b) - new Date(a)
-    return diff > 0 ? Math.round(diff / 86400000) : 1
+    if (!a || !b) return 0
+    const start = new Date(a)
+    const end = new Date(b)
+    const now = new Date()
+    // If check-in is in the future, guest hasn't stayed yet -> 0 nights
+    if (start > now) return 0
+    const diff = end - start
+    return diff > 0 ? Math.round(diff / 86400000) : 0
   }
 
   const getHistoryRoom = (booking) => {
@@ -170,11 +176,13 @@ const BookingHistoryPage = () => {
 
   const getHistoryRoomTotal = (booking) => {
     const rooms = getBookingRooms(booking)
-    return rooms.reduce((sum, r) => sum + (Number(r.roomPriceSnapshot || 0) * Number(booking.totalNights || nightsBetween(booking.checkInDate, booking.checkOutDate) || 1)), 0)
+    const nights = Number(booking.totalNights || nightsBetween(booking.checkInDate, booking.checkOutDate) || 0)
+    return rooms.reduce((sum, r) => sum + (Number(r.roomPriceSnapshot || 0) * nights), 0)
   }
 
   const handlePayment = (booking) => {
     const primaryRoom = getHistoryRoom(booking)
+    const nights = nightsBetween(booking.checkInDate, booking.checkOutDate)
     navigate('/payment?step=1', {
       state: {
         booking,
@@ -182,7 +190,7 @@ const BookingHistoryPage = () => {
           roomId: primaryRoom.roomId || booking.roomId,
           roomNumber: primaryRoom.roomNumber || booking.roomNumber,
           typeName: primaryRoom.roomTypeName || booking.roomTypeName,
-          pricePerNight: primaryRoom.roomPriceSnapshot || getHistoryRoomTotal(booking) / nightsBetween(booking.checkInDate, booking.checkOutDate)
+          pricePerNight: primaryRoom.roomPriceSnapshot || (nights ? getHistoryRoomTotal(booking) / nights : getHistoryRoomTotal(booking))
         },
         form: {
           checkIn: booking.checkInDate,
@@ -248,7 +256,7 @@ const BookingHistoryPage = () => {
 
   const totalBookings = membership?.bookingCount || bookings.length || 0
   const totalSpent = membership?.totalSpent || bookings.reduce((sum, b) => sum + (b.status !== 'CANCELLED' && b.status !== 'REFUNDED' ? b.totalAmount || 0 : 0), 0)
-  const totalNights = bookings.reduce((sum, b) => sum + (b.status !== 'CANCELLED' && b.status !== 'REFUNDED' ? Number(b.totalNights || 1) : 0), 0)
+  const totalNights = bookings.reduce((sum, b) => sum + (b.status !== 'CANCELLED' && b.status !== 'REFUNDED' ? Number(b.totalNights || nightsBetween(b.checkInDate, b.checkOutDate) || 0) : 0), 0)
   const memberPoints = membership?.points || Math.floor(totalSpent / 100000)
 
   const handleSearch = () => {

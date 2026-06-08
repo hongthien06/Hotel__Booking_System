@@ -389,7 +389,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
           }}
           valueLabelDisplay="auto"
           min={0}
-          max={10000000}
+            max={100000000}
           step={500000}
           sx={{
             color: PC,
@@ -909,6 +909,20 @@ const BookingPage = () => {
       cleans.forEach(c => c && c())
     }
   }, [destScrollRef, recentScrollRef, typeScrollRef, roomScrollRef, topRatedScrollRef, budgetScrollRef, weekendScrollRef])
+
+  const weekendSubtitle = React.useMemo(() => {
+    try {
+      let start = dayjs().day(5) // Friday
+      if (start.isBefore(dayjs(), 'day')) start = start.add(7, 'day')
+      const end = start.add(2, 'day') // Sunday
+      if (i18n.language && i18n.language.startsWith('vi')) {
+        return `Tiết kiệm cho chỗ nghỉ từ ngày ${start.date()} tháng ${start.month() + 1} - ngày ${end.date()} tháng ${end.month() + 1}`
+      }
+      return `Save on stays from ${start.format('MMM D')} - ${end.format('MMM D')}`
+    } catch (e) {
+      return t('booking_page.weekend_deals_subtitle')
+    }
+  }, [i18n.language, t])
 
   // Hàm bổ trợ để mở rộng loại phòng được chọn (ví dụ: "Deluxe" -> ["Deluxe King", "Deluxe Twin", ...])
   useEffect(() => {
@@ -1609,7 +1623,7 @@ const BookingPage = () => {
                 {/* 7. Ưu đãi cho cuối tuần */}
                 <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
                   <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.weekend_deals_title')}</Typography>
-                  <Typography variant="body2" color="text.secondary">{t('booking_page.weekend_deals_subtitle')}</Typography>
+                  <Typography variant="body2" color="text.secondary">{weekendSubtitle}</Typography>
                 </Box>
                 <Box sx={{ position: 'relative', mb: 8, px: { xs: 3, sm: 6 } }}>
                   {weekendCanLeft && (

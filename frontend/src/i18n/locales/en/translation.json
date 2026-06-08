@@ -241,7 +241,8 @@
     "sort_newest": "Newest first",
     "sort_oldest": "Oldest first",
     "sort_price_desc": "Price: High to Low",
-    "sort_price_asc": "Price: Low to High"
+    "sort_price_asc": "Price: Low to High",
+    "original_price": "Original price"
   },
   "destinations": {
     "title": "Popular Destinations",
