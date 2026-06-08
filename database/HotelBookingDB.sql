@@ -554,10 +554,27 @@ GO
 
 
 INSERT INTO Users (full_name, email, phone, password_hash) VALUES
-(N'Hoàng Đức Anh',    'ducanhdz2403@gmail.com',       '0387310342', '$2b$10$BM5J07/Yhf5iNtxYrLJyq.dbO1s8wl2Y93/dasivHZd6d41oo0UF.'),
-(N'Hồng Thiên',       'hongthienn280706@gmail.com',    '0961934724', '$2b$10$FPfhOitDtpwfPzi4QGuVp..UYc59jkItb9LHLLZwJTTZHKSTMG.V2'),
-(N'Nguyễn Gia Khang', 'khangnguyek135@gmail.com',      '0326409667', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
-(N'Dư Nguyên An',     'nguyenann1204@gmail.com',       '0939163059', '$2b$10$2/0z4V1G9T0bnnfbvV2F7.cCvUvEDEgJVRC3xXBgcOjhlKQz7oTji');
+(N'Hoàng Đức Anh',       'ducanhdz2403@gmail.com',               '0387310342', '$2b$10$BM5J07/Yhf5iNtxYrLJyq.dbO1s8wl2Y93/dasivHZd6d41oo0UF.'),
+(N'Hồng Thiên',           'hongthienn280706@gmail.com',            '0961934724', '$2b$10$FPfhOitDtpwfPzi4QGuVp..UYc59jkItb9LHLLZwJTTZHKSTMG.V2'),
+(N'Nguyễn Gia Khang',    'khangnguyek135@gmail.com',              '0326409667', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Dư Nguyên An',         'nguyenann1204@gmail.com',               '0939163059', '$2b$10$2/0z4V1G9T0bnnfbvV2F7.cCvUvEDEgJVRC3xXBgcOjhlKQz7oTji'),
+-- Test accounts (password: 123456)
+(N'Nguyễn Minh Tuấn',    'admin_1780813464801@test.com',          '0901234501', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Trần Thị Lan Anh',    'admin_1780813553900@test.com',          '0901234502', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Lê Hoàng Phúc',       'admin_1780813595619@test.com',          '0901234503', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Phạm Thùy Dương',     'admin_1780813978507@test.com',          '0901234504', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Võ Đức Khải',         'admin_1780814386301@test.com',          '0901234505', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Đặng Thị Hương Giang','admin_1780814604922@test.com',          '0901234506', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Bùi Quang Huy',       'cust_1780813464801@test.com',           '0912345601', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Hoàng Thị Ngọc Mai',  'cust_1780813553901@test.com',           '0912345602', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Ngô Tiến Dũng',       'cust_1780813595619@test.com',           '0912345603', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Đinh Thị Thanh Hoa',  'cust_1780813978507@test.com',           '0912345604', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Trương Văn Nam',      'cust_1780814386301@test.com',           '0912345605', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Phan Lê Khánh Linh',  'cust_1780814604922@test.com',           '0912345606', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Lý Thị Bích Thủy',    'cust1_1780825886147@test.com',          '0912345607', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Tô Minh Nhật',         'cust2_1780825886147@test.com',          '0912345608', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Vũ Thị Kim Oanh',     'direct_rev_1780826406282@test.com',     '0923456701', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2'),
+(N'Cao Hùng Cường',      'direct_rev_1780826500792@test.com',     '0923456702', '$2b$10$/WbZKGr7MMzeyta9d1TuaOVvXzol.pObDI.LUWEo3vBWu1Itt/Eb2');
 
 INSERT INTO UserRoles (user_id, role_id)
 SELECT user_id, 3
@@ -566,7 +583,23 @@ WHERE email IN (
     'ducanhdz2403@gmail.com',
     'hongthienn280706@gmail.com',
     'khangnguyek135@gmail.com',
-    'nguyenann1204@gmail.com'
+    'nguyenann1204@gmail.com',
+    'admin_1780813464801@test.com',
+    'admin_1780813553900@test.com',
+    'admin_1780813595619@test.com',
+    'admin_1780813978507@test.com',
+    'admin_1780814386301@test.com',
+    'admin_1780814604922@test.com',
+    'cust_1780813464801@test.com',
+    'cust_1780813553901@test.com',
+    'cust_1780813595619@test.com',
+    'cust_1780813978507@test.com',
+    'cust_1780814386301@test.com',
+    'cust_1780814604922@test.com',
+    'cust1_1780825886147@test.com',
+    'cust2_1780825886147@test.com',
+    'direct_rev_1780826406282@test.com',
+    'direct_rev_1780826500792@test.com'
 );
 GO
 
