@@ -1,5 +1,6 @@
 package com.hotel.modules.email.service;
 
+import com.hotel.common.utils.TaxUtil;
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingRoom;
@@ -15,6 +16,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.math.BigDecimal;
 
 @Slf4j
 @Service
@@ -57,7 +60,7 @@ public class EmailService {
                 log.error("Không tìm thấy thông tin User hoặc Email cho Booking ID: {}", booking.getBookingId());
                 return;
             }
-            Long priceBooking = booking.getRoomPriceSnapshot().longValue() * booking.getTotalNights();
+            long priceBooking = booking.getRoomPriceSnapshot().longValue() * booking.getTotalNights();
             String roomNumbers = booking.getBookingRooms() != null && !booking.getBookingRooms().isEmpty()
                     ? booking.getBookingRooms().stream()
                             .map(BookingRoom::getRoom)
@@ -65,7 +68,17 @@ public class EmailService {
                             .reduce((a, b) -> a + ", " + b)
                             .orElse(room.getRoomNumber())
                     : room.getRoomNumber();
-            Long discount = booking.getDiscountAmount() != null ? booking.getDiscountAmount().longValue() : 0L;
+            long feeService = booking.getBookingServices() != null
+                    ? booking.getBookingServices().stream()
+                            .map(bs -> bs.getSubtotal() != null
+                                    ? bs.getSubtotal()
+                                    : (bs.getUnitPriceSnap() != null && bs.getQuantity() != null
+                                            ? bs.getUnitPriceSnap().multiply(BigDecimal.valueOf(bs.getQuantity()))
+                                            : BigDecimal.ZERO))
+                            .reduce(BigDecimal.ZERO, BigDecimal::add)
+                            .longValue()
+                    : 0L;
+            long discount = booking.getDiscountAmount() != null ? booking.getDiscountAmount().longValue() : 0L;
             // Hiển thị thông tin hạng thành viên thay vì voucher code
             String membershipInfo = null;
             if (booking.getIsFirstBookingDiscount() != null && booking.getIsFirstBookingDiscount()) {
@@ -74,8 +87,8 @@ public class EmailService {
                     && booking.getMembershipDiscountPct().compareTo(java.math.BigDecimal.ZERO) > 0) {
                 membershipInfo = "Ưu đãi thành viên (-" + booking.getMembershipDiscountPct() + "%)";
             }
-            Long tax = (long) (priceBooking * 0.1);
-            long totalPrice = priceBooking + tax - discount;
+            long tax = TaxUtil.calculateVat(BigDecimal.valueOf(priceBooking + feeService)).longValue();
+            long totalPrice = priceBooking + feeService + tax - discount;
 
             EmailRequest request = EmailRequest.builder()
                     .toEmail(user.getEmail())
@@ -94,7 +107,7 @@ public class EmailService {
                     .people(booking.getNumAdults() + booking.getNumChildren())
                     .priceBooking(priceBooking)
                     .priceBreakfast(0L)
-                    .feeService(0L)
+                    .feeService(feeService)
                     .discount(discount)
                     .voucherCode(membershipInfo)
                     .tax(tax)

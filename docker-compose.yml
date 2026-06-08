@@ -34,6 +34,7 @@ services:
       - hbms-network
     volumes:
       - ./database/HotelBookingDB.sql:/HotelBookingDB.sql:ro
+      - ./database/migrations:/migrations:ro
     env_file:
       - .env
     entrypoint:
@@ -64,6 +65,15 @@ services:
         else
           echo 'Dữ liệu đã tồn tại, bỏ qua bước khởi tạo để bảo toàn dữ liệu.';
         fi;
+        echo 'Chạy migration...';
+        if ls /migrations/*.sql >/dev/null 2>&1; then
+          for file in /migrations/*.sql; do
+            echo "Áp dụng $$(basename "$$file")";
+            /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U sa -P "$$SQL_SA_PASSWORD" -i "$$file" -No -C;
+          done;
+        else
+          echo 'Không có migration nào.';
+        fi;
         echo 'Xong!';
     depends_on:
       - sqlserver
@@ -83,7 +93,7 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:sqlserver://sqlserver:1433;databaseName=HotelBookingDB;encrypt=false;trustServerCertificate=true"
       SPRING_DATASOURCE_USERNAME: "sa"
       SPRING_DATASOURCE_PASSWORD: "${SQL_SA_PASSWORD}"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: "update"
+      SPRING_JPA_HIBERNATE_DDL_AUTO: "none"
       SPRING_JPA_SHOW_SQL: "false"
       APP_JWT_SECRET: "${JWT_SECRET_KEY}"
       APP_JWT_EXPIRATION: "900000"

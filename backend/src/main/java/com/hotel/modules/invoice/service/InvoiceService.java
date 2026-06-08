@@ -1,7 +1,6 @@
 package com.hotel.modules.invoice.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -11,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.hotel.common.utils.TaxUtil;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.dto.BookingRoomDTO;
 import com.hotel.modules.booking.repository.BookingRepository;
@@ -65,13 +65,12 @@ public class InvoiceService implements IInvoiceService {
                                                 .multiply(BigDecimal.valueOf(item.getQuantity())))
                                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                BigDecimal taxRate = new BigDecimal("10.00");
+                BigDecimal taxRate = TaxUtil.VAT_RATE_PERCENT;
                 BigDecimal discountAmount = request.getDiscountAmount() != null
                                 ? request.getDiscountAmount()
                                 : BigDecimal.ZERO;
 
-                BigDecimal taxAmount = subtotal.multiply(taxRate)
-                                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+                BigDecimal taxAmount = TaxUtil.calculateVat(subtotal);
                 BigDecimal totalAmount = subtotal.add(taxAmount).subtract(discountAmount);
 
                 String invoiceNumber = "INV-"
@@ -217,7 +216,8 @@ public class InvoiceService implements IInvoiceService {
         private InvoiceResponse toResponse(Invoice invoice, List<InvoiceItem> items) {
                 com.hotel.modules.booking.entity.Booking booking = invoice.getBooking();
                 String holidayName = (booking.getHolidayPeriod() != null)
-                                ? booking.getHolidayPeriod().getNameVi() : null;
+                                ? booking.getHolidayPeriod().getNameVi()
+                                : null;
                 List<BookingRoomDTO> rooms = getBookingRooms(booking);
                 return InvoiceResponse.builder()
                                 .id(invoice.getId())
@@ -274,7 +274,8 @@ public class InvoiceService implements IInvoiceService {
                 dto.setRoomPriceSnapshot(priceSnapshot != null ? priceSnapshot : BigDecimal.ZERO);
                 dto.setTotalNights(booking.getTotalNights());
                 dto.setSubtotal(dto.getRoomPriceSnapshot()
-                                .multiply(BigDecimal.valueOf(booking.getTotalNights() != null ? booking.getTotalNights() : 0)));
+                                .multiply(BigDecimal.valueOf(
+                                                booking.getTotalNights() != null ? booking.getTotalNights() : 0)));
                 if (room.getRoomType() != null) {
                         dto.setRoomTypeName(room.getRoomType().getTypeName());
                 }

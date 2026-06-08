@@ -374,7 +374,7 @@ CREATE TABLE Invoices (
     payment_id      BIGINT          NOT NULL,
     invoice_number  VARCHAR(30)     NOT NULL,   -- VD: INV-20240615-00001
     subtotal        DECIMAL(18,2)   NOT NULL,   -- Tổng trước thuế (phòng + dịch vụ)
-    tax_rate        DECIMAL(5,2)    NOT NULL DEFAULT 10.00,  -- VAT 10%
+    tax_rate        DECIMAL(5,2)    NOT NULL DEFAULT 8.00,  -- VAT 8%
     tax_amount      DECIMAL(18,2)   NOT NULL,
     discount_amount DECIMAL(18,2)   NOT NULL DEFAULT 0,
     total_amount    DECIMAL(18,2)   NOT NULL,   -- = subtotal + tax_amount - discount

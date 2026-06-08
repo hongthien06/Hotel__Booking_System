@@ -183,7 +183,7 @@
                 <td th:text="${item.description}">Phong Deluxe</td>
                 <td th:text="${item.quantity}">1</td>
                 <td class="right" th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 2, 'POINT')}">1,250,000.00</td>
-                <td class="right" th:text="${#numbers.formatDecimal(invoice.taxRate, 0, 'COMMA', 0, 'POINT') + '%'}">10%</td>
+                <td class="right" th:text="${#numbers.formatDecimal(invoice.taxRate, 0, 'COMMA', 0, 'POINT') + '%'}">8%</td>
                 <td class="right" th:text="${#numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 2, 'POINT')}">1,250,000.00</td>
             </tr>
         </tbody>
@@ -204,8 +204,8 @@
                 </tr>
                 <tr>
                     <td class="t-label"
-                        th:text="|VAT - Vietnam (${#numbers.formatDecimal(invoice.taxRate, 0, 'COMMA', 0, 'POINT')}% on ${#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 2, 'POINT')})|">
-                        VAT - Vietnam (10% on 1,250,000.00)
+                        th:text="|VAT 8% - Vietnam (${#numbers.formatDecimal(invoice.taxRate, 0, 'COMMA', 0, 'POINT')}% on ${#numbers.formatDecimal(invoice.subtotal, 0, 'COMMA', 2, 'POINT')})|">
+                        VAT 8% - Vietnam (8% on 1,250,000.00)
                     </td>
                     <td class="t-value" th:text="${#numbers.formatDecimal(invoice.taxAmount, 0, 'COMMA', 2, 'POINT')}">125,000.00</td>
                 </tr>

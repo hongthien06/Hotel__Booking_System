@@ -21,7 +21,7 @@ export const getBookingTotals = (booking, fallbackRoom, voucherData) => {
   const rooms = getBookingRooms(booking, fallbackRoom)
   const roomTotal = Number(booking?.totalAmount ?? rooms.reduce((sum, room) => sum + Number(room.subtotal || 0), 0))
   const serviceTotal = Number(booking?.serviceTotal || 0)
-  const taxFee = Math.round((roomTotal + serviceTotal) * 0.1)
+  const taxFee = Math.round((roomTotal + serviceTotal) * 0.08)
   const automaticDiscount = Number(booking?.discountAmount || 0)
   const voucherDiscount = Number(voucherData?.discountAmount || 0)
   const discountAmount = voucherData ? automaticDiscount + voucherDiscount : automaticDiscount
