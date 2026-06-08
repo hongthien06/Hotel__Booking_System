@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { createReview } from '../../shared/api/reviewApi'
 import { toast } from 'react-toastify'
 
-const ReviewFormDialog = ({ open, onClose, booking, onReviewSubmitted }) => {
+const ReviewFormDialog = ({ open, onClose, booking, room, onReviewSubmitted }) => {
   const { t } = useTranslation()
   const [form, setForm] = useState({
     ratingOverall: 5,
@@ -20,9 +20,16 @@ const ReviewFormDialog = ({ open, onClose, booking, onReviewSubmitted }) => {
     comment: ''
   })
   const [loading, setLoading] = useState(false)
-  const roomLabel = Array.isArray(booking?.rooms) && booking.rooms.length > 0
-    ? booking.rooms.map(room => `#${room.roomNumber}`).join(', ')
-    : booking?.roomNumber
+  
+  const roomLabel = room
+    ? room.roomNumber
+    : (Array.isArray(booking?.rooms) && booking.rooms.length > 0
+      ? booking.rooms.map(r => `#${r.roomNumber}`).join(', ')
+      : booking?.roomNumber)
+
+  const subtitleLabel = room
+    ? (room.roomType?.typeName || room.typeName || '')
+    : (booking?.bookingCode || '')
 
   const handleSubmit = async () => {
     if (!form.ratingOverall) {
@@ -31,15 +38,20 @@ const ReviewFormDialog = ({ open, onClose, booking, onReviewSubmitted }) => {
     }
     setLoading(true)
     try {
-      await createReview({
-        bookingId: booking.bookingId,
+      const payload = {
         ratingOverall: Math.round(form.ratingOverall),
         ratingClean: Math.round(form.ratingClean),
         ratingService: Math.round(form.ratingService),
         ratingLocation: Math.round(form.ratingLocation),
         ratingValue: Math.round(form.ratingValue),
         comment: form.comment
-      })
+      }
+      if (booking) {
+        payload.bookingId = booking.bookingId
+      } else if (room) {
+        payload.roomId = room.roomId || room.id
+      }
+      await createReview(payload)
       toast.success(t('reviews.submit_success'))
       onReviewSubmitted?.()
       onClose()
@@ -79,7 +91,7 @@ const ReviewFormDialog = ({ open, onClose, booking, onReviewSubmitted }) => {
               {t('reviews.write_review')}
             </Typography>
             <Typography variant="caption" sx={{ opacity: 0.9 }}>
-              {t('reviews.room')} {roomLabel} · {booking?.bookingCode}
+              {t('reviews.room')} {roomLabel} {subtitleLabel && `· ${subtitleLabel}`}
             </Typography>
           </Box>
         </Box>

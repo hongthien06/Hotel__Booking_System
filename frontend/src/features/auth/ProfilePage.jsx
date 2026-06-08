@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useRef, useState } from 'react'
 import {
   Alert,
@@ -42,7 +43,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { changePasswordApi } from '../../shared/api/authApi'
 import { getMyMembershipApi } from '../../shared/api/membershipApi'
-import { getMyProfileApi, updateMyProfileApi } from '../../shared/api/userApi'
+import { getMyProfileApi, updateMyProfileApi, uploadFileApi } from '../../shared/api/userApi'
 import { getMembershipTierName, getMembershipTrackingPhone } from '../../shared/utils/membership'
 
 const TIER_VISUAL = {
@@ -79,9 +80,10 @@ const ProfilePage = () => {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [profile, setProfile] = useState(null)
-  const [formData, setFormData] = useState({ fullName: '', phone: '' })
+  const [formData, setFormData] = useState({ fullName: '', phone: '', avatarUrl: '' })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState({ type: '', content: '' })
   const [membership, setMembership] = useState(null)
   const [openPwDialog, setOpenPwDialog] = useState(false)
@@ -94,18 +96,14 @@ const ProfilePage = () => {
   const membershipTierName = getMembershipTierName(membership?.tier, i18n.language)
   const membershipPhone = getMembershipTrackingPhone(membership)
 
-  useEffect(() => {
-    fetchProfile()
-    getMyMembershipApi().then(setMembership).catch(() => {})
-  }, [])
-
   const fetchProfile = async () => {
     try {
       const data = await getMyProfileApi()
       setProfile(data)
       setFormData({
         fullName: data.fullName || '',
-        phone: data.phone || ''
+        phone: data.phone || '',
+        avatarUrl: data.avatarUrl || ''
       })
     } catch (err) {
       console.error('Fetch profile error:', err)
@@ -115,6 +113,11 @@ const ProfilePage = () => {
     }
   }
 
+  useEffect(() => {
+    fetchProfile()
+    getMyMembershipApi().then(setMembership).catch(() => {})
+  }, [])
+
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
@@ -123,10 +126,23 @@ const ProfilePage = () => {
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0]
     if (file) {
-      setMessage({ type: 'success', content: `${t('profile.update_success')} (Avatar feature coming soon!)` })
+      setUploading(true)
+      setMessage({ type: 'info', content: 'Đang tải ảnh lên...' })
+      try {
+        const res = await uploadFileApi(file)
+        if (res?.url) {
+          setFormData((prev) => ({ ...prev, avatarUrl: res.url }))
+          setMessage({ type: 'success', content: 'Tải ảnh lên thành công! Hãy nhấn Lưu thay đổi để lưu lại.' })
+        }
+      } catch (err) {
+        console.error('Upload avatar error:', err)
+        setMessage({ type: 'error', content: 'Có lỗi xảy ra khi tải ảnh lên.' })
+      } finally {
+        setUploading(false)
+      }
     }
   }
 
@@ -139,7 +155,8 @@ const ProfilePage = () => {
       setProfile(updated)
       setFormData({
         fullName: updated.fullName || '',
-        phone: updated.phone || ''
+        phone: updated.phone || '',
+        avatarUrl: updated.avatarUrl || ''
       })
       const latestMembership = await getMyMembershipApi().catch(() => null)
       if (latestMembership) setMembership(latestMembership)
@@ -230,6 +247,7 @@ const ProfilePage = () => {
           >
             <Box sx={{ position: 'relative', width: 180, height: 180, mx: 'auto', mb: 3 }}>
               <Avatar
+                src={formData.avatarUrl || profile?.avatarUrl}
                 sx={{
                   width: 180,
                   height: 180,
@@ -242,6 +260,25 @@ const ProfilePage = () => {
               >
                 {profile?.fullName?.charAt(0)?.toUpperCase() || 'U'}
               </Avatar>
+              {uploading && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: 180,
+                    height: 180,
+                    borderRadius: '50%',
+                    bgcolor: 'rgba(0,0,0,0.4)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 2
+                  }}
+                >
+                  <CircularProgress size={40} sx={{ color: 'white' }} />
+                </Box>
+              )}
               <Tooltip title={t('profile.avatar_tooltip')}>
                 <IconButton
                   onClick={handleAvatarClick}
@@ -272,6 +309,7 @@ const ProfilePage = () => {
               sx={{ fontWeight: 700, bgcolor: (theme) => `${theme.palette.primary.contrastText}1a`, color: 'primary.contrastText' }}
             />
 
+            {/* Membership Section (Simplified) */}
             {membership?.tier ? (() => {
               const tier = membership.tier
               const v = TIER_VISUAL[tier.tierCode] || defaultVisual
@@ -282,102 +320,113 @@ const ProfilePage = () => {
                 ? Math.min(100, Math.max(5, 100 - (spentToNext / (Number(nextTier.minTotalSpent) || 1)) * 100))
                 : 100
               const nextTierName = nextTier ? getMembershipTierName(nextTier, i18n.language) : null
-
               return (
-                <Box sx={{ mt: 2, borderRadius: 4, overflow: 'hidden', border: `2px solid ${v.border}`, textAlign: 'left' }}>
+                <Box sx={{ mt: 2, borderRadius: 4, overflow: 'hidden', border: `2px solid ${v.border}`, textAlign: 'left', width: '100%' }}>
                   {/* Gradient header */}
                   <Box sx={{
-                    background: v.gradient, px: 2.5, py: 2,
-                    display: 'flex', alignItems: 'center', gap: 1.5
+                    background: v.gradient, px: 2, py: 1.5,
+                    display: 'flex', flexDirection: 'column', gap: 1
                   }}>
-                    <Box sx={{
-                      width: 40, height: 40, borderRadius: '50%',
-                      bgcolor: 'rgba(255,255,255,0.3)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'white'
-                    }}>
-                      {v.icon}
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{
+                          width: 28, height: 28, borderRadius: '50%',
+                          bgcolor: 'rgba(255,255,255,0.3)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          color: 'white', flexShrink: 0
+                        }}>
+                          {v.icon}
+                        </Box>
+                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+                          {t('profile.membership_tier')}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={`-${tier.discountPct}%`}
+                        size="small"
+                        sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: v.textColor, fontWeight: 800, fontSize: 11, flexShrink: 0 }}
+                      />
                     </Box>
-                    <Box>
-                      <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.85)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>
-                        {t('profile.membership_tier')}
-                      </Typography>
-                      <Typography variant="subtitle1" sx={{ color: 'white', fontWeight: 900, lineHeight: 1.1 }}>
-                        {membershipTierName}
-                      </Typography>
-                    </Box>
-                    <Chip
-                      label={`-${tier.discountPct}%`}
-                      size="small"
-                      sx={{ ml: 'auto', bgcolor: 'rgba(255,255,255,0.9)', color: v.textColor, fontWeight: 800, fontSize: 12 }}
-                    />
+                    <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 900, lineHeight: 1.1, fontSize: '0.95rem', pl: 4.5, whiteSpace: 'nowrap', mt: -0.5 }}>
+                      {membershipTierName}
+                    </Typography>
                   </Box>
 
                     {/* Stats */}
                     <Box sx={{ px: 2, py: 2, bgcolor: v.bg }}>
                       <Grid container spacing={1} sx={{ mb: 2 }}>
-                      <Grid size={{ xs: 4 }}>
-                        <Box sx={{ textAlign: 'center' }}>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 900, color: v.textColor, fontSize: '0.75rem' }}>{fmtVND(membership.totalSpent)}</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.total_spent')}</Typography>
-                        </Box>
-                      </Grid>
-                      <Grid size={{ xs: 4 }}>
-                        <Box sx={{ textAlign: 'center' }}>
-                          <Typography variant="h6" sx={{ fontWeight: 900, color: v.textColor }}>{tier.discountPct}%</Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.discount_rate')}</Typography>
-                        </Box>
-                      </Grid>
-                      <Grid size={{ xs: 4 }}>
-                        <Box sx={{ textAlign: 'center' }}>
-                          <Typography variant="h6" sx={{ fontWeight: 900, color: v.textColor }}>
-                            {membership.isFirstBookingUsed ? '✓' : t('membership.available')}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.first_booking_perk')}</Typography>
-                        </Box>
-                      </Grid>
-                    </Grid>
-
-                    {/* Progress bars */}
-                    {!isVIP && nextTier && (
-                      <Box sx={{ mb: 1.5 }}>
-                        <Typography variant="caption" sx={{ fontWeight: 700, color: v.textColor, display: 'block', mb: 1 }}>
-                          {t('membership.progress_to')} {nextTierName}
-                        </Typography>
-                        <Box sx={{ mb: 1 }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-                            <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>{t('membership.spent_progress')}</Typography>
-                            <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: v.textColor }}>{fmtVND(spentToNext)} {t('membership.more')}</Typography>
+                        <Grid size={{ xs: 4 }}>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="subtitle2" sx={{ fontWeight: 900, color: v.textColor, fontSize: '0.75rem' }}>{fmtVND(membership.totalSpent)}</Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.total_spent')}</Typography>
                           </Box>
-                          <LinearProgress
-                            variant="determinate" value={spentProgress}
-                            sx={{ height: 6, borderRadius: 3, bgcolor: v.border, '& .MuiLinearProgress-bar': { background: v.gradient, borderRadius: 3 } }}
-                          />
+                        </Grid>
+                        <Grid size={{ xs: 4 }}>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 900, color: v.textColor }}>{tier.discountPct}%</Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.discount_rate')}</Typography>
+                          </Box>
+                        </Grid>
+                        <Grid size={{ xs: 4 }}>
+                          <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="h6" sx={{ fontWeight: 900, color: v.textColor }}>
+                              {membership.isFirstBookingUsed ? '✓' : t('membership.available')}
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.first_booking_perk')}</Typography>
+                          </Box>
+                        </Grid>
+                      </Grid>
+
+                      {/* Progress bars */}
+                      {!isVIP && nextTier && (
+                        <Box sx={{ mb: 1.5 }}>
+                          <Typography variant="caption" sx={{ fontWeight: 700, color: v.textColor, display: 'block', mb: 1 }}>
+                            {t('membership.progress_to')} {nextTierName}
+                          </Typography>
+                          <Box sx={{ mb: 1 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
+                              <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>{t('membership.spent_progress')}</Typography>
+                              <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: v.textColor }}>{fmtVND(spentToNext)} {t('membership.more')}</Typography>
+                            </Box>
+                            <LinearProgress
+                              variant="determinate" value={spentProgress}
+                              sx={{ height: 6, borderRadius: 3, bgcolor: v.border, '& .MuiLinearProgress-bar': { background: v.gradient, borderRadius: 3 } }}
+                            />
+                          </Box>
                         </Box>
-                      </Box>
-                    )}
+                      )}
 
-                    {isVIP && (
-                      <Typography variant="caption" sx={{ color: v.textColor, fontWeight: 700, display: 'block', textAlign: 'center' }}>
-                        🏆 {t('membership.vip_congrats')}
-                      </Typography>
-                    )}
+                      {isVIP && (
+                        <Typography variant="caption" sx={{ color: v.textColor, fontWeight: 700, display: 'block', textAlign: 'center', mb: 2 }}>
+                          🏆 {t('membership.vip_congrats')}
+                        </Typography>
+                      )}
 
-                    <Button
-                      fullWidth
-                      size="small"
-                      endIcon={<ArrowForward />}
-                      onClick={() => navigate('/membership')}
-                      sx={{
-                        mt: 1, borderRadius: 2, fontWeight: 700, fontSize: '0.75rem',
-                        color: v.textColor, borderColor: v.border,
-                        '&:hover': { bgcolor: `${v.border}40` }
-                      }}
-                      variant="outlined"
-                    >
-                      {t('profile.view_membership_details')}
-                    </Button>
-                  </Box>
+                      <Button
+                        fullWidth
+                        size="small"
+                        variant="contained"
+                        endIcon={<ArrowForward />}
+                        onClick={() => navigate('/membership')}
+                        sx={{
+                          borderRadius: 2,
+                          fontWeight: 800,
+                          fontSize: '0.75rem',
+                          bgcolor: 'primary.main',
+                          color: 'primary.contrastText',
+                          '&:hover': {
+                            bgcolor: 'primary.dark',
+                            color: 'primary.contrastTextHover'
+                          },
+                          whiteSpace: 'nowrap',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          py: 0.8
+                        }}
+                      >
+                        {t('profile.view_membership_details')}
+                      </Button>
+                    </Box>
                 </Box>
               )
             })() : (

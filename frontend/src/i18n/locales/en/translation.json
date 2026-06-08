@@ -221,7 +221,7 @@
     "pw_too_short": "New password must be at least 6 characters!",
     "pw_success": "Password changed successfully!",
     "pw_old_wrong": "Old password is incorrect.",
-    "view_membership_details": "View membership details",
+    "view_membership_details": "View details",
     "membership_invite_title": "Join Membership",
     "membership_invite_desc": "Make your first booking to unlock membership discounts!"
   },
@@ -410,7 +410,8 @@
     "no_account": "Don't have an account?",
     "register_now": "Register Now",
     "password": "Password",
-    "failed": "Login failed. Please verify your credentials."
+    "failed": "Login failed. Please verify your credentials.",
+    "wrong_password": "Incorrect email or password."
   },
   "forgot_password": {
     "title": "Forgot Password?",
@@ -701,7 +702,16 @@
     "have_account": "Already have an account?",
     "login_link": "Login",
     "match_error": "Confirm password does not match.",
-    "failed": "Registration failed. Please try again."
+    "failed": "Registration failed. Please try again.",
+    "otp_title": "Email Verification",
+    "otp_subtitle": "We have sent a 6-digit OTP code to",
+    "otp_verify": "Verify",
+    "otp_not_received": "Didn't receive the code?",
+    "otp_resend_in": "Resend in",
+    "otp_resend": "Resend Code",
+    "otp_incomplete": "Please enter all 6 digits of the OTP",
+    "otp_invalid": "Incorrect or expired OTP code",
+    "resend_failed": "Failed to resend OTP"
   },
   "user_management": {
     "title": "User Management",
@@ -768,7 +778,7 @@
     "value": "Value",
     "no_reviews": "No reviews yet.",
     "room": "Room",
-    "hotel_reply": "Hotel Reply",
+    "hotel_reply": "Admin Hotel Booking System",
     "write_review": "Write a Review",
     "rating_overall": "Overall Rating",
     "rating_required": "Please select a star rating",

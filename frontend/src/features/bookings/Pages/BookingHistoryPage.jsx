@@ -115,8 +115,8 @@ const BookingHistoryPage = () => {
       const list = Array.isArray(data) ? data : []
       setBookings(list)
 
-      // Kiểm tra trạng thái review cho các booking CHECKED_OUT
-      const checkedOutBookings = list.filter(b => b.status === 'CHECKED_OUT')
+      // Kiểm tra trạng thái review cho các booking
+      const checkedOutBookings = list
       const reviewChecks = {}
       await Promise.all(
         checkedOutBookings.map(async (b) => {
@@ -773,7 +773,7 @@ const BookingHistoryPage = () => {
                         )}
                       </Box>
                     )}
-                    {booking.status === 'CHECKED_OUT' && (
+                    {true && (
                       <Box sx={{ mt: 2 }}>
                         {reviewedBookings[booking.bookingId] ? (
                           <Button

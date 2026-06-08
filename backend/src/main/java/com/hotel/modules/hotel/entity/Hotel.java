@@ -20,18 +20,22 @@ public class Hotel {
     @Column(name = "hotel_code", nullable = false, length = 20, unique = true)
     private String hotelCode;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "hotel_name", nullable = false, length = 255)
     private String hotelName;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "province", nullable = false, length = 100)
     private String province;
 
     @Column(name = "province_code", nullable = false, length = 10)
     private String provinceCode;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "district", nullable = false, length = 100)
     private String district;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "address", length = 500)
     private String address;
 

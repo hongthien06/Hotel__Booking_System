@@ -144,7 +144,7 @@ const DashboardPage = () => {
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [activeChart, setActiveChart] = useState('revenue');
-  const [chartDays, setChartDays] = useState(7);
+  const [chartDays, setChartDays] = useState(30);
   const [lastUpdated, setLastUpdated] = useState(null);
 
   const fetchStats = useCallback(async () => {

@@ -23,6 +23,7 @@ public class RoomType {
     @Column(name = "type_id")
     private Integer typeId;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name="type_name", nullable=false, length=100)
     private String typeName;
 

@@ -12,3 +12,14 @@ export const updateMyProfileApi = async (profileData) => {
   const response = await axiosInstance.put(`${API_URL}/me`, profileData)
   return response.data
 }
+
+export const uploadFileApi = async (file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  const response = await axiosInstance.post(`${BASE_URL}/files/upload`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  return response.data
+}

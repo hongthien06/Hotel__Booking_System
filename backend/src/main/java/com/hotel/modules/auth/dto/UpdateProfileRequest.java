@@ -18,4 +18,7 @@ public class UpdateProfileRequest {
     @Size(max = 20, message = "Số điện thoại không được vượt quá 20 ký tự")
     @Pattern(regexp = "^(0[35789])\\d{8}$", message = "Số điện thoại không hợp lệ (VD: 0901234567)")
     private String phone;
+
+    @Size(max = 512, message = "Đường dẫn ảnh không được vượt quá 512 ký tự")
+    private String avatarUrl;
 }

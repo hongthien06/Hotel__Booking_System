@@ -221,7 +221,7 @@
     "pw_too_short": "Mật khẩu mới phải có ít nhất 6 ký tự!",
     "pw_success": "Đổi mật khẩu thành công!",
     "pw_old_wrong": "Mật khẩu cũ không chính xác.",
-    "view_membership_details": "Xem chi tiết hạng thành viên",
+    "view_membership_details": "Xem chi tiết",
     "membership_invite_title": "Tham gia thành viên",
     "membership_invite_desc": "Đặt phòng đầu tiên để nhận ngay ưu đãi giảm giá hạng thành viên!"
   },
@@ -409,7 +409,8 @@
     "no_account": "Chưa có tài khoản?",
     "register_now": "Đăng ký ngay",
     "password": "Mật khẩu",
-    "failed": "Đăng nhập thất bại. Xin vui lòng kiểm tra lại thông tin."
+    "failed": "Đăng nhập thất bại. Xin vui lòng kiểm tra lại thông tin.",
+    "wrong_password": "Email hoặc mật khẩu không chính xác."
   },
   "forgot_password": {
     "title": "Quên mật khẩu?",
@@ -743,7 +744,16 @@
     "have_account": "Đã có tài khoản?",
     "login_link": "Đăng nhập",
     "match_error": "Mật khẩu xác nhận không khớp.",
-    "failed": "Đăng ký thất bại. Xin vui lòng thử lại."
+    "failed": "Đăng ký thất bại. Xin vui lòng thử lại.",
+    "otp_title": "Xác thực email",
+    "otp_subtitle": "Chúng tôi đã gửi mã OTP 6 chữ số đến",
+    "otp_verify": "Xác nhận",
+    "otp_not_received": "Chưa nhận được mã?",
+    "otp_resend_in": "Gửi lại sau",
+    "otp_resend": "Gửi lại mã",
+    "otp_incomplete": "Vui lòng nhập đủ 6 chữ số OTP",
+    "otp_invalid": "Mã OTP không chính xác hoặc đã hết hạn",
+    "resend_failed": "Không thể gửi lại OTP"
   },
   "user_management": {
     "title": "Quản lý người dùng",
@@ -764,10 +774,10 @@
     "cleanliness": "Sạch sẽ",
     "service": "Dịch vụ",
     "location": "Vị trí",
-    "value": "Giá trị",
+    "value": "Chi phí",
     "no_reviews": "Chưa có đánh giá nào.",
     "room": "Phòng",
-    "hotel_reply": "Phản hồi từ khách sạn",
+    "hotel_reply": "Quản Lý Hệ Thống Đặt Phòng Khách Sạn", 
     "write_review": "Viết đánh giá",
     "rating_overall": "Đánh giá chung",
     "rating_required": "Vui lòng chọn số sao đánh giá",

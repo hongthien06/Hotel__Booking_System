@@ -63,6 +63,7 @@ public class Booking {
     private Byte numChildren = 0;
 
     // special_request NVARCHAR(500) NULL
+    @org.hibernate.annotations.Nationalized
     @Column(name = "special_request", length = 500)
     private String specialRequest; // special_request — Yêu cầu đặc biệt ("phòng tầng cao", "không hút thuốc"...)
 

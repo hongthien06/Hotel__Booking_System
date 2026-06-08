@@ -26,6 +26,7 @@ public class User implements UserDetails {
     @Column(name = "user_id")
     private Long userId;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
 

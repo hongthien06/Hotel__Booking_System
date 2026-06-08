@@ -127,6 +127,8 @@ const theme = extendTheme({
           },
           '&:active': {
             transform: 'translateY(1px)',
+            backgroundColor: theme.vars.palette.primary.dark,
+            color: theme.vars.palette.primary.contrastTextHover,
             boxShadow: 'none'
           }
         })

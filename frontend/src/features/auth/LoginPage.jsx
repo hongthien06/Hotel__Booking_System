@@ -46,8 +46,20 @@ const LoginPage = () => {
       login(data.token, { email: data.email, fullName: data.fullName, roles: roles })
       // Redirection is handled by useEffect based on roles
     } catch (err) {
-      const errMsg = err.message || t('login_page.failed');
-      setError(errMsg);
+      const data = err.response?.data
+      let errMsg = ''
+      if (data) {
+        if (data.message) errMsg = data.message
+        else if (data.error) errMsg = data.error
+        else if (typeof data === 'object' && Object.keys(data).length > 0) errMsg = Object.values(data)[0]
+      }
+      if (!errMsg) {
+        errMsg = err.message || t('login_page.failed')
+      }
+      if (errMsg === 'Bad credentials' || errMsg === 'User is disabled') {
+        errMsg = t('login_page.wrong_password')
+      }
+      setError(errMsg)
       setIsLoading(false)
     }
   }

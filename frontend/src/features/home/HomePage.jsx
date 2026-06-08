@@ -40,13 +40,7 @@ const policyCards = [
   { icon: <VerifiedUser sx={{ fontSize: 36 }} />, title: 'home.policy.cards.safety.title', desc: 'home.policy.cards.safety.desc' },
 ]
 
-// Fallback reviews khi API chưa có dữ liệu
-const fallbackReviews = [
-  { key: 'item1', avatar: 'A', rating: 5, date: '15/04/2026' },
-  { key: 'item2', avatar: 'M', rating: 5, date: '10/04/2026' },
-  { key: 'item3', avatar: 'P', rating: 4, date: '05/04/2026' },
-  { key: 'item4', avatar: 'N', rating: 5, date: '01/04/2026' },
-]
+
 
 const SectionHeader = ({ overline, title, subtitle }) => (
   <Box sx={{ textAlign: 'center', mb: 7 }}>
@@ -128,9 +122,15 @@ const HomePage = () => {
               bgcolor: 'white', color: PC,
               boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
               '&:hover': {
-                bgcolor: PC, color: 'white',
+                bgcolor: 'primary.dark',
+                color: 'primary.contrastTextHover',
                 transform: 'translateY(-3px)',
                 boxShadow: '0 12px 35px rgba(154,28,72,0.4)'
+              },
+              '&:active': {
+                bgcolor: 'primary.dark',
+                color: 'primary.contrastTextHover',
+                transform: 'translateY(1px)'
               },
               transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)'
             }}
@@ -294,9 +294,9 @@ const HomePage = () => {
                   <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 4 }} />
                 </Grid>
               ))
-            ) : hasApiReviews ? (
+            ) : apiReviews.length > 0 ? (
               apiReviews.map((r) => (
-                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={r.id}>
+                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={r.reviewId || r.id}>
                   <Card sx={{
                     p: 3, borderRadius: 4, height: '100%',
                     transition: 'all 0.3s ease',
@@ -325,30 +325,11 @@ const HomePage = () => {
                 </Grid>
               ))
             ) : (
-              // Fallback to hardcoded reviews
-              fallbackReviews.map((r, i) => (
-                <Grid size={{ xs: 12, sm: 6, md: 3 }} key={i}>
-                  <Card sx={{
-                    p: 3, borderRadius: 4, height: '100%',
-                    transition: 'all 0.3s ease',
-                    '&:hover': { transform: 'translateY(-5px)', boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }
-                  }}>
-                    <CardContent sx={{ p: 0 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                        <Avatar sx={{ bgcolor: PC, fontWeight: 700 }}>{r.avatar}</Avatar>
-                        <Box>
-                          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>{t(`home.reviews.${r.key}.name`)}</Typography>
-                          <Typography variant="caption" color="text.secondary">{r.date}</Typography>
-                        </Box>
-                      </Box>
-                      <Rating value={r.rating} readOnly size="small" sx={{ mb: 1.5 }} />
-                      <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic', lineHeight: 1.7 }}>
-                        "{t(`home.reviews.${r.key}.comment`)}"
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))
+              <Grid size={{ xs: 12 }}>
+                <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ py: 4, fontStyle: 'italic' }}>
+                  Hiện tại chưa có đánh giá nào. Hãy trải nghiệm và để lại đánh giá của bạn nhé!
+                </Typography>
+              </Grid>
             )}
           </Grid>
           {/* See all reviews button */}
@@ -358,7 +339,16 @@ const HomePage = () => {
               onClick={() => navigate('/reviews')}
               sx={{
                 borderColor: PC, color: PC, fontWeight: 700, borderRadius: 3, px: 5, py: 1.5,
-                '&:hover': { bgcolor: PC_ALPHA, borderColor: PC }
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                  color: 'primary.contrastTextHover',
+                  borderColor: 'primary.dark'
+                },
+                '&:active': {
+                  bgcolor: 'primary.dark',
+                  color: 'primary.contrastTextHover',
+                  borderColor: 'primary.dark'
+                }
               }}
             >
               {t('common.see_all')} →
@@ -386,9 +376,15 @@ const HomePage = () => {
               bgcolor: 'white', color: PC, fontWeight: 800, px: 6, py: 2, borderRadius: 3,
               boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
               '&:hover': {
-                bgcolor: 'rgba(255,255,255,0.9)',
+                bgcolor: 'primary.dark',
+                color: 'primary.contrastTextHover',
                 transform: 'translateY(-3px)',
                 boxShadow: '0 15px 40px rgba(0,0,0,0.2)'
+              },
+              '&:active': {
+                bgcolor: 'primary.dark',
+                color: 'primary.contrastTextHover',
+                transform: 'translateY(1px)'
               },
               transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)'
             }}
