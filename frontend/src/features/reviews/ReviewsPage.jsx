@@ -1,21 +1,158 @@
 import React, { useEffect, useState } from 'react'
 import {
   Box, Typography, Container, Grid, Card, CardContent,
-  Avatar, Rating, Chip, Skeleton, Pagination, Paper, Divider
+  Avatar, Rating, Chip, Skeleton, Pagination, Paper, Divider,
+  Button, Dialog, DialogTitle, DialogContent, DialogActions,
+  FormControl, InputLabel, Select, MenuItem, CircularProgress
 } from '@mui/material'
 import { Star, FormatQuote, ThumbUp } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
-import { getApprovedReviews, getReviewStats } from '../../shared/api/reviewApi'
+import { useNavigate } from 'react-router-dom'
+import { getApprovedReviews, getReviewStats, checkReviewExists } from '../../shared/api/reviewApi'
+import { getMyBookingsApi } from '../../shared/api/bookingApi'
+import { useAuth } from '../../shared/hooks/useAuth'
+import ReviewFormDialog from './ReviewFormDialog'
+import { toast } from 'react-toastify'
 
 const PC = '#9a1c48'
 
+const BookingSelectDialog = ({ open, onClose, onSelect }) => {
+  const navigate = useNavigate()
+  const [bookings, setBookings] = useState([])
+  const [selectedBookingId, setSelectedBookingId] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setLoading(true)
+      getMyBookingsApi()
+        .then(async (data) => {
+          const list = Array.isArray(data) ? data : []
+          const unreviewed = []
+          await Promise.all(
+            list.map(async (b) => {
+              try {
+                const res = await checkReviewExists(b.bookingId)
+                if (!res.reviewed) {
+                  unreviewed.push(b)
+                }
+              } catch {
+                unreviewed.push(b)
+              }
+            })
+          )
+          setBookings(unreviewed)
+          if (unreviewed.length > 0) {
+            setSelectedBookingId(unreviewed[0].bookingId)
+          }
+        })
+        .catch(err => console.error('Failed to load bookings:', err))
+        .finally(() => setLoading(false))
+    }
+  }, [open])
+
+  const handleConfirm = () => {
+    const selected = bookings.find(b => b.bookingId === selectedBookingId)
+    if (selected) {
+      onSelect(selected)
+    }
+  }
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
+      <DialogTitle sx={{ fontWeight: 800 }}>Chọn đơn đặt phòng để đánh giá</DialogTitle>
+      <DialogContent>
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+            <CircularProgress color="secondary" />
+          </Box>
+        ) : bookings.length === 0 ? (
+          <Box sx={{ py: 3, textAlign: 'center' }}>
+            <Typography variant="body1" color="text.secondary">
+              Bạn không có đơn đặt phòng nào chưa được đánh giá.{' '}
+              <Typography
+                component="span"
+                variant="body1"
+                onClick={() => {
+                  onClose()
+                  navigate('/bookings')
+                }}
+                sx={{
+                  color: '#9a1c48',
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  fontWeight: 700,
+                  '&:hover': { color: '#7d1639' }
+                }}
+              >
+                Đặt phòng ngay
+              </Typography>
+            </Typography>
+          </Box>
+        ) : (
+          <FormControl fullWidth sx={{ mt: 1 }}>
+            <InputLabel id="select-booking-label">Đơn đặt phòng của bạn</InputLabel>
+            <Select
+              labelId="select-booking-label"
+              value={selectedBookingId}
+              label="Đơn đặt phòng của bạn"
+              onChange={(e) => setSelectedBookingId(e.target.value)}
+              sx={{ borderRadius: 2 }}
+            >
+              {bookings.map(b => {
+                const roomNum = b.room?.roomNumber || (b.bookingRooms && b.bookingRooms.length > 0 ? b.bookingRooms.map(br => br.room?.roomNumber).join(', ') : 'N/A')
+                const hotelName = b.room?.hotel?.name || (b.bookingRooms && b.bookingRooms.length > 0 ? b.bookingRooms[0].room?.hotel?.name : 'Khách sạn')
+                return (
+                  <MenuItem key={b.bookingId} value={b.bookingId}>
+                    Đơn #{b.bookingCode} - Phòng {roomNum} ({hotelName})
+                  </MenuItem>
+                )
+              })}
+            </Select>
+          </FormControl>
+        )}
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 3 }}>
+        <Button onClick={onClose} sx={{ borderRadius: 2 }}>Hủy</Button>
+        <Button
+          variant="contained"
+          onClick={handleConfirm}
+          disabled={bookings.length === 0 || !selectedBookingId || loading}
+          sx={{ bgcolor: '#9a1c48', '&:hover': { bgcolor: '#7d1639' }, borderRadius: 2 }}
+        >
+          Tiếp tục
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
+
 const ReviewsPage = () => {
   const { t } = useTranslation()
+  const { isAuthenticated } = useAuth()
   const [reviews, setReviews] = useState([])
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
+
+  const [bookingSelectOpen, setBookingSelectOpen] = useState(false)
+  const [reviewFormOpen, setReviewFormOpen] = useState(false)
+  const [selectedBookingForReview, setSelectedBookingForReview] = useState(null)
+
+  const handleWriteReviewClick = () => {
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để viết đánh giá!')
+      return
+    }
+    setBookingSelectOpen(true)
+  }
+
+  const handleBookingSelect = (booking) => {
+    setSelectedBookingForReview(booking)
+    setBookingSelectOpen(false)
+    setReviewFormOpen(true)
+  }
 
   const fetchReviews = async (p = 0) => {
     setLoading(true)
@@ -81,9 +218,26 @@ const ReviewsPage = () => {
           <Typography variant="h3" sx={{ fontWeight: 900, mt: 1, mb: 2 }}>
             {t('reviews.title')}
           </Typography>
-          <Typography variant="body1" sx={{ opacity: 0.85, maxWidth: 600, mx: 'auto' }}>
+          <Typography variant="body1" sx={{ opacity: 0.85, maxWidth: 600, mx: 'auto', mb: 3 }}>
             {t('reviews.subtitle')}
           </Typography>
+          <Button
+            variant="contained"
+            onClick={handleWriteReviewClick}
+            sx={{
+              bgcolor: 'white',
+              color: PC,
+              fontWeight: 700,
+              borderRadius: 3,
+              px: 4,
+              py: 1.2,
+              '&:hover': { bgcolor: '#f3f4f6' },
+              boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
+              textTransform: 'none'
+            }}
+          >
+            {t('reviews.write_review')}
+          </Button>
         </Container>
       </Box>
 
@@ -149,7 +303,7 @@ const ReviewsPage = () => {
             </Grid>
           ) : (
             reviews.map((review) => (
-              <Grid size={{ xs: 12, sm: 6 }} key={review.id}>
+              <Grid size={{ xs: 12, sm: 6 }} key={review.reviewId}>
                 <Card sx={{
                   height: '100%',
                   borderRadius: 4,
@@ -218,6 +372,29 @@ const ReviewsPage = () => {
           </Box>
         )}
       </Container>
+
+      {/* Booking Selection Dialog */}
+      <BookingSelectDialog
+        open={bookingSelectOpen}
+        onClose={() => setBookingSelectOpen(false)}
+        onSelect={handleBookingSelect}
+      />
+
+      {/* Review Input Dialog */}
+      {selectedBookingForReview && (
+        <ReviewFormDialog
+          open={reviewFormOpen}
+          onClose={() => {
+            setReviewFormOpen(false)
+            setSelectedBookingForReview(null)
+          }}
+          booking={selectedBookingForReview}
+          onReviewSubmitted={() => {
+            fetchReviews(0)
+            fetchStats()
+          }}
+        />
+      )}
     </Box>
   )
 }

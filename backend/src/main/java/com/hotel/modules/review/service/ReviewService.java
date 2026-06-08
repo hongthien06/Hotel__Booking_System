@@ -10,12 +10,16 @@ import com.hotel.modules.review.dto.ReviewRequestDTO;
 import com.hotel.modules.review.dto.ReviewResponseDTO;
 import com.hotel.modules.review.entity.Review;
 import com.hotel.modules.review.repository.ReviewRepository;
+import com.hotel.modules.rooms.entity.Room;
+import com.hotel.modules.rooms.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Map;
 
 @Service
@@ -25,33 +29,55 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
+    private final RoomRepository roomRepository;
 
     /**
-     * Customer tạo review (chỉ cho booking CHECKED_OUT, chưa review)
+     * Customer tạo review
      */
     @Transactional
     public ReviewResponseDTO createReview(ReviewRequestDTO dto, Long userId) {
-        Booking booking = bookingRepository.findById(dto.getBookingId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy booking!"));
+        User currentUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng hiện tại!"));
 
-        // Kiểm tra booking thuộc về user
-        if (!booking.getUser().getUserId().equals(userId)) {
-            throw new RuntimeException("Bạn không có quyền đánh giá booking này!");
-        }
+        Booking booking;
+        if (dto.getBookingId() != null) {
+            booking = bookingRepository.findById(dto.getBookingId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy booking!"));
 
-        // Kiểm tra trạng thái
-        if (booking.getStatus() != BookingStatus.CHECKED_OUT) {
-            throw new RuntimeException("Chỉ có thể đánh giá sau khi đã trả phòng!");
-        }
+            // Kiểm tra đã review chưa
+            if (reviewRepository.existsByBookingBookingId(dto.getBookingId())) {
+                throw new RuntimeException("Booking này đã được đánh giá rồi!");
+            }
+        } else if (dto.getRoomId() != null) {
+            Room room = roomRepository.findById(dto.getRoomId())
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy phòng!"));
 
-        // Kiểm tra đã review chưa
-        if (reviewRepository.existsByBookingBookingId(dto.getBookingId())) {
-            throw new RuntimeException("Bạn đã đánh giá booking này rồi!");
+            BigDecimal price = room.getRoomType() != null && room.getRoomType().getPricePerNight() != null
+                    ? room.getRoomType().getPricePerNight()
+                    : BigDecimal.ZERO;
+
+            // Tạo booking giả lập tự động hoàn tất cho user và phòng này
+            booking = new Booking();
+            booking.setUser(currentUser);
+            booking.setRoom(room);
+            booking.setCheckInDate(LocalDate.now());
+            booking.setCheckOutDate(LocalDate.now());
+            booking.setNumAdults((byte) 1);
+            booking.setNumChildren((byte) 0);
+            booking.setRoomPriceSnapshot(price);
+            booking.setTotalNights((short) 1);
+            booking.setStatus(BookingStatus.CHECKED_OUT);
+            booking.setBookingCode("REV-" + System.currentTimeMillis());
+            booking.setCreatedAt(java.time.LocalDateTime.now());
+            booking.setUpdatedAt(java.time.LocalDateTime.now());
+            bookingRepository.save(booking);
+        } else {
+            throw new RuntimeException("Yêu cầu đánh giá phải có Booking ID hoặc Room ID!");
         }
 
         Review review = Review.builder()
                 .booking(booking)
-                .user(booking.getUser())
+                .user(currentUser)
                 .room(booking.getRoom())
                 .ratingOverall(dto.getRatingOverall())
                 .ratingClean(dto.getRatingClean())
@@ -69,6 +95,7 @@ public class ReviewService {
     /**
      * Public: lấy review đã duyệt
      */
+    @Transactional(readOnly = true)
     public Page<ReviewResponseDTO> getApprovedReviews(Pageable pageable) {
         return reviewRepository.findByIsApprovedTrue(pageable).map(this::toResponseDTO);
     }
@@ -76,6 +103,7 @@ public class ReviewService {
     /**
      * Customer: xem review của mình
      */
+    @Transactional(readOnly = true)
     public Page<ReviewResponseDTO> getMyReviews(Long userId, Pageable pageable) {
         return reviewRepository.findByUserId(userId, pageable).map(this::toResponseDTO);
     }
@@ -90,6 +118,7 @@ public class ReviewService {
     /**
      * Admin: xem tất cả review
      */
+    @Transactional(readOnly = true)
     public Page<ReviewResponseDTO> getAllReviews(Pageable pageable) {
         return reviewRepository.findAll(pageable).map(this::toResponseDTO);
     }
@@ -99,11 +128,43 @@ public class ReviewService {
      */
     public Map<String, Object> getReviewStats() {
         Double avgRating = reviewRepository.averageRatingOverall();
+        Double avgClean = reviewRepository.averageRatingClean();
+        Double avgService = reviewRepository.averageRatingService();
+        Double avgLocation = reviewRepository.averageRatingLocation();
+        Double avgValue = reviewRepository.averageRatingValue();
         Long totalReviews = reviewRepository.countApproved();
-        return Map.of(
-                "averageRating", avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 0,
-                "totalReviews", totalReviews
-        );
+
+        // Round averages to 1 decimal place
+        Double roundedOverall = avgRating != null ? Math.round(avgRating * 10.0) / 10.0 : 0.0;
+        Double roundedClean = avgClean != null ? Math.round(avgClean * 10.0) / 10.0 : 0.0;
+        Double roundedService = avgService != null ? Math.round(avgService * 10.0) / 10.0 : 0.0;
+        Double roundedLocation = avgLocation != null ? Math.round(avgLocation * 10.0) / 10.0 : 0.0;
+        Double roundedValue = avgValue != null ? Math.round(avgValue * 10.0) / 10.0 : 0.0;
+
+        // Calculate distribution of ratingOverall (1 to 5 stars)
+        java.util.List<Object[]> distributionRaw = reviewRepository.countByRatingOverall();
+        java.util.Map<Integer, Long> distribution = new java.util.HashMap<>();
+        for (int i = 1; i <= 5; i++) {
+            distribution.put(i, 0L);
+        }
+        for (Object[] row : distributionRaw) {
+            Integer rating = (Integer) row[0];
+            Long count = (Long) row[1];
+            if (rating != null) {
+                distribution.put(rating, count);
+            }
+        }
+
+        java.util.Map<String, Object> stats = new java.util.HashMap<>();
+        stats.put("averageRating", roundedOverall);
+        stats.put("totalReviews", totalReviews);
+        stats.put("avgClean", roundedClean);
+        stats.put("avgService", roundedService);
+        stats.put("avgLocation", roundedLocation);
+        stats.put("avgValue", roundedValue);
+        stats.put("distribution", distribution);
+
+        return stats;
     }
 
     /**

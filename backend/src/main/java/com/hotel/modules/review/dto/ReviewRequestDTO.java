@@ -13,8 +13,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReviewRequestDTO {
-    @NotNull(message = "Booking ID không được để trống")
     private Long bookingId;
+
+    private Long roomId;
 
     @NotNull(message = "Đánh giá tổng thể không được để trống")
     @Min(value = 1, message = "Đánh giá tối thiểu là 1")

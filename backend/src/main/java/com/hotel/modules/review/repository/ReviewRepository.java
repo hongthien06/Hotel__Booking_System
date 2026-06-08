@@ -17,9 +17,24 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     boolean existsByBookingBookingId(Long bookingId);
 
-    @Query("SELECT COALESCE(AVG(r.ratingOverall), 0) FROM Review r WHERE r.isApproved = true")
+    @Query("SELECT COALESCE(AVG(r.ratingOverall), 0.0) FROM Review r WHERE r.isApproved = true")
     Double averageRatingOverall();
+
+    @Query("SELECT COALESCE(AVG(r.ratingClean), 0.0) FROM Review r WHERE r.isApproved = true")
+    Double averageRatingClean();
+
+    @Query("SELECT COALESCE(AVG(r.ratingService), 0.0) FROM Review r WHERE r.isApproved = true")
+    Double averageRatingService();
+
+    @Query("SELECT COALESCE(AVG(r.ratingLocation), 0.0) FROM Review r WHERE r.isApproved = true")
+    Double averageRatingLocation();
+
+    @Query("SELECT COALESCE(AVG(r.ratingValue), 0.0) FROM Review r WHERE r.isApproved = true")
+    Double averageRatingValue();
 
     @Query("SELECT COUNT(r) FROM Review r WHERE r.isApproved = true")
     Long countApproved();
+
+    @Query("SELECT r.ratingOverall, COUNT(r) FROM Review r WHERE r.isApproved = true GROUP BY r.ratingOverall")
+    java.util.List<Object[]> countByRatingOverall();
 }

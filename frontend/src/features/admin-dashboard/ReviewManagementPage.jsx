@@ -72,7 +72,7 @@ const ReviewManagementPage = () => {
   const handleReplySubmit = async () => {
     if (!replyText.trim()) return
     try {
-      await replyReview(selectedReview.id, replyText)
+      await replyReview(selectedReview.reviewId, replyText)
       toast.success(t('reviews.reply_success'))
       setReplyDialogOpen(false)
       fetchReviews(page)
@@ -82,8 +82,8 @@ const ReviewManagementPage = () => {
   }
 
   const filteredReviews = reviews.filter(r => {
-    if (filter === 'approved') return r.approved
-    if (filter === 'pending') return !r.approved
+    if (filter === 'approved') return r.isApproved
+    if (filter === 'pending') return !r.isApproved
     return true
   })
 
@@ -144,7 +144,7 @@ const ReviewManagementPage = () => {
               </TableRow>
             ) : (
               filteredReviews.map((review) => (
-                <TableRow key={review.id} hover>
+                <TableRow key={review.reviewId} hover>
                   <TableCell>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>{review.customerName}</Typography>
                     <Typography variant="caption" color="text.secondary">
@@ -165,17 +165,17 @@ const ReviewManagementPage = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={review.approved ? t('reviews.approved') : t('reviews.pending')}
-                      color={review.approved ? 'success' : 'warning'}
+                      label={review.isApproved ? t('reviews.approved') : t('reviews.pending')}
+                      color={review.isApproved ? 'success' : 'warning'}
                       size="small"
                       sx={{ fontWeight: 600 }}
                     />
                   </TableCell>
                   <TableCell align="center">
                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
-                      {!review.approved && (
+                      {!review.isApproved && (
                         <Tooltip title={t('reviews.approve')}>
-                          <IconButton size="small" color="success" onClick={() => handleApprove(review.id)}>
+                          <IconButton size="small" color="success" onClick={() => handleApprove(review.reviewId)}>
                             <CheckCircle fontSize="small" />
                           </IconButton>
                         </Tooltip>
@@ -186,7 +186,7 @@ const ReviewManagementPage = () => {
                         </IconButton>
                       </Tooltip>
                       <Tooltip title={t('common.delete')}>
-                        <IconButton size="small" color="error" onClick={() => handleDelete(review.id)}>
+                        <IconButton size="small" color="error" onClick={() => handleDelete(review.reviewId)}>
                           <Delete fontSize="small" />
                         </IconButton>
                       </Tooltip>

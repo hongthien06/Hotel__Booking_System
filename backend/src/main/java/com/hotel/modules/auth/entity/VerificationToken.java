@@ -24,6 +24,7 @@ public class VerificationToken {
     @Column(name = "otp_code", nullable = false, length = 6)
     private String otpCode;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "full_name", nullable = false, length = 150)
     private String fullName;
 

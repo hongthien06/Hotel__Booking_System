@@ -40,6 +40,7 @@ public class UserService {
         
         user.setFullName(request.getFullName());
         user.setPhone(request.getPhone());
+        user.setAvatarUrl(request.getAvatarUrl());
         user.setUpdatedAt(java.time.LocalDateTime.now());
         
         User updatedUser = userRepository.save(user);

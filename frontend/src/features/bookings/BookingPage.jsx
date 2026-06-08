@@ -1418,7 +1418,14 @@ const BookingPage = () => {
                       onClick={() => navigate('/rooms')}
                       sx={{
                         color: PC, fontWeight: 700, textTransform: 'none',
-                        '&:hover': { bgcolor: PC_LIGHT }
+                        '&:hover': {
+                          bgcolor: 'primary.dark',
+                          color: 'primary.contrastTextHover'
+                        },
+                        '&:active': {
+                          bgcolor: 'primary.dark',
+                          color: 'primary.contrastTextHover'
+                        }
                       }}
                     >
                       {t('common.see_all')}
@@ -1490,7 +1497,14 @@ const BookingPage = () => {
                         onClick={() => navigate('/rooms')}
                         sx={{
                           color: PC, fontWeight: 700, textTransform: 'none',
-                          '&:hover': { bgcolor: PC_LIGHT }
+                          '&:hover': {
+                            bgcolor: 'primary.dark',
+                            color: 'primary.contrastTextHover'
+                          },
+                          '&:active': {
+                            bgcolor: 'primary.dark',
+                            color: 'primary.contrastTextHover'
+                          }
                         }}
                       >
                         {t('common.see_all')}
@@ -1562,7 +1576,14 @@ const BookingPage = () => {
                           onClick={() => navigate('/rooms')}
                           sx={{
                             color: PC, fontWeight: 700, textTransform: 'none',
-                            '&:hover': { bgcolor: PC_LIGHT }
+                            '&:hover': {
+                              bgcolor: 'primary.dark',
+                              color: 'primary.contrastTextHover'
+                            },
+                            '&:active': {
+                              bgcolor: 'primary.dark',
+                              color: 'primary.contrastTextHover'
+                            }
                           }}
                         >
                           {t('common.see_all') || 'Xem tất cả'}
@@ -1695,7 +1716,16 @@ const BookingPage = () => {
                     sx={{
                       borderRadius: 2, color: PC, borderColor: PC, fontWeight: 700,
                       fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                      '&:hover': { bgcolor: PC_LIGHT, borderColor: PC }
+                      '&:hover': {
+                        bgcolor: 'primary.dark',
+                        color: 'primary.contrastTextHover',
+                        borderColor: 'primary.dark'
+                      },
+                      '&:active': {
+                        bgcolor: 'primary.dark',
+                        color: 'primary.contrastTextHover',
+                        borderColor: 'primary.dark'
+                      }
                     }}
                   >
                     {t('booking_page.back_to_home')}

@@ -18,6 +18,7 @@ public class Role {
     @Column(name = "role_name", nullable = false, unique = true, length = 50)
     private String roleName;
 
+    @org.hibernate.annotations.Nationalized
     @Column(name = "description", length = 255)
     private String description;
 }

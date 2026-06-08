@@ -14,7 +14,7 @@ spring:
           max-tokens: 1000
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: false
     properties:
       hibernate:
@@ -138,7 +138,7 @@ spring:
     password: ${SPRING_MAIL_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     show-sql: false
 
 app:
