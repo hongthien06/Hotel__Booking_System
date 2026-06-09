@@ -21,12 +21,13 @@ export const registerApi = async (fullName, email, phone, password) => {
   return response.data
 }
 
-export const registerInitApi = async (fullName, email, phone, password) => {
+export const registerInitApi = async (fullName, email, phone, password, language) => {
   const response = await axios.post(`${API_URL}/register/init`, {
     fullName,
     email,
     phone,
-    password
+    password,
+    language
   })
   return response.data
 }
@@ -39,13 +40,13 @@ export const registerVerifyApi = async (email, otpCode) => {
   return response.data
 }
 
-export const forgotPasswordApi = async (email) => {
-  const response = await axios.post(`${API_URL}/forgot-password`, { email })
+export const forgotPasswordApi = async (email, language) => {
+  const response = await axios.post(`${API_URL}/forgot-password`, { email, language })
   return response.data
 }
 
-export const resetPasswordApi = async (token, newPassword) => {
-  const response = await axios.post(`${API_URL}/reset-password`, { token, newPassword })
+export const resetPasswordApi = async (token, newPassword, language) => {
+  const response = await axios.post(`${API_URL}/reset-password`, { token, newPassword, language })
   return response.data
 }
 

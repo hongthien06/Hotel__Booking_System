@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { resetPasswordApi } from '../../shared/api/authApi'
 
 const ResetPasswordPage = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -33,7 +33,7 @@ const ResetPasswordPage = () => {
 
     setIsLoading(true)
     try {
-      await resetPasswordApi(token, newPassword)
+      await resetPasswordApi(token, newPassword, i18n.language)
       setSuccess(true)
       setTimeout(() => navigate('/login'), 3000)
     } catch (err) {

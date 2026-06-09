@@ -100,6 +100,10 @@ public class AuthService {
                 // Tạo mã OTP 6 chữ số
                 String otpCode = String.format("%06d", RANDOM.nextInt(1000000));
 
+                String language = request.getLanguage() != null && !request.getLanguage().isBlank()
+                                ? request.getLanguage()
+                                : "vi";
+
                 // Lưu thông tin đăng ký tạm + OTP
                 VerificationToken token = VerificationToken.builder()
                                 .email(request.getEmail())
@@ -107,12 +111,13 @@ public class AuthService {
                                 .fullName(request.getFullName())
                                 .phone(request.getPhone())
                                 .passwordHash(passwordEncoder.encode(request.getPassword()))
+                                .language(language)
                                 .expiresAt(LocalDateTime.now().plusMinutes(5))
                                 .build();
                 verificationTokenRepository.save(token);
 
                 // Gửi email chứa OTP
-                emailService.sendOtpEmail(request.getEmail(), otpCode, request.getFullName());
+                emailService.sendOtpEmail(request.getEmail(), otpCode, request.getFullName(), language);
 
                 return Map.of("message", "Mã OTP đã được gửi đến email " + request.getEmail());
         }
@@ -138,10 +143,10 @@ public class AuthService {
                 // Lấy quyền CUSTOMER
                 Role customerRole = roleRepository.findByRoleName("CUSTOMER")
                                 .orElseGet(() -> {
-                                        Role r = new Role();
-                                        r.setRoleName("CUSTOMER");
-                                        r.setDescription("Khách hàng mặc định");
-                                        return roleRepository.save(r);
+                                         Role r = new Role();
+                                         r.setRoleName("CUSTOMER");
+                                         r.setDescription("Khách hàng mặc định");
+                                         return roleRepository.save(r);
                                 });
                 Set<Role> roles = new HashSet<>();
                 roles.add(customerRole);
@@ -163,7 +168,8 @@ public class AuthService {
                 verificationTokenRepository.deleteByEmail(request.getEmail());
 
                 // Gửi email chúc mừng đăng ký
-                emailService.sendRegistrationSuccessEmail(token.getEmail(), token.getFullName());
+                String lang = token.getLanguage() != null ? token.getLanguage() : "vi";
+                emailService.sendRegistrationSuccessEmail(token.getEmail(), token.getFullName(), lang);
 
                 // Tạo JWT token
                 String jwtToken = jwtService.generateAccessToken(user);
@@ -204,8 +210,11 @@ public class AuthService {
 
         // ── Quên mật khẩu ──────────────────────────────────────
         public void forgotPassword(ForgotPasswordRequest request) {
+                String language = request.getLanguage() != null && !request.getLanguage().isBlank() ? request.getLanguage() : "vi";
+                boolean isEn = "en".equalsIgnoreCase(language);
+
                 User user = userRepository.findByEmail(request.getEmail())
-                                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản với email này!"));
+                                .orElseThrow(() -> new RuntimeException(isEn ? "No account found with this email!" : "Không tìm thấy tài khoản với email này!"));
 
                 // Tạo token ngẫu nhiên (UUID)
                 String token = java.util.UUID.randomUUID().toString();
@@ -218,21 +227,30 @@ public class AuthService {
 
                 // Gửi email (link này sẽ trỏ về Frontend)
                 String resetLink = frontendUrl + "/reset-password?token=" + token;
-                String emailContent = "Chào " + user.getFullName() + ",\n\n" +
-                                "Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau để thực hiện:\n" +
-                                resetLink + "\n\n" +
-                                "Link này sẽ hết hạn sau 3 phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.";
+                String subject = isEn ? "Password Reset - Hotel Booking" : "Khôi phục mật khẩu - Hotel Booking";
+                String emailContent = isEn
+                                ? "Hello " + user.getFullName() + ",\n\n" +
+                                                "You have requested to reset your password. Please click on the link below to proceed:\n" +
+                                                resetLink + "\n\n" +
+                                                "This link will expire in 3 minutes. If you did not make this request, please ignore this email."
+                                : "Chào " + user.getFullName() + ",\n\n" +
+                                                "Bạn đã yêu cầu đặt lại mật khẩu. Vui lòng click vào link sau để thực hiện:\n" +
+                                                resetLink + "\n\n" +
+                                                "Link này sẽ hết hạn sau 3 phút. Nếu bạn không yêu cầu, vui lòng bỏ qua email này.";
 
-                emailService.sendMail(user.getEmail(), "Khôi phục mật khẩu - Hotel Booking", emailContent);
+                emailService.sendMail(user.getEmail(), subject, emailContent);
         }
 
         // ── Đặt lại mật khẩu ────────────────────────────────────
         public void resetPassword(ResetPasswordRequest request) {
+                String language = request.getLanguage() != null && !request.getLanguage().isBlank() ? request.getLanguage() : "vi";
+                boolean isEn = "en".equalsIgnoreCase(language);
+
                 User user = userRepository.findByResetToken(request.getToken())
-                                .orElseThrow(() -> new RuntimeException("Token không hợp lệ hoặc đã hết hạn!"));
+                                .orElseThrow(() -> new RuntimeException(isEn ? "Invalid or expired token!" : "Token không hợp lệ hoặc đã hết hạn!"));
 
                 if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
-                        throw new RuntimeException("Token đã hết hạn!");
+                        throw new RuntimeException(isEn ? "Token has expired!" : "Token đã hết hạn!");
                 }
 
                 // Cập nhật mật khẩu mới

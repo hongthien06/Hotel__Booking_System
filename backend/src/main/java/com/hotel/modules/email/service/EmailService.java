@@ -126,17 +126,22 @@ public class EmailService {
     /**
      * Gửi email chứa mã OTP cho đăng ký
      */
-    public void sendOtpEmail(String toEmail, String otpCode, String fullName) {
+    public void sendOtpEmail(String toEmail, String otpCode, String fullName, String language) {
         try {
             Context context = new Context();
             context.setVariable("fullName", fullName);
             context.setVariable("otpCode", otpCode);
-            String htmlContent = templateEngine.process("otp-email", context);
+
+            boolean isEn = "en".equalsIgnoreCase(language);
+            String templateName = isEn ? "otp-email-en" : "otp-email";
+            String subject = isEn ? "Email Verification Code - Hotel Booking System" : "Mã xác thực đăng ký - Hotel Booking System";
+
+            String htmlContent = templateEngine.process(templateName, context);
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, "utf-8");
             messageHelper.setTo(toEmail);
-            messageHelper.setSubject("Mã xác thực đăng ký - Hotel Booking System");
+            messageHelper.setSubject(subject);
             messageHelper.setText(htmlContent, true);
             mailSender.send(message);
         } catch (MessagingException e) {
@@ -148,16 +153,21 @@ public class EmailService {
     /**
      * Gửi email chúc mừng đăng ký thành công
      */
-    public void sendRegistrationSuccessEmail(String toEmail, String fullName) {
+    public void sendRegistrationSuccessEmail(String toEmail, String fullName, String language) {
         try {
             Context context = new Context();
             context.setVariable("fullName", fullName);
-            String htmlContent = templateEngine.process("registration-success", context);
+
+            boolean isEn = "en".equalsIgnoreCase(language);
+            String templateName = isEn ? "registration-success-en" : "registration-success";
+            String subject = isEn ? "Welcome to Hotel Booking System!" : "Chào mừng bạn đến với Hotel Booking System!";
+
+            String htmlContent = templateEngine.process(templateName, context);
 
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper messageHelper = new MimeMessageHelper(message, "utf-8");
             messageHelper.setTo(toEmail);
-            messageHelper.setSubject("Chào mừng bạn đến với Hotel Booking System!");
+            messageHelper.setSubject(subject);
             messageHelper.setText(htmlContent, true);
             mailSender.send(message);
         } catch (MessagingException e) {

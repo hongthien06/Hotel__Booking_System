@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { forgotPasswordApi } from '../../shared/api/authApi'
 
 const ForgotPasswordPage = () => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
@@ -18,8 +18,8 @@ const ForgotPasswordPage = () => {
     setIsLoading(true)
 
     try {
-      const response = await forgotPasswordApi(email)
-      setMessage(typeof response === 'string' ? response : t('forgot_password.success_msg'))
+      await forgotPasswordApi(email, i18n.language)
+      setMessage(t('forgot_password.success_msg'))
     } catch (err) {
       const data = err.response?.data;
       let errMsg = t('forgot_password.error_msg');

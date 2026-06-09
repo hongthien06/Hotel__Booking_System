@@ -25,4 +25,6 @@ public class RegisterRequest {
 
     @Pattern(regexp = "^(0[35789])\\d{8}$", message = "Số điện thoại không hợp lệ (VD: 0901234567)")
     private String phone;
+
+    private String language;
 }
