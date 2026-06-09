@@ -9,7 +9,7 @@ spring:
       base-url: https://openrouter.ai/api
       chat:
         options:
-          model: ${OPENROUTER_MODEL:google/gemma-4-31b-it:free}
+          model: ${OPENROUTER_MODEL:meta-llama/llama-3.2-3b-instruct:free}
           temperature: 0.3
           max-tokens: 1000
   jpa:
