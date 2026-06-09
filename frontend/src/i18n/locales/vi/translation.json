@@ -273,6 +273,8 @@
     "filter_completed": "Đã ở",
     "filter_cancelled": "Đã hủy",
     "pay_button": "Thanh toán",
+    "selected_count": "Đã chọn {{count}} phòng chờ thanh toán",
+    "selected_pay_button": "Thanh toán các phòng đã chọn",
     "check_in": "NHẬN PHÒNG",
     "check_out": "TRẢ PHÒNG",
     "check_in_short": "Nhận",

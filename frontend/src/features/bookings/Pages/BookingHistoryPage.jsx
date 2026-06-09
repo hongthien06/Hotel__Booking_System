@@ -626,7 +626,7 @@ const BookingHistoryPage = () => {
             flexWrap: 'wrap'
           }}>
             <Typography sx={{ color: PC, fontWeight: 800 }}>
-              Đã chọn {selectedPendingIds.length} phòng chờ thanh toán
+              {t('bookings_history.selected_count', { count: selectedPendingIds.length })}
             </Typography>
             <Button
               variant="payButton"
@@ -634,7 +634,7 @@ const BookingHistoryPage = () => {
               onClick={handleSelectedPayment}
               sx={{ borderRadius: 2, fontWeight: 800, px: 3 }}
             >
-              {mergingPayment ? 'Đang xử lý...' : 'Thanh toán các phòng đã chọn'}
+              {mergingPayment ? t('processing') : t('bookings_history.selected_pay_button')}
             </Button>
           </Box>
         )}
