@@ -13,7 +13,8 @@ import imgCaoBang from '../../assets/CAO_BANG.jpg'
 import imgHaNam from '../../assets/HA_NAM.webp'
 import imgHaTinh from '../../assets/HA_TINH.png'
 import imgQuangNam from '../../assets/QUANG_NAM.jpeg'
-import bannerImg from '../../assets/Banner.png'
+import banner1Img from '../../assets/Banner1.png'
+import banner2Img from '../../assets/Banner2.png'
 import imgCanTho from '../../assets/CAN_THO.jpg'
 import imgThanhHoa from '../../assets/THANH_HOA.jpg'
 import imgDienBien from '../../assets/DIEN_BIEN.jpg'
@@ -293,7 +294,7 @@ const RoomCard = ({
 const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTypes,
   amenities, selectedAmenities, setSelectedAmenities,
   minPrice, setMinPrice, maxPrice, setMaxPrice, onSearch, loading, onClose }) => {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const toggle = (list, setList, v) =>
     setList(list.includes(v) ? list.filter(x => x !== v) : [...list, v])
   const labelSx = { fontWeight: 700, color: '#888', letterSpacing: 1, fontSize: 11, display: 'block', mb: 0.5 }
@@ -389,6 +390,15 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
             setMaxPrice(newValue[1])
           }}
           valueLabelDisplay="auto"
+          valueLabelFormat={(val) => {
+            const lang = i18n?.language || 'vi'
+            const rate = 23000
+            if (String(lang).toLowerCase().startsWith('vi')) {
+              return `${new Intl.NumberFormat('vi-VN').format(val)}₫`
+            }
+            const usd = (val || 0) / rate
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(usd)
+          }}
           min={0}
             max={100000000}
           step={500000}
@@ -404,10 +414,26 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
       </Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
         <Typography variant="caption" color="text.secondary">
-          {new Intl.NumberFormat('vi-VN').format(minPrice || 0)}₫
+          {(() => {
+            const lang = i18n?.language || 'vi'
+            const rate = 23000 // VND -> USD approximate
+            if (String(lang).toLowerCase().startsWith('vi')) {
+              return `${new Intl.NumberFormat('vi-VN').format(minPrice || 0)}₫`
+            }
+            const usd = Math.round((minPrice || 0) / rate)
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(usd)
+          })()}
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          {new Intl.NumberFormat('vi-VN').format(maxPrice || 10000000)}₫
+          {(() => {
+            const lang = i18n?.language || 'vi'
+            const rate = 23000
+            if (String(lang).toLowerCase().startsWith('vi')) {
+              return `${new Intl.NumberFormat('vi-VN').format(maxPrice || 10000000)}₫`
+            }
+            const usd = Math.round((maxPrice || 10000000) / rate)
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(usd)
+          })()}
         </Typography>
       </Box>
       <Divider sx={{ mb: 2 }} />
@@ -477,20 +503,25 @@ const OffersSection = ({ membership, lang, onOpenMembership }) => {
   const tierName = getMembershipTierName(membership?.tier, lang)
   const trackingPhone = getMembershipTrackingPhone(membership)
 
+  // Choose banner based on language: use Banner1 for Vietnamese, Banner2 for English/other
+  const bannerImg = (lang && String(lang).toLowerCase().startsWith('vi')) ? banner1Img : banner2Img
+
   return (
     <Box sx={{ mb: 6, px: { xs: 2, md: 6 } }}>
       <Card
-        sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 8px 30px rgba(2,6,23,0.06)', cursor: 'pointer' }}
+        sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 8px 30px rgba(2,6,23,0.06)', cursor: 'pointer', bgcolor: 'transparent' }}
         onClick={onOpenMembership}
       >
         <Box
           component="img"
           src={bannerImg}
-          alt="Ưu đãi đặc quyền"
+          alt={t('booking_page.offers_alt', 'Offers banner')}
           sx={{
             width: '100%',
             height: 'auto',
             display: 'block',
+            backgroundColor: 'transparent',
+            borderRadius: 0,
           }}
         />
       </Card>
