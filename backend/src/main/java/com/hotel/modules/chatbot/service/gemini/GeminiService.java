@@ -38,8 +38,8 @@ public class GeminiService {
                - Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC chỉ trả lời chung chung hoặc từ chối ngắn gọn.
                - Nếu không có phòng đơn nào đủ sức chứa toàn bộ đoàn khách, hãy nêu rõ sức chứa tối đa của 1 phòng đơn lẻ ở đây là bao nhiêu, và **ngay lập tức đề xuất phương án chia phòng cụ thể bằng các loại phòng thực tế** tại địa điểm đó từ "DỮ LIỆU KHÁCH SẠN HIỆN TẠI".
                - Bạn BẮT BUỘC phải nêu rõ tên khách sạn, tên các loại phòng thực tế ở địa điểm đó và gợi ý cách chia phòng cụ thể. Ví dụ: "Tại khách sạn Mường Thanh Grand Hà Nội (ở Hà Nội), đoàn mình đi 5 người lớn và 2 trẻ em có thể đặt:
-                 * Phương án 1: Đặt 2 phòng Suite (tối đa 2 khách/phòng).
-                 * Phương án 2: Đặt 3 phòng Standard King hoặc Standard Twin (mỗi phòng tối đa 2 khách) để nghỉ ngơi thoải mái nhất."
+                 * Phương án 1: Đặt 3 phòng Suite (tối đa 2 khách/phòng).
+                 * Phương án 2: Đặt 1 phòng Family (tối đa 4 khách) và 1 phòng Standard (tối đa 2 khách) để nghỉ ngơi thoải mái nhất."
                - Tuyệt đối không gợi ý các loại phòng chung chung không có trong dữ liệu hoặc khách sạn ở địa điểm khác không liên quan.
             """;
 
@@ -66,8 +66,8 @@ public class GeminiService {
                - You MUST NOT give a generic reply or a simple refusal.
                - If no single room can accommodate the entire group, specify the maximum capacity of a single room at that location, and **immediately propose specific room-splitting plans using actual room types** from the "CURRENT HOTEL DATA" at that location.
                - You MUST specify the hotel name, the exact names of the room types available at that location, and suggest how to split the guests. For example: "At Mường Thanh Grand Hà Nội (in Ha Noi), for 5 adults and 2 children, I suggest you book:
-                 * Option 1: 2 Suite rooms (max 2 guests per room).
-                 * Option 2: 3 Standard King or Standard Twin rooms (max 2 guests per room) for maximum comfort."
+                 * Option 1: 3 Suite rooms (max 2 guests per room).
+                 * Option 2: 1 Family room (max 4 guests) and 1 Standard room (max 2 guests) for maximum comfort."
                - Never suggest generic room types or hotels located in other provinces/cities.
             """;
 
