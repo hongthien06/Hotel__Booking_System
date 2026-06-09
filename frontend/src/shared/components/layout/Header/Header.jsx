@@ -219,12 +219,12 @@ const Header = () => {
             onClick={() => navigate('/login')}
             sx={{
               fontWeight: 700, textTransform: 'none',
-              bgcolor: 'primary.contrastText', color: 'primary.contrastTextHover',
+              bgcolor: 'primary.contrastTextHover', color: 'primary.contrastText',
               borderRadius: 2,
               px: 3,
               '&:hover': {
-                bgcolor: 'primary.contrastTextHover',
-                color: 'primary.contrastText'
+                bgcolor: 'primary.contrastText',
+                color: 'primary.contrastTextHover'
               }
             }}
           >
