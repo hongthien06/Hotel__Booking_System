@@ -277,7 +277,16 @@ const BookingHistoryPage = () => {
     }
     if (destination) {
       const str = JSON.stringify(b).toLowerCase()
-      if (!str.includes(destination.toLowerCase())) return false
+      const destNorm = String(destination).toLowerCase()
+      // support common aliases for major cities (e.g., Sài Gòn <-> TP. Hồ Chí Minh)
+      const aliasMap = {
+        'tp. hồ chí minh': ['sài gòn', 'saigon', 'hcm', 'tp hcm', 'ho chi minh'],
+        'tp. hồ chí minh': ['sài gòn', 'saigon', 'hcm', 'tp hcm', 'ho chi minh'],
+      }
+      const aliases = aliasMap[destNorm] || []
+      const matchesMain = str.includes(destNorm)
+      const matchesAlias = aliases.some(a => str.includes(a))
+      if (!matchesMain && !matchesAlias) return false
     }
     return true
   })
@@ -386,8 +395,25 @@ const BookingHistoryPage = () => {
               <AccountBalanceWallet sx={{ color: 'primary.dark', fontSize: 20 }} />
               <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 600 }}>{t('bookings_history.total_spent_label')}</Typography>
             </Box>
-            <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5 }}>{formatMillions(totalSpent)}</Typography>
-            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>{t('bookings_history.currency_unit')}</Typography>
+            {(() => {
+              const lng = (i18n.language || 'vi').toLowerCase()
+              if (lng.startsWith('vi')) {
+                const unit = t('bookings_history.currency_unit') || 'đồng'
+                return (
+                  <>
+                    <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5, fontSize: { xs: '1.6rem', sm: '2rem', md: '2.2rem' }, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{formatMillions(totalSpent)}</Typography>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>{unit}</Typography>
+                  </>
+                )
+              }
+              // For non-Vietnamese locales show formatted currency and small USD caption below the amount
+              return (
+                <>
+                  <Typography variant="h4" sx={{ color: 'primary.dark', fontWeight: 800, mb: 0.5, fontSize: { xs: '1.4rem', sm: '1.6rem', md: '1.8rem' }, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{formatCurrency(totalSpent)}</Typography>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>{'USD'}</Typography>
+                </>
+              )
+            })()}
           </Box>
 
           {/* Card 4 */}
@@ -456,18 +482,10 @@ const BookingHistoryPage = () => {
           >
             <MenuItem value="">{t('bookings_history.all_locations', 'Tất cả địa điểm')}</MenuItem>
             {
-              (() => {
-                const seen = new Set()
-                const list = []
-                DESTINATIONS.forEach(d => {
-                  const label = d.province || d.name
-                  if (!label) return
-                  if (!seen.has(label)) { seen.add(label); list.push(label) }
-                })
-                return list.map(loc => (
-                  <MenuItem key={loc} value={loc}>{loc}</MenuItem>
-                ))
-              })()
+              // Render exactly the destinations defined in DESTINATIONS (no extras, no dedupe logic)
+              DESTINATIONS.map(d => (
+                <MenuItem key={d.key} value={d.province || d.name}>{t(`destinations.${d.key}.name`) || (d.province || d.name)}</MenuItem>
+              ))
             }
           </TextField>
           {/* Search button */}
@@ -715,12 +733,41 @@ const BookingHistoryPage = () => {
                     </Typography>
                     {(primaryRoom.hotelName || primaryRoom.hotelAddress) && (
                       <Box sx={{ mb: 1.5 }}>
-                        {primaryRoom.hotelName && (
-                          <Typography variant="caption" color="text.secondary" display="block">{primaryRoom.hotelName}</Typography>
-                        )}
-                        {primaryRoom.hotelAddress && (
-                          <Typography variant="caption" color="text.secondary" display="block">{primaryRoom.hotelAddress}</Typography>
-                        )}
+                            {(() => {
+                              const lng = (i18n.language || 'vi').toLowerCase()
+                              const hotelName = (!lng.startsWith('vi') && (primaryRoom.hotelNameEn || primaryRoom.hotelName_en)) ? (primaryRoom.hotelNameEn || primaryRoom.hotelName_en) : primaryRoom.hotelName
+                              let hotelAddress = (!lng.startsWith('vi') && (primaryRoom.hotelAddressEn || primaryRoom.hotelAddress_en)) ? (primaryRoom.hotelAddressEn || primaryRoom.hotelAddress_en) : primaryRoom.hotelAddress
+
+                              // If running in English locale but no explicit English address provided,
+                              // apply a lightweight conversion of common Vietnamese abbreviations to English.
+                              if (lng.startsWith('en') && hotelAddress && !(primaryRoom.hotelAddressEn || primaryRoom.hotelAddress_en)) {
+                                hotelAddress = hotelAddress
+                                  .replace(/\bP\.\s*/g, 'Ward ')
+                                  .replace(/\bPhường\b/g, 'Ward')
+                                  .replace(/\bQ\.\s*/g, 'District ')
+                                  .replace(/\bQuận\b/g, 'District')
+                                  .replace(/\bTP\.\s*/g, 'City ')
+                                  .replace(/\bTp\.\s*/g, 'City ')
+                                  .replace(/\bThành phố\b/g, 'City')
+                                  .replace(/\bĐường\b/g, 'Street')
+                                  .replace(/\bDường\b/g, 'Street')
+                                  .replace(/\bPhố\b/g, 'Street')
+                                  .replace(/\bĐ\.?\s*/g, '')
+                                  .replace(/\s+\(.*?\)\s*/g, ' ') // remove parentheses content like district hints
+                                  .trim()
+                              }
+
+                              return (
+                                <>
+                                  {hotelName && (
+                                    <Typography variant="caption" color="text.secondary" display="block">{hotelName}</Typography>
+                                  )}
+                                  {hotelAddress && (
+                                    <Typography variant="caption" color="text.secondary" display="block">{hotelAddress}</Typography>
+                                  )}
+                                </>
+                              )
+                            })()}
                       </Box>
                     )}
 

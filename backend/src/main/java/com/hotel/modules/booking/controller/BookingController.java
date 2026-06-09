@@ -104,7 +104,7 @@ public class BookingController {
     }
 
     @GetMapping("/room/{roomId}/booked-dates")
-    public ResponseEntity<List<String>> getBookedDates(@PathVariable Long roomId) {
+    public ResponseEntity<?> getBookedDates(@PathVariable Long roomId) {
         return ResponseEntity.ok(bookingService.getBookedDatesByRoomId(roomId));
     }
 
