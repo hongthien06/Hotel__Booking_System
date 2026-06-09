@@ -174,7 +174,7 @@
     },
     "policy": {
       "overline": "QUY ĐỊNH",
-      "title": "Chính sách chỗ ở",
+      "title": "Chính sách đặt phòng",
       "subtitle": "Những điều bạn cần biết trước khi đặt phòng",
       "cards": {
         "checkin": {
@@ -697,7 +697,7 @@
     "amenity_furniture": "Nội thất đầy đủ",
     "amenity_wifi": "Wifi miễn phí",
     "amenity_security": "Bảo vệ 24/7",
-    "policy_title": "Chính sách chỗ ở",
+    "policy_title": "Chính sách đặt phòng",
     "policy_checkin_title": "Nhận phòng, trả phòng & yêu cầu đặc biệt",
     "policy_checkin_content": "Thời gian nhận phòng bắt đầu từ 14:00 và thời gian trả phòng là trước 12:00 trưa, mọi yêu cầu nhận phòng sớm hoặc trả phòng muộn đều phụ thuộc vào tình trạng phòng thực tế tại thời điểm khách đến và có thể phát sinh thêm chi phí. Các yêu cầu đặc biệt như chọn loại phòng cụ thể, giường phụ hoặc dịch vụ đưa đón sân bay sẽ được chỗ ở ghi nhận nhưng không đảm bảo chắc chắn được đáp ứng và có thể đi kèm phụ phí tùy theo chính sách riêng.",
     "policy_cancel_title": "Hủy phòng, thanh toán & xác nhận đặt chỗ",
