@@ -142,8 +142,8 @@ const Checkout = () => {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 0.75 }}>
                   <Typography variant="body2" color="#be185d">
                     {isFirstBooking
-                      ? `🎁 ${t('membership.first_booking_discount')} (-${membershipDiscountPct}%)`
-                      : `⭐ ${t('membership.tier_discount')} (-${membershipDiscountPct}%)`}
+                      ? `${t('membership.first_booking_discount')} (-${membershipDiscountPct}%)`
+                      : ` ${t('membership.tier_discount')} (-${membershipDiscountPct}%)`}
                   </Typography>
                   <Typography variant="body2" fontWeight={600} color="#be185d">
                     -{formatVND(membershipDiscountAmt)}

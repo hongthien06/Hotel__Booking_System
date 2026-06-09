@@ -1,5 +1,6 @@
 package com.hotel.modules.payment.service;
 
+import com.hotel.common.utils.TaxUtil;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.entity.BookingStatus;
 import com.hotel.modules.booking.repository.BookingRepository;
@@ -88,7 +89,8 @@ public class PaymentService implements IPaymentService {
         }
         payment = paymentRepository.save(payment);
 
-        // txnRef phải duy nhất mỗi lần gửi sang gateway → dùng transactionId (không dùng bookingId/bookingCode)
+        // txnRef phải duy nhất mỗi lần gửi sang gateway → dùng transactionId (không
+        // dùng bookingId/bookingCode)
         String txnRef = payment.getTransactionId();
         PaymentGateway gateway = request.getGateway();
         String paymentUrl = "";
@@ -151,10 +153,10 @@ public class PaymentService implements IPaymentService {
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
         }
         BigDecimal subtotal = roomTotal.add(serviceTotal);
-        BigDecimal tax = subtotal.multiply(new BigDecimal("10.00"))
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal tax = TaxUtil.calculateVat(subtotal);
         BigDecimal discount = booking.getDiscountAmount() != null
-                ? booking.getDiscountAmount() : BigDecimal.ZERO;
+                ? booking.getDiscountAmount()
+                : BigDecimal.ZERO;
         BigDecimal payable = subtotal.add(tax).subtract(discount);
         return payable.max(BigDecimal.ZERO).setScale(2, RoundingMode.HALF_UP);
     }

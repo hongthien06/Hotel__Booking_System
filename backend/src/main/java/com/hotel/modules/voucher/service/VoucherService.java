@@ -1,5 +1,6 @@
 package com.hotel.modules.voucher.service;
 
+import com.hotel.common.utils.TaxUtil;
 import com.hotel.modules.auth.entity.User;
 import com.hotel.modules.booking.entity.Booking;
 import com.hotel.modules.booking.repository.BookingRepository;
@@ -57,11 +58,13 @@ public class VoucherService implements IVoucherService {
                 .discountType(request.getDiscountType())
                 .discountValue(request.getDiscountValue())
                 .minOrderAmount(request.getMinOrderAmount() != null
-                        ? request.getMinOrderAmount() : BigDecimal.ZERO)
+                        ? request.getMinOrderAmount()
+                        : BigDecimal.ZERO)
                 .maxDiscountAmount(request.getMaxDiscountAmount())
                 .usageLimit(request.getUsageLimit())
                 .usageLimitPerUser(request.getUsageLimitPerUser() != null
-                        ? request.getUsageLimitPerUser() : 1)
+                        ? request.getUsageLimitPerUser()
+                        : 1)
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .build();
@@ -74,14 +77,22 @@ public class VoucherService implements IVoucherService {
     @Transactional
     public VoucherResponse updateVoucher(Long voucherId, VoucherUpdateRequest request) {
         Voucher voucher = findVoucherOrThrow(voucherId);
-        if (request.getDescription() != null)    voucher.setDescription(request.getDescription());
-        if (request.getMinOrderAmount() != null)  voucher.setMinOrderAmount(request.getMinOrderAmount());
-        if (request.getMaxDiscountAmount() != null) voucher.setMaxDiscountAmount(request.getMaxDiscountAmount());
-        if (request.getUsageLimit() != null)      voucher.setUsageLimit(request.getUsageLimit());
-        if (request.getUsageLimitPerUser() != null) voucher.setUsageLimitPerUser(request.getUsageLimitPerUser());
-        if (request.getStatus() != null)          voucher.setStatus(request.getStatus());
-        if (request.getStartDate() != null)       voucher.setStartDate(request.getStartDate());
-        if (request.getEndDate() != null)         voucher.setEndDate(request.getEndDate());
+        if (request.getDescription() != null)
+            voucher.setDescription(request.getDescription());
+        if (request.getMinOrderAmount() != null)
+            voucher.setMinOrderAmount(request.getMinOrderAmount());
+        if (request.getMaxDiscountAmount() != null)
+            voucher.setMaxDiscountAmount(request.getMaxDiscountAmount());
+        if (request.getUsageLimit() != null)
+            voucher.setUsageLimit(request.getUsageLimit());
+        if (request.getUsageLimitPerUser() != null)
+            voucher.setUsageLimitPerUser(request.getUsageLimitPerUser());
+        if (request.getStatus() != null)
+            voucher.setStatus(request.getStatus());
+        if (request.getStartDate() != null)
+            voucher.setStartDate(request.getStartDate());
+        if (request.getEndDate() != null)
+            voucher.setEndDate(request.getEndDate());
         if (voucher.getStartDate() != null && voucher.getEndDate() != null
                 && voucher.getStartDate().isAfter(voucher.getEndDate())) {
             throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc");
@@ -151,8 +162,7 @@ public class VoucherService implements IVoucherService {
         validateVoucher(voucher, currentUser);
 
         BigDecimal subtotal = calculateSubtotal(booking);
-        BigDecimal taxAmount = subtotal.multiply(new BigDecimal("10.00"))
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+        BigDecimal taxAmount = TaxUtil.calculateVat(subtotal);
         BigDecimal baseDiscount = getAutomaticDiscount(booking);
         BigDecimal originalAmount = subtotal.add(taxAmount).subtract(baseDiscount).max(BigDecimal.ZERO);
         if (originalAmount.compareTo(voucher.getMinOrderAmount()) < 0) {
@@ -284,9 +294,11 @@ public class VoucherService implements IVoucherService {
 
     private BigDecimal getAutomaticDiscount(Booking booking) {
         BigDecimal membership = booking.getMembershipDiscountAmt() != null
-                ? booking.getMembershipDiscountAmt() : BigDecimal.ZERO;
+                ? booking.getMembershipDiscountAmt()
+                : BigDecimal.ZERO;
         BigDecimal group = booking.getGroupDiscountAmt() != null
-                ? booking.getGroupDiscountAmt() : BigDecimal.ZERO;
+                ? booking.getGroupDiscountAmt()
+                : BigDecimal.ZERO;
         return membership.add(group);
     }
 

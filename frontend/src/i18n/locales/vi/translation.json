@@ -90,7 +90,15 @@
     "today_revenue": "Doanh thu hôm nay",
     "today_bookings": "Booking hôm nay",
     "today_checkins": "Check-in hôm nay",
-    "occupancy_rate": "Tỷ lệ lấp đầy"
+    "occupancy_rate": "Tỷ lệ lấp đầy",
+    "status_labels": {
+      "PENDING": "Chờ thanh toán",
+      "CONFIRMED": "Đã xác nhận",
+      "CHECKED_IN": "Đã nhận phòng",
+      "CHECKED_OUT": "Đã trả phòng",
+      "CANCELLED": "Đã hủy",
+      "REFUNDED": "Đã hoàn tiền"
+    }
   },
   "home": {
     "hero": {
@@ -822,6 +830,7 @@
     "delete_confirm": "Bạn có chắc chắn muốn xóa đánh giá này?",
     "delete_success": "Đã xóa đánh giá!",
     "delete_error": "Lỗi khi xóa đánh giá",
-    "fetch_error": "Không thể tải đánh giá"
+    "fetch_error": "Không thể tải đánh giá",
+    "already_reviewed": "Đã đánh giá"
   }
 }

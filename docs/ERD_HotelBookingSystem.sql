@@ -158,7 +158,7 @@ CREATE TABLE [Invoices] (
   [payment_id] BIGINT NOT NULL,
   [invoice_number] VARCHAR(30) NOT NULL,
   [subtotal] DECIMAL(18,2) NOT NULL,
-  [tax_rate] DECIMAL(5,2) NOT NULL DEFAULT (10),
+  [tax_rate] DECIMAL(5,2) NOT NULL DEFAULT (8),
   [tax_amount] DECIMAL(18,2) NOT NULL,
   [discount_amount] DECIMAL(18,2) NOT NULL DEFAULT (0),
   [total_amount] DECIMAL(18,2) NOT NULL,
@@ -419,14 +419,14 @@ VALUES
 GO
 INSERT INTO [Invoices] ([booking_id], [payment_id], [invoice_number], [subtotal], [tax_rate], [tax_amount], [discount_amount], [total_amount])
 VALUES
-  (1, 1, 'INV-20250801-00001', 3150000, 10, 315000, 0, 3465000);
+  (1, 1, 'INV-20250801-00001', 3150000, 8, 315000, 0, 3465000);
 GO
 INSERT INTO [InvoiceItems] ([invoice_id], [item_type], [description], [quantity], [unit_price])
 VALUES
   (1, 'ROOM', N'Phòng 205 (Deluxe) - 3 đêm', 3, 950000),
   (1, 'SERVICE', N'Bữa sáng Buffet x2 người', 2, 150000),
   (1, 'SERVICE', N'Đưa đón sân bay (1 chiều)', 1, 350000),
-  (1, 'TAX', N'VAT 10%', 1, 315000);
+  (1, 'TAX', N'VAT 8%', 1, 315000);
 GO
 INSERT INTO [Reviews] ([booking_id], [user_id], [room_id], [rating_overall], [rating_clean], [rating_service], [rating_location], [rating_value], [comment], [is_approved])
 VALUES

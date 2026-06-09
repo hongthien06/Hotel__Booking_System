@@ -14,7 +14,6 @@ import {
   Grid,
   IconButton,
   InputAdornment,
-  LinearProgress,
   Paper,
   TextField,
   Tooltip,
@@ -313,13 +312,6 @@ const ProfilePage = () => {
             {membership?.tier ? (() => {
               const tier = membership.tier
               const v = TIER_VISUAL[tier.tierCode] || defaultVisual
-              const isVIP = tier.tierCode === 'VIP'
-              const nextTier = membership.nextTier
-              const spentToNext = Number(membership.spentToNextTier || 0)
-              const spentProgress = nextTier
-                ? Math.min(100, Math.max(5, 100 - (spentToNext / (Number(nextTier.minTotalSpent) || 1)) * 100))
-                : 100
-              const nextTierName = nextTier ? getMembershipTierName(nextTier, i18n.language) : null
               return (
                 <Box sx={{ mt: 2, borderRadius: 4, overflow: 'hidden', border: `2px solid ${v.border}`, textAlign: 'left', width: '100%' }}>
                   {/* Gradient header */}
@@ -352,56 +344,8 @@ const ProfilePage = () => {
                     </Typography>
                   </Box>
 
-                    {/* Stats */}
+                    {/* View details button only */}
                     <Box sx={{ px: 2, py: 2, bgcolor: v.bg }}>
-                      <Grid container spacing={1} sx={{ mb: 2 }}>
-                        <Grid size={{ xs: 4 }}>
-                          <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="subtitle2" sx={{ fontWeight: 900, color: v.textColor, fontSize: '0.75rem' }}>{fmtVND(membership.totalSpent)}</Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.total_spent')}</Typography>
-                          </Box>
-                        </Grid>
-                        <Grid size={{ xs: 4 }}>
-                          <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 900, color: v.textColor }}>{tier.discountPct}%</Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.discount_rate')}</Typography>
-                          </Box>
-                        </Grid>
-                        <Grid size={{ xs: 4 }}>
-                          <Box sx={{ textAlign: 'center' }}>
-                            <Typography variant="h6" sx={{ fontWeight: 900, color: v.textColor }}>
-                              {membership.isFirstBookingUsed ? '✓' : t('membership.available')}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>{t('membership.first_booking_perk')}</Typography>
-                          </Box>
-                        </Grid>
-                      </Grid>
-
-                      {/* Progress bars */}
-                      {!isVIP && nextTier && (
-                        <Box sx={{ mb: 1.5 }}>
-                          <Typography variant="caption" sx={{ fontWeight: 700, color: v.textColor, display: 'block', mb: 1 }}>
-                            {t('membership.progress_to')} {nextTierName}
-                          </Typography>
-                          <Box sx={{ mb: 1 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.3 }}>
-                              <Typography sx={{ fontSize: '0.6rem', color: 'text.secondary' }}>{t('membership.spent_progress')}</Typography>
-                              <Typography sx={{ fontSize: '0.6rem', fontWeight: 700, color: v.textColor }}>{fmtVND(spentToNext)} {t('membership.more')}</Typography>
-                            </Box>
-                            <LinearProgress
-                              variant="determinate" value={spentProgress}
-                              sx={{ height: 6, borderRadius: 3, bgcolor: v.border, '& .MuiLinearProgress-bar': { background: v.gradient, borderRadius: 3 } }}
-                            />
-                          </Box>
-                        </Box>
-                      )}
-
-                      {isVIP && (
-                        <Typography variant="caption" sx={{ color: v.textColor, fontWeight: 700, display: 'block', textAlign: 'center', mb: 2 }}>
-                          🏆 {t('membership.vip_congrats')}
-                        </Typography>
-                      )}
-
                       <Button
                         fullWidth
                         size="small"

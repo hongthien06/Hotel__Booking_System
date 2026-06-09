@@ -42,7 +42,7 @@ public class Invoice {
 
     @Column(name = "tax_rate", precision = 5, scale = 2, nullable = false)
     @Builder.Default
-    private BigDecimal taxRate = new BigDecimal("10.00");
+    private BigDecimal taxRate = new BigDecimal("8.00");
 
     @Column(name = "tax_amount", precision = 18, scale = 2, nullable = false)
     private BigDecimal taxAmount;
