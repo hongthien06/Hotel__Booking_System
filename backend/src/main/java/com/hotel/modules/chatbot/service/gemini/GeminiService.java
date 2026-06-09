@@ -98,10 +98,15 @@ public class GeminiService {
 
             Prompt prompt = new Prompt(messages);
 
-            return chatClient.prompt(prompt)
+            String response = chatClient.prompt(prompt)
                     .call()
                     .content();
-
+                    
+            if (response == null || response.trim().isEmpty()) {
+                throw new RuntimeException("AI returned empty or null response");
+            }
+            
+            return response;
         } catch (Exception e) {
             e.printStackTrace();
             return "en".equalsIgnoreCase(lang) ? 
