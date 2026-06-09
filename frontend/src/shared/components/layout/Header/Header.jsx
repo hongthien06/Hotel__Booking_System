@@ -223,8 +223,8 @@ const Header = () => {
               borderRadius: 2,
               px: 3,
               '&:hover': {
-                bgcolor: 'primary.dark',
-                color: 'primary.contrastTextHover'
+                bgcolor: 'primary.contrastTextHover',
+                color: 'primary.contrastText'
               }
             }}
           >
