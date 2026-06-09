@@ -800,6 +800,7 @@ END
 GO
 
 ALTER TABLE Payments ADD language VARCHAR(10) NULL DEFAULT 'vi';
+ALTER TABLE VerificationTokens ADD language VARCHAR(10) NULL DEFAULT 'vi';
 
 -- Seed data for membership_tiers
 INSERT INTO membership_tiers (tier_code, tier_level, discount_pct, min_total_spent, min_booking_count,
