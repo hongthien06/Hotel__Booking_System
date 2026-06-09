@@ -162,7 +162,7 @@ const RoomCard = ({
   const numericId = parseInt(String(room.id || room.roomId || 0).replace(/\D/g, '') || 0)
   const mockData = MOCK_ROOMS[numericId % MOCK_ROOMS.length] || MOCK_ROOMS[0]
   const ratingValue = isMock ? room.rating : mockData.rating
-  const reviewCount = isMock ? room.reviews : mockData.reviews
+  const reviewCount = isMock ? room.reviews : (room.reviewCount != null ? room.reviewCount : mockData.reviews)
 
   // 1 child per room stays for free (does not count towards capacity limit)
   const effectiveGuestsForRoom = Number(params.adults || 0) + Math.max(0, Number(params.children || 0) - 1)
@@ -478,77 +478,45 @@ const OffersSection = ({ membership, lang, onOpenMembership }) => {
 
   return (
     <Box sx={{ mb: 6, px: { xs: 2, md: 6 } }}>
-      <Typography variant="h6" sx={{ fontWeight: 800, mb: 0.5 }}>
-        {t('banners.offers_title')}
-      </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        {t('banners.offers_subtitle')}
-      </Typography>
-
-      <Card sx={{
-        display: 'flex',
-        flexDirection: { xs: 'column', md: 'row' },
-        borderRadius: 4,
-        border: '1px solid #eee',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
-        overflow: 'hidden',
-        bgcolor: '#fff'
-      }}>
-        <Box sx={{ flex: 1, p: { xs: 2.5, md: 4 }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          {membership?.tier && (
-            <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+      <Card sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 8px 30px rgba(2,6,23,0.06)' }}>
+        <Box sx={{ display: 'flex', alignItems: 'stretch', bgcolor: '#f5f7ff' }}>
+          <Box sx={{ flex: 1, p: { xs: 3, md: 6 }, position: 'relative' }}>
+            <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
               <Chip
-                icon={<EmojiEvents sx={{ fontSize: '16px !important' }} />}
-                label={`${t('banners.membership_badge_label')}: ${tierName}`}
+                icon={<EmojiEvents />}
+                label={membership?.tier ? `${t('banners.membership_badge_label')}: ${tierName}` : t('banners.membership_badge_label')}
                 onClick={onOpenMembership}
-                sx={{
-                  fontWeight: 800,
-                  bgcolor: '#fdf2f8',
-                  color: '#be185d',
-                  border: '1px solid #f9a8d4',
-                  cursor: 'pointer'
-                }}
+                sx={{ bgcolor: '#fdf2f8', color: '#7b1636', border: '1px solid #f9a8d4', fontWeight: 800 }}
               />
               {trackingPhone && (
-                <Chip
-                  icon={<Phone sx={{ fontSize: '16px !important' }} />}
-                  label={trackingPhone}
-                  sx={{ fontWeight: 700, bgcolor: '#f8fafc', color: '#475569', border: '1px solid #cbd5e1' }}
-                />
+                <Chip icon={<Phone />} label={trackingPhone} sx={{ bgcolor: '#fff', border: '1px solid #eee' }} />
               )}
             </Box>
-          )}
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1, color: '#333' }}>
-            {t('banners.no_strings_attached')}
-          </Typography>
-          <Typography variant="h5" sx={{ fontWeight: 900, mb: 1, color: '#1a1a1a' }}>
-            {t('banners.travel_offer_title')}
-          </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 4, maxWidth: 450 }}>
-            {t('banners.travel_offer_desc')}
-          </Typography>
-          <Button variant="contained" sx={{
-            bgcolor: '#006ce4',
-            color: '#fff',
-            textTransform: 'none',
-            fontWeight: 700,
-            fontSize: 15,
-            borderRadius: 1.5,
-            width: 'fit-content',
-            py: 1.2,
-            px: 4,
-            '&:hover': { bgcolor: '#005bb8', boxShadow: '0 4px 12px rgba(0,108,228,0.3)' }
-          }}>
-            {t('banners.save_for_next_trip')}
-          </Button>
-        </Box>
-        <Box sx={{ width: { xs: '100%', md: 320 }, minHeight: 220 }}>
-          <CardMedia
-            component="img"
-            image="https://images.unsplash.com/photo-1510414842594-a61c69b5ae57?w=600"
-            alt="Offer"
-            sx={{ height: '100%', objectFit: 'cover' }}
-          />
+
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              Không điều kiện ràng buộc. An tâm nghỉ dưỡng.
+            </Typography>
+
+            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5, color: '#173b8a' }}>
+              Đặt với Ưu Đãi Thành Viên Mới
+            </Typography>
+
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 520 }}>
+              Giảm ngay <strong>10%</strong> hóa đơn đầu tiên khi đặt phòng — đặc quyền dành riêng cho thành viên mới đăng ký.
+            </Typography>
+
+            <Button variant="contained" disabled sx={{ textTransform: 'none', bgcolor: '#fff', color: '#bfbfc3', borderRadius: 2, px: 4, py: 1.25 }}>
+              Tiết kiệm cho chuyến đi tới
+            </Button>
+          </Box>
+
+          <Box sx={{ width: { xs: 140, md: 360 }, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'transparent' }}>
+            <CardMedia component="img" image={imgNoResults} alt="banner" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <Box sx={{ position: 'absolute', top: 16, right: 16, bgcolor: '#fff', borderRadius: 2, p: 1.5, textAlign: 'center', border: '1px solid #f4d8e2' }}>
+              <Typography sx={{ fontWeight: 800, color: '#be185d' }}>10%</Typography>
+              <Typography variant="caption" color="text.secondary">Giảm ngay</Typography>
+            </Box>
+          </Box>
         </Box>
       </Card>
     </Box>

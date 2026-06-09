@@ -69,12 +69,15 @@ public interface RoomRepository extends JpaRepository<Room, Long> {
     );
 
         // Paging-based helpers for UI sections
+        @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel h WHERE r.status <> com.hotel.modules.rooms.entity.enums.RoomStatus.INACTIVE ORDER BY r.createdAt DESC")
         org.springframework.data.domain.Page<Room> findAllByOrderByCreatedAtDesc(org.springframework.data.domain.Pageable pageable);
 
+        @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel h WHERE r.status <> com.hotel.modules.rooms.entity.enums.RoomStatus.INACTIVE ORDER BY rt.pricePerNight DESC")
         org.springframework.data.domain.Page<Room> findAllByOrderByRoomType_PricePerNightDesc(org.springframework.data.domain.Pageable pageable);
 
+        @Query("SELECT r FROM Room r JOIN FETCH r.roomType rt LEFT JOIN FETCH rt.beds JOIN FETCH r.hotel h WHERE r.status <> com.hotel.modules.rooms.entity.enums.RoomStatus.INACTIVE ORDER BY rt.pricePerNight ASC")
         org.springframework.data.domain.Page<Room> findAllByOrderByRoomType_PricePerNightAsc(org.springframework.data.domain.Pageable pageable);
 
-        @Query("SELECT r FROM Room r LEFT JOIN com.hotel.modules.review.entity.Review rev ON rev.room = r GROUP BY r ORDER BY COALESCE(AVG(rev.ratingOverall), 0) DESC")
+        @Query("SELECT r FROM Room r LEFT JOIN com.hotel.modules.review.entity.Review rev ON rev.room = r WHERE r.status <> com.hotel.modules.rooms.entity.enums.RoomStatus.INACTIVE GROUP BY r ORDER BY COALESCE(AVG(rev.ratingOverall), 0) DESC")
         org.springframework.data.domain.Page<Room> findTopRatedRooms(org.springframework.data.domain.Pageable pageable);
 }
