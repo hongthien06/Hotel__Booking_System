@@ -381,7 +381,7 @@
     "adults": "ADULTS",
     "children": "CHILDREN",
     "amenities": "Hotel Amenities",
-    "price_per_night": "PRICE / NIGHT (VND)",
+    "price_per_night": "PRICE / NIGHT (USD)",
     "min_price": "Min price",
     "max_price": "Max price",
     "no_limit": "no limit",
