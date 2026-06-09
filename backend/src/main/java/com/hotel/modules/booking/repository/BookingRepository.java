@@ -36,7 +36,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     SELECT DISTINCT b FROM Booking b
     LEFT JOIN b.bookingRooms br
     WHERE (b.room.roomId = :roomId OR br.room.roomId = :roomId)
-    AND b.status IN ('PENDING', 'CONFIRMED', 'CHECKED_IN')
+    AND b.status NOT IN ('CANCELLED', 'REFUNDED')
 """)
     List<Booking> findActiveBookingsByRoomId(@Param("roomId") Long roomId);
 

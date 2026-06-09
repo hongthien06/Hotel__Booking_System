@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingService {
@@ -60,7 +61,7 @@ public class BookingService {
 
     @Transactional(readOnly = true)
     public List<BookingDTO> getAllBookings() {
-        return bookingRepository.findAll().stream().map(this::toDTO).toList();
+        return bookingRepository.findAll().stream().map(this::toDTO).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -72,7 +73,7 @@ public class BookingService {
                     findGroupedStatusForLegacyCancelledBooking(booking, bookings)
                             .ifPresent(dto::setStatus);
                     return dto;
-                }).toList();
+                }).collect(Collectors.toList());
     }
 
     // CHECK IN
@@ -121,7 +122,7 @@ public class BookingService {
                 .filter(b -> b.getStatus() == BookingStatus.CHECKED_IN)
                 .flatMap(b -> getRoomsForBooking(b).stream())
                 .map(Room::getRoomId)
-                .distinct().toList();
+                .distinct().collect(Collectors.toList());
     }
 
     // CHECK OUT
@@ -159,24 +160,46 @@ public class BookingService {
                 .filter(b -> b.getStatus() == BookingStatus.CHECKED_OUT)
                 .flatMap(b -> getRoomsForBooking(b).stream())
                 .map(Room::getRoomId)
-                .distinct().toList();
+                .distinct().collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<Long> getOccupiedRoomIds(LocalDate checkIn, LocalDate checkOut) {
         LocalDate effCheckOut = checkOut.isEqual(checkIn) ? checkOut.plusDays(1) : checkOut;
-        return bookingRepository.findActiveBookingsInRange(checkIn, effCheckOut).stream()
-                .flatMap(b -> getRoomsForBooking(b).stream())
+        List<Booking> bookings = bookingRepository.findActiveBookingsInRange(checkIn, effCheckOut);
+        return bookings.stream()
+                .flatMap(b -> {
+                    LocalDate bCheckIn = b.getCheckInDate();
+                    LocalDate bEffCheckOut = b.getActualCheckout() != null ? b.getActualCheckout().toLocalDate() : b.getCheckOutDate();
+                    if ((bCheckIn.isBefore(effCheckOut) && bEffCheckOut.isAfter(checkIn))
+                            || (bCheckIn.isEqual(bEffCheckOut) && bCheckIn.isEqual(checkIn))) {
+                        return getRoomsForBooking(b).stream();
+                    }
+                    return java.util.stream.Stream.<Room>empty();
+                })
                 .map(Room::getRoomId)
                 .distinct()
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public boolean isRoomConflicting(Long roomId, LocalDate checkIn, LocalDate checkOut) {
         // treat same-day as a single-night interval
         LocalDate effCheckOut = checkOut.isEqual(checkIn) ? checkOut.plusDays(1) : checkOut;
-        return bookingRepository.existsConflictBooking(roomId, checkIn, effCheckOut);
+        // Use booking records and respect actualCheckout (early checkout) as effectiveCheckOut
+        List<Booking> bookings = bookingRepository.findActiveBookingsByRoomId(roomId);
+        for (Booking b : bookings) {
+            LocalDate bCheckIn = b.getCheckInDate();
+            LocalDate bEffCheckOut = b.getActualCheckout() != null ? b.getActualCheckout().toLocalDate() : b.getCheckOutDate();
+            // treat single-day booking for comparison (make effCheckOut = checkOut +1 for same-day ranges)
+            LocalDate candidateCheckOut = effCheckOut;
+            // Check overlap: (b.checkIn < effCheckOut && b.effCheckOut > checkIn) OR (single-day exact match)
+            if ((bCheckIn.isBefore(candidateCheckOut) && bEffCheckOut.isAfter(checkIn))
+                    || (bCheckIn.isEqual(bEffCheckOut) && bCheckIn.isEqual(checkIn))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Tạo Booking với tính toán giảm giá đầy đủ
@@ -203,7 +226,7 @@ public class BookingService {
         List<Room> rooms = roomIds.stream()
                 .map(roomId -> roomRepository.findById(roomId)
                         .orElseThrow(() -> new RuntimeException("Phòng không tồn tại: " + roomId)))
-                .toList();
+                .collect(Collectors.toList());
 
         // 3. Kiểm tra phòng AVAILABLE và trùng lịch
         List<Long> occupiedRoomIds = getOccupiedRoomIds(request.getCheckIn(), effectiveCheckOutForConflict);
@@ -256,7 +279,7 @@ public class BookingService {
                 .map(room -> room.getRoomType().getPricePerNight()
                         .multiply(holidayMultiplier)
                         .setScale(2, RoundingMode.HALF_UP))
-                .toList();
+                .collect(Collectors.toList());
         BigDecimal adjustedNightlyTotal = adjustedRoomPrices.stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -359,7 +382,7 @@ public class BookingService {
         List<Long> distinctIds = bookingIds.stream()
                 .filter(id -> id != null && id > 0)
                 .distinct()
-                .toList();
+                .collect(Collectors.toList());
         if (distinctIds.isEmpty()) {
             throw new RuntimeException("Danh sách booking không hợp lệ");
         }
@@ -550,17 +573,22 @@ public class BookingService {
     }
 
     @Transactional(readOnly = true)
-    public List<String> getBookedDatesByRoomId(Long roomId) {
+    public List<com.hotel.modules.booking.dto.BookedDateRangeDTO> getBookedDatesByRoomId(Long roomId) {
         List<Booking> activeBookings = bookingRepository.findActiveBookingsByRoomId(roomId);
-        return activeBookings.stream()
-            .flatMap(b -> {
-                if (b.getCheckInDate() != null && b.getCheckOutDate() != null
-                    && b.getCheckInDate().isEqual(b.getCheckOutDate())) {
-                return java.util.stream.Stream.of(b.getCheckInDate().toString());
-                }
-                return b.getCheckInDate().datesUntil(b.getCheckOutDate()).map(LocalDate::toString);
-            })
-            .distinct().toList();
+        return activeBookings.stream().map(b -> {
+            com.hotel.modules.booking.dto.BookedDateRangeDTO dto = new com.hotel.modules.booking.dto.BookedDateRangeDTO();
+            dto.setCheckIn(b.getCheckInDate());
+            dto.setCheckOut(b.getCheckOutDate());
+            dto.setEarlyCheckoutDate(b.getActualCheckout() != null ? b.getActualCheckout().toLocalDate() : null);
+            dto.setStatus(b.getStatus() != null ? b.getStatus().name() : null);
+            // Booking entity doesn't have a cancelledAt field; use updatedAt when status == CANCELLED
+            if (b.getStatus() == BookingStatus.CANCELLED && b.getUpdatedAt() != null) {
+                dto.setCancelledAt(b.getUpdatedAt().toLocalDate());
+            } else {
+                dto.setCancelledAt(null);
+            }
+            return dto;
+        }).collect(Collectors.toList());
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────────

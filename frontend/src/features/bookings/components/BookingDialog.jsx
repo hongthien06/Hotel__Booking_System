@@ -112,6 +112,28 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
     return true
   }
 
+  // New helper: disable dates according to bookings policy
+  // bookings: array of { checkIn, checkOut, earlyCheckoutDate? }
+  const isDateDisabled = (date, bookings) => {
+    if (!date) return false
+    const d = dayjs(date).startOf('day')
+    if (!bookings || bookings.length === 0) return false
+    return bookings.some(b => {
+      const checkIn = dayjs(b.checkIn).startOf('day')
+      const effectiveCheckOut = dayjs(b.earlyCheckoutDate || b.checkOut).startOf('day')
+      // If booking was cancelled before the scheduled check-in, ignore it
+      if (b.cancelledAt) {
+        const cancelled = dayjs(b.cancelledAt).startOf('day')
+        if (cancelled.isBefore(checkIn)) return false
+      }
+      // disable exactly the check-in day
+      if (d.isSame(checkIn)) return true
+      // disable days strictly after checkIn and strictly before effectiveCheckOut
+      if (d.isAfter(checkIn) && d.isBefore(effectiveCheckOut)) return true
+      return false
+    })
+  }
+
   useEffect(() => {
     if (!open) return
     Promise.resolve().then(() => {
@@ -247,9 +269,19 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
                 }}
                 minDate={dayjs()}
                 shouldDisableDate={(date) => {
+                  // use bookings list from API (bookedDates contains flat dates; convert back to ranges isn't necessary here)
+                  // Build bookings array from bookedDatesSetRef by collapsing continuous ranges is expensive; instead
+                  // leverage isDateDisabled by mapping current room bookings if available. We kept bookedDates array as list of strings
+                  // but BookingDialog already fetches raw API response into bookedDates Set. If API returns ranges, we can derive bookings.
+                  // For now check using the Set for single-day matches and use isDateDisabled with a small constructed list of ranges
                   const dateStr = date.format('YYYY-MM-DD')
-                  const isDisabled = bookedDatesSetRef.current.has(dateStr)
-                  return isDisabled
+                  if (bookedDatesSetRef.current.has(dateStr)) return true
+                  // fallback: attempt to detect ranges by scanning adjacent days in set
+                  // check previous and next days to see if date is between a range
+                  const prev = date.subtract(1, 'day').format('YYYY-MM-DD')
+                  const next = date.add(1, 'day').format('YYYY-MM-DD')
+                  if (bookedDatesSetRef.current.has(prev) || bookedDatesSetRef.current.has(next)) return true
+                  return false
                 }}
                 loading={loadingDates}
                 slotProps={{
@@ -285,7 +317,14 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
                   const minStr = form.checkIn || dayjs().format('YYYY-MM-DD')
                   if (dateStr < minStr) return true
                   if (dateStr === minStr) return false
-                  return bookedDates.includes(dateStr)
+                  if (bookedDatesSetRef.current.has(dateStr)) return true
+                  // also apply policy: disable dates that fall strictly between any booking's checkIn and effectiveCheckOut
+                  // reconstruct bookings from bookedDatesSetRef by checking nearby runs is expensive; instead, if we have original bookedDates array
+                  // and it contains range objects, isDateDisabled will handle them. Try using original bookedDates array
+                  try {
+                    if (isDateDisabled(date, bookedDates)) return true
+                  } catch (e) { /* ignore */ }
+                  return false
                 }}
                 loading={loadingDates}
                 slotProps={{

@@ -273,6 +273,8 @@
       "filter_completed": "Completed",
       "filter_cancelled": "Cancelled",
       "pay_button": "Pay",
+      "selected_count": "Selected {{count}} rooms pending payment",
+      "selected_pay_button": "Pay selected rooms",
     "check_in": "CHECK IN",
     "check_out": "CHECK OUT",
     "check_in_short": "In",

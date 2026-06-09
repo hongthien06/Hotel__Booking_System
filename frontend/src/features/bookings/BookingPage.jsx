@@ -1634,61 +1634,7 @@ const BookingPage = () => {
                   </>
                 )}
 
-                {/* 7. Ưu đãi cho cuối tuần */}
-                <Box sx={{ mb: 2, pl: { xs: 1, sm: 6 } }}>
-                  <Typography variant="h6" sx={{ fontWeight: 800 }}>{t('booking_page.weekend_deals_title')}</Typography>
-                  <Typography variant="body2" color="text.secondary">{weekendSubtitle}</Typography>
-                </Box>
-                <Box sx={{ position: 'relative', mb: 8, px: { xs: 3, sm: 6 } }}>
-                  {weekendCanLeft && (
-                  <IconButton onClick={() => scrollWeekend(-1)} sx={{
-                    position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)',
-                    zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                    '&:hover': { bgcolor: PC_LIGHT }
-                  }}>
-                    <ChevronLeft sx={{ color: PC }} />
-                  </IconButton>
-                  )}
-
-                  <Box ref={weekendScrollRef} sx={{
-                    display: 'flex', gap: 2, overflowX: 'auto', pb: 2, pt: 1,
-                    justifyContent: 'flex-start',
-                    scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' },
-                    scrollSnapType: { xs: 'x mandatory', md: 'none' }
-                  }}>
-                    {(sectionsLoading) ? (
-                      [...Array(4)].map((_, i) => (
-                        <Box key={i} sx={{ width: { xs: '240px', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0 }}>
-                          <Skeleton variant="rectangular" height={160} sx={{ borderRadius: 3, mb: 1 }} />
-                          <Skeleton width="70%" height={22} sx={{ mb: 0.5 }} />
-                          <Skeleton width="50%" height={18} />
-                        </Box>
-                      ))
-                    ) : weekendDeals.length === 0 ? (
-                      <Box sx={{ width: '100%', py: 6, textAlign: 'center' }}>
-                        <Alert severity="info" sx={{ borderRadius: 3, display: 'inline-flex', px: 4 }}>
-                          {t('booking_page.no_weekend_deals') || 'Không có ưu đãi cuối tuần.'}
-                        </Alert>
-                      </Box>
-                    ) : (
-                      weekendDeals.map(r => (
-                        <Box key={r.id || r.roomId} sx={{ width: { xs: '240px', sm: 'calc((100% - 48px) / 4)' }, flexShrink: 0, scrollSnapAlign: { xs: 'start', md: 'none' }, scrollSnapStop: { xs: 'always', md: 'normal' }, display: 'flex', alignItems: 'stretch' }}>
-                          <RoomCard room={r} isMock={r._isMockCard} oldPrice={r.oldPrice} showBookButton={false} onOpenDetail={openDetail} />
-                        </Box>
-                      ))
-                    )}
-                  </Box>
-
-                  {weekendCanRight && (
-                  <IconButton onClick={() => scrollWeekend(1)} sx={{
-                    position: 'absolute', right: 0, top: '50%', transform: 'translateY(-50%)',
-                    zIndex: 2, bgcolor: 'white', boxShadow: 3,
-                    '&:hover': { bgcolor: PC_LIGHT }
-                  }}>
-                    <ChevronRight sx={{ color: PC }} />
-                  </IconButton>
-                  )}
-                </Box>
+                {/* Weekend deals section removed as requested */}
               </>
             ) : (
               /* Search Results View */
