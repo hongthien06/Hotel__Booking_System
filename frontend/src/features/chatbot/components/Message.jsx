@@ -8,10 +8,7 @@ const PC = '#c0496e';
 
 const formatTime = (dateStr, lang) => {
   if (!dateStr) return '';
-  // Ensure the date string is treated as UTC if no timezone is provided
-  const normalizedDateStr =
-    dateStr.endsWith('Z') || dateStr.includes('+') ? dateStr : `${dateStr}Z`;
-  const d = new Date(normalizedDateStr);
+  const d = new Date(dateStr);
   return d.toLocaleTimeString(lang === 'vi' ? 'vi-VN' : 'en-US', { hour: '2-digit', minute: '2-digit' });
 };
 
