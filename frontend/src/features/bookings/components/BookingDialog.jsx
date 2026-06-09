@@ -55,6 +55,7 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [bookedDates, setBookedDates] = useState([])
+  const bookedDatesSetRef = React.useRef(new Set())
   const [loadingDates, setLoadingDates] = useState(false)
 
   useEffect(() => {
@@ -72,13 +73,44 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
       })
       .then(dates => {
         setLoadingDates(false)
-        setBookedDates(Array.isArray(dates) ? dates : [])
+        const list = Array.isArray(dates) ? dates : []
+        // Normalize into a set of YYYY-MM-DD strings. API may return array of strings or array of {start,end} ranges.
+        const s = new Set()
+        list.forEach(item => {
+          if (!item) return
+          if (typeof item === 'string') {
+            s.add(item)
+          } else if (item.start && item.end) {
+            // expand range inclusive
+            let cur = dayjs(item.start)
+            const end = dayjs(item.end)
+            while (cur.isBefore(end) || cur.isSame(end, 'day')) {
+              s.add(cur.format('YYYY-MM-DD'))
+              cur = cur.add(1, 'day')
+            }
+          } else if (item.date) {
+            s.add(item.date)
+          }
+        })
+        bookedDatesSetRef.current = s
+        setBookedDates(Array.from(s))
       })
       .catch(() => {
         setLoadingDates(false)
         setBookedDates([])
       })
   }, [open, room?.roomId, room?.id, isMock])
+
+  const isRangeAvailable = (startStr, endStr) => {
+    if (!startStr || !endStr) return true
+    let cur = dayjs(startStr)
+    const end = dayjs(endStr)
+    while (cur.isBefore(end) || cur.isSame(end, 'day')) {
+      if (bookedDatesSetRef.current.has(cur.format('YYYY-MM-DD'))) return false
+      cur = cur.add(1, 'day')
+    }
+    return true
+  }
 
   useEffect(() => {
     if (!open) return
@@ -203,19 +235,21 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
                 value={form.checkIn ? dayjs(form.checkIn) : null}
                 onChange={newValue => {
                   const newCheckIn = newValue ? newValue.format('YYYY-MM-DD') : ''
-                  setForm(f => ({
-                    ...f,
-                    checkIn: newCheckIn,
-                    checkOut: (f.checkOut && newCheckIn && f.checkOut < newCheckIn) ? '' : f.checkOut
-                  }))
+                  setForm(f => {
+                    let nextCheckOut = f.checkOut
+                    if (nextCheckOut && newCheckIn && nextCheckOut < newCheckIn) nextCheckOut = ''
+                    if (nextCheckOut && newCheckIn && !isRangeAvailable(newCheckIn, nextCheckOut)) {
+                      nextCheckOut = ''
+                    }
+                    return { ...f, checkIn: newCheckIn, checkOut: nextCheckOut }
+                  })
                   setError('')
                 }}
                 minDate={dayjs()}
                 shouldDisableDate={(date) => {
-                  const dateStr = date.format('YYYY-MM-DD');
-                  const isDisabled = bookedDates.includes(dateStr);
-                  if (isDisabled) console.log('Disabling date:', dateStr);
-                  return isDisabled;
+                  const dateStr = date.format('YYYY-MM-DD')
+                  const isDisabled = bookedDatesSetRef.current.has(dateStr)
+                  return isDisabled
                 }}
                 loading={loadingDates}
                 slotProps={{
@@ -236,7 +270,13 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
                 label={t('booking_page.check_out')}
                 value={form.checkOut ? dayjs(form.checkOut) : null}
                 onChange={newValue => {
-                  setForm(f => ({ ...f, checkOut: newValue ? newValue.format('YYYY-MM-DD') : '' }))
+                  const newCheckOut = newValue ? newValue.format('YYYY-MM-DD') : ''
+                  setForm(f => {
+                    if (f.checkIn && newCheckOut && !isRangeAvailable(f.checkIn, newCheckOut)) {
+                      return { ...f, checkOut: '' }
+                    }
+                    return { ...f, checkOut: newCheckOut }
+                  })
                   setError('')
                 }}
                 minDate={form.checkIn ? dayjs(form.checkIn).subtract(1, 'day') : dayjs().subtract(1, 'day')}
