@@ -23,3 +23,11 @@ export const uploadFileApi = async (file) => {
   })
   return response.data
 }
+
+export const uploadFromUrlApi = async (imageUrl) => {
+  const response = await axiosInstance.post(`${BASE_URL}/files/upload-url`, null, {
+    params: { url: imageUrl }
+  })
+  return response.data
+}
+

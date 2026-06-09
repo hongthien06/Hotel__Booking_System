@@ -141,12 +141,11 @@ const ReviewFormDialog = ({ open, onClose, booking, room, onReviewSubmitted }) =
           {t('common.cancel')}
         </Button>
         <Button
-          variant="contained"
+          variant="submitReviewButton"
           onClick={handleSubmit}
           disabled={loading}
           sx={{
-            borderRadius: 2, px: 4, fontWeight: 700,
-            bgcolor: '#9a1c48', '&:hover': { bgcolor: '#7d1639' }
+            borderRadius: 2, px: 4
           }}
         >
           {loading ? <CircularProgress size={22} color="inherit" /> : t('reviews.submit')}

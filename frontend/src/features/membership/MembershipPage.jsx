@@ -207,7 +207,7 @@ const CurrentTierCard = ({ membership, tiers, t, lang }) => {
 // ── Tier comparison cards ────────────────────────────────────────────────────
 const TierCard = ({ tier, isActive, lang, t }) => {
   const v = TIER_VISUAL[tier.tierCode] || defaultVisual
-  const name = lang === 'en' ? (tier.displayNameEn || tier.tierCode) : (tier.displayNameVi || tier.tierCode)
+  const name = getMembershipTierName(tier, lang)
   let benefits = []
   try {
     benefits = JSON.parse(lang === 'en' ? (tier.benefitsEn || '[]') : (tier.benefitsVi || '[]'))
@@ -249,7 +249,7 @@ const TierCard = ({ tier, isActive, lang, t }) => {
           <Typography variant="h4" fontWeight={900} color={v.textColor} sx={{ lineHeight: 1 }}>
             {tier.discountPct}%
           </Typography>
-          <Typography variant="caption" color="text.secondary">{t('membership.discount').toLowerCase()}</Typography>
+          <Typography variant="caption" color="text.secondary">{t('membership.discount')}</Typography>
         </Box>
 
         <Divider sx={{ mb: 1.5 }} />
@@ -390,7 +390,7 @@ const ComparisonTable = ({ tiers, currentCode, t, lang }) => {
             {sorted.map(tier => {
               const v = TIER_VISUAL[tier.tierCode] || defaultVisual
               const isActive = tier.tierCode === currentCode
-              const name = lang === 'en' ? (tier.displayNameEn || tier.tierCode) : (tier.displayNameVi || tier.tierCode)
+              const name = getMembershipTierName(tier, lang)
               return (
                 <TableRow
                   key={tier.tierId}
@@ -406,8 +406,8 @@ const ComparisonTable = ({ tiers, currentCode, t, lang }) => {
                       </Box>
                       <Typography variant="body2" fontWeight={isActive ? 700 : 400} color={isActive ? v.textColor : 'inherit'}>
                         {name}
-                        {isActive && <Chip label="✓" size="small" sx={{ ml: 0.75, height: 18, fontSize: 10, bgcolor: v.border, color: v.textColor }} />}
                       </Typography>
+                      {isActive && <Chip label="✓" size="small" sx={{ ml: 0.75, height: 18, fontSize: 10, bgcolor: v.border, color: v.textColor }} />}
                     </Stack>
                   </TableCell>
                   <TableCell align="center">

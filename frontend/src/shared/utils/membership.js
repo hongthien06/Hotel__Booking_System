@@ -1,7 +1,9 @@
 export const getMembershipTierName = (tier, lang = 'vi') => {
   if (!tier) return ''
-  if (lang === 'en') return tier.displayNameEn || tier.displayNameVi || tier.tierCode || ''
-  return tier.displayNameVi || tier.displayNameEn || tier.tierCode || ''
+  const name = lang === 'en'
+    ? (tier.displayNameEn || tier.displayNameVi || tier.tierCode || '')
+    : (tier.displayNameVi || tier.displayNameEn || tier.tierCode || '')
+  return name ? name.charAt(0).toUpperCase() + name.slice(1) : ''
 }
 
 export const getMembershipTrackingPhone = (membership) => {

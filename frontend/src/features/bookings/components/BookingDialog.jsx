@@ -6,6 +6,7 @@ import {
 import { Close } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'react-toastify'
 import { createBookingApi, getBookedDatesApi } from '../../../shared/api/bookingApi'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -147,8 +148,19 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
       navigate('/booking-history')
     } catch (err) {
       const data = err?.response?.data
-      const msg = data?.error || data?.message || (typeof data === 'string' ? data : t('common.error'))
-      setError(msg)
+      let errMsg = ''
+      if (data) {
+        if (data.message) errMsg = data.message
+        else if (data.error) errMsg = data.error
+        else if (typeof data === 'object' && Object.keys(data).length > 0) {
+          errMsg = typeof Object.values(data)[0] === 'string' ? Object.values(data)[0] : JSON.stringify(Object.values(data)[0])
+        }
+      }
+      if (!errMsg) {
+        errMsg = err.message || t('common.error')
+      }
+      setError(errMsg)
+      toast.error(errMsg)
     } finally {
       setSubmitting(false)
     }
@@ -165,6 +177,7 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
       </DialogTitle>
 
       <DialogContent sx={{ pt: 1 }}>
+        {error && <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>}
         {/* Room summary */}
         <Box sx={{ display: 'flex', gap: 2, mb: 2.5, p: 2, bgcolor: '#fafafa', borderRadius: 2, border: '1px solid #eee' }}>
           <Box sx={{ flex: 1 }}>
@@ -382,8 +395,6 @@ const BookingDialog = ({ open, room, rooms = [], isMock, searchParams, onClose, 
             </Box>
           </>
         )}
-
-        {error && <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>{error}</Alert>}
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 3 }}>

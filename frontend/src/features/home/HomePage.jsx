@@ -114,25 +114,11 @@ const HomePage = () => {
             {t('home.hero.subtitle')}
           </Typography>
           <Button
-            variant="contained" size="large" startIcon={<EventNote />}
+            variant="heroBookNow" size="large" startIcon={<EventNote />}
             onClick={() => navigate('/bookings')}
             sx={{
               py: { xs: 1.5, md: 1.8 }, px: { xs: 4, md: 5 }, borderRadius: 3,
-              fontWeight: 800, fontSize: { xs: '0.9rem', md: '1.1rem' },
-              bgcolor: 'white', color: PC,
-              boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-                color: 'primary.contrastTextHover',
-                transform: 'translateY(-3px)',
-                boxShadow: '0 12px 35px rgba(154,28,72,0.4)'
-              },
-              '&:active': {
-                bgcolor: 'primary.dark',
-                color: 'primary.contrastTextHover',
-                transform: 'translateY(1px)'
-              },
-              transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)'
+              fontWeight: 800, fontSize: { xs: '0.9rem', md: '1.1rem' }
             }}
           >
             {t('home.hero.cta')}
@@ -335,21 +321,9 @@ const HomePage = () => {
           {/* See all reviews button */}
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
             <Button
-              variant="outlined"
+              variant="seeAll"
               onClick={() => navigate('/reviews')}
-              sx={{
-                borderColor: PC, color: PC, fontWeight: 700, borderRadius: 3, px: 5, py: 1.5,
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                  color: 'primary.contrastTextHover',
-                  borderColor: 'primary.dark'
-                },
-                '&:active': {
-                  bgcolor: 'primary.dark',
-                  color: 'primary.contrastTextHover',
-                  borderColor: 'primary.dark'
-                }
-              }}
+              sx={{ px: 5, py: 1.5, borderRadius: 3 }}
             >
               {t('common.see_all')} →
             </Button>
@@ -370,24 +344,9 @@ const HomePage = () => {
             {t('home.cta.subtitle')}
           </Typography>
           <Button
-            variant="contained" size="large"
+            variant="bookNow" size="large"
             onClick={() => navigate('/bookings')}
-            sx={{
-              bgcolor: 'white', color: PC, fontWeight: 800, px: 6, py: 2, borderRadius: 3,
-              boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-              '&:hover': {
-                bgcolor: 'primary.dark',
-                color: 'primary.contrastTextHover',
-                transform: 'translateY(-3px)',
-                boxShadow: '0 15px 40px rgba(0,0,0,0.2)'
-              },
-              '&:active': {
-                bgcolor: 'primary.dark',
-                color: 'primary.contrastTextHover',
-                transform: 'translateY(1px)'
-              },
-              transition: 'all 0.3s cubic-bezier(0.4,0,0.2,1)'
-            }}
+            sx={{ px: 6, py: 2, borderRadius: 3 }}
           >
             {t('home.hero.cta')}
           </Button>

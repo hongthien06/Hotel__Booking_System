@@ -137,23 +137,14 @@ const LoginPage = () => {
 
           <Button
             fullWidth
-            variant="contained"
+            variant="loginButton"
             type="submit"
             size="large"
             disabled={isLoading}
             sx={{
               py: 1.8,
-              fontWeight: 'bold',
               borderRadius: 2,
-              textTransform: 'none',
-              fontSize: '1.1rem',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                transform: 'translateY(-1px)',
-                bgcolor: 'primary.dark',
-                color: 'primary.contrastTextHover',
-                boxShadow: '0 6px 20px rgba(231, 78, 134, 0.4)'
-              }
+              fontSize: '1.1rem'
             }}
           >
             {isLoading ? t('login_page.logging_in') : t('login_page.login_button')}

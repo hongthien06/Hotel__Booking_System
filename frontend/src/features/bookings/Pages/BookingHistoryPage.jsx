@@ -472,7 +472,7 @@ const BookingHistoryPage = () => {
           </TextField>
           {/* Search button */}
           <Button
-            variant="contained"
+            variant="historySearchButton"
             onClick={handleSearch}
             startIcon={<Search />}
             sx={{
@@ -611,10 +611,10 @@ const BookingHistoryPage = () => {
               Đã chọn {selectedPendingIds.length} phòng chờ thanh toán
             </Typography>
             <Button
-              variant="contained"
+              variant="payButton"
               disabled={selectedPendingIds.length === 0 || mergingPayment}
               onClick={handleSelectedPayment}
-              sx={{ borderRadius: 2, bgcolor: PC, color: '#fff', fontWeight: 800, px: 3 }}
+              sx={{ borderRadius: 2, fontWeight: 800, px: 3 }}
             >
               {mergingPayment ? 'Đang xử lý...' : 'Thanh toán các phòng đã chọn'}
             </Button>
@@ -644,7 +644,7 @@ const BookingHistoryPage = () => {
                     </Typography>
                     <Divider sx={{ my: 1 }} />
                     <Box sx={{ mt: 1 }}>
-                      <Button variant="outlined" sx={{ borderRadius: 2, color: PC, borderColor: PC }} href="/bookings">
+                      <Button variant="historyBookNowButton" sx={{ borderRadius: 2 }} href="/bookings">
                         {t('common.book_now')}
                       </Button>
                     </Box>
@@ -766,16 +766,12 @@ const BookingHistoryPage = () => {
                         {booking.status === 'PENDING' && (
                           <Button
                             fullWidth
-                            variant="contained"
+                            variant="payButton"
                             size="small"
                             onClick={(e) => { e.stopPropagation(); handlePayment(booking); }}
                             sx={{
                               borderRadius: 2,
-                              fontSize: 11,
-                              fontWeight: 700,
-                              bgcolor: PC,
-                              color: '#fff',
-                              '&:hover': { bgcolor: '#a0365a' }
+                              fontSize: 11
                             }}
                           >
                             {t('common.pay_now')}
