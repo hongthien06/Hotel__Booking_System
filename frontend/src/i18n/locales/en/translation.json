@@ -231,7 +231,17 @@
     "pw_old_wrong": "Old password is incorrect.",
     "view_membership_details": "View details",
     "membership_invite_title": "Join Membership",
-    "membership_invite_desc": "Make your first booking to unlock membership discounts!"
+    "membership_invite_desc": "Make your first booking to unlock membership discounts!",
+    "avatar_url": "Avatar URL",
+    "crop_avatar_title": "Crop Avatar",
+    "crop_hint": "Drag to move, use slider to zoom in/out",
+    "crop_confirm": "Crop & Save",
+    "uploading_cropped_avatar": "Uploading cropped avatar...",
+    "upload_avatar_success": "Avatar uploaded successfully! Click Save Changes to apply.",
+    "upload_avatar_error": "An error occurred while uploading the avatar.",
+    "uploading_to_cloud": "Uploading image to Cloud...",
+    "upload_cloud_success": "Image saved to Cloud successfully! Click Save Changes to apply.",
+    "upload_cloud_error": "An error occurred while saving the image to Cloud."
   },
   "bookings_history": {
     "title": "Search by check-in/out date",

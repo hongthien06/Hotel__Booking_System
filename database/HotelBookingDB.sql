@@ -34,6 +34,7 @@ DROP TABLE IF EXISTS RoomTypes;
 DROP TABLE IF EXISTS Hotels;
 DROP TABLE IF EXISTS Amenities;
 DROP TABLE IF EXISTS ExtraServices;
+DROP TABLE IF EXISTS VerificationTokens;
 DROP TABLE IF EXISTS UserRoles;
 DROP TABLE IF EXISTS Users;
 DROP TABLE IF EXISTS Roles;
@@ -55,6 +56,18 @@ CREATE TABLE Users (
     updated_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
     CONSTRAINT PK_Users PRIMARY KEY (user_id),
     CONSTRAINT UQ_Users_Email UNIQUE (email)
+);
+
+CREATE TABLE VerificationTokens (
+    token_id BIGINT NOT NULL IDENTITY(1,1),
+    email VARCHAR(255) NOT NULL,
+    otp_code VARCHAR(6) NOT NULL,
+    full_name NVARCHAR(150) NOT NULL,
+    phone VARCHAR(20) NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    expires_at DATETIME2 NOT NULL,
+    created_at DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+    CONSTRAINT PK_VerificationTokens PRIMARY KEY (token_id)
 );
 
 CREATE TABLE Roles (

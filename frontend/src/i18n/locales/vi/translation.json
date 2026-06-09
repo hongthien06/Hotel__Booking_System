@@ -231,7 +231,17 @@
     "pw_old_wrong": "Mật khẩu cũ không chính xác.",
     "view_membership_details": "Xem chi tiết",
     "membership_invite_title": "Tham gia thành viên",
-    "membership_invite_desc": "Đặt phòng đầu tiên để nhận ngay ưu đãi giảm giá hạng thành viên!"
+    "membership_invite_desc": "Đặt phòng đầu tiên để nhận ngay ưu đãi giảm giá hạng thành viên!",
+    "avatar_url": "Đường dẫn ảnh đại diện",
+    "crop_avatar_title": "Cắt ảnh đại diện",
+    "crop_hint": "Kéo để di chuyển, dùng thanh trượt để phóng to/thu nhỏ",
+    "crop_confirm": "Cắt & Lưu",
+    "uploading_cropped_avatar": "Đang tải ảnh đã cắt lên...",
+    "upload_avatar_success": "Tải ảnh lên thành công! Hãy nhấn Lưu thay đổi để lưu lại.",
+    "upload_avatar_error": "Có lỗi xảy ra khi tải ảnh lên.",
+    "uploading_to_cloud": "Đang tải ảnh lên Cloud...",
+    "upload_cloud_success": "Lưu ảnh lên Cloud thành công! Hãy nhấn Lưu thay đổi để lưu lại.",
+    "upload_cloud_error": "Có lỗi xảy ra khi lưu ảnh lên Cloud."
   },
   "bookings_history": {
     "title": "Tìm theo ngày nhận, trả",

@@ -145,17 +145,17 @@ const ProfilePage = () => {
   const handleCropComplete = async (blob) => {
     setCropperOpen(false)
     setUploading(true)
-    setMessage({ type: 'info', content: 'Đang tải ảnh đã cắt lên...' })
+    setMessage({ type: 'info', content: t('profile.uploading_cropped_avatar', 'Đang tải ảnh đã cắt lên...') })
     try {
       const croppedFile = new File([blob], 'avatar.jpg', { type: 'image/jpeg' })
       const res = await uploadFileApi(croppedFile)
       if (res?.url) {
         setFormData((prev) => ({ ...prev, avatarUrl: res.url }))
-        setMessage({ type: 'success', content: 'Tải ảnh lên thành công! Hãy nhấn Lưu thay đổi để lưu lại.' })
+        setMessage({ type: 'success', content: t('profile.upload_avatar_success', 'Tải ảnh lên thành công! Hãy nhấn Lưu thay đổi để lưu lại.') })
       }
     } catch (err) {
       console.error('Upload avatar error:', err)
-      setMessage({ type: 'error', content: 'Có lỗi xảy ra khi tải ảnh lên.' })
+      setMessage({ type: 'error', content: t('profile.upload_avatar_error', 'Có lỗi xảy ra khi tải ảnh lên.') })
     } finally {
       setUploading(false)
     }
@@ -164,16 +164,16 @@ const ProfilePage = () => {
   const handleCloudifyAvatar = async () => {
     if (!formData.avatarUrl || !formData.avatarUrl.startsWith('http')) return
     setUploading(true)
-    setMessage({ type: 'info', content: 'Đang tải ảnh lên Cloud...' })
+    setMessage({ type: 'info', content: t('profile.uploading_to_cloud', 'Đang tải ảnh lên Cloud...') })
     try {
       const res = await uploadFromUrlApi(formData.avatarUrl)
       if (res?.url) {
         setFormData((prev) => ({ ...prev, avatarUrl: res.url }))
-        setMessage({ type: 'success', content: 'Lưu ảnh lên Cloud thành công! Hãy nhấn Lưu thay đổi để lưu lại.' })
+        setMessage({ type: 'success', content: t('profile.upload_cloud_success', 'Lưu ảnh lên Cloud thành công! Hãy nhấn Lưu thay đổi để lưu lại.') })
       }
     } catch (err) {
       console.error('Cloudify avatar error:', err)
-      setMessage({ type: 'error', content: 'Có lỗi xảy ra khi lưu ảnh lên Cloud.' })
+      setMessage({ type: 'error', content: t('profile.upload_cloud_error', 'Có lỗi xảy ra khi lưu ảnh lên Cloud.') })
     } finally {
       setUploading(false)
     }
