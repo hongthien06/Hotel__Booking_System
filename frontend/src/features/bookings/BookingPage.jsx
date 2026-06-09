@@ -49,7 +49,7 @@ const PC = '#c0496e'
 const PC_LIGHT = '#fce4ec'
 const SIDEBAR_W = 300
 
-const DESTINATIONS = [
+export const DESTINATIONS = [
   { key: 'caobang', province: 'Cao Bằng', img: imgCaoBang, bg: '#f0f8ff' },
   { key: 'hanam', province: 'Hà Nam', img: imgHaNam, bg: '#fff9f0' },
   { key: 'hanoi', province: 'Hà Nội', img: imgHaNoi, bg: '#f0f4ff' },

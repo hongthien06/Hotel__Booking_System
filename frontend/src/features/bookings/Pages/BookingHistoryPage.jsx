@@ -32,6 +32,7 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { DESTINATIONS } from '../BookingPage'
 import { useNavigate } from 'react-router-dom'
 import { cancelBookingApi, getMyBookingsApi, mergePendingBookingsApi } from '../../../shared/api/bookingApi'
 import { getMyMembershipApi } from '../../../shared/api/membershipApi'
@@ -449,21 +450,25 @@ const BookingHistoryPage = () => {
             select
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            SelectProps={{ native: true }}
             size="small"
             sx={{ flex: 1.5, width: '100%' }}
+            SelectProps={{ native: false, MenuProps: { PaperProps: { sx: { maxHeight: 300, borderRadius: 2 } } } }}
           >
-            <option value="">{t('bookings_history.all_locations', 'Tất cả địa điểm')}</option>
-            <option value="HCM">Hồ Chí Minh</option>
-            <option value="HANOI">Hà Nội</option>
-            <option value="VUNG_TAU">Vũng Tàu</option>
-            <option value="DA_LAT">Đà Lạt</option>
-            <option value="DA_NANG">Đà Nẵng</option>
-            <option value="NHA_TRANG">Nha Trang</option>
-            <option value="PHU_QUOC">Phú Quốc</option>
-            <option value="SAPA">Sapa</option>
-            <option value="HUE">Huế</option>
-            <option value="CAT_BA">Cát Bà</option>
+            <MenuItem value="">{t('bookings_history.all_locations', 'Tất cả địa điểm')}</MenuItem>
+            {
+              (() => {
+                const seen = new Set()
+                const list = []
+                DESTINATIONS.forEach(d => {
+                  const label = d.province || d.name
+                  if (!label) return
+                  if (!seen.has(label)) { seen.add(label); list.push(label) }
+                })
+                return list.map(loc => (
+                  <MenuItem key={loc} value={loc}>{loc}</MenuItem>
+                ))
+              })()
+            }
           </TextField>
           {/* Search button */}
           <Button
