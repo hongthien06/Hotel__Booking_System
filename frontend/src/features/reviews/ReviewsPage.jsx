@@ -113,10 +113,10 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
       <DialogActions sx={{ px: 3, pb: 3 }}>
         <Button onClick={onClose} sx={{ borderRadius: 2 }}>Hủy</Button>
         <Button
-          variant="contained"
+          variant="continueButton"
           onClick={handleConfirm}
           disabled={bookings.length === 0 || !selectedBookingId || loading}
-          sx={{ bgcolor: '#9a1c48', '&:hover': { bgcolor: '#7d1639' }, borderRadius: 2 }}
+          sx={{ borderRadius: 2 }}
         >
           Tiếp tục
         </Button>
@@ -220,15 +220,12 @@ const ReviewsPage = () => {
             {t('reviews.subtitle')}
           </Typography>
           <Button
-            variant="contained"
+            variant="writeReview"
             onClick={handleWriteReviewClick}
             sx={{
-              fontWeight: 700,
               borderRadius: 3,
               px: 4,
-              py: 1.2,
-              boxShadow: '0 4px 14px rgba(0,0,0,0.1)',
-              textTransform: 'none'
+              py: 1.2
             }}
           >
             {t('reviews.write_review')}

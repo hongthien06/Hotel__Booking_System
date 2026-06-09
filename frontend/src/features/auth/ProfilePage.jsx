@@ -18,7 +18,8 @@ import {
   TextField,
   Tooltip,
   Typography,
-  Chip
+  Chip,
+  Slider
 } from '@mui/material'
 import {
   CameraAlt,
@@ -36,13 +37,14 @@ import {
   Diamond,
   WorkspacePremium,
   ArrowForward,
-  CardGiftcard
+  CardGiftcard,
+  CloudUpload
 } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { changePasswordApi } from '../../shared/api/authApi'
 import { getMyMembershipApi } from '../../shared/api/membershipApi'
-import { getMyProfileApi, updateMyProfileApi, uploadFileApi } from '../../shared/api/userApi'
+import { getMyProfileApi, updateMyProfileApi, uploadFileApi, uploadFromUrlApi } from '../../shared/api/userApi'
 import { getMembershipTierName, getMembershipTrackingPhone } from '../../shared/utils/membership'
 
 const TIER_VISUAL = {
@@ -90,6 +92,8 @@ const ProfilePage = () => {
   const [pwLoading, setPwLoading] = useState(false)
   const [pwError, setPwError] = useState('')
   const [showPw, setShowPw] = useState({ old: false, new: false, confirm: false })
+  const [cropperOpen, setCropperOpen] = useState(false)
+  const [cropSrc, setCropSrc] = useState('')
   const fileInputRef = useRef(null)
 
   const membershipTierName = getMembershipTierName(membership?.tier, i18n.language)
@@ -125,25 +129,56 @@ const ProfilePage = () => {
     fileInputRef.current?.click()
   }
 
-  const handleFileChange = async (e) => {
+  const handleFileChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
-      setUploading(true)
-      setMessage({ type: 'info', content: 'Đang tải ảnh lên...' })
-      try {
-        const res = await uploadFileApi(file)
-        if (res?.url) {
-          setFormData((prev) => ({ ...prev, avatarUrl: res.url }))
-          setMessage({ type: 'success', content: 'Tải ảnh lên thành công! Hãy nhấn Lưu thay đổi để lưu lại.' })
-        }
-      } catch (err) {
-        console.error('Upload avatar error:', err)
-        setMessage({ type: 'error', content: 'Có lỗi xảy ra khi tải ảnh lên.' })
-      } finally {
-        setUploading(false)
+      const reader = new FileReader()
+      reader.onload = () => {
+        setCropSrc(reader.result)
+        setCropperOpen(true)
       }
+      reader.readAsDataURL(file)
+      e.target.value = null // reset input
     }
   }
+
+  const handleCropComplete = async (blob) => {
+    setCropperOpen(false)
+    setUploading(true)
+    setMessage({ type: 'info', content: 'Đang tải ảnh đã cắt lên...' })
+    try {
+      const croppedFile = new File([blob], 'avatar.jpg', { type: 'image/jpeg' })
+      const res = await uploadFileApi(croppedFile)
+      if (res?.url) {
+        setFormData((prev) => ({ ...prev, avatarUrl: res.url }))
+        setMessage({ type: 'success', content: 'Tải ảnh lên thành công! Hãy nhấn Lưu thay đổi để lưu lại.' })
+      }
+    } catch (err) {
+      console.error('Upload avatar error:', err)
+      setMessage({ type: 'error', content: 'Có lỗi xảy ra khi tải ảnh lên.' })
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const handleCloudifyAvatar = async () => {
+    if (!formData.avatarUrl || !formData.avatarUrl.startsWith('http')) return
+    setUploading(true)
+    setMessage({ type: 'info', content: 'Đang tải ảnh lên Cloud...' })
+    try {
+      const res = await uploadFromUrlApi(formData.avatarUrl)
+      if (res?.url) {
+        setFormData((prev) => ({ ...prev, avatarUrl: res.url }))
+        setMessage({ type: 'success', content: 'Lưu ảnh lên Cloud thành công! Hãy nhấn Lưu thay đổi để lưu lại.' })
+      }
+    } catch (err) {
+      console.error('Cloudify avatar error:', err)
+      setMessage({ type: 'error', content: 'Có lỗi xảy ra khi lưu ảnh lên Cloud.' })
+    } finally {
+      setUploading(false)
+    }
+  }
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -478,6 +513,40 @@ const ProfilePage = () => {
                   }}
                   sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
                 />
+
+                <TextField
+                  fullWidth
+                  label={t('profile.avatar_url', 'Đường dẫn ảnh đại diện')}
+                  name="avatarUrl"
+                  value={formData.avatarUrl || ''}
+                  onChange={handleChange}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <CameraAlt sx={{ color: 'primary.contrastText' }} />
+                      </InputAdornment>
+                    ),
+                    endAdornment: (
+                      formData.avatarUrl &&
+                      formData.avatarUrl.startsWith('http') &&
+                      !formData.avatarUrl.includes('cloudinary.com') && (
+                        <InputAdornment position="end">
+                          <Tooltip title={t('rooms.save_to_cloud', 'Lưu lên Cloud')}>
+                            <IconButton
+                              size="small"
+                              color="primary"
+                              disabled={uploading}
+                              onClick={handleCloudifyAvatar}
+                            >
+                              {uploading ? <CircularProgress size={16} /> : <CloudUpload fontSize="small" />}
+                            </IconButton>
+                          </Tooltip>
+                        </InputAdornment>
+                      )
+                    )
+                  }}
+                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 3, bgcolor: '#e3f2fd' } }}
+                />
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 5 }}>
@@ -617,7 +686,200 @@ const ProfilePage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <AvatarCropperDialog
+        open={cropperOpen}
+        imageSrc={cropSrc}
+        onClose={() => setCropperOpen(false)}
+        onCrop={handleCropComplete}
+        t={t}
+      />
     </Box>
+  )
+}
+
+// ── Avatar cropping component (1:1 crop using canvas) ───────────────────────
+const AvatarCropperDialog = ({ open, imageSrc, onClose, onCrop, t }) => {
+  const [zoom, setZoom] = useState(1)
+  const [offset, setOffset] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const containerRef = useRef(null)
+  const imgRef = useRef(null)
+
+  useEffect(() => {
+    if (open) {
+      setZoom(1)
+      setOffset({ x: 0, y: 0 })
+    }
+  }, [open, imageSrc])
+
+  const handleMouseDown = (e) => {
+    e.preventDefault()
+    setIsDragging(true)
+    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y })
+  }
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return
+    setOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    })
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true)
+      const touch = e.touches[0]
+      setDragStart({ x: touch.clientX - offset.x, y: touch.clientY - offset.y })
+    }
+  }
+
+  const handleTouchMove = (e) => {
+    if (!isDragging || e.touches.length !== 1) return
+    const touch = e.touches[0]
+    setOffset({
+      x: touch.clientX - dragStart.x,
+      y: touch.clientY - dragStart.y
+    })
+  }
+
+  const handleConfirm = () => {
+    const canvas = document.createElement('canvas')
+    canvas.width = 400
+    canvas.height = 400
+    const ctx = canvas.getContext('2d')
+
+    const img = imgRef.current
+    if (!img) return
+
+    const rect = img.getBoundingClientRect()
+    const containerRect = containerRef.current.getBoundingClientRect()
+
+    const dx = rect.left - containerRect.left
+    const dy = rect.top - containerRect.top
+
+    const ratioX = img.naturalWidth / rect.width
+    const ratioY = img.naturalHeight / rect.height
+
+    const sx = -dx * ratioX
+    const sy = -dy * ratioY
+
+    const sWidth = containerRect.width * ratioX
+    const sHeight = containerRect.height * ratioY
+
+    ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, 400, 400)
+
+    canvas.toBlob((blob) => {
+      if (blob) {
+        onCrop(blob)
+      }
+    }, 'image/jpeg', 0.9)
+  }
+
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: 5, p: 1 } }}>
+      <DialogTitle sx={{ fontWeight: 800, textAlign: 'center' }}>
+        {t('profile.crop_avatar_title', 'Cắt ảnh đại diện')}
+      </DialogTitle>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box
+          ref={containerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleMouseUp}
+          sx={{
+            width: 250,
+            height: 250,
+            overflow: 'hidden',
+            position: 'relative',
+            cursor: 'move',
+            borderRadius: '50%',
+            border: '3px solid',
+            borderColor: 'primary.main',
+            bgcolor: '#f5f5f5',
+            mx: 'auto',
+            my: 2,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+            userSelect: 'none',
+          }}
+        >
+          <img
+            ref={imgRef}
+            src={imageSrc}
+            alt="Crop source"
+            style={{
+              position: 'absolute',
+              transform: `translate(${offset.x}px, ${offset.y}px) scale(${zoom})`,
+              transformOrigin: '0 0',
+              maxWidth: 'none',
+              userSelect: 'none',
+              pointerEvents: 'none',
+            }}
+            onLoad={(e) => {
+              const img = e.target
+              const containerSize = 250
+              let initWidth, initHeight
+              if (img.naturalWidth > img.naturalHeight) {
+                initHeight = containerSize
+                initWidth = (img.naturalWidth / img.naturalHeight) * containerSize
+              } else {
+                initWidth = containerSize
+                initHeight = (img.naturalHeight / img.naturalWidth) * containerSize
+              }
+              img.style.width = `${initWidth}px`
+              img.style.height = `${initHeight}px`
+              setOffset({
+                x: (containerSize - initWidth) / 2,
+                y: (containerSize - initHeight) / 2
+              })
+            }}
+          />
+        </Box>
+        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, fontWeight: 500 }}>
+          {t('profile.crop_hint', 'Kéo để di chuyển, dùng thanh trượt để phóng to/thu nhỏ')}
+        </Typography>
+        <Box sx={{ width: '80%', display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+          <Slider
+            value={zoom}
+            min={1}
+            max={3}
+            step={0.02}
+            onChange={(_, val) => setZoom(val)}
+            sx={{
+              color: 'primary.dark',
+              '& .MuiSlider-thumb': {
+                bgcolor: 'primary.dark',
+              }
+            }}
+          />
+        </Box>
+      </DialogContent>
+      <DialogActions sx={{ p: 3, justifyContent: 'center', gap: 2 }}>
+        <Button onClick={onClose} sx={{ borderRadius: 3 }}>
+          {t('profile.cancel')}
+        </Button>
+        <Button
+          onClick={handleConfirm}
+          variant="cropAvatarButton"
+          sx={{
+            borderRadius: 3,
+            px: 4
+          }}
+        >
+          {t('profile.crop_confirm', 'Cắt & Lưu')}
+        </Button>
+      </DialogActions>
+    </Dialog>
   )
 }
 

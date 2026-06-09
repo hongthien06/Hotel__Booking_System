@@ -258,24 +258,15 @@ const RegisterPage = () => {
 
                 <Button
                   fullWidth
-                  variant="contained"
+                  variant="registerButton"
                   type="submit"
                   size="large"
                   disabled={isLoading}
                   sx={{
                     mt: 4,
                     py: 1.8,
-                    fontWeight: 'bold',
                     borderRadius: 2,
-                    textTransform: 'none',
-                    fontSize: '1.1rem',
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      transform: 'translateY(-1px)',
-                      bgcolor: 'primary.dark',
-                      color: 'primary.contrastTextHover',
-                      boxShadow: '0 6px 20px rgba(231, 78, 134, 0.4)'
-                    }
+                    fontSize: '1.1rem'
                   }}
                 >
                   {isLoading ? <CircularProgress size={24} color="inherit" /> : t('register.submit_button')}
@@ -376,24 +367,15 @@ const RegisterPage = () => {
               {/* Nút xác nhận */}
               <Button
                 fullWidth
-                variant="contained"
+                variant="registerButton"
                 size="large"
                 disabled={isLoading || otpValues.join('').length !== OTP_LENGTH}
                 onClick={handleVerifyOtp}
                 sx={{
                   py: 1.8,
-                  fontWeight: 'bold',
                   borderRadius: 2,
-                  textTransform: 'none',
                   fontSize: '1.1rem',
-                  mb: 3,
-                  transition: 'all 0.2s ease-in-out',
-                  '&:hover': {
-                    transform: 'translateY(-1px)',
-                    bgcolor: 'primary.dark',
-                    color: 'primary.contrastTextHover',
-                    boxShadow: '0 6px 20px rgba(231, 78, 134, 0.4)'
-                  }
+                  mb: 3
                 }}
               >
                 {isLoading ? <CircularProgress size={24} color="inherit" /> : (t('register.otp_verify') || 'Xác nhận')}

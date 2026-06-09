@@ -209,11 +209,18 @@ public class BookingService {
         List<Long> occupiedRoomIds = getOccupiedRoomIds(request.getCheckIn(), effectiveCheckOutForConflict);
         for (Room room : rooms) {
             if (room.getStatus() != RoomStatus.AVAILABLE) {
-                throw new RuntimeException("Phòng " + room.getRoomNumber() + " không khả dụng");
+                if (room.getStatus() == RoomStatus.OCCUPIED) {
+                    throw new RuntimeException("Xin lỗi quý khách, phòng " + room.getRoomNumber() + " hiện đang có khách lưu trú và không còn trống.");
+                } else if (room.getStatus() == RoomStatus.MAINTENANCE) {
+                    throw new RuntimeException("Xin lỗi quý khách, phòng " + room.getRoomNumber() + " hiện đang trong quá trình bảo trì định kỳ.");
+                } else if (room.getStatus() == RoomStatus.INACTIVE) {
+                    throw new RuntimeException("Xin lỗi quý khách, phòng " + room.getRoomNumber() + " hiện đã tạm ngưng hoạt động.");
+                } else {
+                    throw new RuntimeException("Xin lỗi quý khách, phòng " + room.getRoomNumber() + " hiện tạm thời không khả dụng phục vụ.");
+                }
             }
             if (occupiedRoomIds.contains(room.getRoomId())) {
-                throw new RuntimeException("Phòng " + room.getRoomNumber()
-                        + " đã được đặt trong khoảng thời gian này");
+                throw new RuntimeException("Xin lỗi quý khách, phòng " + room.getRoomNumber() + " đã có khách đặt lịch trong khoảng thời gian này. Quý khách vui lòng chọn ngày khác.");
             }
         }
 

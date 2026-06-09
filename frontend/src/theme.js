@@ -112,12 +112,256 @@ const theme = extendTheme({
       }
     },
     MuiButton: {
+      variants: [
+        {
+          props: { variant: 'seeAll' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'bookNow' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.contrastTextHover,
+              color: theme.vars.palette.primary.contrastText,
+              transform: 'translateY(-3px)',
+              boxShadow: '0 10px 30px rgba(154, 28, 72, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.contrastTextHover,
+              color: theme.vars.palette.primary.contrastText,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'writeReview' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.contrastTextHover,
+              color: theme.vars.palette.primary.contrastText,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.contrastTextHover,
+              color: theme.vars.palette.primary.contrastText,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'loginButton' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'registerButton' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'heroBookNow' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.contrastTextHover,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-3px)',
+              boxShadow: '0 12px 35px rgba(154, 28, 72, 0.4)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'continueButton' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'submitReviewButton' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'payButton' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'historySearchButton' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'historyBookNowButton' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        },
+        {
+          props: { variant: 'cropAvatarButton' },
+          style: ({ theme }) => ({
+            backgroundColor: theme.vars.palette.primary.main,
+            color: theme.vars.palette.primary.contrastText,
+            border: 'none',
+            '&:hover': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(-1px)',
+              boxShadow: '0 6px 20px rgba(172, 24, 78, 0.2)'
+            },
+            '&:active': {
+              backgroundColor: theme.vars.palette.primary.dark,
+              color: theme.vars.palette.primary.contrastTextHover,
+              transform: 'translateY(1px)',
+              boxShadow: 'none'
+            }
+          })
+        }
+      ],
       styleOverrides: {
-        root: ({ theme }) => ({
+        root: {
           borderRadius: '12px',
           textTransform: 'none',
           fontWeight: 700,
           transition: 'all 0.2s ease-in-out',
+        },
+        contained: ({ theme }) => ({
           backgroundColor: theme.vars.palette.primary.dark,
           color: theme.vars.palette.primary.contrastTextHover,
           '&:hover': {

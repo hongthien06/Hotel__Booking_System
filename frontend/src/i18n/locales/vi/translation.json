@@ -257,7 +257,7 @@
     "check_in_short": "Nhận",
     "check_out_short": "Trả",
     "no_data": "Bạn chưa có đơn đặt phòng nào.",
-    "empty_cta": "Hãy thực hiện đặt ngay để không bỏ lỡ các ưu đãi nhé!",
+    "empty_cta": "Đặt phòng ngay để không bỏ lỡ các ưu đãi!",
     "fetch_error": "Lỗi khi lấy lịch sử đặt phòng",
     "confirm_cancel": "Bạn có chắc chắn muốn hủy đặt phòng này?",
     "cancel_error": "Lỗi khi hủy đặt phòng",
