@@ -108,7 +108,7 @@ const RegisterPage = () => {
     setError('')
     const otpCode = otpValues.join('')
     if (otpCode.length !== OTP_LENGTH) {
-      return setError(t('register.otp_incomplete') || 'Vui lòng nhập đủ 6 chữ số OTP')
+      return setError(t('register.otp_incomplete'))
     }
     setIsLoading(true)
     try {
@@ -117,7 +117,7 @@ const RegisterPage = () => {
       navigate('/home')
     } catch (err) {
       const data = err.response?.data
-      let errMsg = t('register.otp_invalid') || 'Mã OTP không chính xác hoặc đã hết hạn'
+      let errMsg = t('register.otp_invalid')
       if (data) {
         if (data.message) errMsg = data.message
         else if (data.error) errMsg = data.error
@@ -139,7 +139,7 @@ const RegisterPage = () => {
       setCountdown(RESEND_COUNTDOWN)
     } catch (err) {
       const data = err.response?.data
-      setError(data?.message || t('register.resend_failed') || 'Không thể gửi lại OTP')
+      setError(data?.message || t('register.resend_failed'))
     } finally {
       setIsLoading(false)
     }
@@ -321,10 +321,10 @@ const RegisterPage = () => {
               </Box>
 
               <Typography variant="h5" sx={{ fontWeight: 800, mb: 1, color: 'primary.contrastText' }}>
-                {t('register.otp_title') || 'Xác thực email'}
+                {t('register.otp_title')}
               </Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 4, maxWidth: 360, mx: 'auto' }}>
-                {t('register.otp_subtitle') || 'Chúng tôi đã gửi mã OTP 6 chữ số đến'}{' '}
+                {t('register.otp_subtitle')}{' '}
                 <strong>{formData.email}</strong>
               </Typography>
 
@@ -378,15 +378,15 @@ const RegisterPage = () => {
                   mb: 3
                 }}
               >
-                {isLoading ? <CircularProgress size={24} color="inherit" /> : (t('register.otp_verify') || 'Xác nhận')}
+                {isLoading ? <CircularProgress size={24} color="inherit" /> : t('register.otp_verify')}
               </Button>
 
               {/* Gửi lại OTP */}
               <Typography variant="body2" color="text.secondary">
-                {t('register.otp_not_received') || 'Chưa nhận được mã?'}{' '}
+                {t('register.otp_not_received')}{' '}
                 {countdown > 0 ? (
                   <Box component="span" sx={{ fontWeight: 700, color: 'primary.contrastText' }}>
-                    {t('register.otp_resend_in') || 'Gửi lại sau'} {countdown}s
+                    {t('register.otp_resend_in')} {countdown}s
                   </Box>
                 ) : (
                   <Box
@@ -400,7 +400,7 @@ const RegisterPage = () => {
                       '&:hover': { color: 'primary.dark' }
                     }}
                   >
-                    {t('register.otp_resend') || 'Gửi lại mã'}
+                    {t('register.otp_resend')}
                   </Box>
                 )}
               </Typography>

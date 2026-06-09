@@ -18,6 +18,7 @@ const PC = '#9a1c48'
 
 const BookingSelectDialog = ({ open, onClose, onSelect }) => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [bookings, setBookings] = useState([])
   const [selectedBookingId, setSelectedBookingId] = useState('')
   const [loading, setLoading] = useState(false)
@@ -61,7 +62,7 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: 3 } }}>
-      <DialogTitle sx={{ fontWeight: 800 }}>Chọn đơn đặt phòng để đánh giá</DialogTitle>
+      <DialogTitle sx={{ fontWeight: 800 }}>{t('reviews.select_booking', 'Chọn đơn đặt phòng để đánh giá')}</DialogTitle>
       <DialogContent>
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -70,7 +71,7 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
         ) : bookings.length === 0 ? (
           <Box sx={{ py: 3, textAlign: 'center' }}>
             <Typography variant="body1" color="text.secondary">
-              Bạn không có đơn đặt phòng nào chưa được đánh giá.{' '}
+              {t('reviews.no_unreviewed', 'Bạn không có đơn đặt phòng nào chưa được đánh giá.')}{' '}
               <Box
                 component={Link}
                 to="/bookings"
@@ -83,17 +84,17 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
                   '&:hover': { color: '#7d1639' }
                 }}
               >
-                Đặt phòng ngay
+                {t('reviews.book_now', 'Đặt phòng ngay')}
               </Box>
             </Typography>
           </Box>
         ) : (
           <FormControl fullWidth sx={{ mt: 1 }}>
-            <InputLabel id="select-booking-label">Đơn đặt phòng của bạn</InputLabel>
+            <InputLabel id="select-booking-label">{t('reviews.your_booking', 'Đơn đặt phòng của bạn')}</InputLabel>
             <Select
               labelId="select-booking-label"
               value={selectedBookingId}
-              label="Đơn đặt phòng của bạn"
+              label={t('reviews.your_booking', 'Đơn đặt phòng của bạn')}
               onChange={(e) => setSelectedBookingId(e.target.value)}
               sx={{ borderRadius: 2 }}
             >
@@ -102,7 +103,7 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
                 const hotelName = b.room?.hotel?.name || (b.bookingRooms && b.bookingRooms.length > 0 ? b.bookingRooms[0].room?.hotel?.name : 'Khách sạn')
                 return (
                   <MenuItem key={b.bookingId} value={b.bookingId}>
-                    Đơn #{b.bookingCode} - Phòng {roomNum} ({hotelName})
+                    {t('reviews.booking_format', 'Đơn #{{code}} - Phòng {{room}} ({{hotel}})', { code: b.bookingCode, room: roomNum, hotel: hotelName })}
                   </MenuItem>
                 )
               })}
@@ -111,14 +112,14 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
         )}
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3 }}>
-        <Button onClick={onClose} sx={{ borderRadius: 2 }}>Hủy</Button>
+        <Button onClick={onClose} sx={{ borderRadius: 2 }}>{t('common.cancel', 'Hủy')}</Button>
         <Button
           variant="continueButton"
           onClick={handleConfirm}
           disabled={bookings.length === 0 || !selectedBookingId || loading}
           sx={{ borderRadius: 2 }}
         >
-          Tiếp tục
+          {t('reviews.continue', 'Tiếp tục')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -140,7 +141,7 @@ const ReviewsPage = () => {
 
   const handleWriteReviewClick = () => {
     if (!isAuthenticated) {
-      toast.error('Vui lòng đăng nhập để viết đánh giá!')
+      toast.error(t('reviews.login_required', 'Vui lòng đăng nhập để viết đánh giá!'))
       return
     }
     setBookingSelectOpen(true)

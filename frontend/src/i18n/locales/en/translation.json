@@ -44,6 +44,17 @@
     "login_required_title": "Login Required",
     "login_to_book_desc": "Please login to proceed with your booking and enjoy our best offers."
   },
+  "register": {
+    "otp_incomplete": "Please enter all 6 digits of the OTP",
+    "otp_invalid": "Invalid or expired OTP",
+    "resend_failed": "Failed to resend OTP",
+    "otp_title": "Email Verification",
+    "otp_subtitle": "We have sent a 6-digit OTP to",
+    "otp_verify": "Verify",
+    "otp_not_received": "Didn't receive the code?",
+    "otp_resend_in": "Resend in",
+    "otp_resend": "Resend Code"
+  },
   "dashboard": {
     "title": "Dashboard Overview",
     "welcome": "Welcome back",
@@ -813,6 +824,13 @@
     "no_reviews": "No reviews yet.",
     "room": "Room",
     "hotel_reply": "Admin Hotel Booking System",
+    "select_booking": "Select booking to review",
+    "no_unreviewed": "You have no unreviewed bookings.",
+    "book_now": "Book now",
+    "your_booking": "Your booking",
+    "booking_format": "Order #{{code}} - Room {{room}} ({{hotel}})",
+    "login_required": "Please log in to write a review!",
+    "continue": "Continue",
     "write_review": "Write a Review",
     "rating_overall": "Overall Rating",
     "rating_required": "Please select a star rating",
