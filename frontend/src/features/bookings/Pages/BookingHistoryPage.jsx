@@ -255,7 +255,12 @@ const BookingHistoryPage = () => {
   }
 
   const totalBookings = membership?.bookingCount || bookings.length || 0
-  const totalSpent = membership?.totalSpent || bookings.reduce((sum, b) => sum + (b.status !== 'CANCELLED' && b.status !== 'REFUNDED' ? b.totalAmount || 0 : 0), 0)
+  // Total spent should only include bookings that reached CONFIRMED (paid)
+  const totalSpent = membership?.totalSpent || bookings.reduce((sum, b) => {
+    if (b.status !== 'CONFIRMED') return sum
+    const price = Number(b.finalAmount || b.totalAmount || getHistoryRoomTotal(b) || 0)
+    return sum + price
+  }, 0)
   const totalNights = bookings.reduce((sum, b) => sum + (b.status !== 'CANCELLED' && b.status !== 'REFUNDED' ? Number(b.totalNights || nightsBetween(b.checkInDate, b.checkOutDate) || 0) : 0), 0)
   const memberPoints = membership?.points || Math.floor(totalSpent / 100000)
 
