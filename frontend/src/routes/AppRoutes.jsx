@@ -17,34 +17,72 @@ import MembershipPage from '~/features/membership/MembershipPage'
 import ReviewsPage from '~/features/reviews/ReviewsPage'
 import ReviewManagementPage from '~/features/admin-dashboard/ReviewManagementPage'
 
+import { useAuth } from '~/shared/hooks/useAuth'
+import Box from '@mui/material/Box'
+import CircularProgress from '@mui/material/CircularProgress'
+
 const AppRoutes = () => {
-  const isAuthenticated = !!localStorage.getItem('token');
+  const { isAuthenticated, user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress color="primary" />
+      </Box>
+    )
+  }
+
+  const isAdminOrManager = isAuthenticated && user?.roles?.some(r => {
+    const roleStr = typeof r === 'string' ? r : (r?.roleName || r?.authority || '')
+    const cleanRole = roleStr.replace('ROLE_', '')
+    return cleanRole === 'ADMIN' || cleanRole === 'MANAGER'
+  })
 
   return (
     <Routes>
-      {/* Điều hướng mặc định về "/home" */}
-      <Route path="/" element={<Navigate to="/home" replace />} />
+      {/* Điều hướng mặc định */}
+      <Route path="/" element={<Navigate to={isAdminOrManager ? "/dashboard" : "/home"} replace />} />
 
       {/* Các trang công khai - không có Header */}
-      <Route path='/login' element={<LoginPage />} />
-      <Route path='/register' element={<RegisterPage />} />
-      <Route path='/forgot-password' element={<ForgotPasswordPage />} />
-      <Route path='/reset-password' element={<ResetPasswordPage />} />
+      <Route path='/login' element={
+        isAuthenticated ? <Navigate to={isAdminOrManager ? "/dashboard" : "/home"} replace /> : <LoginPage />
+      } />
+      <Route path='/register' element={
+        isAuthenticated ? <Navigate to={isAdminOrManager ? "/dashboard" : "/home"} replace /> : <RegisterPage />
+      } />
+      <Route path='/forgot-password' element={
+        isAuthenticated ? <Navigate to={isAdminOrManager ? "/dashboard" : "/home"} replace /> : <ForgotPasswordPage />
+      } />
+      <Route path='/reset-password' element={
+        isAuthenticated ? <Navigate to={isAdminOrManager ? "/dashboard" : "/home"} replace /> : <ResetPasswordPage />
+      } />
 
       {/* Các trang sử dụng MainLayout (Có Header + Navbar) */}
       <Route element={<MainLayout />}>
         {/* Các trang công khai */}
-        <Route path='/home' element={<HomePage />} />
-        <Route path='/bookings' element={<BookingPage />} />
+        <Route path='/home' element={
+          isAdminOrManager ? <Navigate to="/dashboard" replace /> : <HomePage />
+        } />
+        <Route path='/bookings' element={
+          isAdminOrManager ? <Navigate to="/dashboard" replace /> : <BookingPage />
+        } />
         <Route path='/rooms' element={<RoomList />} />
-        <Route path='/reviews' element={<ReviewsPage />} />
+        <Route path='/reviews' element={
+          isAdminOrManager ? <Navigate to="/dashboard" replace /> : <ReviewsPage />
+        } />
         
         {/* Các trang yêu cầu đăng nhập (Customer / Admin / Manager) */}
         <Route element={<PrivateRoute />}>
           <Route path='/profile' element={<ProfilePage />} />
-          <Route path='/booking-history' element={<BookingHistoryPage />} />
-          <Route path='/membership' element={<MembershipPage />} />
-          <Route path='/payment' element={<Payments />} />
+          <Route path='/booking-history' element={
+            isAdminOrManager ? <Navigate to="/dashboard" replace /> : <BookingHistoryPage />
+          } />
+          <Route path='/membership' element={
+            isAdminOrManager ? <Navigate to="/dashboard" replace /> : <MembershipPage />
+          } />
+          <Route path='/payment' element={
+            isAdminOrManager ? <Navigate to="/dashboard" replace /> : <Payments />
+          } />
         </Route>
 
         {/* Các trang dành cho Admin và Manager */}

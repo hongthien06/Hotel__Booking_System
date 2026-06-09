@@ -99,6 +99,12 @@ const ProfilePage = () => {
   const membershipTierName = getMembershipTierName(membership?.tier, i18n.language)
   const membershipPhone = getMembershipTrackingPhone(membership)
 
+  const isAdminOrManager = profile?.roles?.some(r => {
+    const roleStr = typeof r === 'string' ? r : (r?.roleName || r?.authority || '')
+    const cleanRole = roleStr.replace('ROLE_', '')
+    return cleanRole === 'ADMIN' || cleanRole === 'MANAGER'
+  })
+
   const fetchProfile = async () => {
     try {
       const data = await getMyProfileApi()
@@ -344,40 +350,41 @@ const ProfilePage = () => {
             />
 
             {/* Membership Section (Simplified) */}
-            {membership?.tier ? (() => {
-              const tier = membership.tier
-              const v = TIER_VISUAL[tier.tierCode] || defaultVisual
-              return (
-                <Box sx={{ mt: 2, borderRadius: 4, overflow: 'hidden', border: `2px solid ${v.border}`, textAlign: 'left', width: '100%' }}>
-                  {/* Gradient header */}
-                  <Box sx={{
-                    background: v.gradient, px: 2, py: 1.5,
-                    display: 'flex', flexDirection: 'column', gap: 1
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Box sx={{
-                          width: 28, height: 28, borderRadius: '50%',
-                          bgcolor: 'rgba(255,255,255,0.3)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          color: 'white', flexShrink: 0
-                        }}>
-                          {v.icon}
+            {!isAdminOrManager && (
+              membership?.tier ? (() => {
+                const tier = membership.tier
+                const v = TIER_VISUAL[tier.tierCode] || defaultVisual
+                return (
+                  <Box sx={{ mt: 2, borderRadius: 4, overflow: 'hidden', border: `2px solid ${v.border}`, textAlign: 'left', width: '100%' }}>
+                    {/* Gradient header */}
+                    <Box sx={{
+                      background: v.gradient, px: 2, py: 1.5,
+                      display: 'flex', flexDirection: 'column', gap: 1
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box sx={{
+                            width: 28, height: 28, borderRadius: '50%',
+                            bgcolor: 'rgba(255,255,255,0.3)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: 'white', flexShrink: 0
+                          }}>
+                            {v.icon}
+                          </Box>
+                          <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
+                            {t('profile.membership_tier')}
+                          </Typography>
                         </Box>
-                        <Typography variant="caption" sx={{ color: 'rgba(255,255,255,0.95)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, fontSize: '0.7rem', whiteSpace: 'nowrap' }}>
-                          {t('profile.membership_tier')}
-                        </Typography>
+                        <Chip
+                          label={`-${tier.discountPct}%`}
+                          size="small"
+                          sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: v.textColor, fontWeight: 800, fontSize: 11, flexShrink: 0 }}
+                        />
                       </Box>
-                      <Chip
-                        label={`-${tier.discountPct}%`}
-                        size="small"
-                        sx={{ bgcolor: 'rgba(255,255,255,0.9)', color: v.textColor, fontWeight: 800, fontSize: 11, flexShrink: 0 }}
-                      />
+                      <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 900, lineHeight: 1.1, fontSize: '0.95rem', pl: 4.5, whiteSpace: 'nowrap', mt: -0.5 }}>
+                        {membershipTierName}
+                      </Typography>
                     </Box>
-                    <Typography variant="subtitle2" sx={{ color: 'white', fontWeight: 900, lineHeight: 1.1, fontSize: '0.95rem', pl: 4.5, whiteSpace: 'nowrap', mt: -0.5 }}>
-                      {membershipTierName}
-                    </Typography>
-                  </Box>
 
                     {/* View details button only */}
                     <Box sx={{ px: 2, py: 2, bgcolor: v.bg }}>
@@ -406,30 +413,31 @@ const ProfilePage = () => {
                         {t('profile.view_membership_details')}
                       </Button>
                     </Box>
+                  </Box>
+                )
+              })() : (
+                /* No membership yet — invitation card */
+                <Box sx={{ mt: 2, p: 2.5, borderRadius: 4, bgcolor: '#fdf2f8', border: '1px solid #f9a8d4', textAlign: 'center' }}>
+                  <CardGiftcard sx={{ fontSize: 36, color: '#be185d', mb: 1 }} />
+                  <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#831843', mb: 0.5 }}>
+                    {t('profile.membership_invite_title')}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
+                    {t('profile.membership_invite_desc')}
+                  </Typography>
+                  <Button
+                    size="small"
+                    variant="contained"
+                    onClick={() => navigate('/bookings')}
+                    sx={{
+                      borderRadius: 2, fontWeight: 700, fontSize: '0.75rem',
+                      bgcolor: '#be185d', '&:hover': { bgcolor: '#9f1239' }
+                    }}
+                  >
+                    {t('common.book_now')}
+                  </Button>
                 </Box>
               )
-            })() : (
-              /* No membership yet — invitation card */
-              <Box sx={{ mt: 2, p: 2.5, borderRadius: 4, bgcolor: '#fdf2f8', border: '1px solid #f9a8d4', textAlign: 'center' }}>
-                <CardGiftcard sx={{ fontSize: 36, color: '#be185d', mb: 1 }} />
-                <Typography variant="subtitle2" sx={{ fontWeight: 800, color: '#831843', mb: 0.5 }}>
-                  {t('profile.membership_invite_title')}
-                </Typography>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1.5 }}>
-                  {t('profile.membership_invite_desc')}
-                </Typography>
-                <Button
-                  size="small"
-                  variant="contained"
-                  onClick={() => navigate('/bookings')}
-                  sx={{
-                    borderRadius: 2, fontWeight: 700, fontSize: '0.75rem',
-                    bgcolor: '#be185d', '&:hover': { bgcolor: '#9f1239' }
-                  }}
-                >
-                  {t('common.book_now')}
-                </Button>
-              </Box>
             )}
 
             <Divider sx={{ my: 3, borderColor: 'primary.main' }} />

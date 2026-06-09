@@ -287,24 +287,35 @@ const DashboardPage = () => {
         );
 
       case 'status':
+        const allStatuses = ['CONFIRMED', 'CHECKED_OUT', 'CANCELLED'];
+        const pieData = allStatuses.map(status => {
+          const existing = (chartData.bookingsByStatus || []).find(item => item.status === status);
+          return {
+            status,
+            count: existing ? existing.count : 0
+          };
+        });
+
         return (
           <ResponsiveContainer width="100%" height={350}>
             <PieChart>
               <Pie
-                data={chartData.bookingsByStatus || []}
+                data={pieData}
                 cx="50%"
                 cy="50%"
                 outerRadius={130}
                 stroke="none"
                 dataKey="count"
                 nameKey="status"
+                labelLine={false}
                 label={({ status, count, percent }) => {
+                  if (count === 0) return null;
                   const labelStatus = t(`dashboard.status_labels.${status}`) || status;
                   const percentStr = percent ? ` (${(percent * 100).toFixed(0)}%)` : '';
                   return `${labelStatus}: ${count}${percentStr}`;
                 }}
               >
-                {(chartData.bookingsByStatus || []).map((entry, idx) => (
+                {pieData.map((entry, idx) => (
                   <Cell key={idx} fill={STATUS_COLORS[entry.status] || CHART_COLORS[idx % CHART_COLORS.length]} />
                 ))}
               </Pie>

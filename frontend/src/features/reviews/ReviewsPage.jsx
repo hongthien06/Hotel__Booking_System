@@ -128,7 +128,13 @@ const BookingSelectDialog = ({ open, onClose, onSelect }) => {
 
 const ReviewsPage = () => {
   const { t } = useTranslation()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, user } = useAuth()
+  
+  const isAdminOrManager = isAuthenticated && user?.roles?.some(r => {
+    const roleStr = typeof r === 'string' ? r : (r?.roleName || r?.authority || '')
+    const cleanRole = roleStr.replace('ROLE_', '')
+    return cleanRole === 'ADMIN' || cleanRole === 'MANAGER'
+  })
   const [reviews, setReviews] = useState([])
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -220,17 +226,19 @@ const ReviewsPage = () => {
           <Typography variant="body1" sx={{ opacity: 0.85, maxWidth: 600, mx: 'auto', mb: 3 }}>
             {t('reviews.subtitle')}
           </Typography>
-          <Button
-            variant="writeReview"
-            onClick={handleWriteReviewClick}
-            sx={{
-              borderRadius: 3,
-              px: 4,
-              py: 1.2
-            }}
-          >
-            {t('reviews.write_review')}
-          </Button>
+          {!isAdminOrManager && (
+            <Button
+              variant="writeReview"
+              onClick={handleWriteReviewClick}
+              sx={{
+                borderRadius: 3,
+                px: 4,
+                py: 1.2
+              }}
+            >
+              {t('reviews.write_review')}
+            </Button>
+          )}
         </Container>
       </Box>
 

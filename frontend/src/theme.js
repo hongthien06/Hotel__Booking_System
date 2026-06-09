@@ -362,18 +362,18 @@ const theme = extendTheme({
           transition: 'all 0.2s ease-in-out',
         },
         contained: ({ theme }) => ({
-          backgroundColor: theme.vars.palette.primary.dark,
-          color: theme.vars.palette.primary.contrastTextHover,
+          backgroundColor: theme.vars.palette.primary.main,
+          color: theme.vars.palette.primary.contrastText,
           '&:hover': {
             transform: 'translateY(-1px)',
-            backgroundColor: theme.vars.palette.primary.main,
-            color: theme.vars.palette.primary.contrastText,
+            backgroundColor: theme.vars.palette.primary.dark,
+            color: theme.vars.palette.primary.contrastTextHover,
             boxShadow: '0 6px 20px rgba(172, 24, 78, 0.4)'
           },
           '&:active': {
             transform: 'translateY(1px)',
-            backgroundColor: theme.vars.palette.primary.main,
-            color: theme.vars.palette.primary.contrastText,
+            backgroundColor: theme.vars.palette.primary.dark,
+            color: theme.vars.palette.primary.contrastTextHover,
             boxShadow: 'none'
           }
         })

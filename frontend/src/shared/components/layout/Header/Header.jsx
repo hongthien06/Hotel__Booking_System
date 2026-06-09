@@ -14,11 +14,9 @@ const navItems = [
 ]
 
 const adminNavItems = [
-  { label: 'header.bookings', path: '/bookings', icon: <EventNote fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
-  { label: 'header.rooms', path: '/rooms', icon: <KingBed fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
+  { label: 'header.rooms', path: '/rooms', icon: <KingBed fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.review_management', path: '/admin/reviews', icon: <RateReview fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
-  { label: 'header.users', path: '/admin/users', icon: <Person fontSize="small" />, roles: ['MANAGER'] },
 ]
 
 const Header = () => {
@@ -81,22 +79,23 @@ const Header = () => {
         variant="h6"
         noWrap
         sx={{
-          fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.5px', color: 'primary.contrastText',
+          fontWeight: 800,
+          cursor: hasRole(['ADMIN', 'MANAGER']) ? 'default' : 'pointer',
+          letterSpacing: '-0.5px',
+          color: 'primary.contrastText',
           fontSize: { xs: '1rem', sm: '1.25rem' },
           flexShrink: 0,
           maxWidth: { xs: 120, sm: 'none' }
         }}
-        onClick={() => navigate('/home')}
+        onClick={hasRole(['ADMIN', 'MANAGER']) ? undefined : () => navigate('/home')}
       >
         🏨 <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>{t('header.logo_text')}</Box>
       </Typography>
 
       {/* Navigation Links */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-        {/* Home / Bookings — Bookings hidden for Admin (shown in admin section) */}
-        {navItems
-          .filter((item) => !(item.path === '/bookings' && hasRole(['ADMIN', 'MANAGER'])))
-          .map((item) => (
+        {/* Home / Bookings / Reviews — hidden for Admin/Manager */}
+        {!hasRole(['ADMIN', 'MANAGER']) && navItems.map((item) => (
           <Button
             key={item.path}
             startIcon={item.icon}
@@ -125,7 +124,7 @@ const Header = () => {
         ))}
 
         {/* Admin/Manager items */}
-        {adminNavItems.filter(item => hasRole(item.roles)).map((item) => (
+        {hasRole(['ADMIN', 'MANAGER']) && adminNavItems.filter(item => hasRole(item.roles)).map((item) => (
           <Button
             key={item.path}
             startIcon={item.icon}
@@ -194,10 +193,12 @@ const Header = () => {
                 <Person fontSize="small" color="primary" /> {t("header.profile") || "Trang cá nhân"}
               </MenuItem>
 
-              {/* Lịch sử đặt phòng — hiện cho tất cả user */}
-              <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
-                <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
-              </MenuItem>
+              {/* Lịch sử đặt phòng — ẩn cho Admin/Manager */}
+              {!hasRole(['ADMIN', 'MANAGER']) && (
+                <MenuItem onClick={() => { navigate('/booking-history'); handleMenuClose(); }} sx={{ py: 1.2, gap: 1.5, fontWeight: 600 }}>
+                  <History fontSize="small" color="primary" /> {t("header.bookings_history") || "Lịch sử đặt phòng"}
+                </MenuItem>
+              )}
 
               {/* Membership — only for customers */}
               {!hasRole(['ADMIN', 'MANAGER']) && (
