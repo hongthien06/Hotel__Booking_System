@@ -13,6 +13,7 @@ import imgCaoBang from '../../assets/CAO_BANG.jpg'
 import imgHaNam from '../../assets/HA_NAM.webp'
 import imgHaTinh from '../../assets/HA_TINH.png'
 import imgQuangNam from '../../assets/QUANG_NAM.jpeg'
+import bannerImg from '../../assets/Banner.png'
 import imgCanTho from '../../assets/CAN_THO.jpg'
 import imgThanhHoa from '../../assets/THANH_HOA.jpg'
 import imgDienBien from '../../assets/DIEN_BIEN.jpg'
@@ -478,46 +479,20 @@ const OffersSection = ({ membership, lang, onOpenMembership }) => {
 
   return (
     <Box sx={{ mb: 6, px: { xs: 2, md: 6 } }}>
-      <Card sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 8px 30px rgba(2,6,23,0.06)' }}>
-        <Box sx={{ display: 'flex', alignItems: 'stretch', bgcolor: '#f5f7ff' }}>
-          <Box sx={{ flex: 1, p: { xs: 3, md: 6 }, position: 'relative' }}>
-            <Box sx={{ display: 'flex', gap: 1, mb: 1, alignItems: 'center' }}>
-              <Chip
-                icon={<EmojiEvents />}
-                label={membership?.tier ? `${t('banners.membership_badge_label')}: ${tierName}` : t('banners.membership_badge_label')}
-                onClick={onOpenMembership}
-                sx={{ bgcolor: '#fdf2f8', color: '#7b1636', border: '1px solid #f9a8d4', fontWeight: 800 }}
-              />
-              {trackingPhone && (
-                <Chip icon={<Phone />} label={trackingPhone} sx={{ bgcolor: '#fff', border: '1px solid #eee' }} />
-              )}
-            </Box>
-
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-              Không điều kiện ràng buộc. An tâm nghỉ dưỡng.
-            </Typography>
-
-            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1.5, color: '#173b8a' }}>
-              Đặt với Ưu Đãi Thành Viên Mới
-            </Typography>
-
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3, maxWidth: 520 }}>
-              Giảm ngay <strong>10%</strong> hóa đơn đầu tiên khi đặt phòng — đặc quyền dành riêng cho thành viên mới đăng ký.
-            </Typography>
-
-            <Button variant="contained" disabled sx={{ textTransform: 'none', bgcolor: '#fff', color: '#bfbfc3', borderRadius: 2, px: 4, py: 1.25 }}>
-              Tiết kiệm cho chuyến đi tới
-            </Button>
-          </Box>
-
-          <Box sx={{ width: { xs: 140, md: 360 }, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'transparent' }}>
-            <CardMedia component="img" image={imgNoResults} alt="banner" sx={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <Box sx={{ position: 'absolute', top: 16, right: 16, bgcolor: '#fff', borderRadius: 2, p: 1.5, textAlign: 'center', border: '1px solid #f4d8e2' }}>
-              <Typography sx={{ fontWeight: 800, color: '#be185d' }}>10%</Typography>
-              <Typography variant="caption" color="text.secondary">Giảm ngay</Typography>
-            </Box>
-          </Box>
-        </Box>
+      <Card
+        sx={{ borderRadius: 3, overflow: 'hidden', boxShadow: '0 8px 30px rgba(2,6,23,0.06)', cursor: 'pointer' }}
+        onClick={onOpenMembership}
+      >
+        <Box
+          component="img"
+          src={bannerImg}
+          alt="Ưu đãi đặc quyền"
+          sx={{
+            width: '100%',
+            height: 'auto',
+            display: 'block',
+          }}
+        />
       </Card>
     </Box>
   )
