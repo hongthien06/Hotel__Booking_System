@@ -151,7 +151,10 @@ public class RoomService {
     // UI helpers: return limited lists for frontend sections
     public List<RoomResponse> getFeaturedRooms(int limit) {
         var page = roomRepository.findAllByOrderByCreatedAtDesc(org.springframework.data.domain.PageRequest.of(0, Math.max(1, limit)));
-        return page.getContent().stream().map(RoomResponse::from).toList();
+        return page.getContent().stream()
+                .filter(r -> r.getStatus() != com.hotel.modules.rooms.entity.enums.RoomStatus.INACTIVE)
+                .map(RoomResponse::from)
+                .toList();
     }
 
     public List<RoomResponse> getTopRatedRooms(int limit) {
