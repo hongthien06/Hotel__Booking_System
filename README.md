@@ -50,6 +50,9 @@ Dự án phù hợp cho môi trường vận hành nội bộ hoặc demo học 
 - Thanh toán bằng VNPay hoặc MoMo.
 - Xem lịch sử đặt phòng và trạng thái thanh toán.
 - Sử dụng chatbot AI để hỗ trợ tư vấn.
+ - Quản lý chương trình thành viên (membership): xem/hưởng ưu đãi và thông tin thành viên.
+ - Hỗ trợ quy trình check-in/check-out (frontend module `checkin-checkout`).
+ - Xem và quản lý hóa đơn khách hàng (customers-invoice) trên giao diện người dùng.
 
 ### Quản trị / vận hành
 - Quản lý khách sạn, tiện ích, loại phòng và phòng.
@@ -58,6 +61,8 @@ Dự án phù hợp cho môi trường vận hành nội bộ hoặc demo học 
 - Xem dashboard tổng quan với số liệu nghiệp vụ.
 - Upload ảnh lên Cloudinary.
 - Xuất hóa đơn PDF và gửi email theo mẫu Thymeleaf.
+ - Quản lý chương trình thành viên, hạng thẻ và ưu đãi.
+ - Quản lý đánh giá / review, bao gồm kiểm duyệt và trả lời.
 
 ### Nền tảng
 - Xác thực JWT và Spring Security.
