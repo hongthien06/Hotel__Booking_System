@@ -1,11 +1,10 @@
+import { Dashboard, EmojiEvents, EventNote, History, Home, KingBed, Logout, Menu as MenuIcon, Person, RateReview } from '@mui/icons-material'
+import { Box, Button, Divider, IconButton, Menu, MenuItem, Tooltip, Typography } from '@mui/material'
 import React from 'react'
-import { Box, Typography, Button, Avatar, Tooltip, IconButton } from '@mui/material'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../../../../shared/hooks/useAuth'
-import { Home, EventNote, AccountBalanceWallet, Dashboard, Logout, KingBed, History, Menu as MenuIcon, Person, EmojiEvents, RateReview } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useAuth } from '../../../../shared/hooks/useAuth'
 import LanguageSwitcher from '../../LanguageSwitcher'
-import { Menu, MenuItem, Divider } from '@mui/material'
 
 const navItems = [
   { label: 'header.home', path: '/home', icon: <Home fontSize="small" /> },
