@@ -14,8 +14,6 @@ const navItems = [
 ]
 
 const adminNavItems = [
-  { label: 'header.bookings', path: '/bookings', icon: <EventNote fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
-  { label: 'header.rooms', path: '/rooms', icon: <KingBed fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.dashboard', path: '/dashboard', icon: <Dashboard fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.review_management', path: '/admin/reviews', icon: <RateReview fontSize="small" />, roles: ['ADMIN', 'MANAGER'] },
   { label: 'header.users', path: '/admin/users', icon: <Person fontSize="small" />, roles: ['MANAGER'] },
