@@ -138,7 +138,7 @@ const HomePage = () => {
         {[
           { number: '200+', labelKey: 'home.stats.rooms' },
           { number: '50K+', labelKey: 'home.stats.customers' },
-          { number: '4.8★', labelKey: 'home.stats.rating' },
+          { number: '4.7★', labelKey: 'home.stats.rating' },
           { number: '24/7', labelKey: 'home.stats.support' },
         ].map((stat, i) => (
           <Box key={i} sx={{
