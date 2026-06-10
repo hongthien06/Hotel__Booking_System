@@ -45,7 +45,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import RoomDetail from '../rooms/Details/RoomDetail'
 import BookingDialog from './components/BookingDialog'
 import i18n from 'i18next'
-import { formatCurrency as formatCurrencyShared } from '../../shared/utils/formatters'
+import { formatCurrency as formatCurrencyShared, getUsdToVndRate } from '../../shared/utils/formatters'
 import { getMembershipTierName, getMembershipTrackingPhone } from '../../shared/utils/membership'
 const PC = '#c0496e'
 const PC_LIGHT = '#fce4ec'
@@ -392,7 +392,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
           valueLabelDisplay="auto"
           valueLabelFormat={(val) => {
             const lang = i18n?.language || 'vi'
-            const rate = 23000
+            const rate = getUsdToVndRate()
             if (String(lang).toLowerCase().startsWith('vi')) {
               return `${new Intl.NumberFormat('vi-VN').format(val)}₫`
             }
@@ -416,7 +416,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         <Typography variant="caption" color="text.secondary">
           {(() => {
             const lang = i18n?.language || 'vi'
-            const rate = 23000 // VND -> USD approximate
+            const rate = getUsdToVndRate() // VND -> USD approximate
             if (String(lang).toLowerCase().startsWith('vi')) {
               return `${new Intl.NumberFormat('vi-VN').format(minPrice || 0)}₫`
             }
@@ -427,7 +427,7 @@ const Sidebar = ({ params, onParam, roomTypes, setRoomTypes, bedTypes, setBedTyp
         <Typography variant="caption" color="text.secondary">
           {(() => {
             const lang = i18n?.language || 'vi'
-            const rate = 23000
+            const rate = getUsdToVndRate()
             if (String(lang).toLowerCase().startsWith('vi')) {
               return `${new Intl.NumberFormat('vi-VN').format(maxPrice || 10000000)}₫`
             }

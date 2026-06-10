@@ -13,10 +13,10 @@ import {
 } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { formatCurrency } from '~/shared/utils/formatters'
 import { applyVoucherApi, getActiveVouchersApi, removeVoucherApi } from '~/shared/api/voucherApi'
 
-const formatVND = (n) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
+const formatVND = (n) => formatCurrency(n)
 
 const PromoInput = ({ bookingId, applied, onApply, onRemove }) => {
   const { t } = useTranslation()

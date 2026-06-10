@@ -4,9 +4,9 @@ import {
   Typography
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { formatCurrency } from '~/shared/utils/formatters'
 
-const formatVND = (n) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
+const formatVND = (n) => formatCurrency(n)
 
 const InvoiceMain = ({ invoiceData }) => {
   const { t } = useTranslation()
@@ -84,7 +84,7 @@ const InvoiceMain = ({ invoiceData }) => {
             <Typography fontSize={13}>{t('payment.deposit')}</Typography>
             <Typography variant="caption" color="text.secondary">{t('payment.deposit_sub')}</Typography>
           </Box>
-          <Typography fontSize={13} fontWeight={500}>0</Typography>
+          <Typography fontSize={13} fontWeight={500}>{formatVND(0)}</Typography>
         </Box>
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>

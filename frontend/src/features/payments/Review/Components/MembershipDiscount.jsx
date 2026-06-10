@@ -1,10 +1,10 @@
 import { Box, Chip, Stack, Typography } from '@mui/material'
 import { EmojiEvents, Celebration, Groups, Event } from '@mui/icons-material'
 import { useTranslation } from 'react-i18next'
+import { formatCurrency } from '~/shared/utils/formatters'
 import { useBookingContext } from '../../_id'
 
-const fmtVND = (n) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
+const fmtVND = (n) => formatCurrency(n)
 
 const DiscountBadge = ({ icon, label, value, color, bgColor, borderColor }) => (
   <Box sx={{

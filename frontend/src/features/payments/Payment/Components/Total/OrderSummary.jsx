@@ -4,11 +4,11 @@ import {
   Typography
 } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import { formatCurrency } from '~/shared/utils/formatters'
 import { useBookingContext } from '../../../_id'
 import { getBookingTotals } from '../../../utils/bookingTotals'
 
-const formatVND = (n) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
+const formatVND = (n) => formatCurrency(n)
 
 const OrderSummary = () => {
   const { t } = useTranslation()

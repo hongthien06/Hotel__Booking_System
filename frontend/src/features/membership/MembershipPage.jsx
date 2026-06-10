@@ -25,6 +25,7 @@ import {
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { getGroupDiscountRulesApi, getHolidaysApi, getMembershipTiersApi, getMyMembershipApi } from '~/shared/api/membershipApi'
+import { formatCurrency } from '~/shared/utils/formatters'
 import { getMembershipTierName, getMembershipTrackingPhone } from '~/shared/utils/membership'
 
 // ── Tier visual config ──────────────────────────────────────────────────────
@@ -69,7 +70,7 @@ const TIER_VISUAL = {
 const defaultVisual = TIER_VISUAL.SILVER
 
 const fmt = (n) => new Intl.NumberFormat('vi-VN').format(n || 0)
-const fmtVND = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
+const fmtVND = (n) => formatCurrency(n)
 
 // ── Current Tier Hero Card ───────────────────────────────────────────────────
 const CurrentTierCard = ({ membership, tiers, t, lang }) => {

@@ -63,7 +63,7 @@ const InfoBooking = () => {
           <Stack direction="row" spacing={4}>
             <Box>
               <Typography sx={{ textAlign: 'center', color: 'primary.main', fontWeight: '600', fontSize: '0.9rem', borderBottom: '2px solid #f19fb9', pb: 0.5 }}>
-                Checkin
+                {t('booking_page.check_in')}
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#3f3f3f', fontWeight: '700', fontSize: { xs: '1rem', sm: '1.125rem' }, mt: 1.5 }}>
                 {formatDate(checkIn)}
@@ -75,7 +75,7 @@ const InfoBooking = () => {
 
             <Box>
               <Typography sx={{ textAlign: 'center', color: 'primary.main', fontWeight: '600', fontSize: '0.9rem', borderBottom: '2px solid #f19fb9', pb: 0.5 }}>
-                Checkout
+                {t('booking_page.check_out')}
               </Typography>
               <Typography sx={{ textAlign: 'center', color: '#3f3f3f', fontWeight: '700', fontSize: { xs: '1rem', sm: '1.125rem' }, mt: 1.5 }}>
                 {formatDate(checkOut)}

@@ -46,6 +46,7 @@ import { changePasswordApi } from '../../shared/api/authApi'
 import { getMyMembershipApi } from '../../shared/api/membershipApi'
 import { getMyProfileApi, updateMyProfileApi, uploadFileApi, uploadFromUrlApi } from '../../shared/api/userApi'
 import { getMembershipTierName, getMembershipTrackingPhone } from '../../shared/utils/membership'
+import { formatCurrency } from '../../shared/utils/formatters'
 
 const TIER_VISUAL = {
   FIRST_TIME: {
@@ -75,7 +76,7 @@ const TIER_VISUAL = {
   }
 }
 const defaultVisual = TIER_VISUAL.SILVER
-const fmtVND = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n || 0)
+const fmtVND = (n) => formatCurrency(n)
 
 const ProfilePage = () => {
   const { t, i18n } = useTranslation()
