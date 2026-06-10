@@ -1,27 +1,35 @@
 # BACKUP DATABASE PROD
 
-### tạo thư mục backup
+### Tạo thư mục backup trong container
 
-sudo docker exec hbms-sqlserver mkdir -p /var/opt/mssql/backup
+```bash
+docker exec hbms-sqlserver mkdir -p /var/opt/mssql/backup
+```
 
-### backup db hiện tại
+### Backup database hiện tại (Chạy trên một dòng)
 
-sudo docker exec hbms-sqlserver /opt/mssql-tools18/bin/sqlcmd \
- -S localhost -U sa -P "PASSWORD" -No \
- -Q "BACKUP DATABASE HotelBookingDB TO DISK='/var/opt/mssql/backup/hotel*backup*<DATE>.bak'"
+```bash
+docker exec hbms-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Hbms@2026!" -No -Q "BACKUP DATABASE HotelBookingDB TO DISK='/var/opt/mssql/backup/hotel_backup.bak' WITH FORMAT, INIT"
+```
 
-### move ra máy host
+### Sao chép file backup ra máy Host (Windows)
 
-sudo docker cp hbms-sqlserver:/var/opt/mssql/backup/hotel*backup_20260609.bak ~/database/hotel_backup*<DATE>.bak
+```bash
+docker cp hbms-sqlserver:/var/opt/mssql/backup/hotel_backup.bak D:/Nam2/backup/hotel_backup_20260610.bak
+```
 
 # RESTORE DATABASE
 
-### move .bak vào container
+### Sao chép file .bak từ máy Host vào container
 
-sudo docker cp ~/database/hotel*backup_20260609.bak hbms-sqlserver:/var/opt/mssql/backup/hotel_backup*<DATE>.bak
+```bash
+docker cp D:/Nam2/backup/hotel_backup_20260610.bak hbms-sqlserver:/var/opt/mssql/backup/hotel_backup.bak
+```
 
-### Restore
+### Thực hiện Restore trong container (Chạy trên một dòng)
 
-sudo docker exec hbms-sqlserver /opt/mssql-tools18/bin/sqlcmd \
- -S localhost -U sa -P "PASSWORD" -No \
- -Q "RESTORE DATABASE HotelBookingDB FROM DISK='/var/opt/mssql/backup/hotel_backup_20260609.bak' WITH REPLACE, RECOVERY"
+```bash
+docker exec hbms-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Hbms@2026!" -No -Q "ALTER DATABASE HotelBookingDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE; RESTORE DATABASE HotelBookingDB FROM DISK='/var/opt/mssql/backup/hotel_backup.bak' WITH REPLACE, RECOVERY; ALTER DATABASE HotelBookingDB SET MULTI_USER;"
+```
+
+
