@@ -29,11 +29,13 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
+    // Admin lấy tất cả booking
     @GetMapping
     public ResponseEntity<?> getAllBookings() {
         return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
+    // User lấy booking của mình, có thể lọc theo ngày
     @GetMapping("/my-bookings")
     public ResponseEntity<?> getMyBookings(
             @AuthenticationPrincipal User user,
@@ -42,11 +44,13 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getMyBookings(user.getUserId(), checkIn, checkOut));
     }
 
+    // Admin lấy booking theo id
     @PutMapping("/{id}/check-in")
     public ResponseEntity<?> checkIn(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.checkIn(id));
     }
 
+    // Admin check-out
     @PutMapping("/{id}/check-out")
     public ResponseEntity<?> checkOut(@PathVariable Long id) {
         return ResponseEntity.ok(bookingService.checkOut(id));
@@ -58,7 +62,7 @@ public class BookingController {
         return bookingService.getCheckedInRoomIds();
     }
 
-    // Lấy danh sách roomId đã check-out
+    // Lấy danh sách roomId đã check-out để tránh xung đột khi check-in mới
     @GetMapping("/checked-out-rooms")
     public List<Long> getCheckedOutRoomIds() {
         return bookingService.getCheckedOutRoomIds();

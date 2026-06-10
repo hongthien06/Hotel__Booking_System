@@ -138,6 +138,14 @@ const BookingHistoryPage = () => {
     }
   }
 
+  const handleSearch = () => {
+    if (checkIn && checkOut && checkIn > checkOut) {
+      alert(t('bookings_history.invalid_date_range', 'Ngày check-in phải trước hoặc bằng ngày check-out'))
+      return
+    }
+    fetchBookings()
+  }
+
   const handleCancel = async (bookingId) => {
     if (!window.confirm(t('bookings_history.confirm_cancel'))) return
     try {
@@ -265,9 +273,7 @@ const BookingHistoryPage = () => {
   const totalNights = bookings.reduce((sum, b) => sum + (b.status !== 'CANCELLED' && b.status !== 'REFUNDED' ? Number(b.totalNights || nightsBetween(b.checkInDate, b.checkOutDate) || 0) : 0), 0)
   const memberPoints = membership?.points || Math.floor(totalSpent / 100000)
 
-  const handleSearch = () => {
-    fetchBookings()
-  }
+  
 
   const preFilteredBookings = bookings.filter(b => {
     if (searchTerm) {

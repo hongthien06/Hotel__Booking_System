@@ -154,6 +154,7 @@ public class BookingService {
         return toDTO(booking);
     }
 
+    // CHECK OUT - Lấy danh sách roomId đã check-out để tránh xung đột khi check-in mới
     @Transactional(readOnly = true)
     public List<Long> getCheckedOutRoomIds() {
         return bookingRepository.findAll().stream()
@@ -163,6 +164,7 @@ public class BookingService {
                 .distinct().collect(Collectors.toList());
     }
 
+    // Lấy danh sách roomId đã check-in hoặc đã check-out trong khoảng thời gian để tránh xung đột khi check-in mới
     @Transactional(readOnly = true)
     public List<Long> getOccupiedRoomIds(LocalDate checkIn, LocalDate checkOut) {
         LocalDate effCheckOut = checkOut.isEqual(checkIn) ? checkOut.plusDays(1) : checkOut;
@@ -373,6 +375,7 @@ public class BookingService {
         return toDTO(saved);
     }
 
+    // Gom các booking PENDING của user thành một booking duy nhất để thanh toán, với tính toán giảm giá đầy đủ
     @Transactional
     public BookingDTO mergePendingBookings(List<Long> bookingIds, Long userId) {
         if (bookingIds == null || bookingIds.isEmpty()) {
@@ -572,6 +575,7 @@ public class BookingService {
                         "Không tìm thấy booking với mã: " + bookingCode));
     }
 
+    // Lấy danh sách khoảng ngày đã được đặt của một phòng (dùng cho calendar booking)
     @Transactional(readOnly = true)
     public List<com.hotel.modules.booking.dto.BookedDateRangeDTO> getBookedDatesByRoomId(Long roomId) {
         List<Booking> activeBookings = bookingRepository.findActiveBookingsByRoomId(roomId);
