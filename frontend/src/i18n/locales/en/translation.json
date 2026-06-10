@@ -814,6 +814,17 @@
     "tier_discount": "Member Discount",
     "group_discount": "Group Discount"
   },
+  "user_management": {
+    "title": "User Management",
+    "user": "User",
+    "email": "Email",
+    "role": "Role",
+    "actions": "Actions",
+    "grant_admin": "Grant Admin",
+    "revoke_admin": "Revoke Admin",
+    "load_error": "Unable to load users list.",
+    "update_error": "Error updating user roles."
+  },
   "reviews": {
     "overline": "REVIEWS",
     "title": "What do our customers say?",
